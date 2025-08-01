@@ -124,13 +124,19 @@ export class CouponService {
         discountAmount,
       });
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       const response = await fetch('/api/coupons/mark-used', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: requestBody,
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       const result = await response.json();
 
@@ -210,13 +216,19 @@ export class CouponService {
         orderAmount,
       });
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       const response = await fetch('/api/coupons/validate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: requestBody,
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       // Check if response is ok before trying to parse JSON
       if (!response.ok) {
