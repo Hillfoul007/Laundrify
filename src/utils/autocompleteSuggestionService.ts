@@ -85,6 +85,21 @@ class AutocompleteSuggestionService {
     }
 
     try {
+      // Check cache first
+      const cacheKey = `${request.input}_${JSON.stringify(request.includedRegionCodes || ['in'])}`;
+      const cached = this.autocompleteCache.get(cacheKey);
+      if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
+        console.log('🚀 Using cached autocomplete result for:', request.input);
+        return cached.data;
+      }
+
+      // Request throttling
+      const now = Date.now();
+      if (now - this.lastRequestTime < this.MIN_REQUEST_INTERVAL) {
+        await new Promise(resolve => setTimeout(resolve, this.MIN_REQUEST_INTERVAL - (now - this.lastRequestTime)));
+      }
+      this.lastRequestTime = Date.now();
+
       const sessionToken = request.sessionToken || this.createSessionToken();
 
       const apiRequest = {
