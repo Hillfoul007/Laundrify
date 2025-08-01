@@ -129,10 +129,8 @@ class LocationService {
         for (const requestUrl of requests) {
           try {
             const response = await fetch(requestUrl, {
-              headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-              },
+              method: 'GET',
+              // Don't set content-type header for Google Maps API to avoid CORS issues
               mode: "cors",
             });
 
