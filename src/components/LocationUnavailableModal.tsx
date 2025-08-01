@@ -52,11 +52,11 @@ const LocationUnavailableModal: React.FC<LocationUnavailableModalProps> = ({
   };
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md w-[90vw] mx-auto border-0 shadow-2xl rounded-3xl overflow-hidden bg-white">
+      <DialogContent className="sm:max-w-md w-[90vw] mx-auto border-0 shadow-2xl rounded-3xl overflow-hidden bg-white mobile-modal z-[9999]">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 text-gray-400 hover:text-gray-600 transition-colors"
+          className="absolute top-4 right-4 z-[10000] text-gray-400 hover:text-gray-600 transition-colors pointer-events-auto"
         >
           <X className="h-5 w-5" />
         </button>
