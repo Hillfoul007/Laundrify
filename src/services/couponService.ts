@@ -164,6 +164,14 @@ export class CouponService {
       }
     } catch (error) {
       console.error('❌ Error marking coupon as used:', error);
+
+      // Handle specific error types
+      if (error.name === 'AbortError') {
+        console.warn('⏰ Mark coupon as used request timed out, using local storage');
+      } else if (error.message?.includes('body stream already read')) {
+        console.warn('⚠️ Body stream already read error, using local storage');
+      }
+
       // Fallback to local storage
       this.markCouponAsUsedLocal(couponCode, userId, orderAmount, discountAmount);
       return false;
@@ -246,6 +254,13 @@ export class CouponService {
       };
     } catch (error) {
       console.error('❌ Error validating coupon:', error);
+
+      // Handle specific error types
+      if (error.name === 'AbortError') {
+        console.warn('⏰ Coupon validation request timed out, using local validation');
+      } else if (error.message?.includes('body stream already read')) {
+        console.warn('⚠️ Body stream already read error, using local validation');
+      }
 
       // Fallback to local validation if backend is unavailable
       return this.validateCouponLocal(couponCode, userId, orderAmount);
