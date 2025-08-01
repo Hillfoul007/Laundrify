@@ -283,6 +283,32 @@ class LocationService {
   }
 
   /**
+   * Select the best result from Google Maps geocoding results
+   */
+  private selectBestGoogleMapsResult(results: any[]): any {
+    if (!results || results.length === 0) return null;
+
+    // Prioritize by result type quality
+    const streetAddressResult = results.find((result) =>
+      result.types.includes("street_address"),
+    );
+
+    const premiseResult = results.find(
+      (result) =>
+        result.types.includes("premise") ||
+        result.types.includes("subpremise"),
+    );
+
+    const routeResult = results.find(
+      (result) =>
+        result.types.includes("route") ||
+        result.types.includes("intersection"),
+    );
+
+    return streetAddressResult || premiseResult || routeResult || results[0];
+  }
+
+  /**
    * Extract detailed components from Google Maps address components with enhanced Indian address support
    */
   private extractDetailedComponents(components: any[]): any {
