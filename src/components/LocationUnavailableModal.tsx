@@ -25,6 +25,32 @@ const LocationUnavailableModal: React.FC<LocationUnavailableModalProps> = ({
   onExplore,
   onNavigateHome,
 }) => {
+  // Debug logging for modal state
+  React.useEffect(() => {
+    console.log("🔄 LocationUnavailableModal state:", {
+      isOpen,
+      detectedLocation,
+      timestamp: new Date().toISOString()
+    });
+
+    // Ensure modal shows on top of everything when opened
+    if (isOpen) {
+      document.body.classList.add('modal-open');
+      // Force modal to be visible with high z-index
+      const modalElement = document.querySelector('[data-radix-dialog-content]');
+      if (modalElement) {
+        (modalElement as HTMLElement).style.zIndex = '10000';
+        (modalElement as HTMLElement).style.position = 'fixed';
+        (modalElement as HTMLElement).style.pointerEvents = 'auto';
+      }
+    } else {
+      document.body.classList.remove('modal-open');
+    }
+
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
+  }, [isOpen, detectedLocation]);
   const handleExploreServices = () => {
     console.log("🔍 User clicked Explore Available Services");
 
@@ -50,9 +76,16 @@ const LocationUnavailableModal: React.FC<LocationUnavailableModalProps> = ({
     // Just close the modal, allow user to edit address
     onClose();
   };
+  if (!isOpen) {
+    return null;
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md w-[90vw] mx-auto border-0 shadow-2xl rounded-3xl overflow-hidden bg-white mobile-modal z-[9999]">
+      <DialogContent
+        className="sm:max-w-md w-[90vw] mx-auto border-0 shadow-2xl rounded-3xl overflow-hidden bg-white mobile-modal z-[10000] !important"
+        style={{ zIndex: 10000, position: 'fixed', pointerEvents: 'auto' }}
+      >
         {/* Close Button */}
         <button
           onClick={onClose}
