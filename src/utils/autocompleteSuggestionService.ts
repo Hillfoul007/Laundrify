@@ -131,6 +131,14 @@ class AutocompleteSuggestionService {
           },
         };
       });
+
+      // Cache the results
+      this.autocompleteCache.set(cacheKey, {
+        data: suggestions,
+        timestamp: Date.now()
+      });
+
+      return suggestions;
     } catch (error) {
       console.error("Error fetching autocomplete suggestions:", error);
       throw error;
