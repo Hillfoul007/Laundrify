@@ -166,7 +166,7 @@ const SavedAddressesModal: React.FC<SavedAddressesModalProps> = React.memo(
         const result = await addressService.saveAddress(addressToUpdate);
 
         if (result.success) {
-          console.log("✅ Address updated successfully");
+          console.log("�� Address updated successfully");
           await loadSavedAddresses(); // Reload addresses from backend
           setEditingAddress(null);
           setShowAddAddressPage(false);
@@ -339,17 +339,17 @@ const SavedAddressesModal: React.FC<SavedAddressesModalProps> = React.memo(
                         </div>
 
                         {/* Actions - 3 Dot Menu and Select Button */}
-                        <div className="flex items-center gap-2 ml-4 relative z-10">
-                          <DropdownMenu modal={false}>
+                        <div className="flex items-center gap-2 ml-4 relative">
+                          <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-8 w-8 p-0 text-gray-600 hover:text-gray-800 hover:bg-gray-100 relative z-20 pointer-events-auto"
+                                className="h-8 w-8 p-0 text-gray-600 hover:text-gray-800 hover:bg-gray-100"
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
-                                  console.log('3 dots menu clicked for address:', address.id);
+                                  console.log('🎯 3 dots menu clicked for address:', address.id);
                                 }}
                               >
                                 <MoreHorizontal className="h-4 w-4" />
@@ -357,13 +357,10 @@ const SavedAddressesModal: React.FC<SavedAddressesModalProps> = React.memo(
                             </DropdownMenuTrigger>
                             <DropdownMenuContent
                               align="end"
-                              className="w-40 z-[70] bg-white shadow-lg border pointer-events-auto"
+                              className="w-40 z-[9999] bg-white shadow-lg border"
                               side="bottom"
                               sideOffset={5}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                              }}
+                              container={document.body}
                             >
                               <DropdownMenuItem
                                 onSelect={(e) => {
