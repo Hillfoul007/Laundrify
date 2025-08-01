@@ -294,6 +294,17 @@ const SavedAddressesModal: React.FC<SavedAddressesModalProps> = React.memo(
                         ? "border-green-500 bg-green-50"
                         : "border-gray-200 hover:border-gray-300"
                     }`}
+                    onClick={(e) => {
+                      // Only select if not clicking on dropdown or buttons
+                      const target = e.target as HTMLElement;
+                      const isDropdownClick = target.closest('[data-radix-dropdown-menu-trigger]') || target.closest('[data-radix-dropdown-menu-content]');
+                      const isButtonClick = target.closest('button');
+
+                      if (!isDropdownClick && !isButtonClick) {
+                        onSelectAddress(address);
+                        onClose();
+                      }
+                    }}
                   >
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between">
