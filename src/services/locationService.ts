@@ -119,6 +119,11 @@ class LocationService {
   async reverseGeocode(coordinates: Coordinates): Promise<string> {
     const startTime = Date.now();
     console.log("🔍 Starting enhanced reverse geocoding for:", coordinates);
+    console.log("🔧 Current geocoding config:", {
+      useSimplified: MAPS_PERFORMANCE_CONFIG.USE_SIMPLIFIED_GEOCODING,
+      hasApiKey: !!this.GOOGLE_MAPS_API_KEY,
+      reverseGeocodingEnabled: isFeatureEnabled('REVERSE_GEOCODING')
+    });
 
     // Use simplified geocoding if enabled for better performance
     if (MAPS_PERFORMANCE_CONFIG.USE_SIMPLIFIED_GEOCODING) {
