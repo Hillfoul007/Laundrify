@@ -151,6 +151,12 @@ class LocationService {
 
             const data = await response.json();
 
+            // Cache the result
+            this.geocodeCache.set(cacheKey, {
+              data,
+              timestamp: Date.now()
+            });
+
             if (data.status === "OK" && data.results.length > 0) {
               // Enhanced prioritization for street-level details
               const streetAddressResult = data.results.find((result) =>
@@ -170,11 +176,7 @@ class LocationService {
               );
 
               // Use the most detailed result available
-              const prioritizedResult =
-                streetAddressResult ||
-                premiseResult ||
-                routeResult ||
-                data.results[0];
+              const prioritizedResult = this.selectBestGoogleMapsResult(data.results);
 
               console.log(
                 "✅ Google Maps street-level result:",
