@@ -3,6 +3,8 @@
  * Replaces the deprecated AutocompleteService with the new AutocompleteSuggestion API
  */
 
+import { MAPS_PERFORMANCE_CONFIG, isFeatureEnabled, getCacheDuration, getMinRequestInterval } from "../config/mapsConfig";
+
 export interface AutocompletePrediction {
   description: string;
   place_id: string;
@@ -26,11 +28,11 @@ class AutocompleteSuggestionService {
 
   // Caching for autocomplete results
   private autocompleteCache = new Map<string, any>();
-  private readonly CACHE_DURATION = 2 * 60 * 1000; // 2 minutes
+  private readonly CACHE_DURATION = getCacheDuration('autocomplete');
 
   // Request throttling
   private lastRequestTime = 0;
-  private readonly MIN_REQUEST_INTERVAL = 300; // 300ms between autocomplete requests
+  private readonly MIN_REQUEST_INTERVAL = getMinRequestInterval('autocomplete');
 
   /**
    * Initialize the AutocompleteSuggestion service
