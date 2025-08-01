@@ -136,9 +136,20 @@ class LocationService {
               console.log('🚀 Using cached Google Maps result');
               const prioritizedResult = this.selectBestGoogleMapsResult(cached.data.results);
               if (prioritizedResult) {
-                return prioritizedResult;
+                return this.formatEnhancedIndianAddress(
+                  prioritizedResult.address_components,
+                  prioritizedResult.formatted_address,
+                  "google_maps",
+                );
               }
             }
+
+            // Request throttling
+            const now = Date.now();
+            if (now - this.lastRequestTime < this.MIN_REQUEST_INTERVAL) {
+              await new Promise(resolve => setTimeout(resolve, this.MIN_REQUEST_INTERVAL - (now - this.lastRequestTime)));
+            }
+            this.lastRequestTime = Date.now();
 
             const response = await fetch(requestUrl, {
               method: 'GET',
