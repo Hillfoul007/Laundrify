@@ -22,8 +22,11 @@ export const MAPS_PERFORMANCE_CONFIG = {
   MIN_GEOCODING_INTERVAL: 1000, // 1 second between geocoding requests
   MIN_AUTOCOMPLETE_INTERVAL: 300, // 300ms between autocomplete requests
   
-  // Fallback to local data when possible
-  PREFER_LOCAL_FALLBACK: true,
+  // Fallback to local data when possible - disabled in production to prevent city switching
+  PREFER_LOCAL_FALLBACK: !isProduction(),
+
+  // Disable coordinate-based city fallback in production
+  DISABLE_COORDINATE_FALLBACK: isProduction(),
   
   // Limit the number of autocomplete suggestions
   MAX_AUTOCOMPLETE_SUGGESTIONS: 5,
