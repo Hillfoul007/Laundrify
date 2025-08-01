@@ -1421,12 +1421,11 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
     setSearchQuery(suggestion.description);
     setShowSuggestions(false);
 
-    // Clear form fields first
-    console.log("🧹 Clearing form fields before autofill");
-    setFlatNo("");
-    setStreet("");
-    setArea("");
-    setPincode("");
+    // Immediately trigger autofill with the selected suggestion
+    console.log("🎯 Starting autofill for selected suggestion:", suggestion.description);
+
+    // Use the simple autofill function directly
+    simpleAutoFill(suggestion.description);
 
     // Check if this is a fallback suggestion that doesn't need Google Maps API
     if (!suggestion.place_id ||
@@ -1463,17 +1462,9 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
       });
       updateMapLocation(coordinates);
 
-      // Clear first and then autofill
-      console.log("🏠 About to autofill for fallback suggestion:", suggestion.description);
-
-      // Test immediate call
+      // Autofill for fallback suggestion
+      console.log("🏠 Autofilling for fallback suggestion:", suggestion.description);
       simpleAutoFill(suggestion.description);
-
-      // Also try with delay
-      setTimeout(() => {
-        console.log("🏠 Second attempt - Simple autofilling for fallback suggestion:", suggestion.description);
-        simpleAutoFill(suggestion.description);
-      }, 100);
 
       return;
     }
@@ -1512,17 +1503,10 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
 
         updateMapLocation(coordinates);
 
-        // Immediate autofill for Google Places
+        // Autofill for Google Places result
         const addressToFill = place.formatted_address || suggestion.description;
-        console.log("🏠 About to autofill for Google Places result:", addressToFill);
-
+        console.log("🏠 Autofilling for Google Places result:", addressToFill);
         simpleAutoFill(addressToFill);
-
-        // Also try with delay
-        setTimeout(() => {
-          console.log("🏠 Second attempt - Simple autofilling for Google Places result:", addressToFill);
-          simpleAutoFill(addressToFill);
-        }, 100);
       } else {
         console.log("🗺️ No place geometry found, using fallback");
         throw new Error("No place geometry found");
@@ -1565,16 +1549,9 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
       });
       updateMapLocation(coordinates);
 
-      // Immediate autofill for smart fallback
-      console.log("🏠 About to autofill for smart fallback:", suggestion.description);
-
+      // Autofill for smart fallback
+      console.log("🏠 Autofilling for smart fallback:", suggestion.description);
       simpleAutoFill(suggestion.description);
-
-      // Also try with delay
-      setTimeout(() => {
-        console.log("🏠 Second attempt - Simple autofilling for smart fallback:", suggestion.description);
-        simpleAutoFill(suggestion.description);
-      }, 100);
 
       console.log(`✅ Used fallback coordinates for: ${suggestion.description}`);
     }
