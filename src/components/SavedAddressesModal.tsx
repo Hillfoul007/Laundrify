@@ -244,7 +244,8 @@ const SavedAddressesModal: React.FC<SavedAddressesModalProps> = React.memo(
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-end">
-        <div className="w-full bg-white rounded-t-2xl max-h-[80vh] overflow-y-auto relative z-[61]">
+        <div className="w-full bg-white rounded-t-2xl max-h-[80vh] relative z-[61] flex flex-col">
+          <div className="flex-1 overflow-y-auto overflow-x-visible">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-100">
             <h2 className="text-lg font-semibold text-gray-900">
@@ -477,6 +478,7 @@ const SavedAddressesModal: React.FC<SavedAddressesModalProps> = React.memo(
                 <span className="text-red-500">e</span>
               </span>
             </div>
+          </div>
           </div>
         </div>
 
