@@ -55,6 +55,18 @@ class ModernGoogleMapsService {
 
     try {
       await this.loader.load();
+
+      // Load marker library for AdvancedMarkerElement
+      const mapId = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID;
+      if (mapId && mapId.trim() !== "") {
+        try {
+          await google.maps.importLibrary("marker");
+          console.log("✅ Google Maps Marker library loaded for Advanced Markers");
+        } catch (error) {
+          console.warn("⚠️ Failed to load Marker library, will use regular markers:", error);
+        }
+      }
+
       this.isLoaded = true;
       console.log("✅ Google Maps API loaded successfully");
     } catch (error) {
