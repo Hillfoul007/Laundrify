@@ -348,13 +348,21 @@ class LocationService {
         this.lastRequestTime = Date.now();
 
         console.log("🔍 Making Google Maps geocoding request...");
+
+        // Add timeout to prevent hanging requests
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 6000); // 6 second timeout
+
         const response = await fetch(
           `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coordinates.lat},${coordinates.lng}&language=en&region=IN&key=${this.GOOGLE_MAPS_API_KEY}`,
           {
             method: 'GET',
-            mode: 'cors'
+            mode: 'cors',
+            signal: controller.signal
           }
         );
+
+        clearTimeout(timeoutId);
 
         if (response.ok) {
           const data = await response.json();
