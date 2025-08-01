@@ -188,9 +188,11 @@ html {
 
 /* Fix for modal z-index issues on mobile */
 .mobile-modal {
-  z-index: 9999 !important;
+  z-index: 10000 !important;
   position: fixed !important;
   pointer-events: auto !important;
+  display: block !important;
+  visibility: visible !important;
 }
 
 /* Ensure modal overlay is visible and interactive */
@@ -238,6 +240,50 @@ html {
     will-change: transform;
     touch-action: manipulation;
   }
+}
+
+/* Specific fixes for LocationUnavailableModal */
+[data-radix-dialog-overlay] {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9998 !important;
+  background-color: rgba(0, 0, 0, 0.8) !important;
+  pointer-events: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+[data-radix-dialog-content] {
+  position: relative !important;
+  z-index: 9999 !important;
+  pointer-events: auto !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+}
+
+/* Ensure modal shows on mobile Safari and other problematic browsers */
+.modal-open {
+  position: fixed !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  touch-action: none !important;
+}
+
+/* Force all dialogs to have proper z-index and visibility */
+[role="dialog"] {
+  z-index: 10000 !important;
+  position: fixed !important;
+  pointer-events: auto !important;
+}
+
+/* Prevent background scrolling when modal is open */
+body.modal-open {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 /* Voice search button animation */
