@@ -1,4 +1,5 @@
 import { Loader } from "@googlemaps/js-api-loader";
+import { MAPS_PERFORMANCE_CONFIG, isFeatureEnabled } from "../config/mapsConfig";
 
 export interface MapConfig {
   center: { lat: number; lng: number };
@@ -56,15 +57,17 @@ class ModernGoogleMapsService {
     try {
       await this.loader.load();
 
-      // Load marker library for AdvancedMarkerElement
+      // Load marker library for AdvancedMarkerElement (only if not disabled for performance)
       const mapId = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID;
-      if (mapId && mapId.trim() !== "") {
+      if (mapId && mapId.trim() !== "" && !MAPS_PERFORMANCE_CONFIG.DISABLE_ADVANCED_MARKERS) {
         try {
           await google.maps.importLibrary("marker");
           console.log("✅ Google Maps Marker library loaded for Advanced Markers");
         } catch (error) {
           console.warn("⚠️ Failed to load Marker library, will use regular markers:", error);
         }
+      } else if (MAPS_PERFORMANCE_CONFIG.DISABLE_ADVANCED_MARKERS) {
+        console.log("⚡ Advanced Markers disabled for better performance");
       }
 
       this.isLoaded = true;
