@@ -304,6 +304,90 @@ class LocationService {
   }
 
   /**
+   * Simplified reverse geocoding that uses fewer API calls and focuses on basic location info
+   */
+  private async simplifiedReverseGeocode(coordinates: Coordinates): Promise<string> {
+    console.log("🚀 Using simplified reverse geocoding for better performance");
+
+    // Check cache first
+    const cacheKey = `simplified_${coordinates.lat}_${coordinates.lng}`;
+    const cached = this.geocodeCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
+      console.log('🚀 Using cached simplified result');
+      return cached.data;
+    }
+
+    // Try Google Maps API with single request
+    if (this.GOOGLE_MAPS_API_KEY) {
+      try {
+        // Request throttling
+        const now = Date.now();
+        if (now - this.lastRequestTime < this.MIN_REQUEST_INTERVAL) {
+          await new Promise(resolve => setTimeout(resolve, this.MIN_REQUEST_INTERVAL - (now - this.lastRequestTime)));
+        }
+        this.lastRequestTime = Date.now();
+
+        const response = await fetch(
+          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coordinates.lat},${coordinates.lng}&language=en&region=IN&key=${this.GOOGLE_MAPS_API_KEY}`,
+          { method: 'GET' }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+
+          if (data.status === "OK" && data.results.length > 0) {
+            const address = data.results[0].formatted_address;
+
+            // Cache the result
+            this.geocodeCache.set(cacheKey, {
+              data: address,
+              timestamp: Date.now()
+            });
+
+            return address;
+          }
+        }
+      } catch (error) {
+        console.warn("⚠️ Simplified Google Maps geocoding failed:", error);
+      }
+    }
+
+    // Fallback to basic coordinate-based location
+    return this.getFallbackLocationName(coordinates);
+  }
+
+  /**
+   * Get fallback location name based on coordinates (without API calls)
+   */
+  private getFallbackLocationName(coordinates: Coordinates): string {
+    // Basic location detection based on coordinates for Indian locations
+    const { lat, lng } = coordinates;
+
+    // Delhi NCR region
+    if (lat >= 28.4 && lat <= 28.8 && lng >= 76.8 && lng <= 77.5) {
+      return "Delhi NCR, India";
+    }
+
+    // Mumbai region
+    if (lat >= 18.9 && lat <= 19.3 && lng >= 72.7 && lng <= 73.1) {
+      return "Mumbai, Maharashtra, India";
+    }
+
+    // Bangalore region
+    if (lat >= 12.8 && lat <= 13.1 && lng >= 77.4 && lng <= 77.8) {
+      return "Bangalore, Karnataka, India";
+    }
+
+    // Gurgaon/Gurugram region
+    if (lat >= 28.35 && lat <= 28.55 && lng >= 76.9 && lng <= 77.15) {
+      return "Gurugram, Haryana, India";
+    }
+
+    // Default fallback
+    return `Location (${lat.toFixed(4)}, ${lng.toFixed(4)}), India`;
+  }
+
+  /**
    * Select the best result from Google Maps geocoding results
    */
   private selectBestGoogleMapsResult(results: any[]): any {
