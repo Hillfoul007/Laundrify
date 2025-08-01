@@ -2,6 +2,7 @@
 // This is a stub implementation for demo purposes
 
 import { apiClient } from "@/lib/api";
+import { MAPS_PERFORMANCE_CONFIG, isFeatureEnabled, getCacheDuration, getMinRequestInterval } from "../config/mapsConfig";
 
 export interface Coordinates {
   lat: number;
@@ -40,11 +41,11 @@ class LocationService {
 
   // Simple cache to avoid duplicate API calls
   private geocodeCache = new Map<string, any>();
-  private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+  private readonly CACHE_DURATION = getCacheDuration('geocoding');
 
   // Request throttling
   private lastRequestTime = 0;
-  private readonly MIN_REQUEST_INTERVAL = 1000; // 1 second between requests
+  private readonly MIN_REQUEST_INTERVAL = getMinRequestInterval('geocoding');
 
   /**
    * Get user's current position using browser geolocation with enhanced accuracy
