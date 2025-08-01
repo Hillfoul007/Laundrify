@@ -38,6 +38,10 @@ class LocationService {
   private readonly GOOGLE_MAPS_API_KEY = import.meta.env
     .VITE_GOOGLE_MAPS_API_KEY;
 
+  // Simple cache to avoid duplicate API calls
+  private geocodeCache = new Map<string, any>();
+  private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
   /**
    * Get user's current position using browser geolocation with enhanced accuracy
    */
@@ -121,6 +125,17 @@ class LocationService {
 
         for (const requestUrl of requests) {
           try {
+            // Check cache first
+            const cacheKey = requestUrl;
+            const cached = this.geocodeCache.get(cacheKey);
+            if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
+              console.log('🚀 Using cached Google Maps result');
+              const prioritizedResult = this.selectBestGoogleMapsResult(cached.data.results);
+              if (prioritizedResult) {
+                return prioritizedResult;
+              }
+            }
+
             const response = await fetch(requestUrl, {
               method: 'GET',
               // Don't set content-type header for Google Maps API to avoid CORS issues
