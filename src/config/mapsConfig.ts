@@ -4,8 +4,8 @@
  */
 
 export const MAPS_PERFORMANCE_CONFIG = {
-  // Reduce API calls by using simpler methods
-  USE_SIMPLIFIED_GEOCODING: true,
+  // Reduce API calls by using simpler methods - disabled in production to prevent fallback issues
+  USE_SIMPLIFIED_GEOCODING: false,
   
   // Cache settings
   GEOCODING_CACHE_DURATION: 5 * 60 * 1000, // 5 minutes
