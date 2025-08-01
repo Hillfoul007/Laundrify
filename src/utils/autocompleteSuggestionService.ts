@@ -134,13 +134,16 @@ class AutocompleteSuggestionService {
         };
       });
 
+      // Limit suggestions for better performance
+      const limitedSuggestions = suggestions.slice(0, MAPS_PERFORMANCE_CONFIG.MAX_AUTOCOMPLETE_SUGGESTIONS);
+
       // Cache the results
       this.autocompleteCache.set(cacheKey, {
-        data: suggestions,
+        data: limitedSuggestions,
         timestamp: Date.now()
       });
 
-      return suggestions;
+      return limitedSuggestions;
     } catch (error) {
       console.error("Error fetching autocomplete suggestions:", error);
       throw error;
