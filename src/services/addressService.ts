@@ -375,16 +375,19 @@ export class AddressService {
             // Still try to save locally
           }
         } catch (error) {
-          console.error("Backend save error:", error);
+          console.error("❌ Backend save error:", error);
           // Continue to localStorage save
         }
+      } else {
+        console.warn("⚠️ No backend API URL configured, saving to localStorage only");
       }
 
       // Fallback to localStorage
+      console.log("💾 Saving address to localStorage as fallback");
       const result = this.saveAddressToLocalStorage(addressData, userId);
       return {
         ...result,
-        message: "Address saved locally (will sync when online)",
+        message: "Address saved locally (database unavailable)",
       };
     } catch (error) {
       console.error("Failed to save address:", error);
