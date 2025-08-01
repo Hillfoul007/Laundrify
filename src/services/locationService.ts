@@ -117,6 +117,7 @@ class LocationService {
    * Reverse geocode coordinates to human-readable address with maximum detail including area/village
    */
   async reverseGeocode(coordinates: Coordinates): Promise<string> {
+    const startTime = Date.now();
     console.log("🔍 Starting enhanced reverse geocoding for:", coordinates);
 
     // Use simplified geocoding if enabled for better performance
