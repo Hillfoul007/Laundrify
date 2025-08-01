@@ -311,19 +311,21 @@ class LocationService {
 
   /**
    * Simplified reverse geocoding that uses fewer API calls and focuses on basic location info
+   * Enhanced to prevent incorrect fallback to city names
    */
   private async simplifiedReverseGeocode(coordinates: Coordinates): Promise<string> {
     console.log("🚀 Using simplified reverse geocoding for better performance");
+    console.log("📍 Coordinates to geocode:", coordinates);
 
     // Check cache first
     const cacheKey = `simplified_${coordinates.lat}_${coordinates.lng}`;
     const cached = this.geocodeCache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
-      console.log('🚀 Using cached simplified result');
+      console.log('🚀 Using cached simplified result:', cached.data);
       return cached.data;
     }
 
-    // Try Google Maps API with single request
+    // Try Google Maps API with single request first
     if (this.GOOGLE_MAPS_API_KEY) {
       try {
         // Request throttling
@@ -333,16 +335,22 @@ class LocationService {
         }
         this.lastRequestTime = Date.now();
 
+        console.log("🔍 Making Google Maps geocoding request...");
         const response = await fetch(
           `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coordinates.lat},${coordinates.lng}&language=en&region=IN&key=${this.GOOGLE_MAPS_API_KEY}`,
-          { method: 'GET' }
+          {
+            method: 'GET',
+            mode: 'cors'
+          }
         );
 
         if (response.ok) {
           const data = await response.json();
+          console.log("📍 Google Maps API response:", data);
 
           if (data.status === "OK" && data.results.length > 0) {
             const address = data.results[0].formatted_address;
+            console.log("✅ Google Maps geocoding successful:", address);
 
             // Cache the result
             this.geocodeCache.set(cacheKey, {
@@ -351,46 +359,113 @@ class LocationService {
             });
 
             return address;
+          } else {
+            console.warn("⚠️ Google Maps API returned status:", data.status, "Error:", data.error_message);
           }
+        } else {
+          console.warn("⚠️ Google Maps API HTTP error:", response.status, response.statusText);
         }
       } catch (error) {
-        console.warn("⚠️ Simplified Google Maps geocoding failed:", error);
+        console.error("❌ Google Maps geocoding request failed:", error);
       }
+    } else {
+      console.warn("⚠️ No Google Maps API key available for geocoding");
     }
 
-    // Fallback to basic coordinate-based location
-    return this.getFallbackLocationName(coordinates);
+    // Try Nominatim as a more reliable fallback before using coordinate-based fallback
+    try {
+      console.log("🔄 Trying Nominatim as fallback...");
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${coordinates.lat}&lon=${coordinates.lng}&zoom=16&addressdetails=1&accept-language=en`,
+        {
+          headers: {
+            "User-Agent": "CleanCarePro-LocationService/1.0",
+            Accept: "application/json",
+          },
+          mode: "cors",
+        },
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("📍 Nominatim response:", data);
+
+        if (data && data.display_name) {
+          const address = data.display_name;
+          console.log("✅ Nominatim geocoding successful:", address);
+
+          // Cache the result
+          this.geocodeCache.set(cacheKey, {
+            data: address,
+            timestamp: Date.now()
+          });
+
+          return address;
+        }
+      } else {
+        console.warn("⚠️ Nominatim API HTTP error:", response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error("❌ Nominatim geocoding failed:", error);
+    }
+
+    // Final fallback - use coordinate-based location as last resort
+    console.warn("⚠️ All geocoding services failed, using coordinate-based fallback");
+    const fallbackResult = this.getFallbackLocationName(coordinates);
+
+    // Cache even the fallback to avoid repeated failures
+    this.geocodeCache.set(cacheKey, {
+      data: fallbackResult,
+      timestamp: Date.now()
+    });
+
+    return fallbackResult;
   }
 
   /**
    * Get fallback location name based on coordinates (without API calls)
+   * Note: This method should only be used as a last resort to avoid incorrect location detection
    */
   private getFallbackLocationName(coordinates: Coordinates): string {
     // Basic location detection based on coordinates for Indian locations
     const { lat, lng } = coordinates;
 
-    // Delhi NCR region
-    if (lat >= 28.4 && lat <= 28.8 && lng >= 76.8 && lng <= 77.5) {
+    console.log("⚠️ Using fallback location detection for coordinates:", { lat, lng });
+
+    // More precise coordinate ranges to avoid overlaps
+    // Gurgaon/Gurugram region (prioritize this since it's the service area)
+    if (lat >= 28.35 && lat <= 28.55 && lng >= 76.95 && lng <= 77.15) {
+      console.log("📍 Detected Gurugram region");
+      return "Gurugram, Haryana, India";
+    }
+
+    // Delhi NCR region (excluding Gurgaon)
+    if (lat >= 28.45 && lat <= 28.75 && lng >= 77.0 && lng <= 77.5) {
+      console.log("📍 Detected Delhi NCR region");
       return "Delhi NCR, India";
     }
 
     // Mumbai region
     if (lat >= 18.9 && lat <= 19.3 && lng >= 72.7 && lng <= 73.1) {
+      console.log("📍 Detected Mumbai region");
       return "Mumbai, Maharashtra, India";
     }
 
     // Bangalore region
     if (lat >= 12.8 && lat <= 13.1 && lng >= 77.4 && lng <= 77.8) {
+      console.log("📍 Detected Bangalore region");
       return "Bangalore, Karnataka, India";
     }
 
-    // Gurgaon/Gurugram region
-    if (lat >= 28.35 && lat <= 28.55 && lng >= 76.9 && lng <= 77.15) {
-      return "Gurugram, Haryana, India";
+    // Chennai region
+    if (lat >= 12.8 && lat <= 13.2 && lng >= 80.1 && lng <= 80.3) {
+      console.log("📍 Detected Chennai region");
+      return "Chennai, Tamil Nadu, India";
     }
 
-    // Default fallback
-    return `Location (${lat.toFixed(4)}, ${lng.toFixed(4)}), India`;
+    // Default fallback - return coordinates without presuming location
+    console.log("⚠️ No known region matched, using coordinate-based fallback");
+    return `Location near ${lat.toFixed(4)}, ${lng.toFixed(4)}, India`;
   }
 
   /**
