@@ -38,6 +38,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
 import ZomatoAddAddressPage from "./ZomatoAddAddressPage";
 import { AddressService } from "@/services/addressService";
@@ -356,15 +357,15 @@ const SavedAddressesModal: React.FC<SavedAddressesModalProps> = React.memo(
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent
-                              align="end"
-                              className="w-40 z-[10000] bg-white shadow-xl border"
-                              side="bottom"
-                              sideOffset={5}
-                              container={document.body}
-                              avoidCollisions={true}
-                              collisionPadding={10}
-                            >
+                            <DropdownMenuPortal>
+                              <DropdownMenuContent
+                                align="end"
+                                className="w-40 z-[10000] bg-white shadow-xl border"
+                                side="bottom"
+                                sideOffset={5}
+                                avoidCollisions={true}
+                                collisionPadding={10}
+                              >
                               <DropdownMenuItem
                                 className="flex items-center gap-2 cursor-pointer"
                                 onClick={(e) => {
@@ -390,7 +391,8 @@ const SavedAddressesModal: React.FC<SavedAddressesModalProps> = React.memo(
                                 <Trash2 className="h-4 w-4" />
                                 Delete Address
                               </DropdownMenuItem>
-                            </DropdownMenuContent>
+                              </DropdownMenuContent>
+                            </DropdownMenuPortal>
                           </DropdownMenu>
 
                           {onSelectAddress && (
