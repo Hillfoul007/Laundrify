@@ -359,19 +359,19 @@ export class AddressService {
 
           if (response.ok) {
             const result = await response.json();
-            console.log("✅ Address saved to backend:", result);
+            console.log("✅ Address saved to backend successfully:", result);
 
             // Also save to localStorage as backup
             this.saveAddressToLocalStorage(addressData, userId);
 
             return {
               success: true,
-              message: "Address saved successfully",
-              data: result.data,
+              message: "Address saved to database successfully",
+              data: result.data || addressData,
             };
           } else {
             const errorText = await response.text();
-            console.error("Backend save failed:", errorText);
+            console.error(`❌ Backend save failed (${response.status}):`, errorText);
             // Still try to save locally
           }
         } catch (error) {
