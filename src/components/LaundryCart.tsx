@@ -367,7 +367,7 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
       const session = sessionManager.ensureValidSession();
       const userId = session.userId || "guest";
 
-      const validation = couponService.validateCoupon(couponCode, userId, getSubtotal());
+      const validation = await couponService.validateCoupon(couponCode, userId, getSubtotal());
 
       if (validation.valid && validation.coupon) {
         const coupon = validation.coupon;
