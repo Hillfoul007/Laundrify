@@ -3,6 +3,7 @@
 
 import { apiClient } from "@/lib/api";
 import { MAPS_PERFORMANCE_CONFIG, isFeatureEnabled, getCacheDuration, getMinRequestInterval } from "../config/mapsConfig";
+import { performanceMonitor, trackPerformance } from "../utils/mapsPerformanceMonitor";
 
 export interface Coordinates {
   lat: number;
