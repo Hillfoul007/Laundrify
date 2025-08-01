@@ -612,36 +612,29 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
 
       console.log(`🎯 Final location accuracy: ${coordinates.accuracy}m`);
 
-      // Get detailed address with multiple geocoding sources
-      const address = await locationService.reverseGeocode(coordinates);
-      console.log("🏠 Geocoded address:", address);
-
-      // Get additional detailed components for better auto-fill
+      // FIXED: Prevent race conditions by using only ONE geocoding call
+      console.log("🔍 Getting detailed address components (single call to prevent race conditions)...");
       const detailedComponents =
         await locationService.getDetailedAddressComponents(coordinates);
 
-      // Try to enhance with street-level details if not found initially
-      let enhancedAddress = address;
+      let address: string;
       let finalComponents = detailedComponents;
 
-      if (!hasStreetLevelDetails(address, detailedComponents)) {
-        console.log(
-          "🔍 Initial address lacks street details, trying enhanced detection...",
-        );
-        try {
-          const streetDetails = await getStreetLevelDetails(coordinates);
-          if (streetDetails) {
-            enhancedAddress = streetDetails.address;
-            finalComponents = streetDetails.components;
-            console.log(
-              "✅ Enhanced street-level details found:",
-              enhancedAddress,
-            );
-          }
-        } catch (error) {
-          console.warn("Street-level enhancement failed:", error);
-        }
+      // Try to extract address from detailed components first to avoid additional API calls
+      if (detailedComponents?.formatted_address) {
+        address = detailedComponents.formatted_address;
+        console.log("✅ Using address from detailed components:", address);
+      } else {
+        // Fallback to reverse geocoding if components don't have formatted address
+        console.log("🔄 Falling back to reverse geocoding...");
+        address = await locationService.reverseGeocode(coordinates);
+        console.log("🏠 Geocoded address from fallback:", address);
       }
+
+      // Use the single result we got - no additional multiple API calls
+      let enhancedAddress = address;
+
+      console.log("✅ Final address (no race conditions):", enhancedAddress);
 
       setSelectedLocation({ address: enhancedAddress, coordinates });
       setSearchQuery(enhancedAddress);
