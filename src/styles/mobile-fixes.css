@@ -189,6 +189,24 @@ html {
 /* Fix for modal z-index issues on mobile */
 .mobile-modal {
   z-index: 9999 !important;
+  position: fixed !important;
+  pointer-events: auto !important;
+}
+
+/* Ensure modal overlay is visible and interactive */
+.mobile-modal [data-radix-dialog-overlay] {
+  z-index: 9998 !important;
+  background-color: rgba(0, 0, 0, 0.8) !important;
+  position: fixed !important;
+  inset: 0 !important;
+  pointer-events: auto !important;
+}
+
+/* Ensure modal content is above overlay */
+.mobile-modal [data-radix-dialog-content] {
+  z-index: 9999 !important;
+  position: fixed !important;
+  pointer-events: auto !important;
 }
 
 /* Prevent body scroll when modal is open */
@@ -197,6 +215,29 @@ html {
   position: fixed;
   width: 100%;
   height: 100%;
+}
+
+/* Fix invisible modal issue on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .mobile-modal {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    will-change: transform;
+  }
+
+  .mobile-modal [data-radix-dialog-overlay] {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    will-change: transform;
+    touch-action: manipulation;
+  }
+
+  .mobile-modal [data-radix-dialog-content] {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    will-change: transform;
+    touch-action: manipulation;
+  }
 }
 
 /* Voice search button animation */
