@@ -302,6 +302,10 @@ class LocationService {
 
     // Method 4: Fallback with coordinate-based address
     const formattedCoords = await this.formatCoordinatesAsAddress(coordinates);
+
+    // Track performance
+    performanceMonitor.trackAPICall('reverseGeocode', startTime, true);
+
     return formattedCoords;
   }
 
