@@ -138,8 +138,6 @@ export class CouponService {
 
       clearTimeout(timeoutId);
 
-      const result = await response.json();
-
       // Check if response is ok before parsing JSON
       if (!response.ok) {
         const errorText = await response.text();
