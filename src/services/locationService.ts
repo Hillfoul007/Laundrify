@@ -430,6 +430,20 @@ class LocationService {
     }
 
     // Final fallback - use coordinate-based location as last resort
+    // Check if coordinate fallback is disabled (to prevent production city switching issues)
+    if (MAPS_PERFORMANCE_CONFIG.DISABLE_COORDINATE_FALLBACK) {
+      console.warn("⚠️ All geocoding services failed, coordinate fallback disabled in production");
+      const genericResult = `Location ${coordinates.lat.toFixed(4)}, ${coordinates.lng.toFixed(4)}`;
+
+      // Cache the generic result
+      this.geocodeCache.set(cacheKey, {
+        data: genericResult,
+        timestamp: Date.now()
+      });
+
+      return genericResult;
+    }
+
     console.warn("⚠️ All geocoding services failed, using coordinate-based fallback");
     const fallbackResult = this.getFallbackLocationName(coordinates);
 
