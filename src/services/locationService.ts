@@ -126,9 +126,13 @@ class LocationService {
     });
 
     // Use simplified geocoding if enabled for better performance
-    if (MAPS_PERFORMANCE_CONFIG.USE_SIMPLIFIED_GEOCODING) {
+    // BUT skip simplified in production to prevent fallback city issues
+    if (MAPS_PERFORMANCE_CONFIG.USE_SIMPLIFIED_GEOCODING && !MAPS_PERFORMANCE_CONFIG.DISABLE_COORDINATE_FALLBACK) {
+      console.log("🔄 Using simplified geocoding (development mode)");
       return this.simplifiedReverseGeocode(coordinates);
     }
+
+    console.log("🔍 Using full geocoding (production mode or fallback disabled)");
 
     // Method 1: Google Maps API with multiple result types for maximum detail
     if (this.GOOGLE_MAPS_API_KEY && isFeatureEnabled('REVERSE_GEOCODING')) {
