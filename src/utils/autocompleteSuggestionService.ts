@@ -24,6 +24,14 @@ class AutocompleteSuggestionService {
   private AutocompleteSessionToken: any = null;
   private isInitialized = false;
 
+  // Caching for autocomplete results
+  private autocompleteCache = new Map<string, any>();
+  private readonly CACHE_DURATION = 2 * 60 * 1000; // 2 minutes
+
+  // Request throttling
+  private lastRequestTime = 0;
+  private readonly MIN_REQUEST_INTERVAL = 300; // 300ms between autocomplete requests
+
   /**
    * Initialize the AutocompleteSuggestion service
    */
