@@ -117,7 +117,7 @@ class AutocompleteSuggestionService {
         return [];
       }
 
-      return response.suggestions.map((suggestion: any) => {
+      const suggestions = response.suggestions.map((suggestion: any) => {
         const placePrediction = suggestion.placePrediction;
         return {
           description: placePrediction.text,
