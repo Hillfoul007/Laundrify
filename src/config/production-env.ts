@@ -4,7 +4,8 @@
  */
 
 // Define the correct production API URL - always point to the backend
-export const PRODUCTION_API_URL = "https://backend-vaxf.onrender.com/api";
+// Updated to use the Railway deployment URL as specified by user
+export const PRODUCTION_API_URL = "https://cleancare-pro-api-production-129e.up.railway.app/api";
 
 export const getProductionApiUrl = (): string => {
   // Check if we're in production based on hostname
