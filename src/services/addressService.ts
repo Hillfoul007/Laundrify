@@ -337,13 +337,16 @@ export class AddressService {
       };
 
       // Try to save to backend first
-      if (this.apiBaseUrl) {
+      if (this.apiBaseUrl && this.apiBaseUrl !== "") {
+        console.log("🔄 Attempting to save address to backend:", this.apiBaseUrl);
         try {
           const url = addressData.id
             ? `${this.apiBaseUrl}/addresses/${addressData.id}`
             : `${this.apiBaseUrl}/addresses`;
 
           const method = addressData.id ? "PUT" : "POST";
+
+          console.log(`🎯 Making ${method} request to:`, url);
 
           const response = await fetch(url, {
             method,
