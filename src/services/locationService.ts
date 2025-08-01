@@ -164,11 +164,18 @@ class LocationService {
             }
             this.lastRequestTime = Date.now();
 
+            // Add timeout to prevent hanging requests that cause fallback
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+
             const response = await fetch(requestUrl, {
               method: 'GET',
               // Don't set content-type header for Google Maps API to avoid CORS issues
               mode: "cors",
+              signal: controller.signal
             });
+
+            clearTimeout(timeoutId);
 
             if (!response.ok) {
               console.warn(
