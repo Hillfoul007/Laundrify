@@ -202,16 +202,18 @@ export class CouponService {
     }
 
     try {
+      const requestBody = JSON.stringify({
+        couponCode,
+        userId,
+        orderAmount,
+      });
+
       const response = await fetch('/api/coupons/validate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          couponCode,
-          userId,
-          orderAmount,
-        }),
+        body: requestBody,
       });
 
       // Check if response is ok before trying to parse JSON
