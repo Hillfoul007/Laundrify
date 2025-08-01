@@ -113,18 +113,37 @@ class ModernGoogleMapsService {
       console.log("🗺️ Using Map ID for Advanced Markers (styles controlled via cloud console):", mapId);
     } else {
       // Only add custom styles if no mapId is present
-      mapConfig.styles = [
-        {
-          featureType: "poi.business",
-          stylers: [{ visibility: "off" }],
-        },
-        {
-          featureType: "poi.park",
-          elementType: "labels.text",
-          stylers: [{ visibility: "off" }],
-        },
-      ];
-      console.log("🗺️ No Map ID configured, using custom styles and regular markers");
+      const styles = MAPS_PERFORMANCE_CONFIG.USE_LIGHTWEIGHT_MAP_STYLES
+        ? [
+            // Lightweight styles for better performance
+            {
+              featureType: "poi",
+              stylers: [{ visibility: "off" }],
+            },
+            {
+              featureType: "transit",
+              stylers: [{ visibility: "off" }],
+            },
+          ]
+        : [
+            // Full styles for better appearance
+            {
+              featureType: "poi.business",
+              stylers: [{ visibility: "off" }],
+            },
+            {
+              featureType: "poi.park",
+              elementType: "labels.text",
+              stylers: [{ visibility: "off" }],
+            },
+          ];
+
+      mapConfig.styles = styles;
+      console.log(
+        "🗺️ No Map ID configured, using",
+        MAPS_PERFORMANCE_CONFIG.USE_LIGHTWEIGHT_MAP_STYLES ? "lightweight" : "full",
+        "styles and regular markers"
+      );
     }
 
     this.map = new google.maps.Map(container, mapConfig);
