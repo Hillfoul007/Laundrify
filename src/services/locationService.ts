@@ -42,6 +42,10 @@ class LocationService {
   private geocodeCache = new Map<string, any>();
   private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
+  // Request throttling
+  private lastRequestTime = 0;
+  private readonly MIN_REQUEST_INTERVAL = 1000; // 1 second between requests
+
   /**
    * Get user's current position using browser geolocation with enhanced accuracy
    */
