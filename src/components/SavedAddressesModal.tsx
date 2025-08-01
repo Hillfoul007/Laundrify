@@ -340,13 +340,13 @@ const SavedAddressesModal: React.FC<SavedAddressesModalProps> = React.memo(
                         </div>
 
                         {/* Actions - 3 Dot Menu and Select Button */}
-                        <div className="flex items-center gap-2 ml-4 relative">
-                          <DropdownMenu>
+                        <div className="flex items-center gap-2 ml-4 relative z-50">
+                          <DropdownMenu modal={false}>
                             <DropdownMenuTrigger asChild>
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-8 w-8 p-0 text-gray-600 hover:text-gray-800 hover:bg-gray-100"
+                                className="h-8 w-8 p-0 text-gray-600 hover:text-gray-800 hover:bg-gray-100 z-50"
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
@@ -358,10 +358,12 @@ const SavedAddressesModal: React.FC<SavedAddressesModalProps> = React.memo(
                             </DropdownMenuTrigger>
                             <DropdownMenuContent
                               align="end"
-                              className="w-40 z-[9999] bg-white shadow-lg border"
+                              className="w-40 z-[10000] bg-white shadow-xl border"
                               side="bottom"
                               sideOffset={5}
                               container={document.body}
+                              avoidCollisions={true}
+                              collisionPadding={10}
                             >
                               <DropdownMenuItem
                                 className="flex items-center gap-2 cursor-pointer"
