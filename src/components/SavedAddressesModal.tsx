@@ -334,10 +334,11 @@ const SavedAddressesModal: React.FC<SavedAddressesModalProps> = React.memo(
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-8 w-8 p-0 text-gray-600 hover:text-gray-800 hover:bg-gray-100 relative z-20 sm:text-gray-400 sm:hover:text-gray-600"
+                                className="h-8 w-8 p-0 text-gray-600 hover:text-gray-800 hover:bg-gray-100 relative z-20 pointer-events-auto"
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
+                                  console.log('3 dots menu clicked for address:', address.id);
                                 }}
                               >
                                 <MoreHorizontal className="h-4 w-4" />
@@ -345,13 +346,18 @@ const SavedAddressesModal: React.FC<SavedAddressesModalProps> = React.memo(
                             </DropdownMenuTrigger>
                             <DropdownMenuContent
                               align="end"
-                              className="w-40 z-[60] bg-white shadow-lg border"
+                              className="w-40 z-[70] bg-white shadow-lg border pointer-events-auto"
                               side="bottom"
                               sideOffset={5}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                              }}
                             >
                               <DropdownMenuItem
                                 onSelect={(e) => {
                                   e.preventDefault();
+                                  e.stopPropagation();
                                   console.log(
                                     "✏️ Editing address:",
                                     address.id,
@@ -359,7 +365,11 @@ const SavedAddressesModal: React.FC<SavedAddressesModalProps> = React.memo(
                                   setEditingAddress(address);
                                   setShowAddAddressPage(true);
                                 }}
-                                className="flex items-center gap-2 cursor-pointer hover:bg-gray-100"
+                                className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 pointer-events-auto"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                }}
                               >
                                 <Edit className="h-4 w-4" />
                                 Edit Address
@@ -367,13 +377,18 @@ const SavedAddressesModal: React.FC<SavedAddressesModalProps> = React.memo(
                               <DropdownMenuItem
                                 onSelect={(e) => {
                                   e.preventDefault();
+                                  e.stopPropagation();
                                   console.log(
                                     "🗑️ Deleting address:",
                                     address.id,
                                   );
                                   setDeletingId(address.id || "");
                                 }}
-                                className="flex items-center gap-2 cursor-pointer text-red-600 hover:bg-red-50 focus:text-red-600"
+                                className="flex items-center gap-2 cursor-pointer text-red-600 hover:bg-red-50 focus:text-red-600 pointer-events-auto"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                }}
                               >
                                 <Trash2 className="h-4 w-4" />
                                 Delete Address
