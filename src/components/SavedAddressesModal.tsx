@@ -166,7 +166,7 @@ const SavedAddressesModal: React.FC<SavedAddressesModalProps> = React.memo(
         const result = await addressService.saveAddress(addressToUpdate);
 
         if (result.success) {
-          console.log("�� Address updated successfully");
+          console.log("✅ Address updated successfully");
           await loadSavedAddresses(); // Reload addresses from backend
           setEditingAddress(null);
           setShowAddAddressPage(false);
@@ -363,39 +363,25 @@ const SavedAddressesModal: React.FC<SavedAddressesModalProps> = React.memo(
                               container={document.body}
                             >
                               <DropdownMenuItem
-                                onSelect={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  console.log(
-                                    "✏️ Editing address:",
-                                    address.id,
-                                  );
-                                  setEditingAddress(address);
-                                  setShowAddAddressPage(true);
-                                }}
-                                className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 pointer-events-auto"
+                                className="flex items-center gap-2 cursor-pointer"
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
+                                  console.log("✏️ Editing address:", address.id);
+                                  setEditingAddress(address);
+                                  setShowAddAddressPage(true);
                                 }}
                               >
                                 <Edit className="h-4 w-4" />
                                 Edit Address
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                onSelect={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  console.log(
-                                    "🗑️ Deleting address:",
-                                    address.id,
-                                  );
-                                  setDeletingId(address.id || "");
-                                }}
-                                className="flex items-center gap-2 cursor-pointer text-red-600 hover:bg-red-50 focus:text-red-600 pointer-events-auto"
+                                className="flex items-center gap-2 cursor-pointer text-red-600 hover:bg-red-50 focus:text-red-600"
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
+                                  console.log("🗑️ Deleting address:", address.id);
+                                  setDeletingId(address.id || "");
                                 }}
                               >
                                 <Trash2 className="h-4 w-4" />
