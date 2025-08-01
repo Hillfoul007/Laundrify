@@ -118,8 +118,13 @@ class LocationService {
   async reverseGeocode(coordinates: Coordinates): Promise<string> {
     console.log("🔍 Starting enhanced reverse geocoding for:", coordinates);
 
+    // Use simplified geocoding if enabled for better performance
+    if (MAPS_PERFORMANCE_CONFIG.USE_SIMPLIFIED_GEOCODING) {
+      return this.simplifiedReverseGeocode(coordinates);
+    }
+
     // Method 1: Google Maps API with multiple result types for maximum detail
-    if (this.GOOGLE_MAPS_API_KEY) {
+    if (this.GOOGLE_MAPS_API_KEY && isFeatureEnabled('REVERSE_GEOCODING')) {
       try {
         // Make multiple requests prioritizing street-level detail
         // Optimized: Use only ONE comprehensive request instead of 5 separate requests
