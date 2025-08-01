@@ -113,16 +113,9 @@ class LocationService {
     if (this.GOOGLE_MAPS_API_KEY) {
       try {
         // Make multiple requests prioritizing street-level detail
+        // Optimized: Use only ONE comprehensive request instead of 5 separate requests
         const requests = [
-          // Ultra-high detail request for street addresses
-          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coordinates.lat},${coordinates.lng}&result_type=street_address&language=en&region=IN&key=${this.GOOGLE_MAPS_API_KEY}`,
-          // Building/premise detail request
-          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coordinates.lat},${coordinates.lng}&result_type=premise|subpremise|establishment&language=en&region=IN&key=${this.GOOGLE_MAPS_API_KEY}`,
-          // Street-level detail request
-          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coordinates.lat},${coordinates.lng}&result_type=route|intersection&language=en&region=IN&key=${this.GOOGLE_MAPS_API_KEY}`,
-          // Neighborhood detail request
-          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coordinates.lat},${coordinates.lng}&result_type=neighborhood|sublocality_level_1|sublocality_level_2&language=en&region=IN&key=${this.GOOGLE_MAPS_API_KEY}`,
-          // Comprehensive fallback request
+          // Single comprehensive request with all result types
           `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coordinates.lat},${coordinates.lng}&language=en&region=IN&key=${this.GOOGLE_MAPS_API_KEY}`,
         ];
 
