@@ -116,18 +116,20 @@ export class CouponService {
     if (!userId) return false;
 
     try {
+      const requestBody = JSON.stringify({
+        couponCode,
+        userId,
+        bookingId,
+        orderAmount,
+        discountAmount,
+      });
+
       const response = await fetch('/api/coupons/mark-used', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          couponCode,
-          userId,
-          bookingId,
-          orderAmount,
-          discountAmount,
-        }),
+        body: requestBody,
       });
 
       const result = await response.json();
