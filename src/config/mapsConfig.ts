@@ -3,9 +3,16 @@
  * Optimizes Google Maps usage for better performance and accuracy
  */
 
+// Detect production environment
+const isProduction = () => {
+  const hostname = window?.location?.hostname;
+  return hostname && !hostname.includes("localhost") && !hostname.includes("127.0.0.1");
+};
+
 export const MAPS_PERFORMANCE_CONFIG = {
   // Reduce API calls by using simpler methods - disabled in production to prevent fallback issues
-  USE_SIMPLIFIED_GEOCODING: false,
+  // In production, use full geocoding to avoid incorrect city fallbacks
+  USE_SIMPLIFIED_GEOCODING: !isProduction(),
   
   // Cache settings
   GEOCODING_CACHE_DURATION: 5 * 60 * 1000, // 5 minutes
