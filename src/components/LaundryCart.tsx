@@ -308,11 +308,7 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
 
 
 
-  const removeCoupon = () => {
-    setAppliedCoupon(null);
-    setCouponCode("");
-    setCouponError("");
-  };
+
 
   const updateQuantity = (serviceId: string, change: number) => {
     setCart((prev) => {
