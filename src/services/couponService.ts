@@ -117,6 +117,36 @@ export class CouponService {
   ): Promise<boolean> {
     if (!userId) return false;
 
+    // Create a unique key for this mark-used request
+    const requestKey = `${couponCode}_${userId}_${bookingId}`;
+
+    // If there's already a pending mark-used for this exact request, return it
+    if (this.pendingMarkUsed.has(requestKey)) {
+      console.log(`🔄 Using pending mark-used for ${requestKey}`);
+      return this.pendingMarkUsed.get(requestKey)!;
+    }
+
+    // Create the mark-used promise
+    const markUsedPromise = this.performMarkUsed(couponCode, userId, bookingId, orderAmount, discountAmount);
+
+    // Store it to prevent duplicates
+    this.pendingMarkUsed.set(requestKey, markUsedPromise);
+
+    // Clean up after completion
+    markUsedPromise.finally(() => {
+      this.pendingMarkUsed.delete(requestKey);
+    });
+
+    return markUsedPromise;
+  }
+
+  private async performMarkUsed(
+    couponCode: string,
+    userId: string,
+    bookingId: string,
+    orderAmount: number,
+    discountAmount: number
+  ): Promise<boolean> {
     try {
       const requestBody = JSON.stringify({
         couponCode,
