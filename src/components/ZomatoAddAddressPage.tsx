@@ -1350,10 +1350,15 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
     console.log("🔍 Extracted flat number pattern match for:", parts[0], "->", extractedFlatNo);
 
     // Set all states in one batch - React will batch these automatically
+    console.log("🔧 BEFORE setState - Current values:", { flatNo, street, area, pincode });
+    console.log("🔧 SETTING setState with:", { extractedFlatNo, street, area, extractedPincode });
+
     setFlatNo(extractedFlatNo);
     setStreet(street);
     setArea(area);
     setPincode(extractedPincode);
+
+    console.log("🔧 AFTER setState called");
 
     // Force React re-render using functional updates
     setTimeout(() => {
