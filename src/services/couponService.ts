@@ -26,6 +26,8 @@ export interface CouponUsage {
 
 export class CouponService {
   private static instance: CouponService;
+  private pendingValidations = new Map<string, Promise<any>>();
+  private pendingMarkUsed = new Map<string, Promise<any>>();
 
   private constructor() {}
 
