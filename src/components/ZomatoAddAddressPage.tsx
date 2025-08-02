@@ -1785,20 +1785,33 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
                 <h3 className="text-base font-medium text-gray-900">
                   Delivery details
                 </h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setSearchQuery(selectedLocation.address);
-                    setShowSuggestions(false);
-                    if (searchInputRef.current) {
-                      searchInputRef.current.focus();
-                    }
-                  }}
-                  className="text-green-600 hover:text-green-700 text-sm px-2 py-1"
-                >
-                  Edit
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      console.log("🧪 Manual autofill test with:", selectedLocation.address);
+                      simpleAutoFill(selectedLocation.address);
+                    }}
+                    className="text-blue-600 hover:text-blue-700 text-sm px-2 py-1"
+                  >
+                    Test Fill
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setSearchQuery(selectedLocation.address);
+                      setShowSuggestions(false);
+                      if (searchInputRef.current) {
+                        searchInputRef.current.focus();
+                      }
+                    }}
+                    className="text-green-600 hover:text-green-700 text-sm px-2 py-1"
+                  >
+                    Edit
+                  </Button>
+                </div>
 
               </div>
               <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
