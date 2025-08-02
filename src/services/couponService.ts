@@ -42,6 +42,46 @@ export class CouponService {
   }
 
   /**
+   * Check if the coupon API is healthy
+   */
+  private async checkApiHealth(): Promise<boolean> {
+    const now = Date.now();
+
+    // Only check health every minute to avoid spam
+    if (now - this.lastHealthCheck < this.healthCheckInterval && this.apiHealthStatus !== 'unknown') {
+      return this.apiHealthStatus === 'healthy';
+    }
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout for health check
+
+      const response = await fetch('/api/coupons/health', {
+        method: 'GET',
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        this.apiHealthStatus = 'healthy';
+        this.lastHealthCheck = now;
+        return true;
+      } else {
+        this.apiHealthStatus = 'unhealthy';
+        this.lastHealthCheck = now;
+        console.warn(`⚠️ Coupon API health check failed: ${response.status}`);
+        return false;
+      }
+    } catch (error) {
+      this.apiHealthStatus = 'unhealthy';
+      this.lastHealthCheck = now;
+      console.warn('⚠️ Coupon API health check failed:', error.message);
+      return false;
+    }
+  }
+
+  /**
    * Get all available coupons
    */
   getAllCoupons(): CouponData[] {
