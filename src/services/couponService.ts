@@ -185,7 +185,7 @@ export class CouponService {
 
     // If there's already a pending mark-used for this exact request, return it
     if (this.pendingMarkUsed.has(requestKey)) {
-      console.log(`�� Using pending mark-used for ${requestKey}`);
+      console.log(`🔄 Using pending mark-used for ${requestKey}`);
       return this.pendingMarkUsed.get(requestKey)!;
     }
 
@@ -520,9 +520,14 @@ export class CouponService {
       return { valid: false, error: "This coupon has already been used" };
     }
 
-    // Check first order restrictions
+    // Check first order restrictions (more strict)
     if (coupon.isFirstOrder && !isFirstTime) {
       return { valid: false, error: "This coupon is valid for first orders only" };
+    }
+
+    // Additional check for specific first-time coupons
+    if ((coupon.code === "FIRST30" || coupon.code === "FIRST10") && !isFirstTime) {
+      return { valid: false, error: "This coupon can only be used on your first order" };
     }
 
     // Check exclude first order restrictions
