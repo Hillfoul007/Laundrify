@@ -18,7 +18,7 @@ import {
   Copy,
   MapPin,
 } from "lucide-react";
-import { ReferralService } from "@/services/referralService";
+
 import { useToast } from "@/hooks/use-toast";
 import UserService from "@/services/userService";
 import SavedAddressesModal from "./SavedAddressesModal";
