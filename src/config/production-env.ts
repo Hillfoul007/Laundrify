@@ -40,5 +40,7 @@ export const shouldUseBackend = (): boolean => {
     return false;
   }
 
+  // For now, use backend but the AddressService will handle 404 gracefully
+  // TODO: Ensure Railway deployment has latest code with address routes
   return true;
 };
