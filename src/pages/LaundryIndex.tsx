@@ -612,7 +612,7 @@ const getDetailedLocationInfo = async (
     );
   };
 
-  const handleLoginSuccess = (user: any) => {
+  const handleLoginSuccess = async (user: any) => {
     setCurrentUser(user);
     setIsLoggedIn(true);
 
@@ -623,7 +623,29 @@ const getDetailedLocationInfo = async (
     console.log("✅ User logged in successfully:", user.name || user.phone);
     console.log("📍 Redirecting to:", targetView);
 
+    // Save user location if we have stored location data
+    try {
+      const storedLocation = locationTracker.getStoredLocation();
+      if (storedLocation) {
+        console.log("📍 Found stored location, saving for logged-in user:", storedLocation);
 
+        await locationTracker.saveLoggedInUserLocation({
+          ...storedLocation,
+          userId: user._id || user.id,
+          phone: user.phone,
+          name: user.name || user.full_name || 'Unknown',
+        });
+
+        // Clear the stored location since we've used it
+        locationTracker.clearStoredLocation();
+      } else {
+        // If no stored location, try to get current location for the logged-in user
+        console.log("📍 No stored location found, getting current location for logged-in user");
+        // Note: getUserLocation will now automatically save for logged-in users
+      }
+    } catch (error) {
+      console.error("Failed to save logged-in user location:", error);
+    }
 
     // Add success notification
     addNotification(
