@@ -300,8 +300,7 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
     return (
       getSubtotal() +
       getDeliveryCharge() +
-      getHandlingFee() -
-      getCouponDiscount()
+      getHandlingFee()
     );
   };
 
@@ -448,7 +447,7 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
     // Prevent multiple submissions
     if (isProcessingCheckout) {
       console.log(
-        "⚠��� Checkout already in progress, ignoring duplicate click",
+        "⚠���� Checkout already in progress, ignoring duplicate click",
       );
       return;
     }
