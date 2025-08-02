@@ -661,7 +661,7 @@ router.post("/", async (req, res) => {
       // Don't fail the booking if address saving fails
     }
 
-    // Handle referral discounts after successful booking save
+
     try {
       console.log("��� Checking for referral discounts...");
 
