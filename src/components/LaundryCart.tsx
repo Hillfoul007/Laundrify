@@ -593,7 +593,8 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
 
       const deliveryCharge = getDeliveryCharge() || 0;
       const handlingFee = getHandlingFee() || 0;
-      const finalTotal = serviceTotal + deliveryCharge + handlingFee;
+      const couponDiscount = getCouponDiscount() || 0;
+      const finalTotal = serviceTotal + deliveryCharge + handlingFee - couponDiscount;
 
       console.log("Price breakdown:", {
         serviceTotal,
@@ -616,7 +617,7 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
           base_price: serviceTotal,
           delivery_fee: deliveryCharge,
           handling_fee: handlingFee,
-
+          discount: couponDiscount,
         },
       };
 
@@ -649,6 +650,21 @@ Confirm this booking?`;
 
           console.log("✅ Checkout initiated successfully");
 
+          // Track coupon usage if a coupon was applied
+          if (appliedCoupon) {
+            const sessionManager = SessionManager.getInstance();
+            const session = sessionManager.ensureValidSession();
+            const userId = session.userId || "guest";
+
+            couponService.markCouponAsUsed(
+              appliedCoupon.code,
+              userId,
+              serviceTotal,
+              couponDiscount
+            );
+            console.log(`✅ Marked coupon ${appliedCoupon.code} as used`);
+          }
+
           // Mark user as having made an order (no longer first-time)
           const sessionManager = SessionManager.getInstance();
           const session = sessionManager.ensureValidSession();
@@ -668,6 +684,8 @@ Confirm this booking?`;
           // Clear form data
           localStorage.removeItem("laundry_booking_form");
           setSpecialInstructions("");
+          setCouponCode("");
+          setAppliedCoupon(null);
 
           addNotification(
             createSuccessNotification(
@@ -1130,7 +1148,7 @@ Confirm this booking?`;
             <div className="flex justify-between text-sm text-laundrify-blue">
               <span>Handling Fee</span>
               <div className="flex items-center gap-2">
-                <span className="line-through text-gray-400 text-xs">₹9</span>
+                <span className="line-through text-gray-400 text-xs">���9</span>
                 <span className="font-medium">FREE</span>
               </div>
             </div>
