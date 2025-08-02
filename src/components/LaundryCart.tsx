@@ -96,9 +96,7 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
     if (savedFormData.deliveryTime) setDeliveryTime(savedFormData.deliveryTime);
     if (savedFormData.additionalDetails)
       setSpecialInstructions(savedFormData.additionalDetails);
-    if (savedFormData.couponCode) setCouponCode(savedFormData.couponCode);
-    if (savedFormData.appliedCoupon)
-      setAppliedCoupon(savedFormData.appliedCoupon);
+
   }, []);
 
   // Auto-save form data when it changes
@@ -109,8 +107,7 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
       deliveryDate,
       deliveryTime,
       additionalDetails: specialInstructions,
-      couponCode,
-      appliedCoupon,
+
     });
   }, [
     selectedDate,
@@ -1330,7 +1327,7 @@ Confirm this booking?`;
               try {
                 handleProceedToCheckout();
               } catch (error) {
-                console.error("💥 Checkout handler failed:", error);
+                console.error("��� Checkout handler failed:", error);
                 addNotification(
                   createErrorNotification(
                     "Checkout Error",
