@@ -375,6 +375,147 @@ const LaundryIndex = () => {
     }
   };
 
+// Enhanced function to get detailed location information
+const getDetailedLocationInfo = async (
+  latitude: number,
+  longitude: number,
+): Promise<{
+  fullAddress: string;
+  displayLocation: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  pincode?: string;
+} | null> => {
+  console.log(`🔄 Getting detailed location info for: ${latitude}, ${longitude}`);
+
+  // Check if we're in a hosted environment where external APIs might fail
+  const isHostedEnv =
+    window.location.hostname.includes("fly.dev") ||
+    window.location.hostname.includes("builder.codes");
+
+  if (isHostedEnv) {
+    console.log("🌐 Hosted environment - using coordinates only");
+    const coordsStr = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+    return {
+      fullAddress: `Location: ${coordsStr}`,
+      displayLocation: `Location: ${coordsStr}`,
+    };
+  }
+
+  // Method 1: Try Google Maps API if available
+  const googleApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  if (googleApiKey) {
+    try {
+      console.log("🗺️ Trying Google Maps API for detailed info...");
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${googleApiKey}`,
+        { signal: controller.signal },
+      );
+
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.results && data.results.length > 0) {
+          const result = data.results[0];
+          const components = result.address_components || [];
+
+          const cityComponent = components.find((c: any) =>
+            c.types.includes("locality") || c.types.includes("administrative_area_level_2"),
+          );
+          const stateComponent = components.find((c: any) =>
+            c.types.includes("administrative_area_level_1"),
+          );
+          const countryComponent = components.find((c: any) =>
+            c.types.includes("country"),
+          );
+          const pincodeComponent = components.find((c: any) =>
+            c.types.includes("postal_code"),
+          );
+
+          const city = cityComponent?.long_name;
+          const state = stateComponent?.long_name;
+          const country = countryComponent?.long_name;
+          const pincode = pincodeComponent?.long_name;
+
+          const displayLocation = city && state && city !== state
+            ? `${city}, ${state}`
+            : city || `${latitude.toFixed(2)}, ${longitude.toFixed(2)}`;
+
+          return {
+            fullAddress: result.formatted_address,
+            displayLocation,
+            city,
+            state,
+            country,
+            pincode,
+          };
+        }
+      }
+    } catch (error) {
+      console.log("❌ Google Maps detailed geocoding failed:", error);
+    }
+  }
+
+  // Method 2: Try OpenStreetMap
+  try {
+    console.log("🌍 Trying OpenStreetMap for detailed info...");
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=12&addressdetails=1`,
+      {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "User-Agent": "CleanCare-App/1.0",
+        },
+        signal: controller.signal,
+      },
+    );
+
+    clearTimeout(timeoutId);
+
+    if (response.ok) {
+      const data = await response.json();
+
+      if (data.address) {
+        const city = data.address.city || data.address.town || data.address.village;
+        const state = data.address.state;
+        const country = data.address.country;
+        const pincode = data.address.postcode;
+
+        const displayLocation = city && state && city !== state
+          ? `${city}, ${state}`
+          : city || `${latitude.toFixed(2)}, ${longitude.toFixed(2)}`;
+
+        return {
+          fullAddress: data.display_name || `${latitude}, ${longitude}`,
+          displayLocation,
+          city,
+          state,
+          country,
+          pincode,
+        };
+      }
+    }
+  } catch (error) {
+    console.log("❌ OpenStreetMap detailed geocoding failed:", error);
+  }
+
+  console.log("⚠️ All geocoding methods failed, using coordinates");
+  const coordsStr = `${latitude.toFixed(2)}, ${longitude.toFixed(2)}`;
+  return {
+    fullAddress: coordsStr,
+    displayLocation: coordsStr,
+  };
+};
+
   const getUserLocation = async () => {
     setCurrentLocation("Detecting location...");
 
