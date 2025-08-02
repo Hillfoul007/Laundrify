@@ -334,12 +334,49 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
     );
   };
 
+  // Helper function to check if a code is a predefined coupon
+  const isPredefinedCoupon = (code: string): boolean => {
+    const predefinedCoupons = ["FIRST30", "NEW10", "FIRST10", "SAVE20"];
+    return predefinedCoupons.includes(code.toUpperCase());
+  };
+
   const applyCoupon = async () => {
     console.log("applyCoupon function called with code:", couponCode);
     setCouponError(""); // Clear any previous errors
 
     try {
-      // First check if it's a referral code
+      // Use the new CouponService for validation first if it's a predefined coupon
+      const sessionManager = SessionManager.getInstance();
+      const session = sessionManager.ensureValidSession();
+      const userId = session.userId || "guest";
+
+      // If it's a predefined coupon, validate as coupon only
+      if (isPredefinedCoupon(couponCode)) {
+        const validation = await couponService.validateCoupon(couponCode, userId, getSubtotal());
+
+        if (validation.valid && validation.coupon) {
+          const coupon = validation.coupon;
+
+          setAppliedCoupon({
+            code: coupon.code,
+            discount: coupon.discount,
+            maxDiscount: coupon.maxDiscount || undefined,
+          });
+
+          addNotification(
+            createSuccessNotification(
+              "Coupon Applied!",
+              `${coupon.discount}% discount applied${coupon.maxDiscount ? ` (max ₹${coupon.maxDiscount})` : ""}`,
+            ),
+          );
+          return;
+        } else {
+          setCouponError(validation.message || "Invalid coupon code");
+          return;
+        }
+      }
+
+      // For non-predefined codes, try referral validation first
       const referralDiscount = await referralService.validateReferralCode(
         couponCode,
         currentUser,
@@ -362,11 +399,7 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
         return;
       }
 
-      // Use the new CouponService for validation
-      const sessionManager = SessionManager.getInstance();
-      const session = sessionManager.ensureValidSession();
-      const userId = session.userId || "guest";
-
+      // Fallback to coupon validation for non-predefined codes
       const validation = await couponService.validateCoupon(couponCode, userId, getSubtotal());
 
       if (validation.valid && validation.coupon) {
