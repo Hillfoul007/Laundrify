@@ -664,28 +664,12 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
         console.warn("Browser location fallback failed:", locationError);
       }
 
-      // Ultimate fallback - major Indian cities based on common usage
-      const fallbackLocations = [
-        { lat: 28.6139, lng: 77.209, city: "New Delhi" },
-        { lat: 19.076, lng: 72.8777, city: "Mumbai" },
-        { lat: 12.9716, lng: 77.5946, city: "Bangalore" },
-        { lat: 17.385, lng: 78.4867, city: "Hyderabad" },
-        { lat: 13.0827, lng: 80.2707, city: "Chennai" },
-        { lat: 22.5726, lng: 88.3639, city: "Kolkata" },
-      ];
-
-      const randomFallback =
-        fallbackLocations[Math.floor(Math.random() * fallbackLocations.length)];
-      const fallbackAddress = `${randomFallback.city}, India`;
-
-      console.log(`🏙��� Using fallback location: ${fallbackAddress}`);
-
-      setSelectedLocation({
-        address: fallbackAddress,
-        coordinates: { lat: randomFallback.lat, lng: randomFallback.lng },
-      });
-      setSearchQuery(fallbackAddress);
-      updateMapLocation({ lat: randomFallback.lat, lng: randomFallback.lng });
+      // FIXED: No more random city fallbacks that cause location confusion
+      // Let the user manually search/select their location instead
+      console.log("📍 Location detection failed - user will manually select location");
+      
+      // Show helpful message to user instead of wrong city
+      alert("Location detection failed. Please search for your address manually in the search box above.");
     } finally {
       setIsDetectingLocation(false);
       setLocationAttempt(0);
