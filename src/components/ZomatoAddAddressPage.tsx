@@ -613,7 +613,7 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
       console.log(`🎯 Final location accuracy: ${coordinates.accuracy}m`);
 
       // FIXED: Prevent race conditions by using only ONE geocoding call
-      console.log("�� Getting detailed address components (single call to prevent race conditions)...");
+      console.log("🔍 Getting detailed address components (single call to prevent race conditions)...");
       const detailedComponents =
         await locationService.getDetailedAddressComponents(coordinates);
 
@@ -1378,8 +1378,9 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
       return extractedPincode;
     });
 
-    // Also update DOM directly as a fallback to ensure values are visible
+    // Also update DOM directly as a fallback to ensure values are visible - immediate
     setTimeout(() => {
+      console.log("🔧 Starting DOM direct update...");
       const flatNoInput = document.getElementById('flatNo') as HTMLInputElement;
       const streetInput = document.getElementById('street') as HTMLInputElement;
       const areaInput = document.getElementById('area') as HTMLInputElement;
