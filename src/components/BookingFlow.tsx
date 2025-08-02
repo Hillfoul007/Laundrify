@@ -89,21 +89,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({
     return 0; // Free handling fee as shown in UI
   };
 
-  const getCouponDiscount = () => {
-    if (!appliedCoupon) return 0;
-    const basePrice = calculateTotalPrice();
 
-    const discountAmount = Math.round(
-      (basePrice * appliedCoupon.discount) / 100
-    );
-
-    // Apply max discount limit if specified
-    if (appliedCoupon.maxDiscount) {
-      return Math.min(discountAmount, appliedCoupon.maxDiscount);
-    }
-
-    return discountAmount;
-  };
 
   const calculateFinalAmount = () => {
     const basePrice = calculateTotalPrice();
