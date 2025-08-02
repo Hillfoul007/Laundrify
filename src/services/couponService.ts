@@ -240,6 +240,34 @@ export class CouponService {
       return { valid: false, error: "Invalid input" };
     }
 
+    // Create a unique key for this validation request
+    const requestKey = `${couponCode}_${userId}_${orderAmount}`;
+
+    // If there's already a pending validation for this exact request, return it
+    if (this.pendingValidations.has(requestKey)) {
+      console.log(`🔄 Using pending validation for ${requestKey}`);
+      return this.pendingValidations.get(requestKey)!;
+    }
+
+    // Create the validation promise
+    const validationPromise = this.performValidation(couponCode, userId, orderAmount);
+
+    // Store it to prevent duplicates
+    this.pendingValidations.set(requestKey, validationPromise);
+
+    // Clean up after completion
+    validationPromise.finally(() => {
+      this.pendingValidations.delete(requestKey);
+    });
+
+    return validationPromise;
+  }
+
+  private async performValidation(
+    couponCode: string,
+    userId: string,
+    orderAmount: number = 0
+  ): Promise<{ valid: boolean; coupon?: CouponData; error?: string }> {
     try {
       const requestBody = JSON.stringify({
         couponCode,
