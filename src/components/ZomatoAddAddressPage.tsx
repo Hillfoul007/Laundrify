@@ -1805,17 +1805,6 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
                     variant="ghost"
                     size="sm"
                     onClick={() => {
-                      console.log("🧪 Manual autofill test with:", selectedLocation.address);
-                      simpleAutoFill(selectedLocation.address);
-                    }}
-                    className="text-blue-600 hover:text-blue-700 text-sm px-2 py-1"
-                  >
-                    Test Fill
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
                       setSearchQuery(selectedLocation.address);
                       setShowSuggestions(false);
                       if (searchInputRef.current) {
