@@ -179,7 +179,7 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
             if (state.deliveryTime) setDeliveryTime(state.deliveryTime);
             if (state.specialInstructions)
               setSpecialInstructions(state.specialInstructions);
-            if (state.appliedCoupon) setAppliedCoupon(state.appliedCoupon);
+
 
             console.log("���� Restored checkout form state after login");
           }
@@ -207,7 +207,7 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
             if (state.deliveryTime) setDeliveryTime(state.deliveryTime);
             if (state.specialInstructions)
               setSpecialInstructions(state.specialInstructions);
-            if (state.appliedCoupon) setAppliedCoupon(state.appliedCoupon);
+
 
             // If redirectToAddress flag is set, open address page
             if (state.redirectToAddress) {
@@ -670,7 +670,7 @@ Confirm this booking?`;
           ),
         );
 
-        console.log("��� New address saved to backend and selected");
+        console.log("����� New address saved to backend and selected");
       } else {
         // Still save locally and proceed
         const addressWithId = {
