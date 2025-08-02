@@ -305,12 +305,62 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
 
   
 
+  const getCouponDiscount = () => {
+    if (!appliedCoupon) return 0;
+    const subtotal = getSubtotal();
+    return couponService.calculateDiscount(subtotal, appliedCoupon);
+  };
+
   const getTotal = () => {
     return (
       getSubtotal() +
       getDeliveryCharge() +
-      getHandlingFee()
+      getHandlingFee() -
+      getCouponDiscount()
     );
+  };
+
+  const applyCoupon = async () => {
+    console.log("applyCoupon function called with code:", couponCode);
+    setCouponError(""); // Clear any previous errors
+
+    try {
+      const sessionManager = SessionManager.getInstance();
+      const session = sessionManager.ensureValidSession();
+      const userId = session.userId || "guest";
+
+      const validation = couponService.validateCoupon(couponCode, userId, getSubtotal());
+
+      if (validation.valid && validation.coupon) {
+        const coupon = validation.coupon;
+
+        setAppliedCoupon({
+          code: coupon.code,
+          discount: coupon.discount,
+          maxDiscount: coupon.maxDiscount,
+        });
+
+        addNotification(
+          createSuccessNotification(
+            "Coupon Applied!",
+            `${coupon.discount}% discount applied (up to ₹${coupon.maxDiscount})`,
+          ),
+        );
+        console.log("✅ Coupon applied successfully:", coupon.code);
+      } else {
+        setCouponError(validation.error || "Invalid coupon code");
+        console.log("❌ Invalid coupon:", validation.error);
+      }
+    } catch (error) {
+      console.error("Error in applyCoupon:", error);
+      setCouponError("Something went wrong while applying the coupon.");
+    }
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
+    setCouponError("");
   };
 
 
