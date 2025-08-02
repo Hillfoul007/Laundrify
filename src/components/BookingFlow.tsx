@@ -61,11 +61,8 @@ const BookingFlow: React.FC<BookingFlowProps> = ({
     instructions: "",
   });
   const [additionalDetails, setAdditionalDetails] = useState("");
-  const [couponCode, setCouponCode] = useState("");
-  const [appliedCoupon, setAppliedCoupon] = useState<{
-    code: string;
-    discount: number;
-  } | null>(null);
+
+
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
