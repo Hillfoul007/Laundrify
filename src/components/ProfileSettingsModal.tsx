@@ -48,9 +48,7 @@ const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
   const { toast } = useToast();
   const userService = UserService.getInstance();
 
-  const referralService = ReferralService.getInstance();
-  const userCoupons = referralService.getUserCoupons(currentUser);
-  const userReferralCode = referralService.generateReferralCode(currentUser);
+
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
