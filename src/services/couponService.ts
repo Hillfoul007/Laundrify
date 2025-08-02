@@ -525,9 +525,12 @@ export class CouponService {
       return { valid: false, error: "This coupon is valid for first orders only" };
     }
 
-    // Additional check for specific first-time coupons
+    // Additional check for specific first-time coupons with more explicit messages
     if ((coupon.code === "FIRST30" || coupon.code === "FIRST10") && !isFirstTime) {
-      return { valid: false, error: "This coupon can only be used on your first order" };
+      return {
+        valid: false,
+        error: `${coupon.code} is a first-order only coupon and can only be used once on your very first order`
+      };
     }
 
     // Check exclude first order restrictions
