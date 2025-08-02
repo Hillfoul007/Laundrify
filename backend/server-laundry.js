@@ -214,6 +214,15 @@ try {
   console.error("❌ Failed to load Detected Locations routes:", error.message);
 }
 
+// Coupons routes
+try {
+  const couponRoutes = require("./routes/coupons");
+  app.use("/api/coupons", couponRoutes);
+  console.log("🔗 Coupon routes registered at /api/coupons");
+} catch (error) {
+  console.error("❌ Failed to load Coupon routes:", error.message);
+}
+
 
 
 // Google Sheets integration removed
