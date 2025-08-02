@@ -226,19 +226,7 @@ const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
             </div>
           )}
 
-          {/* Offers & Coupons Section */}
-          <div className="pt-6 border-t border-gray-200">
-            <div className="flex items-center gap-2 mb-4">
-              <Gift className="h-5 w-5 text-green-600" />
-              <h3 className="text-lg font-semibold text-gray-900">
-                Offers & Coupons
-              </h3>
-            </div>
 
-
-
-
-          </div>
 
           {/* Address Management Section */}
           <div className="pt-6 border-t border-gray-200">
