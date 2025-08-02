@@ -332,10 +332,17 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
     console.log("applyCoupon function called with code:", couponCode);
     setCouponError(""); // Clear any previous errors
 
+    if (!couponCode.trim()) {
+      setCouponError("Please enter a coupon code");
+      return;
+    }
+
     try {
       const sessionManager = SessionManager.getInstance();
       const session = sessionManager.ensureValidSession();
       const userId = session.userId || "guest";
+
+      console.log("🎫 Validating coupon:", { couponCode, userId, subtotal: getSubtotal() });
 
       const validation = couponService.validateCoupon(couponCode, userId, getSubtotal());
 
