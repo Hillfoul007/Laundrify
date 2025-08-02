@@ -578,6 +578,7 @@ const LaundryIndex = () => {
         total_price: cartData.original_total || cartData.totalAmount,
         discount_amount: cartData.discount_amount || 0,
         final_amount: cartData.totalAmount,
+        coupon_code: cartData.coupon_code || null,
         special_instructions: cartData.instructions || "",
         charges_breakdown: cartData.charges_breakdown || {
           base_price: cartData.original_total || cartData.totalAmount,
