@@ -806,15 +806,7 @@ const LaundryIndex = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Referral Code Handler - handles URL-based referrals */}
-      <ReferralCodeHandler
-        currentUser={currentUser}
-        onReferralApplied={(discountPercentage) => {
-          console.log(`Referral applied with ${discountPercentage}% discount`);
-          // Refresh user data to show new discount
-          checkAuthState();
-        }}
-      />
+
 
       {currentView === "home" && (
         <>
