@@ -138,16 +138,39 @@ export class CouponService {
 
       clearTimeout(timeoutId);
 
-      // Check if response is ok before parsing JSON
+      // Handle response based on content type
+      let result;
+      let errorText = '';
+
       if (!response.ok) {
-        const errorText = await response.text();
+        try {
+          // Try to read as JSON first, fallback to text
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            result = await response.json();
+            errorText = result.message || result.error || 'Unknown error';
+          } else {
+            errorText = await response.text();
+          }
+        } catch (parseError) {
+          errorText = `Failed to parse error response: ${response.status} ${response.statusText}`;
+        }
+
         console.error('❌ Failed to mark coupon as used via backend:', response.status, errorText);
         // Fallback to local storage
         this.markCouponAsUsedLocal(couponCode, userId, orderAmount, discountAmount);
         return false;
       }
 
-      const result = await response.json();
+      // Response is ok, parse as JSON
+      try {
+        result = await response.json();
+      } catch (parseError) {
+        console.error('❌ Failed to parse success response as JSON:', parseError);
+        // Fallback to local storage
+        this.markCouponAsUsedLocal(couponCode, userId, orderAmount, discountAmount);
+        return false;
+      }
 
       if (result.success) {
         console.log(`✅ Marked coupon ${couponCode} as used for user ${userId} via backend`);
@@ -236,14 +259,35 @@ export class CouponService {
 
       clearTimeout(timeoutId);
 
-      // Check if response is ok before trying to parse JSON
+      // Handle response based on content type
+      let result;
+      let errorText = '';
+
       if (!response.ok) {
-        const errorText = await response.text();
+        try {
+          // Try to read as JSON first, fallback to text
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            result = await response.json();
+            errorText = result.message || result.error || 'Unknown error';
+          } else {
+            errorText = await response.text();
+          }
+        } catch (parseError) {
+          errorText = `Failed to parse error response: ${response.status} ${response.statusText}`;
+        }
+
         console.error('❌ Coupon validation failed:', response.status, errorText);
         return { valid: false, error: errorText || 'Coupon validation failed' };
       }
 
-      const result = await response.json();
+      // Response is ok, parse as JSON
+      try {
+        result = await response.json();
+      } catch (parseError) {
+        console.error('❌ Failed to parse success response as JSON:', parseError);
+        return { valid: false, error: 'Failed to parse server response' };
+      }
 
       return {
         valid: result.success,
