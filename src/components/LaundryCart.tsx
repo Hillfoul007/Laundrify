@@ -516,7 +516,7 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
       // Handle location unavailable case
       if (locationUnavailable && addressData?.fullAddress) {
         console.log(
-          "🚫 Location not available for service:",
+          "�� Location not available for service:",
           addressData.fullAddress,
         );
         setUnavailableLocationText(addressData.fullAddress);
@@ -1153,7 +1153,82 @@ Confirm this booking?`;
               </div>
             </div>
 
+            {/* Coupon Section */}
+            <div className="space-y-2 pt-2 border-t">
+              {!appliedCoupon ? (
+                <>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Coupon"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          if (couponCode.trim()) {
+                            applyCoupon();
+                          }
+                        }
+                      }}
+                      className="flex-1 h-8 text-sm"
+                    />
+                    <Button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        applyCoupon();
+                      }}
+                      variant="outline"
+                      disabled={!couponCode.trim()}
+                      className="h-8 px-3 text-sm"
+                      type="button"
+                    >
+                      Apply
+                    </Button>
+                  </div>
 
+                  {/* Available coupons info */}
+                  <div className="text-xs text-gray-500 space-y-1">
+                    <div>FIRST30 - 30% off for first order only (up to ₹200)</div>
+                    <div>NEW10 - 10% off on all orders (up to ₹200)</div>
+                  </div>
+
+                  {/* Coupon Error Message */}
+                  {couponError && (
+                    <div className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded">
+                      {couponError}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="flex justify-between items-center text-sm">
+                  <div className="flex items-center gap-1">
+                    <span className="text-green-600 font-medium text-xs">
+                      ✓ {appliedCoupon.code}
+                    </span>
+                    <span className="text-xs text-green-600">
+                      ({appliedCoupon.discount}% off)
+                    </span>
+                  </div>
+                  <Button
+                    onClick={removeCoupon}
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0 text-red-500 hover:bg-red-50"
+                  >
+                    ✕
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {/* Show discount if coupon is applied */}
+            {appliedCoupon && (
+              <div className="flex justify-between text-sm text-green-600">
+                <span>Discount</span>
+                <span>-₹{getCouponDiscount()}</span>
+              </div>
+            )}
 
             <hr className="my-2" />
 
