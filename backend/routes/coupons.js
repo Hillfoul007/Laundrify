@@ -7,7 +7,7 @@ const mockCoupons = [
     code: "FIRST30",
     discount: 30,
     maxDiscount: 200,
-    description: "30% off on first order (up to ₹200)",
+    description: "30% off on first order only - one-time use (up to ₹200)",
     type: "first_order",
     isFirstOrder: true,
     isOneTimeUse: true,
@@ -23,7 +23,7 @@ const mockCoupons = [
   {
     code: "FIRST10",
     discount: 10,
-    description: "10% off on first order",
+    description: "10% off on first order only - one-time use",
     type: "first_order",
     isFirstOrder: true,
     isOneTimeUse: true,
