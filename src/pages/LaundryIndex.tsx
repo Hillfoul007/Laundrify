@@ -812,12 +812,7 @@ const LaundryIndex = () => {
         <>
 
 
-          {/* Referral Discount Banner */}
-          {currentUser && (
-            <div className="px-4 pt-4 bg-gradient-to-r from-laundrify-purple to-laundrify-pink">
-              <ReferralDiscountBanner user={currentUser} />
-            </div>
-          )}
+
 
           <ResponsiveLaundryHome
             currentUser={currentUser}
