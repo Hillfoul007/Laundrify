@@ -35,20 +35,13 @@ export const restoreAuthState = async (): Promise<boolean> => {
 };
 
 /**
- * Ensure auth state is consistent across all storage keys
+ * Ensure auth state is consistent - now using unified service
  */
 export const syncAuthStorage = () => {
-  const authService = DVHostingSmsService.getInstance();
-  const user = authService.getCurrentUser();
+  const authService = UnifiedAuthService.getInstance();
 
-  if (user) {
-    // Ensure all storage keys are in sync
-    const token =
-      localStorage.getItem("auth_token") ||
-      localStorage.getItem("cleancare_auth_token");
-    if (token) {
-      authService.setCurrentUser(user, token);
-      console.log("🔄 Auth storage synchronized");
-    }
+  if (authService.isAuthenticated()) {
+    authService.updateActivity();
+    console.log("🔄 Unified auth storage synchronized");
   }
 };
