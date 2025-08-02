@@ -181,7 +181,7 @@ router.post("/", async (req, res) => {
     console.log("📊 Final amount === undefined:", final_amount === undefined);
     console.log("📊 Final amount === null:", final_amount === null);
     console.log("📊 Final amount isNaN:", isNaN(final_amount));
-    console.log("�� Final amount < 0:", final_amount < 0);
+    console.log("📊 Final amount < 0:", final_amount < 0);
     console.log("📊 Final amount parsed as Number:", Number(final_amount));
 
     if (
@@ -606,7 +606,7 @@ router.post("/", async (req, res) => {
             pincode: "",
             landmark: "",
             coordinates: coordinates || {},
-            address_type: "other",
+            address_type: newAddressType,
             is_default: false,
             status: "active",
           };
@@ -1234,7 +1234,7 @@ router.put("/:bookingId/cancel", async (req, res) => {
     const { bookingId } = req.params;
     let userId = req.headers["user-id"] || req.body.user_id;
 
-    console.log("🚫 Booking cancellation request:", { bookingId, userId });
+    console.log("��� Booking cancellation request:", { bookingId, userId });
 
     // Get booking details first
     const booking = await Booking.findById(bookingId);
