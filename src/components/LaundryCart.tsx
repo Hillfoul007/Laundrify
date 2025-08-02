@@ -842,8 +842,27 @@ Confirm this booking?`;
         localStorage.getItem(savedAddressesKey) || "[]",
       );
 
-      // Always save the address from booking to maintain user history
-      if (orderAddress.fullAddress) {
+      // Function to normalize address for comparison (removes minor variations)
+      const normalizeAddress = (address: string) => {
+        return address
+          .toLowerCase()
+          .replace(/\s+/g, ' ') // Multiple spaces to single space
+          .replace(/,\s*,/g, ',') // Remove empty comma sections
+          .replace(/[.,\s]+$/, '') // Remove trailing punctuation and spaces
+          .replace(/^[.,\s]+/, '') // Remove leading punctuation and spaces
+          .trim();
+      };
+
+      // Check if this address already exists (smart comparison)
+      const normalizedNewAddress = normalizeAddress(orderAddress.fullAddress);
+      const addressExists = existingAddresses.some((addr: any) => {
+        if (!addr.fullAddress) return false;
+        const normalizedExisting = normalizeAddress(addr.fullAddress);
+        return normalizedExisting === normalizedNewAddress;
+      });
+
+      // Only save if it's a genuinely different address
+      if (!addressExists && orderAddress.fullAddress) {
         const newAddress = {
           ...orderAddress,
           id: `addr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
