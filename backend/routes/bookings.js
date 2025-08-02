@@ -181,7 +181,7 @@ router.post("/", async (req, res) => {
     console.log("📊 Final amount === undefined:", final_amount === undefined);
     console.log("📊 Final amount === null:", final_amount === null);
     console.log("📊 Final amount isNaN:", isNaN(final_amount));
-    console.log("📊 Final amount < 0:", final_amount < 0);
+    console.log("�� Final amount < 0:", final_amount < 0);
     console.log("📊 Final amount parsed as Number:", Number(final_amount));
 
     if (
@@ -582,9 +582,15 @@ router.post("/", async (req, res) => {
           status: "active",
         });
 
+        // Determine address type from the booking data
+        const newAddressType = (addressObject && addressObject.type) || "other";
+
         const addressExists = userAddresses.some(addr => {
           const normalizedExisting = normalizeAddress(addr.full_address);
-          return normalizedExisting === normalizedNewAddress;
+          const existingType = addr.address_type || "other";
+
+          // Same address AND same type = duplicate
+          return normalizedExisting === normalizedNewAddress && existingType === newAddressType;
         });
 
         // Only save if it's a genuinely different address
