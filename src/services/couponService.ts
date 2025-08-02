@@ -116,25 +116,41 @@ export class CouponService {
     if (!userId) return false;
 
     try {
+      const requestBody = JSON.stringify({
+        couponCode,
+        userId,
+        bookingId,
+        orderAmount,
+        discountAmount,
+      });
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       const response = await fetch('/api/coupons/mark-used', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          couponCode,
-          userId,
-          bookingId,
-          orderAmount,
-          discountAmount,
-        }),
+        body: requestBody,
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
+
+      // Check if response is ok before parsing JSON
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Failed to mark coupon as used via backend:', response.status, errorText);
+        // Fallback to local storage
+        this.markCouponAsUsedLocal(couponCode, userId, orderAmount, discountAmount);
+        return false;
+      }
 
       const result = await response.json();
 
-      if (response.ok && result.success) {
+      if (result.success) {
         console.log(`✅ Marked coupon ${couponCode} as used for user ${userId} via backend`);
-
         // Also update localStorage as backup
         this.markCouponAsUsedLocal(couponCode, userId, orderAmount, discountAmount);
         return true;
@@ -146,6 +162,14 @@ export class CouponService {
       }
     } catch (error) {
       console.error('❌ Error marking coupon as used:', error);
+
+      // Handle specific error types
+      if (error.name === 'AbortError') {
+        console.warn('⏰ Mark coupon as used request timed out, using local storage');
+      } else if (error.message?.includes('body stream already read')) {
+        console.warn('⚠️ Body stream already read error, using local storage');
+      }
+
       // Fallback to local storage
       this.markCouponAsUsedLocal(couponCode, userId, orderAmount, discountAmount);
       return false;
@@ -192,23 +216,34 @@ export class CouponService {
     }
 
     try {
+      const requestBody = JSON.stringify({
+        couponCode,
+        userId,
+        orderAmount,
+      });
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       const response = await fetch('/api/coupons/validate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          couponCode,
-          userId,
-          orderAmount,
-        }),
+        body: requestBody,
+        signal: controller.signal,
       });
 
-      const result = await response.json();
+      clearTimeout(timeoutId);
 
+      // Check if response is ok before trying to parse JSON
       if (!response.ok) {
-        return { valid: false, error: result.message || 'Coupon validation failed' };
+        const errorText = await response.text();
+        console.error('❌ Coupon validation failed:', response.status, errorText);
+        return { valid: false, error: errorText || 'Coupon validation failed' };
       }
+
+      const result = await response.json();
 
       return {
         valid: result.success,
@@ -217,6 +252,13 @@ export class CouponService {
       };
     } catch (error) {
       console.error('❌ Error validating coupon:', error);
+
+      // Handle specific error types
+      if (error.name === 'AbortError') {
+        console.warn('⏰ Coupon validation request timed out, using local validation');
+      } else if (error.message?.includes('body stream already read')) {
+        console.warn('⚠️ Body stream already read error, using local validation');
+      }
 
       // Fallback to local validation if backend is unavailable
       return this.validateCouponLocal(couponCode, userId, orderAmount);
@@ -287,21 +329,40 @@ export class CouponService {
   }
 
   /**
-   * Get available coupons for a specific user
+   * Get available coupons for a specific user (async version)
    */
-  getAvailableCouponsForUser(userId: string, orderAmount: number = 0): CouponData[] {
+  async getAvailableCouponsForUser(userId: string, orderAmount: number = 0): Promise<CouponData[]> {
     if (!userId) return [];
-    
+
     const allCoupons = this.getAllCoupons();
     const availableCoupons: CouponData[] = [];
-    
+
     for (const coupon of allCoupons) {
-      const validation = this.validateCoupon(coupon.code, userId, orderAmount);
+      const validation = await this.validateCoupon(coupon.code, userId, orderAmount);
       if (validation.valid) {
         availableCoupons.push(coupon);
       }
     }
-    
+
+    return availableCoupons;
+  }
+
+  /**
+   * Get available coupons for a specific user (sync version using local validation only)
+   */
+  getAvailableCouponsForUserLocal(userId: string, orderAmount: number = 0): CouponData[] {
+    if (!userId) return [];
+
+    const allCoupons = this.getAllCoupons();
+    const availableCoupons: CouponData[] = [];
+
+    for (const coupon of allCoupons) {
+      const validation = this.validateCouponLocal(coupon.code, userId, orderAmount);
+      if (validation.valid) {
+        availableCoupons.push(coupon);
+      }
+    }
+
     return availableCoupons;
   }
 

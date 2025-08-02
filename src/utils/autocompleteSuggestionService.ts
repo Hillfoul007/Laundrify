@@ -3,6 +3,8 @@
  * Replaces the deprecated AutocompleteService with the new AutocompleteSuggestion API
  */
 
+import { MAPS_PERFORMANCE_CONFIG, isFeatureEnabled, getCacheDuration, getMinRequestInterval } from "../config/mapsConfig";
+
 export interface AutocompletePrediction {
   description: string;
   place_id: string;
@@ -23,6 +25,14 @@ class AutocompleteSuggestionService {
   private AutocompleteSuggestion: any = null;
   private AutocompleteSessionToken: any = null;
   private isInitialized = false;
+
+  // Caching for autocomplete results
+  private autocompleteCache = new Map<string, any>();
+  private readonly CACHE_DURATION = getCacheDuration('autocomplete');
+
+  // Request throttling
+  private lastRequestTime = 0;
+  private readonly MIN_REQUEST_INTERVAL = getMinRequestInterval('autocomplete');
 
   /**
    * Initialize the AutocompleteSuggestion service
@@ -77,6 +87,21 @@ class AutocompleteSuggestionService {
     }
 
     try {
+      // Check cache first
+      const cacheKey = `${request.input}_${JSON.stringify(request.includedRegionCodes || ['in'])}`;
+      const cached = this.autocompleteCache.get(cacheKey);
+      if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
+        console.log('🚀 Using cached autocomplete result for:', request.input);
+        return cached.data;
+      }
+
+      // Request throttling
+      const now = Date.now();
+      if (now - this.lastRequestTime < this.MIN_REQUEST_INTERVAL) {
+        await new Promise(resolve => setTimeout(resolve, this.MIN_REQUEST_INTERVAL - (now - this.lastRequestTime)));
+      }
+      this.lastRequestTime = Date.now();
+
       const sessionToken = request.sessionToken || this.createSessionToken();
 
       const apiRequest = {
@@ -94,7 +119,7 @@ class AutocompleteSuggestionService {
         return [];
       }
 
-      return response.suggestions.map((suggestion: any) => {
+      const suggestions = response.suggestions.map((suggestion: any) => {
         const placePrediction = suggestion.placePrediction;
         return {
           description: placePrediction.text,
@@ -108,6 +133,17 @@ class AutocompleteSuggestionService {
           },
         };
       });
+
+      // Limit suggestions for better performance
+      const limitedSuggestions = suggestions.slice(0, MAPS_PERFORMANCE_CONFIG.MAX_AUTOCOMPLETE_SUGGESTIONS);
+
+      // Cache the results
+      this.autocompleteCache.set(cacheKey, {
+        data: limitedSuggestions,
+        timestamp: Date.now()
+      });
+
+      return limitedSuggestions;
     } catch (error) {
       console.error("Error fetching autocomplete suggestions:", error);
       throw error;

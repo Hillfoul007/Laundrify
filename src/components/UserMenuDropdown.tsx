@@ -213,37 +213,6 @@ const UserMenuDropdown: React.FC<UserMenuDropdownProps> = ({
 
             <DropdownMenuItem
               onClick={() =>
-                handleItemClick("addresses", () => {
-                  setIsOpen(false);
-                  setShowAddressesModal(true);
-                })
-              }
-              className={`cursor-pointer rounded-xl p-3 hover:bg-orange-50 hover:text-orange-700 transition-all duration-200 group transform hover:scale-[1.02] ${
-                clickedItem === "addresses"
-                  ? "scale-110 bg-orange-100 shadow-lg ring-2 ring-orange-300 ring-opacity-50"
-                  : ""
-              }`}
-            >
-              <div className="flex items-center w-full">
-                <div
-                  className={`w-8 h-8 bg-orange-100 group-hover:bg-orange-200 rounded-lg flex items-center justify-center mr-3 transition-all duration-200 ${
-                    clickedItem === "addresses"
-                      ? "animate-pulse bg-orange-200 scale-110"
-                      : ""
-                  }`}
-                >
-                  <MapPin
-                    className={`h-4 w-4 text-orange-600 transition-all duration-200 ${
-                      clickedItem === "addresses" ? "scale-125" : ""
-                    }`}
-                  />
-                </div>
-                <span className="font-medium">Saved Addresses</span>
-              </div>
-            </DropdownMenuItem>
-
-            <DropdownMenuItem
-              onClick={() =>
                 handleItemClick("preferences", () => {
                   setIsOpen(false);
                   setShowPreferencesModal(true);

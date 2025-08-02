@@ -96,9 +96,14 @@ export class LocationDetectionService {
     coordinates?: { lat: number; lng: number },
   ): Promise<LocationAvailabilityResponse> {
     try {
-      if (!this.apiBaseUrl) {
-        // Fallback local check
-        return this.checkAvailabilityLocal(city, pincode, coordinates);
+      // Always perform local check as primary method for consistency
+      console.log("🔍 Checking location availability:", { city, pincode, fullAddress });
+
+      if (!this.apiBaseUrl || this.apiBaseUrl === "" || config.isProduction) {
+        // Use local check for consistency across all environments
+        const localResult = this.checkAvailabilityLocal(city, pincode, coordinates);
+        console.log("📍 Local availability check result:", localResult);
+        return localResult;
       }
 
       const response = await fetch(

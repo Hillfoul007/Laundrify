@@ -38,6 +38,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
 import ZomatoAddAddressPage from "./ZomatoAddAddressPage";
 import { AddressService } from "@/services/addressService";
@@ -244,7 +245,8 @@ const SavedAddressesModal: React.FC<SavedAddressesModalProps> = React.memo(
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-end">
-        <div className="w-full bg-white rounded-t-2xl max-h-[80vh] overflow-y-auto relative">
+        <div className="w-full bg-white rounded-t-2xl max-h-[80vh] relative z-[61] flex flex-col">
+          <div className="flex-1 overflow-y-auto overflow-x-visible">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-100">
             <h2 className="text-lg font-semibold text-gray-900">
@@ -294,6 +296,17 @@ const SavedAddressesModal: React.FC<SavedAddressesModalProps> = React.memo(
                         ? "border-green-500 bg-green-50"
                         : "border-gray-200 hover:border-gray-300"
                     }`}
+                    onClick={(e) => {
+                      // Only select if not clicking on dropdown or buttons
+                      const target = e.target as HTMLElement;
+                      const isDropdownClick = target.closest('[data-radix-dropdown-menu-trigger]') || target.closest('[data-radix-dropdown-menu-content]');
+                      const isButtonClick = target.closest('button');
+
+                      if (!isDropdownClick && !isButtonClick) {
+                        onSelectAddress(address);
+                        onClose();
+                      }
+                    }}
                   >
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between">
@@ -328,57 +341,58 @@ const SavedAddressesModal: React.FC<SavedAddressesModalProps> = React.memo(
                         </div>
 
                         {/* Actions - 3 Dot Menu and Select Button */}
-                        <div className="flex items-center gap-2 ml-4 relative z-10">
+                        <div className="flex items-center gap-2 ml-4 relative z-50">
                           <DropdownMenu modal={false}>
                             <DropdownMenuTrigger asChild>
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-8 w-8 p-0 text-gray-600 hover:text-gray-800 hover:bg-gray-100 relative z-20 sm:text-gray-400 sm:hover:text-gray-600"
+                                className="h-8 w-8 p-0 text-gray-600 hover:text-gray-800 hover:bg-gray-100 z-50"
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
+                                  console.log('🎯 3 dots menu clicked for address:', address.id);
                                 }}
                               >
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent
-                              align="end"
-                              className="w-40 z-[60] bg-white shadow-lg border"
-                              side="bottom"
-                              sideOffset={5}
-                            >
+                            <DropdownMenuPortal>
+                              <DropdownMenuContent
+                                align="end"
+                                className="w-40 z-[10000] bg-white shadow-xl border"
+                                side="bottom"
+                                sideOffset={5}
+                                avoidCollisions={true}
+                                collisionPadding={10}
+                              >
                               <DropdownMenuItem
-                                onSelect={(e) => {
+                                className="flex items-center gap-2 cursor-pointer"
+                                onClick={(e) => {
                                   e.preventDefault();
-                                  console.log(
-                                    "✏️ Editing address:",
-                                    address.id,
-                                  );
+                                  e.stopPropagation();
+                                  console.log("✏️ Editing address:", address.id);
                                   setEditingAddress(address);
                                   setShowAddAddressPage(true);
                                 }}
-                                className="flex items-center gap-2 cursor-pointer hover:bg-gray-100"
                               >
                                 <Edit className="h-4 w-4" />
                                 Edit Address
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                onSelect={(e) => {
+                                className="flex items-center gap-2 cursor-pointer text-red-600 hover:bg-red-50 focus:text-red-600"
+                                onClick={(e) => {
                                   e.preventDefault();
-                                  console.log(
-                                    "🗑️ Deleting address:",
-                                    address.id,
-                                  );
+                                  e.stopPropagation();
+                                  console.log("🗑️ Deleting address:", address.id);
                                   setDeletingId(address.id || "");
                                 }}
-                                className="flex items-center gap-2 cursor-pointer text-red-600 hover:bg-red-50 focus:text-red-600"
                               >
                                 <Trash2 className="h-4 w-4" />
                                 Delete Address
                               </DropdownMenuItem>
-                            </DropdownMenuContent>
+                              </DropdownMenuContent>
+                            </DropdownMenuPortal>
                           </DropdownMenu>
 
                           {onSelectAddress && (
@@ -468,6 +482,7 @@ const SavedAddressesModal: React.FC<SavedAddressesModalProps> = React.memo(
                 <span className="text-red-500">e</span>
               </span>
             </div>
+          </div>
           </div>
         </div>
 
