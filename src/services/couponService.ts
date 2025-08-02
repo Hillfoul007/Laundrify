@@ -185,7 +185,7 @@ export class CouponService {
 
     // If there's already a pending mark-used for this exact request, return it
     if (this.pendingMarkUsed.has(requestKey)) {
-      console.log(`🔄 Using pending mark-used for ${requestKey}`);
+      console.log(`�� Using pending mark-used for ${requestKey}`);
       return this.pendingMarkUsed.get(requestKey)!;
     }
 
@@ -349,7 +349,10 @@ export class CouponService {
     existingUsages.push(usage);
     localStorage.setItem(`used_coupons_${userId}`, JSON.stringify(existingUsages));
 
-    console.log(`✅ Marked coupon ${couponCode} as used locally for user ${userId}`);
+    // Mark user as having made an order (no longer first-time)
+    localStorage.setItem(`has_ordered_${userId}`, "true");
+
+    console.log(`✅ Marked coupon ${couponCode} as used locally for user ${userId} and set order history flag`);
   }
 
   /**
