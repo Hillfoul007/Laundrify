@@ -1347,6 +1347,7 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
       area: area,
       pincode: extractedPincode
     });
+    console.log("🔍 Extracted flat number pattern match for:", parts[0], "->", extractedFlatNo);
 
     // Set all states in one batch - React will batch these automatically
     setFlatNo(extractedFlatNo);
