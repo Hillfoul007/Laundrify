@@ -641,6 +641,7 @@ ${services.map((s) => `• ${s.name} x${s.quantity} - ₹${s.price * s.quantity}
 Pickup: ${selectedDate.toLocaleDateString()} at ${selectedTime}
 Delivery: ${finalDeliveryDate.toLocaleDateString()} at ${finalDeliveryTime}
 
+${appliedCoupon ? `Coupon Applied: ${appliedCoupon.code} (-₹${couponDiscount})` : ""}
 Total Amount: ₹${finalTotal}
 
 Confirm this booking?`;
