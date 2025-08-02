@@ -1,5 +1,6 @@
 const express = require("express");
 const DetectedLocation = require("../models/DetectedLocation");
+const LoggedInUser = require("../models/LoggedInUser");
 
 const router = express.Router();
 
