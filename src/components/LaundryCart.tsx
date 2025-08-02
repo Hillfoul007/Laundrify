@@ -52,6 +52,7 @@ import ZomatoAddressSelector from "./ZomatoAddressSelector";
 import ZomatoAddAddressPage from "./ZomatoAddAddressPage";
 import { AddressService } from "@/services/addressService";
 import { SessionManager } from "@/utils/sessionManager";
+import { CouponService } from "@/services/couponService";
 
 
 interface LaundryCartProps {
@@ -76,6 +77,13 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
   const [selectedTime, setSelectedTime] = useState("");
   const [deliveryDate, setDeliveryDate] = useState<Date>();
   const [deliveryTime, setDeliveryTime] = useState("");
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    code: string;
+    discount: number;
+    maxDiscount: number;
+  } | null>(null);
+  const [couponError, setCouponError] = useState("");
 
 
   // Location availability modal state
@@ -83,6 +91,7 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
   const [unavailableLocationText, setUnavailableLocationText] = useState("");
 
   const authService = OTPAuthService.getInstance();
+  const couponService = CouponService.getInstance();
 
 
   // Load saved form data on component mount (excluding date autofill)
