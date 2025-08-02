@@ -609,8 +609,6 @@ Confirm this booking?`;
           // Clear form data
           localStorage.removeItem("laundry_booking_form");
           setSpecialInstructions("");
-          setCouponCode("");
-          setAppliedCoupon(null);
 
           addNotification(
             createSuccessNotification(
