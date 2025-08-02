@@ -76,22 +76,14 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
   const [selectedTime, setSelectedTime] = useState("");
   const [deliveryDate, setDeliveryDate] = useState<Date>();
   const [deliveryTime, setDeliveryTime] = useState("");
-  const [couponCode, setCouponCode] = useState("");
-  const [appliedCoupon, setAppliedCoupon] = useState<{
-    code: string;
-    discount: number;
-    maxDiscount?: number;
-    isReferral?: boolean;
-  } | null>(null);
-  const [couponError, setCouponError] = useState("");
+
 
   // Location availability modal state
   const [showLocationUnavailable, setShowLocationUnavailable] = useState(false);
   const [unavailableLocationText, setUnavailableLocationText] = useState("");
 
   const authService = OTPAuthService.getInstance();
-  const referralService = ReferralService.getInstance();
-  const couponService = CouponService.getInstance();
+
 
   // Load saved form data on component mount (excluding date autofill)
   useEffect(() => {
