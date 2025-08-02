@@ -201,14 +201,7 @@ try {
   console.error("❌ Failed to load Dynamic Services routes:", error.message);
 }
 
-// Referral routes
-try {
-  const referralRoutes = require("./routes/referrals");
-  app.use("/api/referrals", referralRoutes);
-  console.log("🔗 Referral routes registered at /api/referrals");
-} catch (error) {
-  console.error("❌ Failed to load Referral routes:", error.message);
-}
+
 
 // Detected Locations routes
 try {
@@ -221,14 +214,7 @@ try {
   console.error("❌ Failed to load Detected Locations routes:", error.message);
 }
 
-// Register coupon management routes
-try {
-  const couponRoutes = require("./routes/coupons");
-  app.use("/api/coupons", couponRoutes);
-  console.log("🔗 Coupon routes registered at /api/coupons");
-} catch (error) {
-  console.error("❌ Failed to load coupon routes:", error.message);
-}
+
 
 // Google Sheets integration removed
 
