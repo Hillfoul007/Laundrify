@@ -564,14 +564,8 @@ router.post("/", async (req, res) => {
       console.log("💾 Saving booking address to addresses table...");
 
       if (sanitizedAddress && sanitizedAddress.length > 10 && customer._id) {
-        // Check if this address already exists for the user
-        const existingAddress = await Address.findOne({
-          user_id: customer._id,
-          full_address: sanitizedAddress,
-          status: "active",
-        });
-
-        if (!existingAddress) {
+        // Always save booking addresses to maintain user's address history
+        // Users may want multiple similar addresses (home, office, relatives, etc.)
           // Parse address components from addressObject or sanitizedAddress
           let addressData = {
             user_id: customer._id,
@@ -618,12 +612,7 @@ router.post("/", async (req, res) => {
             "✅ Booking address saved to addresses table:",
             savedAddress._id,
           );
-        } else {
-          console.log(
-            "ℹ️ Address already exists in addresses table:",
-            existingAddress._id,
-          );
-        }
+
       } else {
         console.log(
           "⚠️ Skipping address save - insufficient data or invalid customer",
