@@ -394,16 +394,31 @@ const LaundryIndex = () => {
           // Set coordinates immediately for a quick response
           setCurrentLocation(`${latitude.toFixed(2)}, ${longitude.toFixed(2)}`);
 
+          // Prepare location data for saving
+          let locationData = {
+            latitude,
+            longitude,
+            fullAddress: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+            detectionMethod: 'gps' as const,
+          };
+
           // Try to get readable address with multiple fallbacks
           try {
-            const displayLocation = await getReverseGeocodedLocation(
-              latitude,
-              longitude,
-            );
+            const addressResult = await getDetailedLocationInfo(latitude, longitude);
 
-            if (displayLocation && displayLocation.trim()) {
-              setCurrentLocation(displayLocation);
-              console.log("✅ Final location set:", displayLocation);
+            if (addressResult) {
+              // Update location data with detailed info
+              locationData = {
+                ...locationData,
+                fullAddress: addressResult.fullAddress,
+                city: addressResult.city,
+                state: addressResult.state,
+                country: addressResult.country,
+                pincode: addressResult.pincode,
+              };
+
+              setCurrentLocation(addressResult.displayLocation);
+              console.log("✅ Final location set:", addressResult.displayLocation);
             } else {
               console.log("🔍 Using coordinate fallback");
               setCurrentLocation(
@@ -415,6 +430,29 @@ const LaundryIndex = () => {
             setCurrentLocation(
               `${latitude.toFixed(2)}, ${longitude.toFixed(2)}`,
             );
+          }
+
+          // Save location for anonymous users (if not logged in)
+          if (!currentUser) {
+            try {
+              await locationTracker.saveAnonymousLocation(locationData);
+              // Also store for later use when user logs in
+              locationTracker.storeLocationForLater(locationData);
+            } catch (error) {
+              console.error("Failed to save anonymous location:", error);
+            }
+          } else {
+            // If user is already logged in, save as logged-in user location
+            try {
+              await locationTracker.saveLoggedInUserLocation({
+                ...locationData,
+                userId: currentUser._id || currentUser.id,
+                phone: currentUser.phone,
+                name: currentUser.name || currentUser.full_name || 'Unknown',
+              });
+            } catch (error) {
+              console.error("Failed to save logged-in user location:", error);
+            }
           }
         } catch (error) {
           console.error("Location processing error:", error);
