@@ -235,4 +235,46 @@ router.post("/logged-user", async (req, res) => {
   }
 });
 
+// Get logged-in user locations (admin/testing)
+router.get("/logged-users", async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 50;
+    const skip = (page - 1) * limit;
+
+    const filter = {};
+    if (req.query.phone) {
+      filter.phone = new RegExp(req.query.phone, "i");
+    }
+    if (req.query.city) {
+      filter.city = new RegExp(req.query.city, "i");
+    }
+
+    const locations = await LoggedInUser.find(filter)
+      .sort({ login_timestamp: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    const total = await LoggedInUser.countDocuments(filter);
+
+    res.json({
+      success: true,
+      data: locations,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching logged-in user locations:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch logged-in user locations",
+    });
+  }
+});
+
 module.exports = router;
