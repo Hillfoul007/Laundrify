@@ -685,6 +685,15 @@ Confirm this booking?`;
 
           console.log("✅ Checkout initiated successfully");
 
+          // Mark user as having made an order (no longer first-time)
+          const sessionManager = SessionManager.getInstance();
+          const session = sessionManager.ensureValidSession();
+          const userId = session.userId || "guest";
+          if (userId !== "guest") {
+            localStorage.setItem(`has_ordered_${userId}`, "true");
+            console.log(`✅ Marked user ${userId} as having order history`);
+          }
+
           // Track coupon usage for general coupons
           if (appliedCoupon) {
             const sessionManager = SessionManager.getInstance();
