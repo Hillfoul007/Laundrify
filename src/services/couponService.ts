@@ -3,7 +3,11 @@ interface CouponData {
   discount: number;
   maxDiscount: number;
   description: string;
-  isFirstOrderOnly: boolean;
+  type: string;
+  isFirstOrder?: boolean;
+  isOneTimeUse?: boolean;
+  excludeFirstOrder?: boolean;
+  minimumAmount?: number;
   isActive: boolean;
 }
 
@@ -17,6 +21,7 @@ interface CouponUsage {
 
 export class CouponService {
   private static instance: CouponService;
+  private pendingValidations = new Map<string, Promise<{ valid: boolean; coupon?: CouponData; error?: string }>>();
 
   public static getInstance(): CouponService {
     if (!CouponService.instance) {
@@ -32,32 +37,24 @@ export class CouponService {
         code: "FIRST30",
         discount: 30,
         maxDiscount: 200,
-<<<<<<< HEAD
-        description: "30% off for first order only (up to ₹200)",
-        isFirstOrderOnly: true,
-=======
         description: "30% off on first order only - one-time use (up to ₹200)",
         type: "first_order",
         isFirstOrder: true,
         isOneTimeUse: true,
->>>>>>> 8516ae5575f6cd5c2f5c7fe778eafc9e2d408c20
         isActive: true,
       },
       {
         code: "NEW10",
         discount: 10,
-<<<<<<< HEAD
         maxDiscount: 200,
         description: "10% off on all orders (up to ₹200)",
-        isFirstOrderOnly: false,
-=======
-        description: "10% off on all orders",
         type: "general",
         isActive: true,
       },
       {
         code: "FIRST10",
         discount: 10,
+        maxDiscount: 200,
         description: "10% off on first order only - one-time use",
         type: "first_order",
         isFirstOrder: true,
@@ -67,9 +64,9 @@ export class CouponService {
       {
         code: "SAVE20",
         discount: 20,
+        maxDiscount: 200,
         description: "20% off",
         type: "general",
->>>>>>> 8516ae5575f6cd5c2f5c7fe778eafc9e2d408c20
         isActive: true,
       },
     ];
@@ -96,13 +93,9 @@ export class CouponService {
     return existingBookings.length === 0 && !hasUsedFirstOrderCoupon;
   }
 
-<<<<<<< HEAD
-  // Check if user has already used a specific coupon
-=======
   /**
    * Check if user has already used a specific coupon (with multiple safeguards)
    */
->>>>>>> 8516ae5575f6cd5c2f5c7fe778eafc9e2d408c20
   hasCouponBeenUsed(couponCode: string, userId: string): boolean {
     if (!userId) return false;
 
@@ -162,7 +155,7 @@ export class CouponService {
     const isFirstTime = this.isFirstTimeUser(userId);
 
     // Check first order restrictions
-    if (coupon.isFirstOrderOnly && !isFirstTime) {
+    if (coupon.isFirstOrder && !isFirstTime) {
       return { valid: false, error: "This coupon is valid for first orders only" };
     }
 
@@ -204,9 +197,6 @@ export class CouponService {
     existingUsages.push(usage);
     localStorage.setItem(`used_coupons_${userId}`, JSON.stringify(existingUsages));
 
-<<<<<<< HEAD
-    console.log(`✅ Marked coupon ${couponCode} as used locally for user ${userId}`);
-=======
     // Mark user as having made an order (no longer first-time)
     localStorage.setItem(`has_ordered_${userId}`, "true");
 
@@ -214,9 +204,25 @@ export class CouponService {
   }
 
   /**
+   * Check API health
+   */
+  private async checkApiHealth(): Promise<boolean> {
+    try {
+      const response = await fetch('/api/coupons/health', {
+        method: 'GET',
+        signal: AbortSignal.timeout(5000), // 5 second timeout
+      });
+      return response.ok;
+    } catch (error) {
+      console.log('🏥 Coupon API health check failed:', error);
+      return false;
+    }
+  }
+
+  /**
    * Validate a coupon for a specific user using backend API
    */
-  async validateCoupon(
+  async validateCouponAsync(
     couponCode: string,
     userId: string,
     orderAmount: number = 0
@@ -257,7 +263,7 @@ export class CouponService {
     const isApiHealthy = await this.checkApiHealth();
     if (!isApiHealthy) {
       console.log('🏥 Coupon API unhealthy, using local validation');
-      return this.validateCouponLocal(couponCode, userId, orderAmount);
+      return this.validateCoupon(couponCode, userId, orderAmount);
     }
 
     try {
@@ -281,56 +287,12 @@ export class CouponService {
 
       clearTimeout(timeoutId);
 
-      // Handle response based on content type
-      let result;
-      let errorText = '';
-
       if (!response.ok) {
-        // Handle different types of server errors
-        if (response.status === 500) {
-          console.error('❌ Coupon validation failed: Server error (500). Using local validation fallback.');
-          return this.validateCouponLocal(couponCode, userId, orderAmount);
-        }
-
-        if (response.status === 404) {
-          console.warn('⚠️ Coupon API endpoint not found (404). Using local validation fallback.');
-          return this.validateCouponLocal(couponCode, userId, orderAmount);
-        }
-
-        if (response.status === 502 || response.status === 503 || response.status === 504) {
-          console.warn('⚠️ Coupon service temporarily unavailable. Using local validation fallback.');
-          return this.validateCouponLocal(couponCode, userId, orderAmount);
-        }
-
-        // Try to parse error response for other status codes
-        try {
-          const contentType = response.headers.get('content-type');
-          if (contentType && contentType.includes('application/json')) {
-            result = await response.json();
-            errorText = result.message || result.error || `HTTP ${response.status}`;
-          } else {
-            errorText = await response.text();
-            // Limit error text length to avoid showing HTML pages
-            if (errorText.length > 200) {
-              errorText = `HTTP ${response.status}: ${response.statusText}`;
-            }
-          }
-        } catch (parseError) {
-          errorText = `HTTP ${response.status}: ${response.statusText}`;
-        }
-
-        console.error('❌ Coupon validation failed:', response.status, errorText);
-        return { valid: false, error: errorText || 'Coupon validation failed' };
+        console.error('❌ Coupon validation failed:', response.status, response.statusText);
+        return this.validateCoupon(couponCode, userId, orderAmount);
       }
 
-      // Response is ok, parse as JSON
-      try {
-        result = await response.json();
-      } catch (parseError) {
-        console.error('❌ Failed to parse success response as JSON:', parseError);
-        return { valid: false, error: 'Failed to parse server response' };
-      }
-
+      const result = await response.json();
       return {
         valid: result.success,
         coupon: result.coupon,
@@ -338,126 +300,9 @@ export class CouponService {
       };
     } catch (error) {
       console.error('❌ Error validating coupon:', error);
-
-      // Handle specific error types
-      if (error.name === 'AbortError') {
-        console.warn('⏰ Coupon validation request timed out, using local validation');
-      } else if (error.message?.includes('body stream already read')) {
-        console.warn('⚠️ Body stream already read error, using local validation');
-      }
-
       // Fallback to local validation if backend is unavailable
-      return this.validateCouponLocal(couponCode, userId, orderAmount);
+      return this.validateCoupon(couponCode, userId, orderAmount);
     }
-  }
-
-  /**
-   * Local fallback validation method
-   */
-  private validateCouponLocal(
-    couponCode: string,
-    userId: string,
-    orderAmount: number = 0
-  ): { valid: boolean; coupon?: CouponData; error?: string } {
-    const coupons = this.getAllCoupons();
-    const coupon = coupons.find(c => c.code.toLowerCase() === couponCode.toLowerCase());
-
-    if (!coupon) {
-      return { valid: false, error: `Invalid coupon code: ${couponCode}` };
-    }
-
-    if (!coupon.isActive) {
-      return { valid: false, error: "This coupon is no longer active" };
-    }
-
-    const isFirstTime = this.isFirstTimeUser(userId);
-    const hasBeenUsed = this.hasCouponBeenUsed(coupon.code, userId);
-
-    // Check if it's a one-time use coupon and has been used
-    if (coupon.isOneTimeUse && hasBeenUsed) {
-      return { valid: false, error: "This coupon has already been used" };
-    }
-
-    // Check first order restrictions (more strict)
-    if (coupon.isFirstOrder && !isFirstTime) {
-      return { valid: false, error: "This coupon is valid for first orders only" };
-    }
-
-    // Additional check for specific first-time coupons with more explicit messages
-    if ((coupon.code === "FIRST30" || coupon.code === "FIRST10") && !isFirstTime) {
-      return {
-        valid: false,
-        error: `${coupon.code} is a first-order only coupon and can only be used once on your very first order`
-      };
-    }
-
-    // Check exclude first order restrictions
-    if (coupon.excludeFirstOrder && isFirstTime) {
-      return { valid: false, error: "This coupon is not valid for first orders" };
-    }
-
-    // Check minimum amount if specified
-    if (coupon.minimumAmount && orderAmount < coupon.minimumAmount) {
-      return {
-        valid: false,
-        error: `Minimum order amount of ₹${coupon.minimumAmount} required`
-      };
-    }
-
-    return { valid: true, coupon };
-  }
-
-  /**
-   * Calculate discount amount for a coupon
-   */
-  calculateDiscount(coupon: CouponData, orderAmount: number): number {
-    if (!coupon || orderAmount <= 0) return 0;
-    
-    const discountAmount = Math.round(orderAmount * (coupon.discount / 100));
-    
-    if (coupon.maxDiscount) {
-      return Math.min(discountAmount, coupon.maxDiscount);
-    }
-    
-    return discountAmount;
-  }
-
-  /**
-   * Get available coupons for a specific user (async version)
-   */
-  async getAvailableCouponsForUser(userId: string, orderAmount: number = 0): Promise<CouponData[]> {
-    if (!userId) return [];
-
-    const allCoupons = this.getAllCoupons();
-    const availableCoupons: CouponData[] = [];
-
-    for (const coupon of allCoupons) {
-      const validation = await this.validateCoupon(coupon.code, userId, orderAmount);
-      if (validation.valid) {
-        availableCoupons.push(coupon);
-      }
-    }
-
-    return availableCoupons;
-  }
-
-  /**
-   * Get available coupons for a specific user (sync version using local validation only)
-   */
-  getAvailableCouponsForUserLocal(userId: string, orderAmount: number = 0): CouponData[] {
-    if (!userId) return [];
-
-    const allCoupons = this.getAllCoupons();
-    const availableCoupons: CouponData[] = [];
-
-    for (const coupon of allCoupons) {
-      const validation = this.validateCouponLocal(coupon.code, userId, orderAmount);
-      if (validation.valid) {
-        availableCoupons.push(coupon);
-      }
-    }
-
-    return availableCoupons;
   }
 
   /**
@@ -479,6 +324,5 @@ export class CouponService {
     
     localStorage.removeItem(`used_coupons_${userId}`);
     console.log(`🧹 Cleared coupon usage data for user ${userId}`);
->>>>>>> 8516ae5575f6cd5c2f5c7fe778eafc9e2d408c20
   }
 }
