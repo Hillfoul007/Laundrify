@@ -276,6 +276,14 @@ export class AddressService {
               success: true,
               data: transformedAddresses,
             };
+          } else {
+            // Handle specific HTTP errors
+            if (response.status === 404) {
+              console.warn("⚠️ Address API endpoint not found (404). Backend may not have address routes deployed.");
+              console.warn("🔧 Using localStorage fallback for addresses");
+            } else {
+              console.warn(`⚠️ Backend returned ${response.status}: ${response.statusText}`);
+            }
           }
         } catch (error) {
           console.warn("⚠️ Backend fetch failed, using localStorage:", {
@@ -337,13 +345,16 @@ export class AddressService {
       };
 
       // Try to save to backend first
-      if (this.apiBaseUrl) {
+      if (this.apiBaseUrl && this.apiBaseUrl !== "") {
+        console.log("🔄 Attempting to save address to backend:", this.apiBaseUrl);
         try {
           const url = addressData.id
             ? `${this.apiBaseUrl}/addresses/${addressData.id}`
             : `${this.apiBaseUrl}/addresses`;
 
           const method = addressData.id ? "PUT" : "POST";
+
+          console.log(`🎯 Making ${method} request to:`, url);
 
           const response = await fetch(url, {
             method,
@@ -356,32 +367,40 @@ export class AddressService {
 
           if (response.ok) {
             const result = await response.json();
-            console.log("✅ Address saved to backend:", result);
+            console.log("✅ Address saved to backend successfully:", result);
 
             // Also save to localStorage as backup
             this.saveAddressToLocalStorage(addressData, userId);
 
             return {
               success: true,
-              message: "Address saved successfully",
-              data: result.data,
+              message: "Address saved to database successfully",
+              data: result.data || addressData,
             };
           } else {
-            const errorText = await response.text();
-            console.error("Backend save failed:", errorText);
+            if (response.status === 404) {
+              console.warn("⚠️ Address API endpoint not found (404) for save operation");
+              console.warn("🔧 Backend may not have address routes deployed - using localStorage");
+            } else {
+              const errorText = await response.text();
+              console.error(`❌ Backend save failed (${response.status}):`, errorText);
+            }
             // Still try to save locally
           }
         } catch (error) {
-          console.error("Backend save error:", error);
+          console.error("❌ Backend save error:", error);
           // Continue to localStorage save
         }
+      } else {
+        console.warn("⚠️ No backend API URL configured, saving to localStorage only");
       }
 
       // Fallback to localStorage
+      console.log("💾 Saving address to localStorage as fallback");
       const result = this.saveAddressToLocalStorage(addressData, userId);
       return {
         ...result,
-        message: "Address saved locally (will sync when online)",
+        message: "Address saved locally (database unavailable)",
       };
     } catch (error) {
       console.error("Failed to save address:", error);

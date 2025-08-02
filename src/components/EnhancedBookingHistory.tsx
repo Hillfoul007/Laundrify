@@ -905,6 +905,17 @@ const EnhancedBookingHistory: React.FC<EnhancedBookingHistoryProps> =
                                 quantity = 1;
                               }
 
+                              // Extract quantity from service name if it contains "x<number>" pattern
+                              const quantityMatch = serviceName.match(/x(\d+)$/i);
+                              if (quantityMatch) {
+                                const extractedQuantity = parseInt(quantityMatch[1]);
+                                if (extractedQuantity > 0) {
+                                  quantity = extractedQuantity;
+                                  // Remove the quantity part from the service name for display
+                                  serviceName = serviceName.replace(/\s*x\d+$/i, '').trim();
+                                }
+                              }
+
                               // Get pricing from static service data instead of database
                               const serviceInfo =
                                 getServicePriceWithFallback(serviceName);

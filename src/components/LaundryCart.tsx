@@ -196,7 +196,7 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
               setSpecialInstructions(state.specialInstructions);
             if (state.appliedCoupon) setAppliedCoupon(state.appliedCoupon);
 
-            console.log("�� Restored checkout form state after login");
+            console.log("���� Restored checkout form state after login");
           }
           localStorage.removeItem("checkout_form_state");
         } catch (error) {
@@ -367,7 +367,7 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
       const session = sessionManager.ensureValidSession();
       const userId = session.userId || "guest";
 
-      const validation = couponService.validateCoupon(couponCode, userId, getSubtotal());
+      const validation = await couponService.validateCoupon(couponCode, userId, getSubtotal());
 
       if (validation.valid && validation.coupon) {
         const coupon = validation.coupon;
@@ -685,6 +685,15 @@ Confirm this booking?`;
 
           console.log("✅ Checkout initiated successfully");
 
+          // Mark user as having made an order (no longer first-time)
+          const sessionManager = SessionManager.getInstance();
+          const session = sessionManager.ensureValidSession();
+          const userId = session.userId || "guest";
+          if (userId !== "guest") {
+            localStorage.setItem(`has_ordered_${userId}`, "true");
+            console.log(`✅ Marked user ${userId} as having order history`);
+          }
+
           // Track coupon usage for general coupons
           if (appliedCoupon) {
             const sessionManager = SessionManager.getInstance();
@@ -842,11 +851,31 @@ Confirm this booking?`;
         localStorage.getItem(savedAddressesKey) || "[]",
       );
 
-      // Check if this address already exists
-      const addressExists = existingAddresses.some(
-        (addr: any) => addr.fullAddress === orderAddress.fullAddress,
-      );
+      // Function to normalize address for comparison (removes minor variations)
+      const normalizeAddress = (address: string) => {
+        return address
+          .toLowerCase()
+          .replace(/\s+/g, ' ') // Multiple spaces to single space
+          .replace(/,\s*,/g, ',') // Remove empty comma sections
+          .replace(/[.,\s]+$/, '') // Remove trailing punctuation and spaces
+          .replace(/^[.,\s]+/, '') // Remove leading punctuation and spaces
+          .trim();
+      };
 
+      // Check if this address already exists (smart comparison including type)
+      const normalizedNewAddress = normalizeAddress(orderAddress.fullAddress);
+      const newAddressType = orderAddress.type || "other";
+
+      const addressExists = existingAddresses.some((addr: any) => {
+        if (!addr.fullAddress) return false;
+        const normalizedExisting = normalizeAddress(addr.fullAddress);
+        const existingType = addr.type || "other";
+
+        // Same address AND same type = duplicate
+        return normalizedExisting === normalizedNewAddress && existingType === newAddressType;
+      });
+
+      // Only save if it's a genuinely different address
       if (!addressExists && orderAddress.fullAddress) {
         const newAddress = {
           ...orderAddress,

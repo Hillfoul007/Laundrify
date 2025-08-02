@@ -259,7 +259,7 @@ const ZomatoAddressSelector: React.FC<ZomatoAddressSelectorProps> = ({
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-40">
+                          <DropdownMenuContent align="end" className="w-40 z-[70]">
                             <DropdownMenuItem
                               onClick={(e) => {
                                 e.stopPropagation();

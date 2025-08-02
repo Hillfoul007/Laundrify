@@ -177,7 +177,7 @@ router.post("/", async (req, res) => {
 
     console.log("🔍 VALIDATION STEP 4: Checking final_amount...");
     console.log("💰 Final amount received:", final_amount);
-    console.log("📊 Final amount type:", typeof final_amount);
+    console.log("�� Final amount type:", typeof final_amount);
     console.log("📊 Final amount === undefined:", final_amount === undefined);
     console.log("📊 Final amount === null:", final_amount === null);
     console.log("📊 Final amount isNaN:", isNaN(final_amount));
@@ -564,14 +564,37 @@ router.post("/", async (req, res) => {
       console.log("💾 Saving booking address to addresses table...");
 
       if (sanitizedAddress && sanitizedAddress.length > 10 && customer._id) {
-        // Check if this address already exists for the user
-        const existingAddress = await Address.findOne({
+        // Function to normalize address for comparison
+        const normalizeAddress = (address) => {
+          return address
+            .toLowerCase()
+            .replace(/\s+/g, ' ') // Multiple spaces to single space
+            .replace(/,\s*,/g, ',') // Remove empty comma sections
+            .replace(/[.,\s]+$/, '') // Remove trailing punctuation and spaces
+            .replace(/^[.,\s]+/, '') // Remove leading punctuation and spaces
+            .trim();
+        };
+
+        // Check if this exact address already exists for the user
+        const normalizedNewAddress = normalizeAddress(sanitizedAddress);
+        const userAddresses = await Address.find({
           user_id: customer._id,
-          full_address: sanitizedAddress,
           status: "active",
         });
 
-        if (!existingAddress) {
+        // Determine address type from the booking data
+        const newAddressType = (addressObject && addressObject.type) || "other";
+
+        const addressExists = userAddresses.some(addr => {
+          const normalizedExisting = normalizeAddress(addr.full_address);
+          const existingType = addr.address_type || "other";
+
+          // Same address AND same type = duplicate
+          return normalizedExisting === normalizedNewAddress && existingType === newAddressType;
+        });
+
+        // Only save if it's a genuinely different address
+        if (!addressExists) {
           // Parse address components from addressObject or sanitizedAddress
           let addressData = {
             user_id: customer._id,
@@ -583,7 +606,7 @@ router.post("/", async (req, res) => {
             pincode: "",
             landmark: "",
             coordinates: coordinates || {},
-            address_type: "other",
+            address_type: newAddressType,
             is_default: false,
             status: "active",
           };
@@ -620,10 +643,11 @@ router.post("/", async (req, res) => {
           );
         } else {
           console.log(
-            "ℹ️ Address already exists in addresses table:",
-            existingAddress._id,
+            "ℹ️ Address already exists (normalized), skipping save:",
+            normalizedNewAddress.substring(0, 50) + "...",
           );
         }
+
       } else {
         console.log(
           "⚠️ Skipping address save - insufficient data or invalid customer",
@@ -1210,7 +1234,7 @@ router.put("/:bookingId/cancel", async (req, res) => {
     const { bookingId } = req.params;
     let userId = req.headers["user-id"] || req.body.user_id;
 
-    console.log("🚫 Booking cancellation request:", { bookingId, userId });
+    console.log("��� Booking cancellation request:", { bookingId, userId });
 
     // Get booking details first
     const booking = await Booking.findById(bookingId);

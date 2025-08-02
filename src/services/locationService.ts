@@ -2,6 +2,8 @@
 // This is a stub implementation for demo purposes
 
 import { apiClient } from "@/lib/api";
+import { MAPS_PERFORMANCE_CONFIG, isFeatureEnabled, getCacheDuration, getMinRequestInterval } from "../config/mapsConfig";
+import { performanceMonitor, trackPerformance } from "../utils/mapsPerformanceMonitor";
 
 export interface Coordinates {
   lat: number;
@@ -37,6 +39,14 @@ export interface GeocodeResult {
 class LocationService {
   private readonly GOOGLE_MAPS_API_KEY = import.meta.env
     .VITE_GOOGLE_MAPS_API_KEY;
+
+  // Simple cache to avoid duplicate API calls
+  private geocodeCache = new Map<string, any>();
+  private readonly CACHE_DURATION = getCacheDuration('geocoding');
+
+  // Request throttling
+  private lastRequestTime = 0;
+  private readonly MIN_REQUEST_INTERVAL = getMinRequestInterval('geocoding');
 
   /**
    * Get user's current position using browser geolocation with enhanced accuracy
@@ -107,34 +117,69 @@ class LocationService {
    * Reverse geocode coordinates to human-readable address with maximum detail including area/village
    */
   async reverseGeocode(coordinates: Coordinates): Promise<string> {
+    const startTime = Date.now();
     console.log("🔍 Starting enhanced reverse geocoding for:", coordinates);
+    console.log("🔧 Current geocoding config:", {
+      useSimplified: MAPS_PERFORMANCE_CONFIG.USE_SIMPLIFIED_GEOCODING,
+      hasApiKey: !!this.GOOGLE_MAPS_API_KEY,
+      reverseGeocodingEnabled: isFeatureEnabled('REVERSE_GEOCODING')
+    });
+
+    // Use simplified geocoding if enabled for better performance
+    // BUT skip simplified in production to prevent fallback city issues
+    if (MAPS_PERFORMANCE_CONFIG.USE_SIMPLIFIED_GEOCODING && !MAPS_PERFORMANCE_CONFIG.DISABLE_COORDINATE_FALLBACK) {
+      console.log("🔄 Using simplified geocoding (development mode)");
+      return this.simplifiedReverseGeocode(coordinates);
+    }
+
+    console.log("🔍 Using full geocoding (production mode or fallback disabled)");
 
     // Method 1: Google Maps API with multiple result types for maximum detail
-    if (this.GOOGLE_MAPS_API_KEY) {
+    if (this.GOOGLE_MAPS_API_KEY && isFeatureEnabled('REVERSE_GEOCODING')) {
       try {
         // Make multiple requests prioritizing street-level detail
+        // Optimized: Use only ONE comprehensive request instead of 5 separate requests
         const requests = [
-          // Ultra-high detail request for street addresses
-          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coordinates.lat},${coordinates.lng}&result_type=street_address&language=en&region=IN&key=${this.GOOGLE_MAPS_API_KEY}`,
-          // Building/premise detail request
-          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coordinates.lat},${coordinates.lng}&result_type=premise|subpremise|establishment&language=en&region=IN&key=${this.GOOGLE_MAPS_API_KEY}`,
-          // Street-level detail request
-          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coordinates.lat},${coordinates.lng}&result_type=route|intersection&language=en&region=IN&key=${this.GOOGLE_MAPS_API_KEY}`,
-          // Neighborhood detail request
-          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coordinates.lat},${coordinates.lng}&result_type=neighborhood|sublocality_level_1|sublocality_level_2&language=en&region=IN&key=${this.GOOGLE_MAPS_API_KEY}`,
-          // Comprehensive fallback request
+          // Single comprehensive request with all result types
           `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coordinates.lat},${coordinates.lng}&language=en&region=IN&key=${this.GOOGLE_MAPS_API_KEY}`,
         ];
 
         for (const requestUrl of requests) {
           try {
+            // Check cache first
+            const cacheKey = requestUrl;
+            const cached = this.geocodeCache.get(cacheKey);
+            if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
+              console.log('🚀 Using cached Google Maps result');
+              const prioritizedResult = this.selectBestGoogleMapsResult(cached.data.results);
+              if (prioritizedResult) {
+                return this.formatEnhancedIndianAddress(
+                  prioritizedResult.address_components,
+                  prioritizedResult.formatted_address,
+                  "google_maps",
+                );
+              }
+            }
+
+            // Request throttling
+            const now = Date.now();
+            if (now - this.lastRequestTime < this.MIN_REQUEST_INTERVAL) {
+              await new Promise(resolve => setTimeout(resolve, this.MIN_REQUEST_INTERVAL - (now - this.lastRequestTime)));
+            }
+            this.lastRequestTime = Date.now();
+
+            // Add timeout to prevent hanging requests that cause fallback
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+
             const response = await fetch(requestUrl, {
-              headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-              },
+              method: 'GET',
+              // Don't set content-type header for Google Maps API to avoid CORS issues
               mode: "cors",
+              signal: controller.signal
             });
+
+            clearTimeout(timeoutId);
 
             if (!response.ok) {
               console.warn(
@@ -144,6 +189,12 @@ class LocationService {
             }
 
             const data = await response.json();
+
+            // Cache the result
+            this.geocodeCache.set(cacheKey, {
+              data,
+              timestamp: Date.now()
+            });
 
             if (data.status === "OK" && data.results.length > 0) {
               // Enhanced prioritization for street-level details
@@ -164,11 +215,7 @@ class LocationService {
               );
 
               // Use the most detailed result available
-              const prioritizedResult =
-                streetAddressResult ||
-                premiseResult ||
-                routeResult ||
-                data.results[0];
+              const prioritizedResult = this.selectBestGoogleMapsResult(data.results);
 
               console.log(
                 "✅ Google Maps street-level result:",
@@ -271,7 +318,218 @@ class LocationService {
 
     // Method 4: Fallback with coordinate-based address
     const formattedCoords = await this.formatCoordinatesAsAddress(coordinates);
+
+    // Track performance
+    performanceMonitor.trackAPICall('reverseGeocode', startTime, true);
+
     return formattedCoords;
+  }
+
+  /**
+   * Simplified reverse geocoding that uses fewer API calls and focuses on basic location info
+   * Enhanced to prevent incorrect fallback to city names
+   */
+  private async simplifiedReverseGeocode(coordinates: Coordinates): Promise<string> {
+    console.log("🚀 Using simplified reverse geocoding for better performance");
+    console.log("📍 Coordinates to geocode:", coordinates);
+
+    // Check cache first
+    const cacheKey = `simplified_${coordinates.lat}_${coordinates.lng}`;
+    const cached = this.geocodeCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
+      console.log('🚀 Using cached simplified result:', cached.data);
+      return cached.data;
+    }
+
+    // Try Google Maps API with single request first
+    if (this.GOOGLE_MAPS_API_KEY) {
+      try {
+        // Request throttling
+        const now = Date.now();
+        if (now - this.lastRequestTime < this.MIN_REQUEST_INTERVAL) {
+          await new Promise(resolve => setTimeout(resolve, this.MIN_REQUEST_INTERVAL - (now - this.lastRequestTime)));
+        }
+        this.lastRequestTime = Date.now();
+
+        console.log("🔍 Making Google Maps geocoding request...");
+
+        // Add timeout to prevent hanging requests
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 6000); // 6 second timeout
+
+        const response = await fetch(
+          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coordinates.lat},${coordinates.lng}&language=en&region=IN&key=${this.GOOGLE_MAPS_API_KEY}`,
+          {
+            method: 'GET',
+            mode: 'cors',
+            signal: controller.signal
+          }
+        );
+
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log("📍 Google Maps API response:", data);
+
+          if (data.status === "OK" && data.results.length > 0) {
+            const address = data.results[0].formatted_address;
+            console.log("✅ Google Maps geocoding successful:", address);
+
+            // Cache the result
+            this.geocodeCache.set(cacheKey, {
+              data: address,
+              timestamp: Date.now()
+            });
+
+            return address;
+          } else {
+            console.warn("⚠️ Google Maps API returned status:", data.status, "Error:", data.error_message);
+          }
+        } else {
+          console.warn("⚠️ Google Maps API HTTP error:", response.status, response.statusText);
+        }
+      } catch (error) {
+        console.error("❌ Google Maps geocoding request failed:", error);
+      }
+    } else {
+      console.warn("⚠️ No Google Maps API key available for geocoding");
+    }
+
+    // Try Nominatim as a more reliable fallback before using coordinate-based fallback
+    try {
+      console.log("🔄 Trying Nominatim as fallback...");
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${coordinates.lat}&lon=${coordinates.lng}&zoom=16&addressdetails=1&accept-language=en`,
+        {
+          headers: {
+            "User-Agent": "CleanCarePro-LocationService/1.0",
+            Accept: "application/json",
+          },
+          mode: "cors",
+        },
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("📍 Nominatim response:", data);
+
+        if (data && data.display_name) {
+          const address = data.display_name;
+          console.log("✅ Nominatim geocoding successful:", address);
+
+          // Cache the result
+          this.geocodeCache.set(cacheKey, {
+            data: address,
+            timestamp: Date.now()
+          });
+
+          return address;
+        }
+      } else {
+        console.warn("⚠️ Nominatim API HTTP error:", response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error("❌ Nominatim geocoding failed:", error);
+    }
+
+    // Final fallback - use coordinate-based location as last resort
+    // Check if coordinate fallback is disabled (to prevent production city switching issues)
+    if (MAPS_PERFORMANCE_CONFIG.DISABLE_COORDINATE_FALLBACK) {
+      console.warn("⚠️ All geocoding services failed, coordinate fallback disabled in production");
+      const genericResult = `Location ${coordinates.lat.toFixed(4)}, ${coordinates.lng.toFixed(4)}`;
+
+      // Cache the generic result
+      this.geocodeCache.set(cacheKey, {
+        data: genericResult,
+        timestamp: Date.now()
+      });
+
+      return genericResult;
+    }
+
+    console.warn("⚠️ All geocoding services failed, using coordinate-based fallback");
+    const fallbackResult = this.getFallbackLocationName(coordinates);
+
+    // Cache even the fallback to avoid repeated failures
+    this.geocodeCache.set(cacheKey, {
+      data: fallbackResult,
+      timestamp: Date.now()
+    });
+
+    return fallbackResult;
+  }
+
+  /**
+   * Get fallback location name based on coordinates (without API calls)
+   * Note: This method should only be used as a last resort to avoid incorrect location detection
+   */
+  private getFallbackLocationName(coordinates: Coordinates): string {
+    // Basic location detection based on coordinates for Indian locations
+    const { lat, lng } = coordinates;
+
+    console.log("⚠️ Using fallback location detection for coordinates:", { lat, lng });
+
+    // More precise coordinate ranges to avoid overlaps
+    // Gurgaon/Gurugram region (prioritize this since it's the service area)
+    if (lat >= 28.35 && lat <= 28.55 && lng >= 76.95 && lng <= 77.15) {
+      console.log("📍 Detected Gurugram region");
+      return "Gurugram, Haryana, India";
+    }
+
+    // Delhi NCR region (excluding Gurgaon)
+    if (lat >= 28.45 && lat <= 28.75 && lng >= 77.0 && lng <= 77.5) {
+      console.log("📍 Detected Delhi NCR region");
+      return "Delhi NCR, India";
+    }
+
+    // Mumbai region
+    if (lat >= 18.9 && lat <= 19.3 && lng >= 72.7 && lng <= 73.1) {
+      console.log("📍 Detected Mumbai region");
+      return "Mumbai, Maharashtra, India";
+    }
+
+    // Bangalore region
+    if (lat >= 12.8 && lat <= 13.1 && lng >= 77.4 && lng <= 77.8) {
+      console.log("📍 Detected Bangalore region");
+      return "Bangalore, Karnataka, India";
+    }
+
+    // Chennai region
+    if (lat >= 12.8 && lat <= 13.2 && lng >= 80.1 && lng <= 80.3) {
+      console.log("📍 Detected Chennai region");
+      return "Chennai, Tamil Nadu, India";
+    }
+
+    // Default fallback - return coordinates without presuming location
+    console.log("⚠️ No known region matched, using coordinate-based fallback");
+    return `Location near ${lat.toFixed(4)}, ${lng.toFixed(4)}, India`;
+  }
+
+  /**
+   * Select the best result from Google Maps geocoding results
+   */
+  private selectBestGoogleMapsResult(results: any[]): any {
+    if (!results || results.length === 0) return null;
+
+    // Prioritize by result type quality
+    const streetAddressResult = results.find((result) =>
+      result.types.includes("street_address"),
+    );
+
+    const premiseResult = results.find(
+      (result) =>
+        result.types.includes("premise") ||
+        result.types.includes("subpremise"),
+    );
+
+    const routeResult = results.find(
+      (result) =>
+        result.types.includes("route") ||
+        result.types.includes("intersection"),
+    );
+
+    return streetAddressResult || premiseResult || routeResult || results[0];
   }
 
   /**

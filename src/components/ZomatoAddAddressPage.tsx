@@ -208,7 +208,15 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
         streetViewControl: false,
         fullscreenControl: false,
         gestureHandling: "cooperative", // Better mobile performance
-        styles: [
+      };
+
+      // Only add Map ID if it's configured
+      if (mapId && mapId.trim() !== "") {
+        mapConfig.mapId = mapId;
+        console.log("🗺️ Using Map ID for Advanced Markers (styles controlled via cloud console):", mapId);
+      } else {
+        // Only add custom styles if no mapId is present
+        mapConfig.styles = [
           {
             featureType: "poi",
             elementType: "labels",
@@ -219,15 +227,8 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
             elementType: "labels",
             stylers: [{ visibility: "off" }], // Hide transit labels for cleaner view
           },
-        ],
-      };
-
-      // Only add Map ID if it's configured
-      if (mapId && mapId.trim() !== "") {
-        mapConfig.mapId = mapId;
-        console.log("🗺️ Using Map ID for Advanced Markers:", mapId);
-      } else {
-        console.log("🗺️ No Map ID configured, using regular markers");
+        ];
+        console.log("🗺️ No Map ID configured, using custom styles and regular markers");
       }
 
       const map = new google.maps.Map(mapRef.current!, mapConfig);
@@ -257,7 +258,8 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
       if (
         mapId &&
         mapId.trim() !== "" &&
-        google.maps.marker?.AdvancedMarkerElement
+        google.maps.marker?.AdvancedMarkerElement &&
+        typeof google.maps.marker.AdvancedMarkerElement === 'function'
       ) {
         try {
           const markerContent = document.createElement("div");
@@ -386,7 +388,7 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
 
       // Remove existing marker (works for both AdvancedMarkerElement and legacy Marker)
       if (marker) {
-        if (marker instanceof google.maps.marker.AdvancedMarkerElement) {
+        if (google.maps.marker?.AdvancedMarkerElement && marker instanceof google.maps.marker.AdvancedMarkerElement) {
           marker.map = null;
         } else if (marker instanceof google.maps.Marker) {
           marker.setMap(null);
@@ -401,7 +403,8 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
       if (
         mapId &&
         mapId.trim() !== "" &&
-        google.maps.marker?.AdvancedMarkerElement
+        google.maps.marker?.AdvancedMarkerElement &&
+        typeof google.maps.marker.AdvancedMarkerElement === 'function'
       ) {
         try {
           const markerContent = document.createElement("div");
@@ -454,11 +457,11 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
             anchor: new google.maps.Point(16, 32),
           },
         });
-        console.log("��� Created regular Marker at:", coordinates);
+        console.log("���� Created regular Marker at:", coordinates);
       }
 
       // Add event listeners that work with both marker types
-      if (newMarker instanceof google.maps.marker.AdvancedMarkerElement) {
+      if (google.maps.marker?.AdvancedMarkerElement && newMarker instanceof google.maps.marker.AdvancedMarkerElement) {
         // For AdvancedMarkerElement
         newMarker.addListener("dragstart", () => {
           // Visual feedback for advanced marker
@@ -611,47 +614,38 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
 
       console.log(`🎯 Final location accuracy: ${coordinates.accuracy}m`);
 
-      // Get detailed address with multiple geocoding sources
-      const address = await locationService.reverseGeocode(coordinates);
-      console.log("🏠 Geocoded address:", address);
-
-      // Get additional detailed components for better auto-fill
+      // FIXED: Prevent race conditions by using only ONE geocoding call
+      console.log("🔍 Getting detailed address components (single call to prevent race conditions)...");
       const detailedComponents =
         await locationService.getDetailedAddressComponents(coordinates);
 
-      // Try to enhance with street-level details if not found initially
-      let enhancedAddress = address;
+      let address: string;
       let finalComponents = detailedComponents;
 
-      if (!hasStreetLevelDetails(address, detailedComponents)) {
-        console.log(
-          "🔍 Initial address lacks street details, trying enhanced detection...",
-        );
-        try {
-          const streetDetails = await getStreetLevelDetails(coordinates);
-          if (streetDetails) {
-            enhancedAddress = streetDetails.address;
-            finalComponents = streetDetails.components;
-            console.log(
-              "✅ Enhanced street-level details found:",
-              enhancedAddress,
-            );
-          }
-        } catch (error) {
-          console.warn("Street-level enhancement failed:", error);
-        }
+      // Try to extract address from detailed components first to avoid additional API calls
+      if (detailedComponents?.formatted_address) {
+        address = detailedComponents.formatted_address;
+        console.log("✅ Using address from detailed components:", address);
+      } else {
+        // Fallback to reverse geocoding if components don't have formatted address
+        console.log("🔄 Falling back to reverse geocoding...");
+        address = await locationService.reverseGeocode(coordinates);
+        console.log("🏠 Geocoded address from fallback:", address);
       }
+
+      // Use the single result we got - no additional multiple API calls
+      let enhancedAddress = address;
+
+      console.log("✅ Final address (no race conditions):", enhancedAddress);
 
       setSelectedLocation({ address: enhancedAddress, coordinates });
       setSearchQuery(enhancedAddress);
       updateMapLocation(coordinates);
 
       // Enhanced auto-fill with best available components
-      if (finalComponents) {
-        autoFillAddressFieldsFromComponents(finalComponents);
-      } else {
-        simpleAutoFill(enhancedAddress);
-      }
+      // FIXED: Always use simpleAutoFill since it works reliably
+      console.log("🎯 Location detected, using simpleAutoFill for:", enhancedAddress);
+      simpleAutoFill(enhancedAddress);
     } catch (error) {
       console.error("�� All location detection attempts failed:", error);
 
@@ -670,28 +664,10 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
         console.warn("Browser location fallback failed:", locationError);
       }
 
-      // Ultimate fallback - major Indian cities based on common usage
-      const fallbackLocations = [
-        { lat: 28.6139, lng: 77.209, city: "New Delhi" },
-        { lat: 19.076, lng: 72.8777, city: "Mumbai" },
-        { lat: 12.9716, lng: 77.5946, city: "Bangalore" },
-        { lat: 17.385, lng: 78.4867, city: "Hyderabad" },
-        { lat: 13.0827, lng: 80.2707, city: "Chennai" },
-        { lat: 22.5726, lng: 88.3639, city: "Kolkata" },
-      ];
-
-      const randomFallback =
-        fallbackLocations[Math.floor(Math.random() * fallbackLocations.length)];
-      const fallbackAddress = `${randomFallback.city}, India`;
-
-      console.log(`🏙��� Using fallback location: ${fallbackAddress}`);
-
-      setSelectedLocation({
-        address: fallbackAddress,
-        coordinates: { lat: randomFallback.lat, lng: randomFallback.lng },
-      });
-      setSearchQuery(fallbackAddress);
-      updateMapLocation({ lat: randomFallback.lat, lng: randomFallback.lng });
+      // FIXED: No more random city fallbacks that cause location confusion
+      // Let the user manually search/select their location instead
+      console.log("📍 Location detection failed - user will manually select location");
+      
     } finally {
       setIsDetectingLocation(false);
       setLocationAttempt(0);
@@ -1333,10 +1309,11 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
     const pincodeMatch = fullAddress.match(/\b\d{6}\b/);
     const extractedPincode = pincodeMatch ? pincodeMatch[0] : "";
 
-    // Extract flat/house number (first part with numbers)
+    // Extract flat/house number (first part with numbers or alphanumeric like B115)
     let extractedFlatNo = "";
     for (const part of parts) {
-      if (part.match(/^\d+/) && !part.match(/^\d{6}$/)) {
+      // Match patterns like: 123, B115, A-45, Plot-67, etc.
+      if ((part.match(/^\d+/) || part.match(/^[A-Z]\d+/) || part.match(/^[A-Z]-?\d+/)) && !part.match(/^\d{6}$/)) {
         extractedFlatNo = part;
         break;
       }
@@ -1370,24 +1347,40 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
       area: area,
       pincode: extractedPincode
     });
+    console.log("🔍 Extracted flat number pattern match for:", parts[0], "->", extractedFlatNo);
 
     // Set all states in one batch - React will batch these automatically
+    console.log("🔧 BEFORE setState - Current values:", { flatNo, street, area, pincode });
+    console.log("🔧 SETTING setState with:", { extractedFlatNo, street, area, extractedPincode });
+
     setFlatNo(extractedFlatNo);
     setStreet(street);
     setArea(area);
     setPincode(extractedPincode);
 
-    // Force React re-render using functional updates
-    setTimeout(() => {
-      setFlatNo(prev => extractedFlatNo);
-      setStreet(prev => street);
-      setArea(prev => area);
-      setPincode(prev => extractedPincode);
-      console.log("🔄 Forced re-render with functional updates");
-    }, 10);
+    console.log("🔧 AFTER setState called");
 
-    // Also update DOM directly as a fallback to ensure values are visible
+    // Force React re-render using functional updates - immediate
+    setFlatNo(prev => {
+      console.log("🔄 FlatNo update:", prev, "->", extractedFlatNo);
+      return extractedFlatNo;
+    });
+    setStreet(prev => {
+      console.log("🔄 Street update:", prev, "->", street);
+      return street;
+    });
+    setArea(prev => {
+      console.log("🔄 Area update:", prev, "->", area);
+      return area;
+    });
+    setPincode(prev => {
+      console.log("🔄 Pincode update:", prev, "->", extractedPincode);
+      return extractedPincode;
+    });
+
+    // Also update DOM directly as a fallback to ensure values are visible - immediate
     setTimeout(() => {
+      console.log("🔧 Starting DOM direct update...");
       const flatNoInput = document.getElementById('flatNo') as HTMLInputElement;
       const streetInput = document.getElementById('street') as HTMLInputElement;
       const areaInput = document.getElementById('area') as HTMLInputElement;
@@ -1411,7 +1404,7 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
       }
 
       console.log("🔧 Direct DOM update completed");
-    }, 50);
+    }, 5); // Immediate DOM update
 
     console.log("✅ Simple autofill completed");
   };
@@ -1421,12 +1414,11 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
     setSearchQuery(suggestion.description);
     setShowSuggestions(false);
 
-    // Clear form fields first
-    console.log("🧹 Clearing form fields before autofill");
-    setFlatNo("");
-    setStreet("");
-    setArea("");
-    setPincode("");
+    // Immediately trigger autofill with the selected suggestion
+    console.log("🎯 Starting autofill for selected suggestion:", suggestion.description);
+
+    // Use the simple autofill function directly
+    simpleAutoFill(suggestion.description);
 
     // Check if this is a fallback suggestion that doesn't need Google Maps API
     if (!suggestion.place_id ||
@@ -1463,17 +1455,9 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
       });
       updateMapLocation(coordinates);
 
-      // Clear first and then autofill
-      console.log("🏠 About to autofill for fallback suggestion:", suggestion.description);
-
-      // Test immediate call
+      // Autofill for fallback suggestion
+      console.log("🏠 Autofilling for fallback suggestion:", suggestion.description);
       simpleAutoFill(suggestion.description);
-
-      // Also try with delay
-      setTimeout(() => {
-        console.log("🏠 Second attempt - Simple autofilling for fallback suggestion:", suggestion.description);
-        simpleAutoFill(suggestion.description);
-      }, 100);
 
       return;
     }
@@ -1512,17 +1496,10 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
 
         updateMapLocation(coordinates);
 
-        // Immediate autofill for Google Places
+        // Autofill for Google Places result
         const addressToFill = place.formatted_address || suggestion.description;
-        console.log("🏠 About to autofill for Google Places result:", addressToFill);
-
+        console.log("🏠 Autofilling for Google Places result:", addressToFill);
         simpleAutoFill(addressToFill);
-
-        // Also try with delay
-        setTimeout(() => {
-          console.log("🏠 Second attempt - Simple autofilling for Google Places result:", addressToFill);
-          simpleAutoFill(addressToFill);
-        }, 100);
       } else {
         console.log("🗺️ No place geometry found, using fallback");
         throw new Error("No place geometry found");
@@ -1565,16 +1542,9 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
       });
       updateMapLocation(coordinates);
 
-      // Immediate autofill for smart fallback
-      console.log("🏠 About to autofill for smart fallback:", suggestion.description);
-
+      // Autofill for smart fallback
+      console.log("🏠 Autofilling for smart fallback:", suggestion.description);
       simpleAutoFill(suggestion.description);
-
-      // Also try with delay
-      setTimeout(() => {
-        console.log("🏠 Second attempt - Simple autofilling for smart fallback:", suggestion.description);
-        simpleAutoFill(suggestion.description);
-      }, 100);
 
       console.log(`✅ Used fallback coordinates for: ${suggestion.description}`);
     }
@@ -1830,31 +1800,23 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
                 <h3 className="text-base font-medium text-gray-900">
                   Delivery details
                 </h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setSearchQuery(selectedLocation.address);
-                    setShowSuggestions(false);
-                    if (searchInputRef.current) {
-                      searchInputRef.current.focus();
-                    }
-                  }}
-                  className="text-green-600 hover:text-green-700 text-sm px-2 py-1"
-                >
-                  Edit
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    console.log("🧪 Testing autofill with:", selectedLocation.address);
-                    simpleAutoFill(selectedLocation.address);
-                  }}
-                  className="text-blue-600 hover:text-blue-700 text-sm px-2 py-1"
-                >
-                  Test Fill
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setSearchQuery(selectedLocation.address);
+                      setShowSuggestions(false);
+                      if (searchInputRef.current) {
+                        searchInputRef.current.focus();
+                      }
+                    }}
+                    className="text-green-600 hover:text-green-700 text-sm px-2 py-1"
+                  >
+                    Edit
+                  </Button>
+                </div>
+
               </div>
               <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
                 <div className="bg-green-600 rounded-full p-1 mt-1 flex-shrink-0">

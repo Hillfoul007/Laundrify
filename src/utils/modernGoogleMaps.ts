@@ -1,4 +1,5 @@
 import { Loader } from "@googlemaps/js-api-loader";
+import { MAPS_PERFORMANCE_CONFIG, isFeatureEnabled } from "../config/mapsConfig";
 
 export interface MapConfig {
   center: { lat: number; lng: number };
@@ -55,6 +56,20 @@ class ModernGoogleMapsService {
 
     try {
       await this.loader.load();
+
+      // Load marker library for AdvancedMarkerElement (only if not disabled for performance)
+      const mapId = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID;
+      if (mapId && mapId.trim() !== "" && !MAPS_PERFORMANCE_CONFIG.DISABLE_ADVANCED_MARKERS) {
+        try {
+          await google.maps.importLibrary("marker");
+          console.log("✅ Google Maps Marker library loaded for Advanced Markers");
+        } catch (error) {
+          console.warn("⚠️ Failed to load Marker library, will use regular markers:", error);
+        }
+      } else if (MAPS_PERFORMANCE_CONFIG.DISABLE_ADVANCED_MARKERS) {
+        console.log("⚡ Advanced Markers disabled for better performance");
+      }
+
       this.isLoaded = true;
       console.log("✅ Google Maps API loaded successfully");
     } catch (error) {
@@ -85,18 +100,6 @@ class ModernGoogleMapsService {
 
     const mapConfig: any = {
       ...defaultConfig,
-      // Modern map styling options
-      styles: [
-        {
-          featureType: "poi.business",
-          stylers: [{ visibility: "off" }],
-        },
-        {
-          featureType: "poi.park",
-          elementType: "labels.text",
-          stylers: [{ visibility: "off" }],
-        },
-      ],
       // Enhanced user experience options
       clickableIcons: false,
       fullscreenControl: true,
@@ -107,9 +110,40 @@ class ModernGoogleMapsService {
     // Only add Map ID if it's configured and not empty
     if (mapId && mapId.trim() !== "") {
       mapConfig.mapId = mapId;
-      console.log("🗺️ Using Map ID for Advanced Markers:", mapId);
+      console.log("🗺️ Using Map ID for Advanced Markers (styles controlled via cloud console):", mapId);
     } else {
-      console.log("🗺️ No Map ID configured, using regular markers only");
+      // Only add custom styles if no mapId is present
+      const styles = MAPS_PERFORMANCE_CONFIG.USE_LIGHTWEIGHT_MAP_STYLES
+        ? [
+            // Lightweight styles for better performance
+            {
+              featureType: "poi",
+              stylers: [{ visibility: "off" }],
+            },
+            {
+              featureType: "transit",
+              stylers: [{ visibility: "off" }],
+            },
+          ]
+        : [
+            // Full styles for better appearance
+            {
+              featureType: "poi.business",
+              stylers: [{ visibility: "off" }],
+            },
+            {
+              featureType: "poi.park",
+              elementType: "labels.text",
+              stylers: [{ visibility: "off" }],
+            },
+          ];
+
+      mapConfig.styles = styles;
+      console.log(
+        "🗺️ No Map ID configured, using",
+        MAPS_PERFORMANCE_CONFIG.USE_LIGHTWEIGHT_MAP_STYLES ? "lightweight" : "full",
+        "styles and regular markers"
+      );
     }
 
     this.map = new google.maps.Map(container, mapConfig);

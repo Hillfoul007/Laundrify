@@ -26,6 +26,11 @@ export interface CouponUsage {
 
 export class CouponService {
   private static instance: CouponService;
+  private pendingValidations = new Map<string, Promise<any>>();
+  private pendingMarkUsed = new Map<string, Promise<any>>();
+  private apiHealthStatus: 'unknown' | 'healthy' | 'unhealthy' = 'unknown';
+  private lastHealthCheck = 0;
+  private healthCheckInterval = 60000; // 1 minute
 
   private constructor() {}
 
@@ -34,6 +39,46 @@ export class CouponService {
       CouponService.instance = new CouponService();
     }
     return CouponService.instance;
+  }
+
+  /**
+   * Check if the coupon API is healthy
+   */
+  private async checkApiHealth(): Promise<boolean> {
+    const now = Date.now();
+
+    // Only check health every minute to avoid spam
+    if (now - this.lastHealthCheck < this.healthCheckInterval && this.apiHealthStatus !== 'unknown') {
+      return this.apiHealthStatus === 'healthy';
+    }
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout for health check
+
+      const response = await fetch('/api/coupons/health', {
+        method: 'GET',
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        this.apiHealthStatus = 'healthy';
+        this.lastHealthCheck = now;
+        return true;
+      } else {
+        this.apiHealthStatus = 'unhealthy';
+        this.lastHealthCheck = now;
+        console.warn(`⚠️ Coupon API health check failed: ${response.status}`);
+        return false;
+      }
+    } catch (error) {
+      this.apiHealthStatus = 'unhealthy';
+      this.lastHealthCheck = now;
+      console.warn('⚠️ Coupon API health check failed:', error.message);
+      return false;
+    }
   }
 
   /**
@@ -78,16 +123,36 @@ export class CouponService {
   }
 
   /**
-   * Check if user is a first-time user
+   * Check if user is a first-time user (improved detection)
    */
   isFirstTimeUser(userId: string): boolean {
     if (!userId) return false;
-    
+
+    // Check multiple sources for booking history
     const existingBookings = JSON.parse(
       localStorage.getItem(`user_bookings_${userId}`) || "[]",
     );
-    
-    return existingBookings.length === 0;
+
+    // Also check if user has used any first-order coupons before
+    const usedCoupons = JSON.parse(
+      localStorage.getItem(`used_coupons_${userId}`) || "[]",
+    ) as CouponUsage[];
+
+    const hasUsedFirstOrderCoupon = usedCoupons.some(coupon =>
+      coupon.code === "FIRST30" || coupon.code === "FIRST10"
+    );
+
+    // Check if there's a flag indicating user has made an order
+    const hasOrderHistory = localStorage.getItem(`has_ordered_${userId}`) === "true";
+
+    console.log(`🔍 First-time user check for ${userId}:`, {
+      existingBookings: existingBookings.length,
+      hasUsedFirstOrderCoupon,
+      hasOrderHistory,
+      isFirstTime: existingBookings.length === 0 && !hasUsedFirstOrderCoupon && !hasOrderHistory
+    });
+
+    return existingBookings.length === 0 && !hasUsedFirstOrderCoupon && !hasOrderHistory;
   }
 
   /**
@@ -115,26 +180,126 @@ export class CouponService {
   ): Promise<boolean> {
     if (!userId) return false;
 
+    // Create a unique key for this mark-used request
+    const requestKey = `${couponCode}_${userId}_${bookingId}`;
+
+    // If there's already a pending mark-used for this exact request, return it
+    if (this.pendingMarkUsed.has(requestKey)) {
+      console.log(`🔄 Using pending mark-used for ${requestKey}`);
+      return this.pendingMarkUsed.get(requestKey)!;
+    }
+
+    // Create the mark-used promise
+    const markUsedPromise = this.performMarkUsed(couponCode, userId, bookingId, orderAmount, discountAmount);
+
+    // Store it to prevent duplicates
+    this.pendingMarkUsed.set(requestKey, markUsedPromise);
+
+    // Clean up after completion
+    markUsedPromise.finally(() => {
+      this.pendingMarkUsed.delete(requestKey);
+    });
+
+    return markUsedPromise;
+  }
+
+  private async performMarkUsed(
+    couponCode: string,
+    userId: string,
+    bookingId: string,
+    orderAmount: number,
+    discountAmount: number
+  ): Promise<boolean> {
+    // Check API health first
+    const isApiHealthy = await this.checkApiHealth();
+    if (!isApiHealthy) {
+      console.log('🏥 Coupon API unhealthy, using local storage fallback');
+      this.markCouponAsUsedLocal(couponCode, userId, orderAmount, discountAmount);
+      return false;
+    }
+
     try {
+      const requestBody = JSON.stringify({
+        couponCode,
+        userId,
+        bookingId,
+        orderAmount,
+        discountAmount,
+      });
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       const response = await fetch('/api/coupons/mark-used', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          couponCode,
-          userId,
-          bookingId,
-          orderAmount,
-          discountAmount,
-        }),
+        body: requestBody,
+        signal: controller.signal,
       });
 
-      const result = await response.json();
+      clearTimeout(timeoutId);
 
-      if (response.ok && result.success) {
+      // Handle response based on content type
+      let result;
+      let errorText = '';
+
+      if (!response.ok) {
+        // Handle different types of server errors
+        if (response.status === 500) {
+          console.error('❌ Failed to mark coupon as used: Server error (500). Using local storage fallback.');
+          this.markCouponAsUsedLocal(couponCode, userId, orderAmount, discountAmount);
+          return false;
+        }
+
+        if (response.status === 404) {
+          console.warn('⚠️ Coupon API endpoint not found (404). Using local storage fallback.');
+          this.markCouponAsUsedLocal(couponCode, userId, orderAmount, discountAmount);
+          return false;
+        }
+
+        if (response.status === 502 || response.status === 503 || response.status === 504) {
+          console.warn('⚠️ Coupon service temporarily unavailable. Using local storage fallback.');
+          this.markCouponAsUsedLocal(couponCode, userId, orderAmount, discountAmount);
+          return false;
+        }
+
+        // Try to parse error response for other status codes
+        try {
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            result = await response.json();
+            errorText = result.message || result.error || `HTTP ${response.status}`;
+          } else {
+            errorText = await response.text();
+            // Limit error text length to avoid showing HTML pages
+            if (errorText.length > 200) {
+              errorText = `HTTP ${response.status}: ${response.statusText}`;
+            }
+          }
+        } catch (parseError) {
+          errorText = `HTTP ${response.status}: ${response.statusText}`;
+        }
+
+        console.error('❌ Failed to mark coupon as used via backend:', response.status, errorText);
+        // Fallback to local storage
+        this.markCouponAsUsedLocal(couponCode, userId, orderAmount, discountAmount);
+        return false;
+      }
+
+      // Response is ok, parse as JSON
+      try {
+        result = await response.json();
+      } catch (parseError) {
+        console.error('❌ Failed to parse success response as JSON:', parseError);
+        // Fallback to local storage
+        this.markCouponAsUsedLocal(couponCode, userId, orderAmount, discountAmount);
+        return false;
+      }
+
+      if (result.success) {
         console.log(`✅ Marked coupon ${couponCode} as used for user ${userId} via backend`);
-
         // Also update localStorage as backup
         this.markCouponAsUsedLocal(couponCode, userId, orderAmount, discountAmount);
         return true;
@@ -146,6 +311,14 @@ export class CouponService {
       }
     } catch (error) {
       console.error('❌ Error marking coupon as used:', error);
+
+      // Handle specific error types
+      if (error.name === 'AbortError') {
+        console.warn('⏰ Mark coupon as used request timed out, using local storage');
+      } else if (error.message?.includes('body stream already read')) {
+        console.warn('⚠️ Body stream already read error, using local storage');
+      }
+
       // Fallback to local storage
       this.markCouponAsUsedLocal(couponCode, userId, orderAmount, discountAmount);
       return false;
@@ -176,7 +349,10 @@ export class CouponService {
     existingUsages.push(usage);
     localStorage.setItem(`used_coupons_${userId}`, JSON.stringify(existingUsages));
 
-    console.log(`✅ Marked coupon ${couponCode} as used locally for user ${userId}`);
+    // Mark user as having made an order (no longer first-time)
+    localStorage.setItem(`has_ordered_${userId}`, "true");
+
+    console.log(`✅ Marked coupon ${couponCode} as used locally for user ${userId} and set order history flag`);
   }
 
   /**
@@ -191,23 +367,110 @@ export class CouponService {
       return { valid: false, error: "Invalid input" };
     }
 
+    // Create a unique key for this validation request
+    const requestKey = `${couponCode}_${userId}_${orderAmount}`;
+
+    // If there's already a pending validation for this exact request, return it
+    if (this.pendingValidations.has(requestKey)) {
+      console.log(`🔄 Using pending validation for ${requestKey}`);
+      return this.pendingValidations.get(requestKey)!;
+    }
+
+    // Create the validation promise
+    const validationPromise = this.performValidation(couponCode, userId, orderAmount);
+
+    // Store it to prevent duplicates
+    this.pendingValidations.set(requestKey, validationPromise);
+
+    // Clean up after completion
+    validationPromise.finally(() => {
+      this.pendingValidations.delete(requestKey);
+    });
+
+    return validationPromise;
+  }
+
+  private async performValidation(
+    couponCode: string,
+    userId: string,
+    orderAmount: number = 0
+  ): Promise<{ valid: boolean; coupon?: CouponData; error?: string }> {
+    // Check API health first
+    const isApiHealthy = await this.checkApiHealth();
+    if (!isApiHealthy) {
+      console.log('🏥 Coupon API unhealthy, using local validation');
+      return this.validateCouponLocal(couponCode, userId, orderAmount);
+    }
+
     try {
+      const requestBody = JSON.stringify({
+        couponCode,
+        userId,
+        orderAmount,
+      });
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       const response = await fetch('/api/coupons/validate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          couponCode,
-          userId,
-          orderAmount,
-        }),
+        body: requestBody,
+        signal: controller.signal,
       });
 
-      const result = await response.json();
+      clearTimeout(timeoutId);
+
+      // Handle response based on content type
+      let result;
+      let errorText = '';
 
       if (!response.ok) {
-        return { valid: false, error: result.message || 'Coupon validation failed' };
+        // Handle different types of server errors
+        if (response.status === 500) {
+          console.error('❌ Coupon validation failed: Server error (500). Using local validation fallback.');
+          return this.validateCouponLocal(couponCode, userId, orderAmount);
+        }
+
+        if (response.status === 404) {
+          console.warn('⚠️ Coupon API endpoint not found (404). Using local validation fallback.');
+          return this.validateCouponLocal(couponCode, userId, orderAmount);
+        }
+
+        if (response.status === 502 || response.status === 503 || response.status === 504) {
+          console.warn('⚠️ Coupon service temporarily unavailable. Using local validation fallback.');
+          return this.validateCouponLocal(couponCode, userId, orderAmount);
+        }
+
+        // Try to parse error response for other status codes
+        try {
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            result = await response.json();
+            errorText = result.message || result.error || `HTTP ${response.status}`;
+          } else {
+            errorText = await response.text();
+            // Limit error text length to avoid showing HTML pages
+            if (errorText.length > 200) {
+              errorText = `HTTP ${response.status}: ${response.statusText}`;
+            }
+          }
+        } catch (parseError) {
+          errorText = `HTTP ${response.status}: ${response.statusText}`;
+        }
+
+        console.error('❌ Coupon validation failed:', response.status, errorText);
+        return { valid: false, error: errorText || 'Coupon validation failed' };
+      }
+
+      // Response is ok, parse as JSON
+      try {
+        result = await response.json();
+      } catch (parseError) {
+        console.error('❌ Failed to parse success response as JSON:', parseError);
+        return { valid: false, error: 'Failed to parse server response' };
       }
 
       return {
@@ -217,6 +480,13 @@ export class CouponService {
       };
     } catch (error) {
       console.error('❌ Error validating coupon:', error);
+
+      // Handle specific error types
+      if (error.name === 'AbortError') {
+        console.warn('⏰ Coupon validation request timed out, using local validation');
+      } else if (error.message?.includes('body stream already read')) {
+        console.warn('⚠️ Body stream already read error, using local validation');
+      }
 
       // Fallback to local validation if backend is unavailable
       return this.validateCouponLocal(couponCode, userId, orderAmount);
@@ -250,9 +520,14 @@ export class CouponService {
       return { valid: false, error: "This coupon has already been used" };
     }
 
-    // Check first order restrictions
+    // Check first order restrictions (more strict)
     if (coupon.isFirstOrder && !isFirstTime) {
       return { valid: false, error: "This coupon is valid for first orders only" };
+    }
+
+    // Additional check for specific first-time coupons
+    if ((coupon.code === "FIRST30" || coupon.code === "FIRST10") && !isFirstTime) {
+      return { valid: false, error: "This coupon can only be used on your first order" };
     }
 
     // Check exclude first order restrictions
@@ -287,21 +562,40 @@ export class CouponService {
   }
 
   /**
-   * Get available coupons for a specific user
+   * Get available coupons for a specific user (async version)
    */
-  getAvailableCouponsForUser(userId: string, orderAmount: number = 0): CouponData[] {
+  async getAvailableCouponsForUser(userId: string, orderAmount: number = 0): Promise<CouponData[]> {
     if (!userId) return [];
-    
+
     const allCoupons = this.getAllCoupons();
     const availableCoupons: CouponData[] = [];
-    
+
     for (const coupon of allCoupons) {
-      const validation = this.validateCoupon(coupon.code, userId, orderAmount);
+      const validation = await this.validateCoupon(coupon.code, userId, orderAmount);
       if (validation.valid) {
         availableCoupons.push(coupon);
       }
     }
-    
+
+    return availableCoupons;
+  }
+
+  /**
+   * Get available coupons for a specific user (sync version using local validation only)
+   */
+  getAvailableCouponsForUserLocal(userId: string, orderAmount: number = 0): CouponData[] {
+    if (!userId) return [];
+
+    const allCoupons = this.getAllCoupons();
+    const availableCoupons: CouponData[] = [];
+
+    for (const coupon of allCoupons) {
+      const validation = this.validateCouponLocal(coupon.code, userId, orderAmount);
+      if (validation.valid) {
+        availableCoupons.push(coupon);
+      }
+    }
+
     return availableCoupons;
   }
 
