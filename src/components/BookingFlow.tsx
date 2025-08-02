@@ -102,10 +102,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({
 
 
 
-  const removeCoupon = () => {
-    setAppliedCoupon(null);
-    setCouponCode("");
-  };
+
 
   const handleBookService = async () => {
     console.log("🚀 Starting booking process...");
