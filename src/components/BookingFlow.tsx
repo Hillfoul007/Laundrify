@@ -23,7 +23,7 @@ import { adaptiveBookingHelpers } from "@/integrations/adaptive/bookingHelpers";
 import { userValidation } from "@/utils/userValidation";
 import { bookingTestHelper } from "@/utils/bookingTestHelper";
 import { getServicePriceWithFallback } from "@/utils/servicePricing";
-import { CouponService } from "@/services/couponService";
+
 
 interface BookingFlowProps {
   provider?: any;
