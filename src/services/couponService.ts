@@ -175,17 +175,40 @@ export class CouponService {
       let errorText = '';
 
       if (!response.ok) {
+        // Handle different types of server errors
+        if (response.status === 500) {
+          console.error('❌ Failed to mark coupon as used: Server error (500). Using local storage fallback.');
+          this.markCouponAsUsedLocal(couponCode, userId, orderAmount, discountAmount);
+          return false;
+        }
+
+        if (response.status === 404) {
+          console.warn('⚠️ Coupon API endpoint not found (404). Using local storage fallback.');
+          this.markCouponAsUsedLocal(couponCode, userId, orderAmount, discountAmount);
+          return false;
+        }
+
+        if (response.status === 502 || response.status === 503 || response.status === 504) {
+          console.warn('⚠️ Coupon service temporarily unavailable. Using local storage fallback.');
+          this.markCouponAsUsedLocal(couponCode, userId, orderAmount, discountAmount);
+          return false;
+        }
+
+        // Try to parse error response for other status codes
         try {
-          // Try to read as JSON first, fallback to text
           const contentType = response.headers.get('content-type');
           if (contentType && contentType.includes('application/json')) {
             result = await response.json();
-            errorText = result.message || result.error || 'Unknown error';
+            errorText = result.message || result.error || `HTTP ${response.status}`;
           } else {
             errorText = await response.text();
+            // Limit error text length to avoid showing HTML pages
+            if (errorText.length > 200) {
+              errorText = `HTTP ${response.status}: ${response.statusText}`;
+            }
           }
         } catch (parseError) {
-          errorText = `Failed to parse error response: ${response.status} ${response.statusText}`;
+          errorText = `HTTP ${response.status}: ${response.statusText}`;
         }
 
         console.error('❌ Failed to mark coupon as used via backend:', response.status, errorText);
