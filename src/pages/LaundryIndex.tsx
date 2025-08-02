@@ -10,6 +10,7 @@ import BookingConfirmed from "@/components/BookingConfirmed";
 import LaundrifySplashLoader from "@/components/LaundrifySplashLoader";
 import { DVHostingSmsService } from "../services/dvhostingSmsService";
 import PushNotificationService from "../services/pushNotificationService";
+import { LocationTrackingService } from "../services/locationTrackingService";
 
 import { useNotifications } from "@/contexts/NotificationContext";
 import {
