@@ -123,16 +123,36 @@ export class CouponService {
   }
 
   /**
-   * Check if user is a first-time user
+   * Check if user is a first-time user (improved detection)
    */
   isFirstTimeUser(userId: string): boolean {
     if (!userId) return false;
-    
+
+    // Check multiple sources for booking history
     const existingBookings = JSON.parse(
       localStorage.getItem(`user_bookings_${userId}`) || "[]",
     );
-    
-    return existingBookings.length === 0;
+
+    // Also check if user has used any first-order coupons before
+    const usedCoupons = JSON.parse(
+      localStorage.getItem(`used_coupons_${userId}`) || "[]",
+    ) as CouponUsage[];
+
+    const hasUsedFirstOrderCoupon = usedCoupons.some(coupon =>
+      coupon.code === "FIRST30" || coupon.code === "FIRST10"
+    );
+
+    // Check if there's a flag indicating user has made an order
+    const hasOrderHistory = localStorage.getItem(`has_ordered_${userId}`) === "true";
+
+    console.log(`🔍 First-time user check for ${userId}:`, {
+      existingBookings: existingBookings.length,
+      hasUsedFirstOrderCoupon,
+      hasOrderHistory,
+      isFirstTime: existingBookings.length === 0 && !hasUsedFirstOrderCoupon && !hasOrderHistory
+    });
+
+    return existingBookings.length === 0 && !hasUsedFirstOrderCoupon && !hasOrderHistory;
   }
 
   /**
