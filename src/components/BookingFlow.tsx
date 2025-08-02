@@ -628,15 +628,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({
                     <span className="font-medium">FREE</span>
                   </div>
                 </div>
-                {appliedCoupon && (
-                  <div className="flex justify-between text-sm text-green-600">
-                    <span>
-                      Coupon ({appliedCoupon.code}) - {appliedCoupon.discount}%
-                      off
-                    </span>
-                    <span>-${getCouponDiscount()}</span>
-                  </div>
-                )}
+
               </div>
 
               {/* Coupon Section */}
