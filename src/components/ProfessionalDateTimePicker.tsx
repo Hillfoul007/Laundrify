@@ -70,7 +70,7 @@ const ProfessionalDateTimePicker: React.FC<ProfessionalDateTimePickerProps> = ({
   const generateTimeSlots = () => {
     const slots = [];
     const now = new Date();
-    const currentHour = now.getHours();
+    const currentTime = new Date();
 
     // Generate slots from 8 AM to 9 PM (1-hour intervals)
     for (let hour = 8; hour <= 21; hour++) {
@@ -80,9 +80,18 @@ const ProfessionalDateTimePicker: React.FC<ProfessionalDateTimePickerProps> = ({
         "h:mm a",
       );
 
-      // Skip past times for today
-      const isDisabled =
-        selectedDate && isToday(selectedDate) && hour <= currentHour;
+      // Skip slots that are less than 30 minutes from current time for today
+      let isDisabled = false;
+      if (selectedDate && isToday(selectedDate)) {
+        const slotTime = new Date();
+        slotTime.setHours(hour, 0, 0, 0);
+
+        // Calculate the difference in minutes between slot time and current time
+        const timeDifferenceMinutes = (slotTime.getTime() - currentTime.getTime()) / (1000 * 60);
+
+        // Disable if slot is in the past or less than 30 minutes from now
+        isDisabled = timeDifferenceMinutes < 30;
+      }
 
       if (!isDisabled) {
         let period = "Morning";
