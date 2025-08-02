@@ -28,6 +28,9 @@ export class CouponService {
   private static instance: CouponService;
   private pendingValidations = new Map<string, Promise<any>>();
   private pendingMarkUsed = new Map<string, Promise<any>>();
+  private apiHealthStatus: 'unknown' | 'healthy' | 'unhealthy' = 'unknown';
+  private lastHealthCheck = 0;
+  private healthCheckInterval = 60000; // 1 minute
 
   private constructor() {}
 
