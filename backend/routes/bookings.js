@@ -2,7 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const Booking = require("../models/Booking");
 const User = require("../models/User");
-const Referral = require("../models/Referral");
+
 const Address = require("../models/Address");
 
 const router = express.Router();
@@ -1234,7 +1234,7 @@ router.put("/:bookingId/cancel", async (req, res) => {
     const { bookingId } = req.params;
     let userId = req.headers["user-id"] || req.body.user_id;
 
-    console.log("��� Booking cancellation request:", { bookingId, userId });
+    console.log("����� Booking cancellation request:", { bookingId, userId });
 
     // Get booking details first
     const booking = await Booking.findById(bookingId);
