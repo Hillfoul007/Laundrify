@@ -215,7 +215,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({
           .join("\n"),
         total_price: calculateTotalPrice(),
         final_amount: calculateFinalAmount(),
-        discount_amount: getCouponDiscount(),
+
         special_instructions: [
           additionalDetails,
           addressDetails.instructions,
