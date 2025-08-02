@@ -530,6 +530,7 @@ router.post("/", async (req, res) => {
       total_price,
       discount_amount: discount_amount || 0,
       final_amount: final_amount || total_price - (discount_amount || 0),
+      coupon_code: coupon_code || null,
       special_instructions,
       charges_breakdown,
       item_prices, // Store individual service prices
