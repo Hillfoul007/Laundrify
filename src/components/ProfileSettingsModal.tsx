@@ -228,39 +228,7 @@ const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
 
 
 
-          {/* Address Management Section */}
-          <div className="pt-6 border-t border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-green-600" />
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Saved Addresses
-                </h3>
-              </div>
-              <Button
-                onClick={() => setShowAddressModal(true)}
-                variant="outline"
-                size="sm"
-                className="text-green-600 border-green-200 hover:bg-green-50 hover:border-green-300"
-              >
-                Manage
-              </Button>
-            </div>
 
-            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-xl border border-blue-200">
-              <p className="text-sm text-gray-600 mb-2">
-                Manage your delivery addresses for faster checkout
-              </p>
-              <Button
-                onClick={() => setShowAddressModal(true)}
-                variant="ghost"
-                size="sm"
-                className="text-blue-600 hover:bg-blue-100 p-0 h-auto font-medium"
-              >
-                View & Edit Addresses →
-              </Button>
-            </div>
-          </div>
 
           {/* Logout Button */}
           {onLogout && (
