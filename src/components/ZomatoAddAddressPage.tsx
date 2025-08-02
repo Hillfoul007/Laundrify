@@ -1404,7 +1404,7 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
       }
 
       console.log("🔧 Direct DOM update completed");
-    }, 50);
+    }, 5); // Immediate DOM update
 
     console.log("✅ Simple autofill completed");
   };
