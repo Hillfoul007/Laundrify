@@ -235,38 +235,7 @@ const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
               </h3>
             </div>
 
-            {/* Your Referral Code */}
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-200 mb-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-1">
-                    Your Referral Code
-                  </h4>
-                  <p className="text-sm text-gray-600">
-                    Share with friends to earn rewards
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="bg-white px-3 py-2 rounded-lg border border-green-300 font-mono text-green-700 font-bold">
-                    {userReferralCode}
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      navigator.clipboard.writeText(userReferralCode);
-                      toast({
-                        title: "Copied!",
-                        description: "Referral code copied to clipboard",
-                      });
-                    }}
-                    className="border-green-300 text-green-600 hover:bg-green-50"
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
+
 
 
           </div>
