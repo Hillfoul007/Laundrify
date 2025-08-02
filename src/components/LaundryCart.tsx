@@ -615,6 +615,8 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
         serviceTotal,
         deliveryCharge,
         handlingFee,
+        couponDiscount,
+        appliedCoupon: appliedCoupon?.code,
         finalTotal,
       });
 
@@ -628,6 +630,10 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
         address: addressData,
         phone: phoneNumber || currentUser?.phone,
         instructions: specialInstructions,
+        // Explicit coupon information
+        coupon_code: appliedCoupon?.code || null,
+        discount_amount: couponDiscount,
+        original_total: serviceTotal + deliveryCharge + handlingFee,
         charges_breakdown: {
           base_price: serviceTotal,
           delivery_fee: deliveryCharge,
