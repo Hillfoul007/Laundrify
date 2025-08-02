@@ -1309,10 +1309,11 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
     const pincodeMatch = fullAddress.match(/\b\d{6}\b/);
     const extractedPincode = pincodeMatch ? pincodeMatch[0] : "";
 
-    // Extract flat/house number (first part with numbers)
+    // Extract flat/house number (first part with numbers or alphanumeric like B115)
     let extractedFlatNo = "";
     for (const part of parts) {
-      if (part.match(/^\d+/) && !part.match(/^\d{6}$/)) {
+      // Match patterns like: 123, B115, A-45, Plot-67, etc.
+      if ((part.match(/^\d+/) || part.match(/^[A-Z]\d+/) || part.match(/^[A-Z]-?\d+/)) && !part.match(/^\d{6}$/)) {
         extractedFlatNo = part;
         break;
       }
