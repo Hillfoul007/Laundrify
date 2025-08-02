@@ -304,11 +304,7 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
     );
   };
 
-  // Helper function to check if a code is a predefined coupon
-  const isPredefinedCoupon = (code: string): boolean => {
-    const predefinedCoupons = ["FIRST30", "NEW10", "FIRST10", "SAVE20"];
-    return predefinedCoupons.includes(code.toUpperCase());
-  };
+
 
   const applyCoupon = async () => {
     console.log("applyCoupon function called with code:", couponCode);
