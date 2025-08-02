@@ -46,12 +46,12 @@ export class SessionManager {
   public ensureValidSession(): SessionData {
     let session = this.getCurrentSession();
 
-    // If no user session exists, create a guest session
-    if (!session.isAuthenticated) {
-      console.log('👤 No authenticated user found, creating guest session for cart functionality');
+    // If no user session exists, create or reuse guest session
+    if (!session.isAuthenticated && !session.userId) {
+      console.log('👤 No user session found, ensuring guest session for cart functionality');
       const guestUser = createGuestSession();
       session = {
-        isAuthenticated: true,
+        isAuthenticated: true, // Guest sessions count as "authenticated" for cart purposes
         user: guestUser,
         userId: getUserId(guestUser),
         isGuest: true,
