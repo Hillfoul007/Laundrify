@@ -149,7 +149,7 @@ detectedLocationSchema.statics.saveDetectedLocation = async function (
     }
 
     // Check if location is available
-    const isAvailable = this.checkAvailability(
+    const availabilityResult = this.checkAvailability(
       locationData.city,
       locationData.pincode,
     );
@@ -157,7 +157,7 @@ detectedLocationSchema.statics.saveDetectedLocation = async function (
     const detectedLocation = new this({
       ...locationData,
       device_fingerprint: fingerprint,
-      is_available: isAvailable,
+      is_available: availabilityResult.is_available,
     });
 
     await detectedLocation.save();
