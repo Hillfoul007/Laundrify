@@ -631,45 +631,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({
 
               </div>
 
-              {/* Coupon Section */}
-              <div className="border-t pt-4">
-                <Label htmlFor="coupon" className="text-sm font-medium">
-                  Have a coupon?
-                </Label>
-                <div className="flex gap-2 mt-2">
-                  <Input
-                    id="coupon"
-                    placeholder="Enter coupon code"
-                    value={couponCode}
-                    onChange={(e) =>
-                      setCouponCode(e.target.value.toUpperCase())
-                    }
-                    disabled={!!appliedCoupon}
-                    className="flex-1"
-                  />
-                  {appliedCoupon ? (
-                    <Button variant="outline" onClick={removeCoupon} size="sm">
-                      Remove
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        applyCoupon();
-                      }}
-                      size="sm"
-                      type="button"
-                    >
-                      Apply
-                    </Button>
-                  )}
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  Try "NEW10" for 10% off or "FIRST30" for 30% off your first order!
-                </p>
-              </div>
+
 
               <div className="border-t pt-2">
                 <div className="flex justify-between font-semibold text-lg">
