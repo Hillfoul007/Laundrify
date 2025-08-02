@@ -96,9 +96,8 @@ const BookingFlow: React.FC<BookingFlowProps> = ({
     const deliveryCharge = getDeliveryCharge();
     const handlingFee = getHandlingFee();
     const subtotal = basePrice + deliveryCharge + handlingFee;
-    const couponDiscount = getCouponDiscount();
 
-    return Math.round((subtotal - couponDiscount) * 100) / 100;
+    return Math.round(subtotal * 100) / 100;
   };
 
   const applyCoupon = async () => {
