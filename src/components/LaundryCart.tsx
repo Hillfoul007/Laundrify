@@ -105,6 +105,8 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
     if (savedFormData.deliveryTime) setDeliveryTime(savedFormData.deliveryTime);
     if (savedFormData.additionalDetails)
       setSpecialInstructions(savedFormData.additionalDetails);
+    if (savedFormData.couponCode) setCouponCode(savedFormData.couponCode);
+    if (savedFormData.appliedCoupon) setAppliedCoupon(savedFormData.appliedCoupon);
 
   }, []);
 
@@ -516,7 +518,7 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
       // Handle location unavailable case
       if (locationUnavailable && addressData?.fullAddress) {
         console.log(
-          "�� Location not available for service:",
+          "🚫 Location not available for service:",
           addressData.fullAddress,
         );
         setUnavailableLocationText(addressData.fullAddress);
