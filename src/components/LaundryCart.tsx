@@ -599,32 +599,7 @@ Confirm this booking?`;
             console.log(`✅ Marked user ${userId} as having order history`);
           }
 
-          // Track coupon usage for general coupons
-          if (appliedCoupon) {
-            const sessionManager = SessionManager.getInstance();
-            const session = sessionManager.ensureValidSession();
-            const userId = session.userId || "guest";
 
-            if (appliedCoupon.isReferral) {
-              // Track referral usage
-              referralService.trackReferralUsage(
-                appliedCoupon.code,
-                userId,
-                getCouponDiscount(),
-              );
-              // Award bonus to referrer (this would normally be done on backend after payment confirmation)
-              referralService.awardReferralBonus(appliedCoupon.code);
-            } else {
-              // Track general coupon usage
-              couponService.markCouponAsUsed(
-                appliedCoupon.code,
-                userId,
-                getSubtotal(),
-                getCouponDiscount()
-              );
-              console.log(`✅ Marked coupon ${appliedCoupon.code} as used`);
-            }
-          }
 
           // Clear cart after successful booking
           console.log("🧹 Clearing cart after successful booking");
