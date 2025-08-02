@@ -530,45 +530,7 @@ class EnhancedApiClient {
     );
   }
 
-  // Referral endpoints
-  async validateReferralCode(code: string): Promise<ApiResponse<any>> {
-    return this.request(`/referrals/validate/${encodeURIComponent(code)}`);
-  }
 
-  async applyReferralCode(
-    referralCode: string,
-    userId: string,
-  ): Promise<ApiResponse<any>> {
-    return this.request("/referrals/apply", {
-      method: "POST",
-      body: { referralCode, userId },
-    });
-  }
-
-  async generateReferralCode(userId: string): Promise<ApiResponse<any>> {
-    return this.request("/referrals/generate", {
-      method: "POST",
-      body: { userId },
-    });
-  }
-
-  async getReferralStats(userId: string): Promise<ApiResponse<any>> {
-    return this.request(`/referrals/stats/${encodeURIComponent(userId)}`);
-  }
-
-  async getReferralShareLink(userId: string): Promise<ApiResponse<any>> {
-    return this.request(`/referrals/share-link/${encodeURIComponent(userId)}`);
-  }
-
-  async applyReferralDiscount(
-    bookingId: string,
-    userId: string,
-  ): Promise<ApiResponse<any>> {
-    return this.request("/referrals/apply-discount", {
-      method: "POST",
-      body: { bookingId, userId },
-    });
-  }
 
   // Clear all pending requests (useful for component unmount)
   clearPendingRequests(): void {
