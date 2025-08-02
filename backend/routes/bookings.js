@@ -60,6 +60,7 @@ router.post("/", async (req, res) => {
       total_price,
       discount_amount,
       final_amount,
+      coupon_code,
       special_instructions,
       charges_breakdown,
     } = req.body;
