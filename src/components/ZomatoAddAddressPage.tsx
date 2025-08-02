@@ -613,7 +613,7 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
       console.log(`🎯 Final location accuracy: ${coordinates.accuracy}m`);
 
       // FIXED: Prevent race conditions by using only ONE geocoding call
-      console.log("🔍 Getting detailed address components (single call to prevent race conditions)...");
+      console.log("�� Getting detailed address components (single call to prevent race conditions)...");
       const detailedComponents =
         await locationService.getDetailedAddressComponents(coordinates);
 
@@ -1360,14 +1360,23 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
 
     console.log("🔧 AFTER setState called");
 
-    // Force React re-render using functional updates
-    setTimeout(() => {
-      setFlatNo(prev => extractedFlatNo);
-      setStreet(prev => street);
-      setArea(prev => area);
-      setPincode(prev => extractedPincode);
-      console.log("🔄 Forced re-render with functional updates");
-    }, 10);
+    // Force React re-render using functional updates - immediate
+    setFlatNo(prev => {
+      console.log("🔄 FlatNo update:", prev, "->", extractedFlatNo);
+      return extractedFlatNo;
+    });
+    setStreet(prev => {
+      console.log("🔄 Street update:", prev, "->", street);
+      return street;
+    });
+    setArea(prev => {
+      console.log("🔄 Area update:", prev, "->", area);
+      return area;
+    });
+    setPincode(prev => {
+      console.log("🔄 Pincode update:", prev, "->", extractedPincode);
+      return extractedPincode;
+    });
 
     // Also update DOM directly as a fallback to ensure values are visible
     setTimeout(() => {
