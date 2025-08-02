@@ -556,38 +556,47 @@ const MobileBookingHistory: React.FC<MobileBookingHistoryProps> = ({
                 const defaultPrice = 0; // Will calculate from booking data
 
                 const mappedServices = services.map((service, index) => {
+                  let serviceName = "";
+                  let quantity = 1;
+                  let price = 0;
+
                   if (typeof service === "string") {
-                    return {
-                      name: service,
-                      quantity: 1,
-                      price: 0, // Will be calculated below
-                      id: `service_${index}`,
-                    };
+                    serviceName = service;
+                    quantity = 1;
+                    price = 0; // Will be calculated below
+                  } else if (typeof service === "object" && service) {
+                    serviceName = sanitizeValue(
+                      service.name || service.service,
+                      "Unknown Service",
+                    );
+                    quantity = typeof service.quantity === "number" ? service.quantity : 1;
+                    price = typeof service.price === "number"
+                      ? service.price
+                      : typeof service.amount === "number"
+                        ? service.amount
+                        : 0; // Will be calculated below if no price available
+                  } else {
+                    serviceName = String(service) || "Unknown Service";
+                    quantity = 1;
+                    price = 0; // Will be calculated below
                   }
-                  if (typeof service === "object" && service) {
-                    return {
-                      name: sanitizeValue(
-                        service.name || service.service,
-                        "Unknown Service",
-                      ),
-                      quantity:
-                        typeof service.quantity === "number"
-                          ? service.quantity
-                          : 1,
-                      price:
-                        typeof service.price === "number"
-                          ? service.price
-                          : typeof service.amount === "number"
-                            ? service.amount
-                            : 0, // Will be calculated below if no price available
-                      id: service.id || `service_${index}`,
-                    };
+
+                  // Extract quantity from service name if it contains "x<number>" pattern
+                  const quantityMatch = serviceName.match(/x(\d+)$/i);
+                  if (quantityMatch) {
+                    const extractedQuantity = parseInt(quantityMatch[1]);
+                    if (extractedQuantity > 0) {
+                      quantity = extractedQuantity;
+                      // Remove the quantity part from the service name for display
+                      serviceName = serviceName.replace(/\s*x\d+$/i, '').trim();
+                    }
                   }
+
                   return {
-                    name: String(service) || "Unknown Service",
-                    quantity: 1,
-                    price: 0, // Will be calculated below
-                    id: `service_${index}`,
+                    name: serviceName,
+                    quantity: quantity,
+                    price: price,
+                    id: (typeof service === "object" && service?.id) || `service_${index}`,
                   };
                 });
 
