@@ -842,12 +842,8 @@ Confirm this booking?`;
         localStorage.getItem(savedAddressesKey) || "[]",
       );
 
-      // Check if this address already exists
-      const addressExists = existingAddresses.some(
-        (addr: any) => addr.fullAddress === orderAddress.fullAddress,
-      );
-
-      if (!addressExists && orderAddress.fullAddress) {
+      // Always save the address from booking to maintain user history
+      if (orderAddress.fullAddress) {
         const newAddress = {
           ...orderAddress,
           id: `addr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
