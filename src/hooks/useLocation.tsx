@@ -50,7 +50,7 @@ export interface UseLocationReturn extends LocationState {
 
 const defaultOptions: UseLocationOptions = {
   enableHighAccuracy: true,
-  timeout: 10000,
+  timeout: 15000, // Increased timeout to give GPS more time
   maximumAge: 60000,
   watchPosition: false,
   autoGeocoding: true,
