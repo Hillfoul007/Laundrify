@@ -388,7 +388,7 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
 
       // Remove existing marker (works for both AdvancedMarkerElement and legacy Marker)
       if (marker) {
-        if (marker instanceof google.maps.marker.AdvancedMarkerElement) {
+        if (google.maps.marker?.AdvancedMarkerElement && marker instanceof google.maps.marker.AdvancedMarkerElement) {
           marker.map = null;
         } else if (marker instanceof google.maps.Marker) {
           marker.setMap(null);
@@ -1374,7 +1374,7 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
       return area;
     });
     setPincode(prev => {
-      console.log("🔄 Pincode update:", prev, "->", extractedPincode);
+      console.log("�� Pincode update:", prev, "->", extractedPincode);
       return extractedPincode;
     });
 
