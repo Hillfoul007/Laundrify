@@ -118,6 +118,8 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
       deliveryDate,
       deliveryTime,
       additionalDetails: specialInstructions,
+      couponCode,
+      appliedCoupon,
 
     });
   }, [
@@ -126,6 +128,8 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
     deliveryDate,
     deliveryTime,
     specialInstructions,
+    couponCode,
+    appliedCoupon,
   ]);
 
   // Listen for cart clearing events
