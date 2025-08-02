@@ -62,6 +62,7 @@ function App() {
               <Route path="/login" element={<ReferralLoginPage />} />
               <Route path="/refer" element={<ReferralLoginPage />} />
               <Route path="/address-demo" element={<AddressSearchDemo />} />
+              <Route path="/unified-auth-demo" element={<UnifiedAuthDemo />} />
               <Route
                 path="/admin/location-config"
                 element={<LocationConfigPage />}
