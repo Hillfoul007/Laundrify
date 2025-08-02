@@ -1,3 +1,11 @@
+/**
+ * Device Detection Service
+ *
+ * IMPORTANT: This service is for UI/UX purposes only.
+ * It does NOT affect authentication, caching, or core app behavior.
+ * All devices use the same unified authentication and caching logic.
+ */
+
 export interface DeviceInfo {
   isMobile: boolean;
   isTablet: boolean;
@@ -95,7 +103,9 @@ export class DeviceDetectionService {
   }
 
   /**
-   * Get authentication method recommendations
+   * Get authentication method recommendations (for UI suggestions only)
+   * NOTE: This does NOT affect actual authentication behavior -
+   * all devices use the same authentication logic
    */
   getAuthRecommendations(): {
     primary: "missedcall" | "email";
@@ -104,23 +114,24 @@ export class DeviceDetectionService {
   } {
     const deviceInfo = this.getDeviceInfo();
 
+    // These are just UI recommendations - actual auth behavior is unified
     if (deviceInfo.isMobile) {
       return {
         primary: "missedcall",
         secondary: "email",
-        message: "Quick login with missed call verification",
+        message: "Quick login with missed call verification (UI suggestion only)",
       };
     } else if (deviceInfo.isDesktop) {
       return {
         primary: "email",
         secondary: "missedcall",
-        message: "Secure login with email verification",
+        message: "Secure login with email verification (UI suggestion only)",
       };
     } else {
       return {
         primary: "email",
         secondary: "missedcall",
-        message: "Choose your preferred login method",
+        message: "Choose your preferred login method (UI suggestion only)",
       };
     }
   }
