@@ -403,7 +403,8 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
       if (
         mapId &&
         mapId.trim() !== "" &&
-        google.maps.marker?.AdvancedMarkerElement
+        google.maps.marker?.AdvancedMarkerElement &&
+        typeof google.maps.marker.AdvancedMarkerElement === 'function'
       ) {
         try {
           const markerContent = document.createElement("div");
