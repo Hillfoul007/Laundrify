@@ -1801,7 +1801,7 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
                   Delivery details
                 </h3>
                 <div className="flex gap-2">
-                  <Button
+{/*                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => {
@@ -1811,7 +1811,7 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
                     className="text-blue-600 hover:text-blue-700 text-sm px-2 py-1"
                   >
                     Test Fill
-                  </Button>
+                  </Button>  */}
                   <Button
                     variant="ghost"
                     size="sm"
