@@ -50,8 +50,8 @@ function App() {
           <div className="App">
             <Routes>
               <Route path="/" element={<LaundryIndex />} />
-              <Route path="/login" element={<ReferralLoginPage />} />
-              <Route path="/refer" element={<ReferralLoginPage />} />
+
+
               <Route path="/address-demo" element={<AddressSearchDemo />} />
               <Route
                 path="/admin/location-config"
