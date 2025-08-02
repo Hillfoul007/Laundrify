@@ -396,7 +396,7 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
           deliveryDate: deliveryDate?.toISOString(),
           deliveryTime,
           specialInstructions,
-          appliedCoupon,
+
           timestamp: Date.now(),
         };
         localStorage.setItem(
@@ -670,7 +670,7 @@ Confirm this booking?`;
           ),
         );
 
-        console.log("����� New address saved to backend and selected");
+        console.log("��� New address saved to backend and selected");
       } else {
         // Still save locally and proceed
         const addressWithId = {
@@ -950,7 +950,7 @@ Confirm this booking?`;
                         deliveryDate: deliveryDate?.toISOString(),
                         deliveryTime,
                         specialInstructions,
-                        appliedCoupon,
+              
                         timestamp: Date.now(),
                         redirectToAddress: true, // Flag to indicate address flow
                       };
