@@ -668,8 +668,6 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
       // Let the user manually search/select their location instead
       console.log("📍 Location detection failed - user will manually select location");
       
-      // Show helpful message to user instead of wrong city
-      alert("Location detection failed. Please search for your address manually in the search box above.");
     } finally {
       setIsDetectingLocation(false);
       setLocationAttempt(0);
