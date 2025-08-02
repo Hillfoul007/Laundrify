@@ -196,7 +196,7 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
               setSpecialInstructions(state.specialInstructions);
             if (state.appliedCoupon) setAppliedCoupon(state.appliedCoupon);
 
-            console.log("�� Restored checkout form state after login");
+            console.log("���� Restored checkout form state after login");
           }
           localStorage.removeItem("checkout_form_state");
         } catch (error) {
@@ -853,12 +853,17 @@ Confirm this booking?`;
           .trim();
       };
 
-      // Check if this address already exists (smart comparison)
+      // Check if this address already exists (smart comparison including type)
       const normalizedNewAddress = normalizeAddress(orderAddress.fullAddress);
+      const newAddressType = orderAddress.type || "other";
+
       const addressExists = existingAddresses.some((addr: any) => {
         if (!addr.fullAddress) return false;
         const normalizedExisting = normalizeAddress(addr.fullAddress);
-        return normalizedExisting === normalizedNewAddress;
+        const existingType = addr.type || "other";
+
+        // Same address AND same type = duplicate
+        return normalizedExisting === normalizedNewAddress && existingType === newAddressType;
       });
 
       // Only save if it's a genuinely different address
