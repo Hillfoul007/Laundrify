@@ -364,6 +364,13 @@ export class CouponService {
     userId: string,
     orderAmount: number = 0
   ): Promise<{ valid: boolean; coupon?: CouponData; error?: string }> {
+    // Check API health first
+    const isApiHealthy = await this.checkApiHealth();
+    if (!isApiHealthy) {
+      console.log('🏥 Coupon API unhealthy, using local validation');
+      return this.validateCouponLocal(couponCode, userId, orderAmount);
+    }
+
     try {
       const requestBody = JSON.stringify({
         couponCode,
