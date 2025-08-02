@@ -115,8 +115,6 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
     deliveryDate,
     deliveryTime,
     specialInstructions,
-    couponCode,
-    appliedCoupon,
   ]);
 
   // Listen for cart clearing events
@@ -814,7 +812,7 @@ Confirm this booking?`;
           ),
         );
 
-        console.log("✅ New address saved to backend and selected");
+        console.log("��� New address saved to backend and selected");
       } else {
         // Still save locally and proceed
         const addressWithId = {
