@@ -177,7 +177,7 @@ router.post("/", async (req, res) => {
 
     console.log("🔍 VALIDATION STEP 4: Checking final_amount...");
     console.log("💰 Final amount received:", final_amount);
-    console.log("📊 Final amount type:", typeof final_amount);
+    console.log("�� Final amount type:", typeof final_amount);
     console.log("📊 Final amount === undefined:", final_amount === undefined);
     console.log("📊 Final amount === null:", final_amount === null);
     console.log("📊 Final amount isNaN:", isNaN(final_amount));
@@ -564,8 +564,31 @@ router.post("/", async (req, res) => {
       console.log("💾 Saving booking address to addresses table...");
 
       if (sanitizedAddress && sanitizedAddress.length > 10 && customer._id) {
-        // Always save booking addresses to maintain user's address history
-        // Users may want multiple similar addresses (home, office, relatives, etc.)
+        // Function to normalize address for comparison
+        const normalizeAddress = (address) => {
+          return address
+            .toLowerCase()
+            .replace(/\s+/g, ' ') // Multiple spaces to single space
+            .replace(/,\s*,/g, ',') // Remove empty comma sections
+            .replace(/[.,\s]+$/, '') // Remove trailing punctuation and spaces
+            .replace(/^[.,\s]+/, '') // Remove leading punctuation and spaces
+            .trim();
+        };
+
+        // Check if this exact address already exists for the user
+        const normalizedNewAddress = normalizeAddress(sanitizedAddress);
+        const userAddresses = await Address.find({
+          user_id: customer._id,
+          status: "active",
+        });
+
+        const addressExists = userAddresses.some(addr => {
+          const normalizedExisting = normalizeAddress(addr.full_address);
+          return normalizedExisting === normalizedNewAddress;
+        });
+
+        // Only save if it's a genuinely different address
+        if (!addressExists) {
           // Parse address components from addressObject or sanitizedAddress
           let addressData = {
             user_id: customer._id,
@@ -612,6 +635,12 @@ router.post("/", async (req, res) => {
             "✅ Booking address saved to addresses table:",
             savedAddress._id,
           );
+        } else {
+          console.log(
+            "ℹ️ Address already exists (normalized), skipping save:",
+            normalizedNewAddress.substring(0, 50) + "...",
+          );
+        }
 
       } else {
         console.log(
