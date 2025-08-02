@@ -216,7 +216,7 @@ const LaundryIndex = () => {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const authService = DVHostingSmsService.getInstance();
   const pushService = PushNotificationService.getInstance();
-  const referralService = ReferralService.getInstance();
+
 
   // Initialize PWA and check auth state
   useEffect(() => {
