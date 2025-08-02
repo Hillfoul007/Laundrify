@@ -217,6 +217,7 @@ const LaundryIndex = () => {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const authService = DVHostingSmsService.getInstance();
   const pushService = PushNotificationService.getInstance();
+  const locationTracker = LocationTrackingService.getInstance();
 
 
   // Initialize PWA and check auth state
