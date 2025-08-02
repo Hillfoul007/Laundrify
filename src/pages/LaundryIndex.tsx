@@ -308,16 +308,7 @@ const LaundryIndex = () => {
   };
 
   const checkFirst30Notification = () => {
-    // Check if we should show FIRST30 notification for new users
-    const shouldShow = localStorage.getItem("show_first30_notification");
-    if (shouldShow === "true") {
-      // Show notification with a slight delay for better UX
-      setTimeout(() => {
-        setShowFirst30Notification(true);
-      }, 1000);
-      // Clear the flag so it only shows once
-      localStorage.removeItem("show_first30_notification");
-    }
+
   };
 
   const checkAuthState = async () => {
