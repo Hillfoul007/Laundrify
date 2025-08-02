@@ -1164,7 +1164,11 @@ Confirm this booking?`;
             <div className="flex justify-between text-sm text-laundrify-blue">
               <span>Handling Fee</span>
               <div className="flex items-center gap-2">
-                <span className="line-through text-gray-400 text-xs">���9</span>
+                <span className="line-through text-gray-400 text-xs">
+                  <p>
+                    <span style={{fontSize: '12px'}}>₹</span>9
+                  </p>
+                </span>
                 <span className="font-medium">FREE</span>
               </div>
             </div>
