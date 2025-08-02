@@ -276,6 +276,14 @@ export class AddressService {
               success: true,
               data: transformedAddresses,
             };
+          } else {
+            // Handle specific HTTP errors
+            if (response.status === 404) {
+              console.warn("⚠️ Address API endpoint not found (404). Backend may not have address routes deployed.");
+              console.warn("🔧 Using localStorage fallback for addresses");
+            } else {
+              console.warn(`⚠️ Backend returned ${response.status}: ${response.statusText}`);
+            }
           }
         } catch (error) {
           console.warn("⚠️ Backend fetch failed, using localStorage:", {
