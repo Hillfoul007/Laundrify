@@ -258,7 +258,8 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
       if (
         mapId &&
         mapId.trim() !== "" &&
-        google.maps.marker?.AdvancedMarkerElement
+        google.maps.marker?.AdvancedMarkerElement &&
+        typeof google.maps.marker.AdvancedMarkerElement === 'function'
       ) {
         try {
           const markerContent = document.createElement("div");
@@ -455,7 +456,7 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
             anchor: new google.maps.Point(16, 32),
           },
         });
-        console.log("��� Created regular Marker at:", coordinates);
+        console.log("���� Created regular Marker at:", coordinates);
       }
 
       // Add event listeners that work with both marker types
