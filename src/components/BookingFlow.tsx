@@ -234,7 +234,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({
           tax_amount:
             (calculateTotalPrice() + getDeliveryCharge() + getHandlingFee()) *
             0.12,
-          discount: getCouponDiscount(),
+
         },
         // For backward compatibility with different booking systems
         pickupDate: selectedDate.toISOString().split("T")[0],
