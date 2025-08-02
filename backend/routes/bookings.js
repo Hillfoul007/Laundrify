@@ -537,6 +537,12 @@ router.post("/", async (req, res) => {
     });
 
     console.log("🔍 SAVING BOOKING: About to save booking to database...");
+    console.log("🎫 Coupon Info:", {
+      coupon_code: coupon_code,
+      discount_amount: discount_amount,
+      total_price: total_price,
+      final_amount: final_amount,
+    });
 
     console.log(
       "📦 Final booking object (before save):",
