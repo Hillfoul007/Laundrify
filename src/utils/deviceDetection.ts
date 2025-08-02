@@ -1,3 +1,11 @@
+/**
+ * Device Detection Service
+ *
+ * IMPORTANT: This service is for UI/UX purposes only.
+ * It does NOT affect authentication, caching, or core app behavior.
+ * All devices use the same unified authentication and caching logic.
+ */
+
 export interface DeviceInfo {
   isMobile: boolean;
   isTablet: boolean;
