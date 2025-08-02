@@ -21,27 +21,35 @@ import "./styles/mobile-fixes.css";
 import "./styles/mobile-touch-fixes.css";
 
 function App() {
-  // Initialize authentication persistence and restore user session
+  // Initialize unified authentication and caching
   useEffect(() => {
-    const initializeAuth = async () => {
+    const initializeApp = async () => {
+      console.log('🚀 Initializing app with unified authentication and caching');
+
       // Auto-clear cart on deploy (only once)
-      const versionKey = "catalogue-version-v2";
+      const versionKey = "catalogue-version-v3-unified";
       if (!localStorage.getItem(versionKey)) {
         localStorage.removeItem("cart");
         localStorage.setItem(versionKey, "true");
+        console.log('🧹 Cart cleared for unified auth update');
       }
 
-      // Initialize auth persistence handlers (storage events, page lifecycle, etc.)
+      // Initialize unified auth persistence (replaces device-specific logic)
       initializeAuthPersistence();
 
       // Initialize PWA updates and service worker cleanup
       initializePWAUpdates();
 
-      // Restore authentication state from localStorage
-      await restoreAuthState();
+      // Restore authentication state using unified service
+      const restored = await restoreAuthState();
+      if (restored) {
+        console.log('✅ Unified authentication initialized successfully');
+      } else {
+        console.log('ℹ️ No existing session found - unified auth ready for new login');
+      }
     };
 
-    initializeAuth();
+    initializeApp();
   }, []);
 
   return (
