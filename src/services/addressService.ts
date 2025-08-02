@@ -378,8 +378,13 @@ export class AddressService {
               data: result.data || addressData,
             };
           } else {
-            const errorText = await response.text();
-            console.error(`❌ Backend save failed (${response.status}):`, errorText);
+            if (response.status === 404) {
+              console.warn("⚠️ Address API endpoint not found (404) for save operation");
+              console.warn("🔧 Backend may not have address routes deployed - using localStorage");
+            } else {
+              const errorText = await response.text();
+              console.error(`❌ Backend save failed (${response.status}):`, errorText);
+            }
             // Still try to save locally
           }
         } catch (error) {
