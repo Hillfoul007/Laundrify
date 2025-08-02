@@ -190,6 +190,14 @@ export class CouponService {
     orderAmount: number,
     discountAmount: number
   ): Promise<boolean> {
+    // Check API health first
+    const isApiHealthy = await this.checkApiHealth();
+    if (!isApiHealthy) {
+      console.log('🏥 Coupon API unhealthy, using local storage fallback');
+      this.markCouponAsUsedLocal(couponCode, userId, orderAmount, discountAmount);
+      return false;
+    }
+
     try {
       const requestBody = JSON.stringify({
         couponCode,
