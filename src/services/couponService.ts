@@ -156,16 +156,41 @@ export class CouponService {
   }
 
   /**
-   * Check if user has already used a specific coupon
+   * Check if user has already used a specific coupon (with multiple safeguards)
    */
   hasCouponBeenUsed(couponCode: string, userId: string): boolean {
     if (!userId) return false;
-    
+
+    // Check user-specific usage
     const usedCoupons = JSON.parse(
       localStorage.getItem(`used_coupons_${userId}`) || "[]",
     ) as CouponUsage[];
-    
-    return usedCoupons.some(usage => usage.code === couponCode);
+
+    const hasUsedSpecific = usedCoupons.some(usage => usage.code === couponCode);
+
+    // Additional safeguard: Check if FIRST30/FIRST10 has been used across all guest sessions
+    // to prevent guest ID switching abuse
+    if ((couponCode === "FIRST30" || couponCode === "FIRST10") && userId.startsWith('guest_')) {
+      const allKeys = Object.keys(localStorage);
+      const hasUsedAcrossGuests = allKeys.some(key => {
+        if (key.startsWith('used_coupons_guest_')) {
+          try {
+            const coupons = JSON.parse(localStorage.getItem(key) || '[]');
+            return coupons.some((usage: any) => usage.code === couponCode);
+          } catch (e) {
+            return false;
+          }
+        }
+        return false;
+      });
+
+      if (hasUsedAcrossGuests) {
+        console.log(`🚫 Detected ${couponCode} usage across guest sessions - preventing reuse`);
+        return true;
+      }
+    }
+
+    return hasUsedSpecific;
   }
 
   /**
