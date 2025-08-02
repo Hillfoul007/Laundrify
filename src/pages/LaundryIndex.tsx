@@ -575,15 +575,15 @@ const LaundryIndex = () => {
             : cartData.address?.fullAddress || "",
         coordinates: cartData.address?.coordinates || { lat: 0, lng: 0 },
         additional_details: cartData.instructions || "",
-        total_price: cartData.totalAmount,
-        discount_amount: 0,
+        total_price: cartData.original_total || cartData.totalAmount,
+        discount_amount: cartData.discount_amount || 0,
         final_amount: cartData.totalAmount,
         special_instructions: cartData.instructions || "",
-        charges_breakdown: {
-          base_price: cartData.totalAmount,
-          tax_amount: 0,
-          service_fee: 0,
-          discount: 0,
+        charges_breakdown: cartData.charges_breakdown || {
+          base_price: cartData.original_total || cartData.totalAmount,
+          delivery_fee: 0,
+          handling_fee: 0,
+          discount: cartData.discount_amount || 0,
         },
         // Save item prices for accurate booking history display
         item_prices: itemPrices,
