@@ -177,7 +177,7 @@ const bookingSchema = new mongoose.Schema(
       },
       handling_fee: {
         type: Number,
-        default: 9,
+        default: 0,
       },
       discount: {
         type: Number,
