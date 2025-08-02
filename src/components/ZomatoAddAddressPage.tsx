@@ -461,7 +461,7 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
       }
 
       // Add event listeners that work with both marker types
-      if (newMarker instanceof google.maps.marker.AdvancedMarkerElement) {
+      if (google.maps.marker?.AdvancedMarkerElement && newMarker instanceof google.maps.marker.AdvancedMarkerElement) {
         // For AdvancedMarkerElement
         newMarker.addListener("dragstart", () => {
           // Visual feedback for advanced marker
@@ -1374,7 +1374,7 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
       return area;
     });
     setPincode(prev => {
-      console.log("�� Pincode update:", prev, "->", extractedPincode);
+      console.log("🔄 Pincode update:", prev, "->", extractedPincode);
       return extractedPincode;
     });
 
