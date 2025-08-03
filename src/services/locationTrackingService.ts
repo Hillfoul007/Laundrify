@@ -53,12 +53,34 @@ export class LocationTrackingService {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        let errorData = {};
+        try {
+          const responseText = await response.text();
+          if (responseText.trim()) {
+            errorData = JSON.parse(responseText);
+          } else {
+            errorData = { error: `HTTP ${response.status}: ${response.statusText}` };
+          }
+        } catch (parseError) {
+          errorData = { error: `HTTP ${response.status}: Failed to parse error response` };
+        }
         console.error('Failed to save anonymous location:', errorData);
         return false;
       }
 
-      const result = await response.json();
+      let result = {};
+      try {
+        const responseText = await response.text();
+        if (responseText.trim()) {
+          result = JSON.parse(responseText);
+        } else {
+          result = { success: true, message: 'Location saved successfully' };
+        }
+      } catch (parseError) {
+        console.warn('Response was not JSON, but request succeeded');
+        result = { success: true, message: 'Location saved successfully' };
+      }
+
       console.log('✅ Anonymous location saved successfully:', result);
       return true;
     } catch (error) {
@@ -98,12 +120,34 @@ export class LocationTrackingService {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        let errorData = {};
+        try {
+          const responseText = await response.text();
+          if (responseText.trim()) {
+            errorData = JSON.parse(responseText);
+          } else {
+            errorData = { error: `HTTP ${response.status}: ${response.statusText}` };
+          }
+        } catch (parseError) {
+          errorData = { error: `HTTP ${response.status}: Failed to parse error response` };
+        }
         console.error('Failed to save logged-in user location:', errorData);
         return false;
       }
 
-      const result = await response.json();
+      let result = {};
+      try {
+        const responseText = await response.text();
+        if (responseText.trim()) {
+          result = JSON.parse(responseText);
+        } else {
+          result = { success: true, message: 'Location saved successfully' };
+        }
+      } catch (parseError) {
+        console.warn('Response was not JSON, but request succeeded');
+        result = { success: true, message: 'Location saved successfully' };
+      }
+
       console.log('✅ Logged-in user location saved successfully:', result);
       return true;
     } catch (error) {
