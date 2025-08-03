@@ -668,7 +668,7 @@ export class DVHostingSmsService {
     } catch (error) {
       console.error("Error getting current user:", error);
       // Never clear data on errors - try to preserve whatever we can
-      console.warn("🔒 Error parsing user data, but preserving session");
+      console.warn("���� Error parsing user data, but preserving session");
 
       // Try to return a basic user object if localStorage has data
       const userStr =
@@ -786,8 +786,11 @@ export class DVHostingSmsService {
             "Cache-Control": "no-cache",
           },
           credentials: 'include', // Required for Clear-Site-Data header to work
-        }).catch(() => {
-          // Ignore backend errors during logout
+          mode: 'cors', // Explicitly set CORS mode
+          timeout: 5000 // Add timeout
+        }).catch((error) => {
+          // Silently ignore backend errors during logout - local logout is sufficient
+          console.log("ℹ️ Backend logout failed (offline mode):", error.message);
         });
       }
 
