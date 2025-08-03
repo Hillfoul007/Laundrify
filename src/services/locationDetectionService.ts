@@ -1,4 +1,4 @@
-import { config } from "../config/env";
+import { config, getApiUrl, shouldUseBackend } from "../config/env";
 
 export interface DetectedLocationData {
   full_address: string;
@@ -32,8 +32,8 @@ export class LocationDetectionService {
   private apiBaseUrl: string;
 
   constructor() {
-    // Use relative path for proxy compatibility in development
-    this.apiBaseUrl = config.isProduction ? config.apiBaseUrl : "/api";
+    // Use centralized API URL configuration
+    this.apiBaseUrl = shouldUseBackend() ? getApiUrl() : null;
   }
 
   public static getInstance(): LocationDetectionService {
@@ -99,8 +99,8 @@ export class LocationDetectionService {
       // Always perform local check as primary method for consistency
       console.log("🔍 Checking location availability:", { city, pincode, fullAddress });
 
-      if (!this.apiBaseUrl || this.apiBaseUrl === "" || config.isProduction) {
-        // Use local check for consistency across all environments
+      if (!this.apiBaseUrl || !shouldUseBackend()) {
+        // Use local check when backend is not available
         const localResult = this.checkAvailabilityLocal(city, pincode, coordinates);
         console.log("📍 Local availability check result:", localResult);
         return localResult;
