@@ -685,6 +685,9 @@ export class DVHostingSmsService {
   setCurrentUser(user: any, token?: string): void {
     try {
       if (user) {
+        // Clear logout flag when user logs in
+        localStorage.removeItem("intentional_logout");
+
         // Store in both keys for backward compatibility
         localStorage.setItem("cleancare_user", JSON.stringify(user));
         localStorage.setItem("current_user", JSON.stringify(user));
