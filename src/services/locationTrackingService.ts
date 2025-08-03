@@ -32,6 +32,11 @@ export class LocationTrackingService {
   async saveAnonymousLocation(locationData: LocationData): Promise<boolean> {
     try {
       console.log('📍 Saving anonymous location:', locationData);
+      console.log('🔍 Backend availability check:', {
+        shouldUseBackend: shouldUseBackend(),
+        hostname: window.location.hostname,
+        apiUrl: getApiUrl()
+      });
 
       // Check if backend is available
       if (!shouldUseBackend()) {
