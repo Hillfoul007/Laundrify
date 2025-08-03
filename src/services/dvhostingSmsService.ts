@@ -762,6 +762,14 @@ export class DVHostingSmsService {
       this.currentPhone = "";
       this.otpStorage.clear();
 
+      // Clear IndexedDB for iOS devices
+      if (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+          (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)) {
+        this.clearIosIndexedDB().catch(error => {
+          console.warn("Failed to clear iOS IndexedDB:", error);
+        });
+      }
+
       // Call backend logout for session clearing (only if backend is available)
       const apiBaseUrl = this.getApiBaseUrl();
       if (apiBaseUrl) {
@@ -777,7 +785,7 @@ export class DVHostingSmsService {
         });
       }
 
-      this.log("✅ User logged out successfully");
+      console.log("✅ Comprehensive logout completed - all authentication data cleared");
     } catch (error) {
       console.error("Error during logout:", error);
     }
@@ -926,7 +934,7 @@ export class DVHostingSmsService {
       const user = this.getCurrentUser();
       return user?._id || user?.id || null;
     } catch (error) {
-      this.log("⚠�� Error getting user MongoDB ID:", error);
+      this.log("⚠️ Error getting user MongoDB ID:", error);
       return null;
     }
   }
