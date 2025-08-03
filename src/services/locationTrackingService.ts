@@ -116,6 +116,17 @@ export class LocationTrackingService {
       return true;
     } catch (error) {
       console.error('Error saving anonymous location:', error);
+
+      // If it's a network error, save locally as fallback
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        console.log('🌐 Network error detected, saving location locally as fallback');
+        localStorage.setItem('last_detected_location', JSON.stringify({
+          ...locationData,
+          timestamp: new Date().toISOString()
+        }));
+        return true; // Return success since we saved locally
+      }
+
       return false;
     }
   }
