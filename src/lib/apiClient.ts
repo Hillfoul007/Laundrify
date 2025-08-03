@@ -23,7 +23,7 @@ class EnhancedApiClient {
   private requestQueue: Map<string, Promise<any>> = new Map();
 
   constructor(baseURL: string) {
-    this.baseURL = baseURL.replace(/\/$/, ""); // Remove trailing slash
+    this.baseURL = (baseURL || "").replace(/\/$/, ""); // Remove trailing slash, handle undefined
     this.token = localStorage.getItem("auth_token");
   }
 
