@@ -62,14 +62,17 @@ export const getApiUrl = (): string => {
 // Check if backend is available (for hosted environments)
 export const shouldUseBackend = (): boolean => {
   const hostname = window.location.hostname;
-  
+
   // Disable backend for certain hosted environments that don't have backend
   if (hostname.includes("fly.dev") && !hostname.includes("backend")) {
     return false;
   }
-  
+
   return true;
 };
+
+// Backward compatibility alias
+export const isBackendAvailable = shouldUseBackend;
 
 // Environment variables
 export const ENV_CONFIG = {
