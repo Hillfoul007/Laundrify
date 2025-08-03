@@ -729,6 +729,9 @@ export class DVHostingSmsService {
 
   logout(): void {
     try {
+      // Set logout flag to prevent automatic restoration
+      localStorage.setItem("intentional_logout", "true");
+
       // Clear all auth-related localStorage
       localStorage.removeItem("current_user");
       localStorage.removeItem("cleancare_user");
