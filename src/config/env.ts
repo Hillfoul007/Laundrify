@@ -119,4 +119,6 @@ export const getAuthHeaders = () => {
   };
 };
 
+// Export as both 'config' and 'ENV_CONFIG' for compatibility
+export const config = ENV_CONFIG;
 export default ENV_CONFIG;
