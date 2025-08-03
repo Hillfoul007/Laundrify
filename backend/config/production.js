@@ -24,7 +24,7 @@ const config = {
     ? process.env.ALLOWED_ORIGINS.split(",")
     : [
         // Primary production URLs
-        "https://www.laundrify.online"
+        "https://www.laundrify.online",
         "https://laundrify-app-5su7.onrender.com",
         "https://testversion.onrender.com",
         "https://cleancarepro-1-p2oc.onrender.com",
