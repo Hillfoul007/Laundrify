@@ -1,4 +1,4 @@
-import { isBackendAvailable } from "../config/env";
+import { isBackendAvailable, getApiUrl } from "../config/env";
 
 interface User {
   _id?: string;
@@ -19,8 +19,7 @@ interface OTPResponse {
 
 export class OTPAuthService {
   private static instance: OTPAuthService;
-  private apiBaseUrl =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api";
+  private apiBaseUrl = getApiUrl();
 
   public static getInstance(): OTPAuthService {
     if (!OTPAuthService.instance) {
