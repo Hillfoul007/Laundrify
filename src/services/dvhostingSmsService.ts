@@ -732,18 +732,7 @@ export class DVHostingSmsService {
 
   logout(): void {
     try {
-<<<<<<< HEAD
-      // Set logout flag to prevent automatic restoration
-      localStorage.setItem("intentional_logout", "true");
-
-      // Clear all auth-related localStorage
-      localStorage.removeItem("current_user");
-      localStorage.removeItem("cleancare_user");
-      localStorage.removeItem("cleancare_auth_token");
-      localStorage.removeItem("auth_token");
-=======
       console.log("🚪 Starting comprehensive logout...");
->>>>>>> 5a874f797a1a21c07fc3249c72398ba701a9fb06
 
       // Set logout flag to prevent automatic session restoration
       localStorage.setItem("explicit_logout", "true");
