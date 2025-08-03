@@ -137,18 +137,11 @@ export const initializeAuthPersistence = () => {
  */
 export const restoreAuthState = async (): Promise<boolean> => {
   try {
-<<<<<<< HEAD
-    // Check if user intentionally logged out
-    const intentionalLogout = localStorage.getItem("intentional_logout");
-    if (intentionalLogout === "true") {
-      console.log("🚪 Intentional logout detected - skipping auth restoration");
-=======
     // Check if user explicitly logged out
     const explicitLogout = localStorage.getItem("explicit_logout");
     if (explicitLogout === "true") {
       console.log("🚪 User explicitly logged out - not restoring session");
       localStorage.removeItem("explicit_logout"); // Clear the flag
->>>>>>> 5a874f797a1a21c07fc3249c72398ba701a9fb06
       return false;
     }
 
