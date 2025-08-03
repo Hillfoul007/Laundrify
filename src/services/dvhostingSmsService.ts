@@ -966,6 +966,33 @@ export class DVHostingSmsService {
       return false;
     }
   }
+
+  /**
+   * Clear IndexedDB data for iOS devices during logout
+   */
+  private async clearIosIndexedDB(): Promise<void> {
+    try {
+      // Clear the iOS auth IndexedDB
+      const deleteDB = (dbName: string) => {
+        return new Promise<void>((resolve, reject) => {
+          const deleteRequest = indexedDB.deleteDatabase(dbName);
+          deleteRequest.onsuccess = () => resolve();
+          deleteRequest.onerror = () => reject(deleteRequest.error);
+          deleteRequest.onblocked = () => {
+            console.warn(`IndexedDB deletion blocked for: ${dbName}`);
+            resolve(); // Don't fail, just warn
+          };
+        });
+      };
+
+      // Clear known iOS auth databases
+      await deleteDB('ios_auth_storage');
+      await deleteDB('ios_backup_auth');
+      console.log("🍎 iOS IndexedDB cleared");
+    } catch (error) {
+      console.warn("Failed to clear iOS IndexedDB:", error);
+    }
+  }
 }
 
 export default DVHostingSmsService;
