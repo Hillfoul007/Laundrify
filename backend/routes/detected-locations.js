@@ -68,9 +68,12 @@ router.post("/", async (req, res) => {
 // Check location availability
 router.post("/check-availability", async (req, res) => {
   try {
-    const { city, pincode, full_address } = req.body;
+    const { city, pincode, full_address, coordinates } = req.body;
+
+    console.log("🔍 Availability check request:", { city, pincode, full_address, coordinates });
 
     if (!city) {
+      console.log("❌ City is required");
       return res.status(400).json({
         success: false,
         error: "City is required",
@@ -78,6 +81,7 @@ router.post("/check-availability", async (req, res) => {
     }
 
     const availabilityResult = DetectedLocation.checkAvailability(city, pincode);
+    console.log("✅ Availability result:", availabilityResult);
 
     res.json({
       success: true,
@@ -85,10 +89,16 @@ router.post("/check-availability", async (req, res) => {
       message: availabilityResult.message,
     });
   } catch (error) {
-    console.error("Error checking availability:", error);
+    console.error("❌ Error checking availability:", error);
+    console.error("Error details:", {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    });
     res.status(500).json({
       success: false,
       error: "Failed to check availability",
+      details: error.message,
     });
   }
 });
