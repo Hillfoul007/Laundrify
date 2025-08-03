@@ -1,15 +1,15 @@
 // Production configuration settings
 // This file contains all production-specific configurations
 
+import { getApiUrl, ENV_CONFIG } from './env';
+
 export const PRODUCTION_CONFIG = {
   // Environment
   NODE_ENV: import.meta.env.VITE_NODE_ENV || "production",
   IS_PRODUCTION: import.meta.env.VITE_NODE_ENV === "production",
 
-  // API Configuration
-  API_BASE_URL:
-    import.meta.env.VITE_API_BASE_URL ||
-    "https://backend-vaxf.onrender.com/api",
+  // API Configuration - now uses centralized config
+  API_BASE_URL: getApiUrl(),
 
   // Authentication
   AUTH_TOKEN_KEY: "laundrify_token",
@@ -61,7 +61,7 @@ export const PRODUCTION_CONFIG = {
 export const isProduction = () => PRODUCTION_CONFIG.IS_PRODUCTION;
 
 export const getApiUrl = (endpoint: string) => {
-  const baseUrl = PRODUCTION_CONFIG.API_BASE_URL.replace(/\/+$/, "");
+  const baseUrl = getApiUrl().replace(/\/+$/, "");
   const cleanEndpoint = endpoint.replace(/^\/+/, "");
   return `${baseUrl}/${cleanEndpoint}`;
 };
