@@ -201,15 +201,20 @@ export class LocationTrackingService {
     try {
       const storedData = localStorage.getItem('pending_location_data');
       if (storedData) {
-        const locationData = JSON.parse(storedData);
-        // Check if data is not too old (within 24 hours)
-        const timestamp = new Date(locationData.timestamp);
-        const now = new Date();
-        const hoursDiff = (now.getTime() - timestamp.getTime()) / (1000 * 60 * 60);
-        
-        if (hoursDiff < 24) {
-          return locationData;
-        } else {
+        try {
+          const locationData = JSON.parse(storedData);
+          // Check if data is not too old (within 24 hours)
+          const timestamp = new Date(locationData.timestamp);
+          const now = new Date();
+          const hoursDiff = (now.getTime() - timestamp.getTime()) / (1000 * 60 * 60);
+
+          if (hoursDiff < 24) {
+            return locationData;
+          } else {
+            localStorage.removeItem('pending_location_data');
+          }
+        } catch (parseError) {
+          console.warn('Failed to parse stored location data, removing:', parseError);
           localStorage.removeItem('pending_location_data');
         }
       }
