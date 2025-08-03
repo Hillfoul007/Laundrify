@@ -63,7 +63,12 @@ export const getApiUrl = (): string => {
 export const shouldUseBackend = (): boolean => {
   const hostname = window.location.hostname;
 
-  // Disable backend for certain hosted environments that don't have backend
+  // Allow backend for your specific app domain
+  if (hostname.includes("856f989be1cb4050ba0283a2e091d533-f5a549ca82f54c089dcd22f9b.fly.dev")) {
+    return true;
+  }
+
+  // Disable backend for other fly.dev environments that don't have backend
   if (hostname.includes("fly.dev") && !hostname.includes("backend")) {
     return false;
   }
