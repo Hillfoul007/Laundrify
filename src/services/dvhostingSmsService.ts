@@ -732,6 +732,7 @@ export class DVHostingSmsService {
 
   logout(): void {
     try {
+<<<<<<< HEAD
       // Set logout flag to prevent automatic restoration
       localStorage.setItem("intentional_logout", "true");
 
@@ -740,13 +741,51 @@ export class DVHostingSmsService {
       localStorage.removeItem("cleancare_user");
       localStorage.removeItem("cleancare_auth_token");
       localStorage.removeItem("auth_token");
+=======
+      console.log("🚪 Starting comprehensive logout...");
+>>>>>>> 5a874f797a1a21c07fc3249c72398ba701a9fb06
 
-      // Clear sessionStorage for iOS compatibility
+      // Set logout flag to prevent automatic session restoration
+      localStorage.setItem("explicit_logout", "true");
+
+      // Clear ALL auth-related localStorage keys
+      const authKeys = [
+        "current_user", "cleancare_user",
+        "auth_token", "cleancare_auth_token", "cleancare_token",
+        "ios_backup_user", "ios_backup_token", "ios_auth_timestamp",
+        "user_bookings", "last_detected_location", "user_location_data",
+        "pending_location_data"
+      ];
+
+      authKeys.forEach(key => {
+        localStorage.removeItem(key);
+        console.log(`🗑️ Cleared: ${key}`);
+      });
+
+      // Clear any user-specific keys (phone-based)
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('user_') || key.startsWith('used_coupons_') ||
+            key.startsWith('has_ordered_') || key.includes('_token_')) {
+          localStorage.removeItem(key);
+          console.log(`🗑️ Cleared user-specific: ${key}`);
+        }
+      });
+
+      // Clear sessionStorage completely
       sessionStorage.clear();
+      console.log("🗑️ Cleared sessionStorage");
 
       // Clear current phone and OTP storage
       this.currentPhone = "";
       this.otpStorage.clear();
+
+      // Clear IndexedDB for iOS devices
+      if (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+          (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)) {
+        this.clearIosIndexedDB().catch(error => {
+          console.warn("Failed to clear iOS IndexedDB:", error);
+        });
+      }
 
       // Call backend logout for session clearing (only if backend is available)
       const apiBaseUrl = this.getApiBaseUrl();
@@ -763,7 +802,7 @@ export class DVHostingSmsService {
         });
       }
 
-      this.log("✅ User logged out successfully");
+      console.log("✅ Comprehensive logout completed - all authentication data cleared");
     } catch (error) {
       console.error("Error during logout:", error);
     }
@@ -949,6 +988,33 @@ export class DVHostingSmsService {
     } catch (error) {
       this.log("⚠️ Session restore failed:", error);
       return false;
+    }
+  }
+
+  /**
+   * Clear IndexedDB data for iOS devices during logout
+   */
+  private async clearIosIndexedDB(): Promise<void> {
+    try {
+      // Clear the iOS auth IndexedDB
+      const deleteDB = (dbName: string) => {
+        return new Promise<void>((resolve, reject) => {
+          const deleteRequest = indexedDB.deleteDatabase(dbName);
+          deleteRequest.onsuccess = () => resolve();
+          deleteRequest.onerror = () => reject(deleteRequest.error);
+          deleteRequest.onblocked = () => {
+            console.warn(`IndexedDB deletion blocked for: ${dbName}`);
+            resolve(); // Don't fail, just warn
+          };
+        });
+      };
+
+      // Clear known iOS auth databases
+      await deleteDB('ios_auth_storage');
+      await deleteDB('ios_backup_auth');
+      console.log("🍎 iOS IndexedDB cleared");
+    } catch (error) {
+      console.warn("Failed to clear iOS IndexedDB:", error);
     }
   }
 }
