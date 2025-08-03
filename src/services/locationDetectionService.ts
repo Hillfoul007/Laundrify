@@ -123,10 +123,14 @@ export class LocationDetectionService {
       );
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+        console.warn(`❌ Backend availability check failed (${response.status}), falling back to local check`);
+        const localResult = this.checkAvailabilityLocal(city, pincode, coordinates);
+        console.log("📍 Fallback local availability check result:", localResult);
+        return localResult;
       }
 
       const result = await response.json();
+      console.log("✅ Backend availability check result:", result);
       return result;
     } catch (error) {
       console.error("❌ Failed to check availability:", error);
