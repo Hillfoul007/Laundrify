@@ -15,6 +15,7 @@ import {
   restoreAuthState,
 } from "@/utils/authPersistence";
 import { initializePWAUpdates } from "@/utils/swCleanup";
+import "@/utils/testEnvironment"; // Auto-run environment tests in development
 import "./App.css";
 import "./styles/mobile-fixes.css";
 import "./styles/mobile-touch-fixes.css";
