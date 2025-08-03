@@ -62,13 +62,19 @@ export class LocationTrackingService {
       };
 
       const apiUrl = getApiUrl();
-      const response = await fetch(`${apiUrl}/detected-locations`, {
+      const fullUrl = `${apiUrl}/detected-locations`;
+      console.log('��� Making API call to:', fullUrl);
+      console.log('📤 Request data:', requestData);
+
+      const response = await fetch(fullUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(requestData),
       });
+
+      console.log('📥 Response status:', response.status, response.statusText);
 
       if (!response.ok) {
         let errorData = {};
