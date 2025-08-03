@@ -79,7 +79,32 @@ app.use("/api/auth", (req, res, next) => {
 // CORS configuration - Enhanced for iOS Safari compatibility
 app.use(
   cors({
-    origin: productionConfig.ALLOWED_ORIGINS,
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+
+      // Check if the origin is in our allowed list
+      if (productionConfig.ALLOWED_ORIGINS.indexOf(origin) !== -1) {
+        return callback(null, true);
+      }
+
+      // Also check for wildcard patterns
+      const isAllowed = productionConfig.ALLOWED_ORIGINS.some(allowedOrigin => {
+        if (allowedOrigin.includes('*')) {
+          const pattern = allowedOrigin.replace(/\*/g, '.*');
+          const regex = new RegExp(`^${pattern}$`);
+          return regex.test(origin);
+        }
+        return false;
+      });
+
+      if (isAllowed) {
+        return callback(null, true);
+      }
+
+      console.log(`🚫 CORS blocked origin: ${origin}`);
+      return callback(new Error('Not allowed by CORS'));
+    },
     credentials: true, // Enable credentials for iOS
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allowedHeaders: [
@@ -90,6 +115,8 @@ app.use(
       "Cache-Control", // Add Cache-Control header support
       "Pragma",
       "Expires",
+      "X-Requested-With",
+      "Access-Control-Allow-Origin"
     ],
     exposedHeaders: ["Clear-Site-Data"], // Expose clear site data header
     optionsSuccessStatus: 200, // Support legacy browsers
