@@ -60,8 +60,8 @@ export const PRODUCTION_CONFIG = {
 // Helper functions
 export const isProduction = () => PRODUCTION_CONFIG.IS_PRODUCTION;
 
-export const getApiUrl = (endpoint: string) => {
-  const baseUrl = getApiUrl().replace(/\/+$/, "");
+export const buildApiEndpoint = (endpoint: string) => {
+  const baseUrl = PRODUCTION_CONFIG.API_BASE_URL.replace(/\/+$/, "");
   const cleanEndpoint = endpoint.replace(/^\/+/, "");
   return `${baseUrl}/${cleanEndpoint}`;
 };
