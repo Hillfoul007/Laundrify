@@ -31,9 +31,9 @@ export const initializeAuthPersistence = () => {
 
   // Handle storage events (syncing auth across tabs) - with safeguards to prevent auto-logout
   window.addEventListener("storage", (event) => {
-    // Skip processing if user intentionally logged out
-    if (localStorage.getItem("intentional_logout") === "true") {
-      console.log("🚪 Intentional logout detected - ignoring storage events");
+    // Skip processing if user explicitly logged out
+    if (localStorage.getItem("explicit_logout") === "true") {
+      console.log("🚪 Explicit logout detected - ignoring storage events");
       return;
     }
 

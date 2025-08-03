@@ -686,7 +686,7 @@ export class DVHostingSmsService {
     try {
       if (user) {
         // Clear logout flag when user logs in
-        localStorage.removeItem("intentional_logout");
+        localStorage.removeItem("explicit_logout");
 
         // Store in both keys for backward compatibility
         localStorage.setItem("cleancare_user", JSON.stringify(user));
@@ -951,10 +951,10 @@ export class DVHostingSmsService {
    */
   async restoreSession(): Promise<boolean> {
     try {
-      // Check if user intentionally logged out
-      const intentionalLogout = localStorage.getItem("intentional_logout");
-      if (intentionalLogout === "true") {
-        this.log("🚪 Intentional logout detected - skipping session restoration");
+      // Check if user explicitly logged out
+      const explicitLogout = localStorage.getItem("explicit_logout");
+      if (explicitLogout === "true") {
+        this.log("🚪 Explicit logout detected - skipping session restoration");
         return false;
       }
 
