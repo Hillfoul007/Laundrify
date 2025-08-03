@@ -32,7 +32,17 @@ export class LocationTrackingService {
   async saveAnonymousLocation(locationData: LocationData): Promise<boolean> {
     try {
       console.log('📍 Saving anonymous location:', locationData);
-      
+
+      // Check if backend is available
+      if (!shouldUseBackend()) {
+        console.log('🌐 Backend not available, saving location locally only');
+        localStorage.setItem('last_detected_location', JSON.stringify({
+          ...locationData,
+          timestamp: new Date().toISOString()
+        }));
+        return true;
+      }
+
       const requestData = {
         full_address: locationData.fullAddress || `${locationData.latitude}, ${locationData.longitude}`,
         city: locationData.city || 'Unknown',
@@ -46,7 +56,8 @@ export class LocationTrackingService {
         detection_method: locationData.detectionMethod || 'gps',
       };
 
-      const response = await fetch('/api/detected-locations', {
+      const apiUrl = getApiUrl();
+      const response = await fetch(`${apiUrl}/detected-locations`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -95,7 +106,17 @@ export class LocationTrackingService {
   async saveLoggedInUserLocation(userLocationData: UserLocationData): Promise<boolean> {
     try {
       console.log('👤 Saving logged-in user location:', userLocationData);
-      
+
+      // Check if backend is available
+      if (!shouldUseBackend()) {
+        console.log('🌐 Backend not available, saving user location locally only');
+        localStorage.setItem('user_location_data', JSON.stringify({
+          ...userLocationData,
+          timestamp: new Date().toISOString()
+        }));
+        return true;
+      }
+
       const requestData = {
         user_id: userLocationData.userId,
         phone: userLocationData.phone,
@@ -113,7 +134,8 @@ export class LocationTrackingService {
         session_id: userLocationData.sessionId || '',
       };
 
-      const response = await fetch('/api/detected-locations/logged-user', {
+      const apiUrl = getApiUrl();
+      const response = await fetch(`${apiUrl}/detected-locations/logged-user`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
