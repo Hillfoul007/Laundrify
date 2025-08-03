@@ -63,8 +63,11 @@ export class LocationTrackingService {
 
       const apiUrl = getApiUrl();
       const fullUrl = `${apiUrl}/detected-locations`;
-      console.log('��� Making API call to:', fullUrl);
+      console.log('🚀 Making API call to:', fullUrl);
       console.log('📤 Request data:', requestData);
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
       const response = await fetch(fullUrl, {
         method: 'POST',
@@ -72,8 +75,12 @@ export class LocationTrackingService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(requestData),
+        signal: controller.signal,
+        mode: 'cors',
+        credentials: 'include'
       });
 
+      clearTimeout(timeoutId);
       console.log('📥 Response status:', response.status, response.statusText);
 
       if (!response.ok) {
