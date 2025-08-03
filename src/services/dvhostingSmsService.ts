@@ -920,6 +920,13 @@ export class DVHostingSmsService {
    */
   async restoreSession(): Promise<boolean> {
     try {
+      // Check if user intentionally logged out
+      const intentionalLogout = localStorage.getItem("intentional_logout");
+      if (intentionalLogout === "true") {
+        this.log("🚪 Intentional logout detected - skipping session restoration");
+        return false;
+      }
+
       const localUser = this.getCurrentUser();
       if (!localUser || !localUser.phone) {
         return false;
