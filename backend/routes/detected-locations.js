@@ -77,14 +77,12 @@ router.post("/check-availability", async (req, res) => {
       });
     }
 
-    const isAvailable = DetectedLocation.checkAvailability(city, pincode);
+    const availabilityResult = DetectedLocation.checkAvailability(city, pincode);
 
     res.json({
       success: true,
-      is_available: isAvailable,
-      message: isAvailable
-        ? "Service available in your area"
-        : "Service not available in your area",
+      is_available: availabilityResult.is_available,
+      message: availabilityResult.message,
     });
   } catch (error) {
     console.error("Error checking availability:", error);
