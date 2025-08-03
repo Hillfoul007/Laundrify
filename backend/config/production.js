@@ -19,12 +19,33 @@ const config = {
   JWT_SECRET: process.env.JWT_SECRET,
   JWT_EXPIRES_IN: "7d",
 
-  // CORS
+  // CORS - Comprehensive list of allowed origins
   ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(",")
     : [
+        // Primary production URLs
+        "https://laundrify-app-5su7.onrender.com",
         "https://testversion.onrender.com",
         "https://cleancarepro-1-p2oc.onrender.com",
+        "https://backend-vaxf.onrender.com",
+        "https://cleancare-pro-production.up.railway.app",
+        "https://cleancare-pro-api-production-129e.up.railway.app",
+
+        // Builder.io and development platforms
+        "https://builder.codes",
+        "https://*.builder.codes",
+        "https://*.fly.dev",
+        "https://*.vercel.app",
+        "https://*.netlify.app",
+        "https://*.railway.app",
+
+        // Local development
+        "http://localhost:10000",
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:10000",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:3000",
       ],
 
   // SMS Service

@@ -18,9 +18,15 @@ export const clearAllUserData = () => {
       if (
         key.startsWith("cleancare_") ||
         key.startsWith("booking_") ||
-        key.startsWith("user_") ||
         key.startsWith("laundry_")
       ) {
+        localStorage.removeItem(key);
+      }
+
+      // Clear user_ keys EXCEPT coupon usage tracking to prevent bypass
+      if (key.startsWith("user_") &&
+          !key.includes("used_coupons_") &&
+          !key.includes("has_ordered_")) {
         localStorage.removeItem(key);
       }
     });

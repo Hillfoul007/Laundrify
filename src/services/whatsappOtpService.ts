@@ -1,3 +1,5 @@
+import { getApiUrl } from '../config/env';
+
 export interface WhatsAppOTPResponse {
   success: boolean;
   message?: string;
@@ -18,9 +20,7 @@ export class WhatsAppOTPService {
   private static instance: WhatsAppOTPService;
   private apiBaseUrl = (() => {
     const isProduction = window.location.hostname !== "localhost";
-    return isProduction
-      ? (import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api")
-      : "/api";
+    return isProduction ? getApiUrl() : "/api";
   })();
   private gupshupApiUrl = "https://api.gupshup.io/wa/api/v1/msg";
   private gupshupApiKey =
@@ -275,7 +275,7 @@ export class WhatsAppOTPService {
         user,
       };
     } catch (error) {
-      console.error("❌ OTP verification failed:", error);
+      console.error("��� OTP verification failed:", error);
       return {
         success: false,
         error: "Verification failed. Please try again.",

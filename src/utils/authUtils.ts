@@ -106,16 +106,31 @@ export const getUserDisplayName = (user?: UserData | null): string => {
  * Create a guest session if no user exists (for address functionality)
  */
 export const createGuestSession = (): UserData => {
+  // Check if there's already a guest session to reuse
+  const existingUser = localStorage.getItem('current_user');
+  if (existingUser) {
+    try {
+      const parsed = JSON.parse(existingUser);
+      if (parsed && parsed.id && parsed.id.startsWith('guest_')) {
+        console.log('👤 Reusing existing guest session:', parsed);
+        return parsed;
+      }
+    } catch (e) {
+      console.warn('Failed to parse existing user session');
+    }
+  }
+
+  // Create new guest session only if none exists
   const guestId = `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   const guestUser: UserData = {
     id: guestId,
     name: 'Guest User',
     phone: '',
   };
-  
+
   // Store guest session
   localStorage.setItem('current_user', JSON.stringify(guestUser));
-  console.log('👤 Created guest session:', guestUser);
-  
+  console.log('👤 Created new guest session:', guestUser);
+
   return guestUser;
 };

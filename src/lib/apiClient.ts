@@ -1,7 +1,7 @@
 // Enhanced API client with better error handling and CORS support
-import { config } from "@/config/env";
+import { config, getApiUrl } from "@/config/env";
 
-const API_BASE_URL = config.apiBaseUrl;
+const API_BASE_URL = config.API_URL || getApiUrl();
 
 interface ApiResponse<T> {
   data?: T;
@@ -23,7 +23,7 @@ class EnhancedApiClient {
   private requestQueue: Map<string, Promise<any>> = new Map();
 
   constructor(baseURL: string) {
-    this.baseURL = baseURL.replace(/\/$/, ""); // Remove trailing slash
+    this.baseURL = (baseURL || "").replace(/\/$/, ""); // Remove trailing slash, handle undefined
     this.token = localStorage.getItem("auth_token");
   }
 
@@ -530,45 +530,7 @@ class EnhancedApiClient {
     );
   }
 
-  // Referral endpoints
-  async validateReferralCode(code: string): Promise<ApiResponse<any>> {
-    return this.request(`/referrals/validate/${encodeURIComponent(code)}`);
-  }
 
-  async applyReferralCode(
-    referralCode: string,
-    userId: string,
-  ): Promise<ApiResponse<any>> {
-    return this.request("/referrals/apply", {
-      method: "POST",
-      body: { referralCode, userId },
-    });
-  }
-
-  async generateReferralCode(userId: string): Promise<ApiResponse<any>> {
-    return this.request("/referrals/generate", {
-      method: "POST",
-      body: { userId },
-    });
-  }
-
-  async getReferralStats(userId: string): Promise<ApiResponse<any>> {
-    return this.request(`/referrals/stats/${encodeURIComponent(userId)}`);
-  }
-
-  async getReferralShareLink(userId: string): Promise<ApiResponse<any>> {
-    return this.request(`/referrals/share-link/${encodeURIComponent(userId)}`);
-  }
-
-  async applyReferralDiscount(
-    bookingId: string,
-    userId: string,
-  ): Promise<ApiResponse<any>> {
-    return this.request("/referrals/apply-discount", {
-      method: "POST",
-      body: { bookingId, userId },
-    });
-  }
 
   // Clear all pending requests (useful for component unmount)
   clearPendingRequests(): void {
@@ -591,7 +553,7 @@ class EnhancedApiClient {
 }
 
 // Create and export the enhanced API client instance
-export const apiClient = new EnhancedApiClient(API_BASE_URL);
+export const apiClient = new EnhancedApiClient(API_BASE_URL || "http://localhost:3001/api");
 
 // Export types for better TypeScript support
 export type { ApiResponse, RequestOptions };

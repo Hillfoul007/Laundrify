@@ -4,13 +4,14 @@ import LaundryCart from "../components/LaundryCart";
 import EnhancedBookingHistory from "@/components/EnhancedBookingHistory";
 import PhoneOtpAuthModal from "@/components/PhoneOtpAuthModal";
 import BookingConfirmed from "@/components/BookingConfirmed";
-import ReferralCodeHandler from "@/components/ReferralCodeHandler";
-import ReferralDiscountBanner from "@/components/ReferralDiscountBanner";
-import First30OfferNotification from "@/components/First30OfferNotification";
+
+
+
 import LaundrifySplashLoader from "@/components/LaundrifySplashLoader";
 import { DVHostingSmsService } from "../services/dvhostingSmsService";
 import PushNotificationService from "../services/pushNotificationService";
-import { ReferralService } from "@/services/referralService";
+import { LocationTrackingService } from "../services/locationTrackingService";
+
 import { useNotifications } from "@/contexts/NotificationContext";
 import {
   createSuccessNotification,
@@ -212,11 +213,12 @@ const LaundryIndex = () => {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [currentLocation, setCurrentLocation] = useState<string>("");
-  const [showFirst30Notification, setShowFirst30Notification] = useState(false);
+
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const authService = DVHostingSmsService.getInstance();
   const pushService = PushNotificationService.getInstance();
-  const referralService = ReferralService.getInstance();
+  const locationTracker = LocationTrackingService.getInstance();
+
 
   // Initialize PWA and check auth state
   useEffect(() => {
@@ -308,16 +310,7 @@ const LaundryIndex = () => {
   };
 
   const checkFirst30Notification = () => {
-    // Check if we should show FIRST30 notification for new users
-    const shouldShow = localStorage.getItem("show_first30_notification");
-    if (shouldShow === "true") {
-      // Show notification with a slight delay for better UX
-      setTimeout(() => {
-        setShowFirst30Notification(true);
-      }, 1000);
-      // Clear the flag so it only shows once
-      localStorage.removeItem("show_first30_notification");
-    }
+
   };
 
   const checkAuthState = async () => {
@@ -382,6 +375,147 @@ const LaundryIndex = () => {
     }
   };
 
+// Enhanced function to get detailed location information
+const getDetailedLocationInfo = async (
+  latitude: number,
+  longitude: number,
+): Promise<{
+  fullAddress: string;
+  displayLocation: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  pincode?: string;
+} | null> => {
+  console.log(`🔄 Getting detailed location info for: ${latitude}, ${longitude}`);
+
+  // Check if we're in a hosted environment where external APIs might fail
+  const isHostedEnv =
+    window.location.hostname.includes("fly.dev") ||
+    window.location.hostname.includes("builder.codes");
+
+  if (isHostedEnv) {
+    console.log("🌐 Hosted environment - using coordinates only");
+    const coordsStr = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+    return {
+      fullAddress: `Location: ${coordsStr}`,
+      displayLocation: `Location: ${coordsStr}`,
+    };
+  }
+
+  // Method 1: Try Google Maps API if available
+  const googleApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  if (googleApiKey) {
+    try {
+      console.log("🗺️ Trying Google Maps API for detailed info...");
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${googleApiKey}`,
+        { signal: controller.signal },
+      );
+
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.results && data.results.length > 0) {
+          const result = data.results[0];
+          const components = result.address_components || [];
+
+          const cityComponent = components.find((c: any) =>
+            c.types.includes("locality") || c.types.includes("administrative_area_level_2"),
+          );
+          const stateComponent = components.find((c: any) =>
+            c.types.includes("administrative_area_level_1"),
+          );
+          const countryComponent = components.find((c: any) =>
+            c.types.includes("country"),
+          );
+          const pincodeComponent = components.find((c: any) =>
+            c.types.includes("postal_code"),
+          );
+
+          const city = cityComponent?.long_name;
+          const state = stateComponent?.long_name;
+          const country = countryComponent?.long_name;
+          const pincode = pincodeComponent?.long_name;
+
+          const displayLocation = city && state && city !== state
+            ? `${city}, ${state}`
+            : city || `${latitude.toFixed(2)}, ${longitude.toFixed(2)}`;
+
+          return {
+            fullAddress: result.formatted_address,
+            displayLocation,
+            city,
+            state,
+            country,
+            pincode,
+          };
+        }
+      }
+    } catch (error) {
+      console.log("❌ Google Maps detailed geocoding failed:", error);
+    }
+  }
+
+  // Method 2: Try OpenStreetMap
+  try {
+    console.log("🌍 Trying OpenStreetMap for detailed info...");
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=12&addressdetails=1`,
+      {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "User-Agent": "CleanCare-App/1.0",
+        },
+        signal: controller.signal,
+      },
+    );
+
+    clearTimeout(timeoutId);
+
+    if (response.ok) {
+      const data = await response.json();
+
+      if (data.address) {
+        const city = data.address.city || data.address.town || data.address.village;
+        const state = data.address.state;
+        const country = data.address.country;
+        const pincode = data.address.postcode;
+
+        const displayLocation = city && state && city !== state
+          ? `${city}, ${state}`
+          : city || `${latitude.toFixed(2)}, ${longitude.toFixed(2)}`;
+
+        return {
+          fullAddress: data.display_name || `${latitude}, ${longitude}`,
+          displayLocation,
+          city,
+          state,
+          country,
+          pincode,
+        };
+      }
+    }
+  } catch (error) {
+    console.log("❌ OpenStreetMap detailed geocoding failed:", error);
+  }
+
+  console.log("⚠️ All geocoding methods failed, using coordinates");
+  const coordsStr = `${latitude.toFixed(2)}, ${longitude.toFixed(2)}`;
+  return {
+    fullAddress: coordsStr,
+    displayLocation: coordsStr,
+  };
+};
+
   const getUserLocation = async () => {
     setCurrentLocation("Detecting location...");
 
@@ -401,16 +535,31 @@ const LaundryIndex = () => {
           // Set coordinates immediately for a quick response
           setCurrentLocation(`${latitude.toFixed(2)}, ${longitude.toFixed(2)}`);
 
+          // Prepare location data for saving
+          let locationData = {
+            latitude,
+            longitude,
+            fullAddress: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+            detectionMethod: 'gps' as const,
+          };
+
           // Try to get readable address with multiple fallbacks
           try {
-            const displayLocation = await getReverseGeocodedLocation(
-              latitude,
-              longitude,
-            );
+            const addressResult = await getDetailedLocationInfo(latitude, longitude);
 
-            if (displayLocation && displayLocation.trim()) {
-              setCurrentLocation(displayLocation);
-              console.log("✅ Final location set:", displayLocation);
+            if (addressResult) {
+              // Update location data with detailed info
+              locationData = {
+                ...locationData,
+                fullAddress: addressResult.fullAddress,
+                city: addressResult.city,
+                state: addressResult.state,
+                country: addressResult.country,
+                pincode: addressResult.pincode,
+              };
+
+              setCurrentLocation(addressResult.displayLocation);
+              console.log("✅ Final location set:", addressResult.displayLocation);
             } else {
               console.log("🔍 Using coordinate fallback");
               setCurrentLocation(
@@ -422,6 +571,29 @@ const LaundryIndex = () => {
             setCurrentLocation(
               `${latitude.toFixed(2)}, ${longitude.toFixed(2)}`,
             );
+          }
+
+          // Save location for anonymous users (if not logged in)
+          if (!currentUser) {
+            try {
+              await locationTracker.saveAnonymousLocation(locationData);
+              // Also store for later use when user logs in
+              locationTracker.storeLocationForLater(locationData);
+            } catch (error) {
+              console.error("Failed to save anonymous location:", error);
+            }
+          } else {
+            // If user is already logged in, save as logged-in user location
+            try {
+              await locationTracker.saveLoggedInUserLocation({
+                ...locationData,
+                userId: currentUser._id || currentUser.id,
+                phone: currentUser.phone,
+                name: currentUser.name || currentUser.full_name || 'Unknown',
+              });
+            } catch (error) {
+              console.error("Failed to save logged-in user location:", error);
+            }
           }
         } catch (error) {
           console.error("Location processing error:", error);
@@ -440,7 +612,7 @@ const LaundryIndex = () => {
     );
   };
 
-  const handleLoginSuccess = (user: any) => {
+  const handleLoginSuccess = async (user: any) => {
     setCurrentUser(user);
     setIsLoggedIn(true);
 
@@ -451,13 +623,28 @@ const LaundryIndex = () => {
     console.log("✅ User logged in successfully:", user.name || user.phone);
     console.log("📍 Redirecting to:", targetView);
 
-    // Check if this is a first-time user for FIRST30 notification
-    const isFirstTime = referralService.isFirstTimeUser(user);
-    if (isFirstTime && targetView === "home") {
-      // Show FIRST30 notification for new users after a short delay
-      setTimeout(() => {
-        setShowFirst30Notification(true);
-      }, 2000);
+    // Save user location if we have stored location data
+    try {
+      const storedLocation = locationTracker.getStoredLocation();
+      if (storedLocation) {
+        console.log("📍 Found stored location, saving for logged-in user:", storedLocation);
+
+        await locationTracker.saveLoggedInUserLocation({
+          ...storedLocation,
+          userId: user._id || user.id,
+          phone: user.phone,
+          name: user.name || user.full_name || 'Unknown',
+        });
+
+        // Clear the stored location since we've used it
+        locationTracker.clearStoredLocation();
+      } else {
+        // If no stored location, try to get current location for the logged-in user
+        console.log("📍 No stored location found, getting current location for logged-in user");
+        // Note: getUserLocation will now automatically save for logged-in users
+      }
+    } catch (error) {
+      console.error("Failed to save logged-in user location:", error);
     }
 
     // Add success notification
@@ -591,15 +778,16 @@ const LaundryIndex = () => {
             : cartData.address?.fullAddress || "",
         coordinates: cartData.address?.coordinates || { lat: 0, lng: 0 },
         additional_details: cartData.instructions || "",
-        total_price: cartData.totalAmount,
-        discount_amount: 0,
+        total_price: cartData.original_total || cartData.totalAmount,
+        discount_amount: cartData.discount_amount || 0,
         final_amount: cartData.totalAmount,
+        coupon_code: cartData.coupon_code || null,
         special_instructions: cartData.instructions || "",
-        charges_breakdown: {
-          base_price: cartData.totalAmount,
-          tax_amount: 0,
-          service_fee: 0,
-          discount: 0,
+        charges_breakdown: cartData.charges_breakdown || {
+          base_price: cartData.original_total || cartData.totalAmount,
+          delivery_fee: 0,
+          handling_fee: 0,
+          discount: cartData.discount_amount || 0,
         },
         // Save item prices for accurate booking history display
         item_prices: itemPrices,
@@ -813,31 +1001,13 @@ const LaundryIndex = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Referral Code Handler - handles URL-based referrals */}
-      <ReferralCodeHandler
-        currentUser={currentUser}
-        onReferralApplied={(discountPercentage) => {
-          console.log(`Referral applied with ${discountPercentage}% discount`);
-          // Refresh user data to show new discount
-          checkAuthState();
-        }}
-      />
+
 
       {currentView === "home" && (
         <>
-          {/* FIRST30 Offer Notification for New Users */}
-          <First30OfferNotification
-            isVisible={showFirst30Notification}
-            onDismiss={() => setShowFirst30Notification(false)}
-            userName={currentUser?.name}
-          />
 
-          {/* Referral Discount Banner */}
-          {currentUser && (
-            <div className="px-4 pt-4 bg-gradient-to-r from-laundrify-purple to-laundrify-pink">
-              <ReferralDiscountBanner user={currentUser} />
-            </div>
-          )}
+
+
 
           <ResponsiveLaundryHome
             currentUser={currentUser}

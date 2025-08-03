@@ -107,6 +107,11 @@ const bookingSchema = new mongoose.Schema(
       default: 0,
       min: [0, "Discount amount must be non-negative"],
     },
+    coupon_code: {
+      type: String,
+      default: null,
+      trim: true,
+    },
     final_amount: {
       type: Number,
       required: [true, "Final amount is required"],
@@ -172,7 +177,7 @@ const bookingSchema = new mongoose.Schema(
       },
       handling_fee: {
         type: Number,
-        default: 9,
+        default: 0,
       },
       discount: {
         type: Number,
