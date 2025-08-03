@@ -56,6 +56,10 @@ const detectedLocationSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    availability_message: {
+      type: String,
+      trim: true,
+    },
     created_at: {
       type: Date,
       default: Date.now,
