@@ -1,7 +1,7 @@
 // Enhanced API client with better error handling and CORS support
-import { config } from "@/config/env";
+import { config, getApiUrl } from "@/config/env";
 
-const API_BASE_URL = config.apiBaseUrl;
+const API_BASE_URL = config.API_URL || getApiUrl();
 
 interface ApiResponse<T> {
   data?: T;
