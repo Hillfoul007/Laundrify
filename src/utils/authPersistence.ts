@@ -131,6 +131,13 @@ export const initializeAuthPersistence = () => {
  */
 export const restoreAuthState = async (): Promise<boolean> => {
   try {
+    // Check if user intentionally logged out
+    const intentionalLogout = localStorage.getItem("intentional_logout");
+    if (intentionalLogout === "true") {
+      console.log("🚪 Intentional logout detected - skipping auth restoration");
+      return false;
+    }
+
     const authService = DVHostingSmsService.getInstance();
 
     // First try iPhone-specific restoration if on iOS
