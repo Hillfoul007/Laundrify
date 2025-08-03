@@ -729,14 +729,34 @@ export class DVHostingSmsService {
 
   logout(): void {
     try {
-      // Clear all auth-related localStorage
-      localStorage.removeItem("current_user");
-      localStorage.removeItem("cleancare_user");
-      localStorage.removeItem("cleancare_auth_token");
-      localStorage.removeItem("auth_token");
+      console.log("🚪 Starting comprehensive logout...");
 
-      // Clear sessionStorage for iOS compatibility
+      // Clear ALL auth-related localStorage keys
+      const authKeys = [
+        "current_user", "cleancare_user",
+        "auth_token", "cleancare_auth_token", "cleancare_token",
+        "ios_backup_user", "ios_backup_token", "ios_auth_timestamp",
+        "user_bookings", "last_detected_location", "user_location_data",
+        "pending_location_data"
+      ];
+
+      authKeys.forEach(key => {
+        localStorage.removeItem(key);
+        console.log(`🗑️ Cleared: ${key}`);
+      });
+
+      // Clear any user-specific keys (phone-based)
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('user_') || key.startsWith('used_coupons_') ||
+            key.startsWith('has_ordered_') || key.includes('_token_')) {
+          localStorage.removeItem(key);
+          console.log(`🗑️ Cleared user-specific: ${key}`);
+        }
+      });
+
+      // Clear sessionStorage completely
       sessionStorage.clear();
+      console.log("🗑️ Cleared sessionStorage");
 
       // Clear current phone and OTP storage
       this.currentPhone = "";
@@ -906,7 +926,7 @@ export class DVHostingSmsService {
       const user = this.getCurrentUser();
       return user?._id || user?.id || null;
     } catch (error) {
-      this.log("⚠️ Error getting user MongoDB ID:", error);
+      this.log("⚠�� Error getting user MongoDB ID:", error);
       return null;
     }
   }
