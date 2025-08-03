@@ -71,8 +71,9 @@ export const shouldUseBackend = (): boolean => {
   return true;
 };
 
-// Backward compatibility alias
+// Backward compatibility aliases
 export const isBackendAvailable = shouldUseBackend;
+export const getApiBaseUrl = getApiUrl;
 
 // Environment variables
 export const ENV_CONFIG = {
