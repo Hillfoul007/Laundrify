@@ -76,10 +76,15 @@ app.use("/api/auth", (req, res, next) => {
   next();
 });
 
+// Log allowed origins for debugging
+console.log("🌐 CORS allowed origins:", productionConfig.ALLOWED_ORIGINS);
+
 // CORS configuration - Enhanced for iOS Safari compatibility
 app.use(
   cors({
     origin: function (origin, callback) {
+      console.log(`🔍 CORS check for origin: ${origin}`);
+
       // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
 
