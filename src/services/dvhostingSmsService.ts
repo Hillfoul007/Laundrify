@@ -731,6 +731,9 @@ export class DVHostingSmsService {
     try {
       console.log("🚪 Starting comprehensive logout...");
 
+      // Set logout flag to prevent automatic session restoration
+      localStorage.setItem("explicit_logout", "true");
+
       // Clear ALL auth-related localStorage keys
       const authKeys = [
         "current_user", "cleancare_user",
