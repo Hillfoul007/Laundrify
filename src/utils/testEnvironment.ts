@@ -23,16 +23,18 @@ export const testEnvironmentConfiguration = async () => {
   if (results.useBackend) {
     try {
       console.log('🌐 Testing backend connectivity...');
-      
+
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
-      
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // Reduced timeout
+
       const response = await fetch(`${results.apiUrl}/health`, {
         method: 'GET',
         headers: getAuthHeaders(),
-        signal: controller.signal
+        signal: controller.signal,
+        mode: 'cors', // Explicitly set CORS mode
+        credentials: 'include' // Include credentials
       });
-      
+
       clearTimeout(timeoutId);
       
       if (response.ok) {
@@ -57,7 +59,7 @@ export const testEnvironmentConfiguration = async () => {
     console.log('🏠 Backend disabled for this environment - using local storage');
   }
   
-  console.log('🎯 Configuration Summary:');
+  console.log('�� Configuration Summary:');
   console.log(`   API URL: ${results.apiUrl}`);
   console.log(`   Backend Enabled: ${results.useBackend}`);
   console.log(`   Backend Available: ${results.backendAvailable}`);
