@@ -176,6 +176,7 @@ export const authHelpers = {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
+          credentials: 'include', // Required for Clear-Site-Data header to work
         });
       }
 

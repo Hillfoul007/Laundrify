@@ -751,6 +751,7 @@ export class DVHostingSmsService {
             "Content-Type": "application/json",
             "Cache-Control": "no-cache",
           },
+          credentials: 'include', // Required for Clear-Site-Data header to work
         }).catch(() => {
           // Ignore backend errors during logout
         });
