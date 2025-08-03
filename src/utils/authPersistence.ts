@@ -131,6 +131,14 @@ export const initializeAuthPersistence = () => {
  */
 export const restoreAuthState = async (): Promise<boolean> => {
   try {
+    // Check if user explicitly logged out
+    const explicitLogout = localStorage.getItem("explicit_logout");
+    if (explicitLogout === "true") {
+      console.log("🚪 User explicitly logged out - not restoring session");
+      localStorage.removeItem("explicit_logout"); // Clear the flag
+      return false;
+    }
+
     const authService = DVHostingSmsService.getInstance();
 
     // First try iPhone-specific restoration if on iOS
