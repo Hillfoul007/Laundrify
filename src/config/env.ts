@@ -22,6 +22,8 @@ export const FRONTEND_URLS = {
     "http://127.0.0.1:3000"
   ],
   production: [
+    "https://laundrify.online",
+    "https://www.laundrify.online",
     "https://laundrify-app-5su7.onrender.com",
     "https://testversion.onrender.com", 
     "https://cleancarepro-1-p2oc.onrender.com",
