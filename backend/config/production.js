@@ -21,10 +21,11 @@ const config = {
 
   // CORS - Comprehensive list of allowed origins
   ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(",")
+    ? process.env.ALLOWED_ORIGINS.split(",").map(origin => origin.trim())
     : [
-        // Primary production URLs
+        // Primary production URLs - EXACT MATCHES
         "https://www.laundrify.online",
+        "https://laundrify.online", // Without www
         "https://laundrify-app-5su7.onrender.com",
         "https://testversion.onrender.com",
         "https://cleancarepro-1-p2oc.onrender.com",
@@ -39,6 +40,7 @@ const config = {
         "https://*.vercel.app",
         "https://*.netlify.app",
         "https://*.railway.app",
+        "https://*.onrender.com",
 
         // Local development
         "http://localhost:10000",
