@@ -106,6 +106,9 @@ router.post("/check-availability", async (req, res) => {
 // Get all detected locations (admin only)
 router.get("/", async (req, res) => {
   try {
+    console.log(`🔍 GET /detected-locations request from origin: ${req.headers.origin}`);
+    console.log(`🔍 Request headers:`, req.headers);
+
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 50;
     const skip = (page - 1) * limit;
