@@ -10,7 +10,8 @@ router.get("/test", (req, res) => {
   res.json({
     success: true,
     message: "Addresses endpoint is working",
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    version: "v2-with-express-import-fix"
   });
 });
 
