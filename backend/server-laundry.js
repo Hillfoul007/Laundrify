@@ -18,7 +18,7 @@ const productionConfig = require("./config/production");
 try {
   productionConfig.validateConfig();
 } catch (error) {
-  console.error("��� Configuration Error:", error.message);
+  console.error("❌ Configuration Error:", error.message);
   process.exit(1);
 }
 
@@ -73,6 +73,32 @@ app.use("/api/auth", (req, res, next) => {
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.setHeader("Pragma", "no-cache");
   res.setHeader("Expires", "0");
+  next();
+});
+
+// Additional CORS middleware to ensure headers are always set
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+
+  // Check if origin is allowed
+  const isAllowed = !origin || productionConfig.ALLOWED_ORIGINS.includes(origin) ||
+    productionConfig.ALLOWED_ORIGINS.some(allowedOrigin => {
+      if (allowedOrigin.includes('*')) {
+        const pattern = allowedOrigin.replace(/\*/g, '.*');
+        const regex = new RegExp(`^${pattern}$`);
+        return regex.test(origin);
+      }
+      return false;
+    });
+
+  if (isAllowed && origin) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  } else if (!origin) {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  }
+
   next();
 });
 
