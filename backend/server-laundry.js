@@ -344,11 +344,19 @@ app.post("/api/push/unsubscribe", (req, res) => {
   res.json({ success: true });
 });
 
+// Helper function to get IST timestamp
+const getISTTimestamp = () => {
+  const now = new Date();
+  const istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000)); // UTC + 5:30
+  return istTime.toISOString().replace('Z', '+05:30');
+};
+
 // Health check endpoint with comprehensive monitoring
 app.get("/api/health", async (req, res) => {
   const healthCheck = {
     status: "ok",
-    timestamp: new Date().toISOString(),
+    timestamp: getISTTimestamp(),
+    utc_timestamp: new Date().toISOString(),
     service: "CleanCare Pro API",
     version: "1.0.0",
     environment: productionConfig.NODE_ENV,
