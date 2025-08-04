@@ -45,26 +45,41 @@ export const getApiUrl = (): string => {
   // First check for explicit environment variable
   const envApiUrl = import.meta.env.VITE_API_BASE_URL;
   if (envApiUrl && envApiUrl.trim() !== "") {
+    console.log(`🔧 Using explicit env API URL: ${envApiUrl}`);
     return envApiUrl.endsWith('/api') ? envApiUrl : `${envApiUrl}/api`;
   }
 
   // Detect environment based on hostname
   const hostname = window.location.hostname;
   const isLocalhost = hostname.includes("localhost") || hostname.includes("127.0.0.1");
+  const isFlyDev = hostname.includes("fly.dev");
+  const isBuilderCodes = hostname.includes("builder.codes");
+  const isProductionDomain = hostname === "www.laundrify.online" || hostname === "laundrify.online";
 
-  console.log(`🔍 API URL Detection - Hostname: ${hostname}, isLocalhost: ${isLocalhost}`);
+  console.log(`🔍 API URL Detection:`, {
+    hostname,
+    isLocalhost,
+    isFlyDev,
+    isBuilderCodes,
+    isProductionDomain,
+    envApiUrl,
+    developmentUrl: DEVELOPMENT_API_URL,
+    productionUrl: PRODUCTION_API_URL
+  });
 
+  // For localhost, use development API
   if (isLocalhost) {
     console.log(`🏠 Using development API: ${DEVELOPMENT_API_URL}`);
     return DEVELOPMENT_API_URL;
   }
 
-  // Special handling for www.laundrify.online
-  if (hostname === "www.laundrify.online" || hostname === "laundrify.online") {
-    console.log(`🌐 Using production API for laundrify.online: ${PRODUCTION_API_URL}`);
+  // For all hosted environments (fly.dev, builder.codes, production), use production backend
+  if (isFlyDev || isBuilderCodes || isProductionDomain) {
+    console.log(`🌐 Using production backend API: ${PRODUCTION_API_URL}`);
     return PRODUCTION_API_URL;
   }
 
+  // Default fallback
   console.log(`🚀 Using default production API: ${PRODUCTION_API_URL}`);
   return PRODUCTION_API_URL;
 };
