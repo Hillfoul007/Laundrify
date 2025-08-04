@@ -568,7 +568,27 @@ class EnhancedApiClient {
 }
 
 // Create and export the enhanced API client instance
-export const apiClient = new EnhancedApiClient(API_BASE_URL || "http://localhost:3001/api");
+// Force production backend for hosted environments
+const getCorrectApiUrl = () => {
+  const hostname = window.location.hostname;
+  const isLocalhost = hostname.includes("localhost") || hostname.includes("127.0.0.1");
+
+  if (isLocalhost) {
+    return "http://localhost:3001/api";
+  }
+
+  // For all hosted environments, force backend URL
+  return "https://backend-vaxf.onrender.com/api";
+};
+
+const CORRECT_API_URL = getCorrectApiUrl();
+console.log(`🎯 API Client forced URL:`, {
+  hostname: window.location.hostname,
+  apiUrl: CORRECT_API_URL,
+  originalApiBaseUrl: API_BASE_URL
+});
+
+export const apiClient = new EnhancedApiClient(CORRECT_API_URL);
 
 // Export types for better TypeScript support
 export type { ApiResponse, RequestOptions };
