@@ -51,11 +51,21 @@ export const getApiUrl = (): string => {
   // Detect environment based on hostname
   const hostname = window.location.hostname;
   const isLocalhost = hostname.includes("localhost") || hostname.includes("127.0.0.1");
-  
+
+  console.log(`🔍 API URL Detection - Hostname: ${hostname}, isLocalhost: ${isLocalhost}`);
+
   if (isLocalhost) {
+    console.log(`🏠 Using development API: ${DEVELOPMENT_API_URL}`);
     return DEVELOPMENT_API_URL;
   }
 
+  // Special handling for www.laundrify.online
+  if (hostname === "www.laundrify.online" || hostname === "laundrify.online") {
+    console.log(`🌐 Using production API for laundrify.online: ${PRODUCTION_API_URL}`);
+    return PRODUCTION_API_URL;
+  }
+
+  console.log(`🚀 Using default production API: ${PRODUCTION_API_URL}`);
   return PRODUCTION_API_URL;
 };
 
