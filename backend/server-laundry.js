@@ -18,7 +18,7 @@ const productionConfig = require("./config/production");
 try {
   productionConfig.validateConfig();
 } catch (error) {
-  console.error("❌ Configuration Error:", error.message);
+  console.error("��� Configuration Error:", error.message);
   process.exit(1);
 }
 
@@ -131,8 +131,27 @@ app.use(
 
 // Handle preflight requests explicitly
 app.options('*', (req, res) => {
-  console.log(`✅ Preflight request from: ${req.headers.origin}`);
-  res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+  const origin = req.headers.origin;
+  console.log(`✅ Preflight request from: ${origin}`);
+
+  // Check if origin is allowed
+  const isAllowed = !origin || productionConfig.ALLOWED_ORIGINS.includes(origin) ||
+    productionConfig.ALLOWED_ORIGINS.some(allowedOrigin => {
+      if (allowedOrigin.includes('*')) {
+        const pattern = allowedOrigin.replace(/\*/g, '.*');
+        const regex = new RegExp(`^${pattern}$`);
+        return regex.test(origin);
+      }
+      return false;
+    });
+
+  if (isAllowed) {
+    res.setHeader('Access-Control-Allow-Origin', origin || '*');
+  } else {
+    console.log(`🚫 Preflight blocked origin: ${origin}`);
+    res.setHeader('Access-Control-Allow-Origin', 'null');
+  }
+
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept, user-id, Cache-Control, Pragma, Expires, X-Requested-With');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
