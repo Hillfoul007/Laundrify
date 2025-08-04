@@ -400,7 +400,9 @@ app.get("/api/health", async (req, res) => {
 app.get("/api/test", (req, res) => {
   res.json({
     message: "CleanCare Pro API is working!",
-    timestamp: new Date().toISOString(),
+    timestamp: getISTTimestamp(),
+    timezone: "Asia/Kolkata (IST)",
+    utc_timestamp: new Date().toISOString(),
   });
 });
 
