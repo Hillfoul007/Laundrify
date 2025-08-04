@@ -431,7 +431,8 @@ app.use((err, req, res, next) => {
     success: false,
     message,
     error: productionConfig.isDevelopment() ? err.stack : undefined,
-    timestamp: new Date().toISOString(),
+    timestamp: getISTTimestamp(),
+    timezone: "Asia/Kolkata (IST)",
   });
 });
 
