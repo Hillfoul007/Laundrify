@@ -1,12 +1,14 @@
 // Enhanced API client with better error handling and CORS support
 import { config, getApiUrl } from "@/config/env";
 
-const API_BASE_URL = config.API_URL || getApiUrl();
-console.log(`🔧 API Client Base URL:`, {
+// Force fresh evaluation of API URL
+const API_BASE_URL = getApiUrl();
+console.log(`🔧 API Client Initialization:`, {
+  hostname: window.location.hostname,
   configApiUrl: config.API_URL,
   getApiUrlResult: getApiUrl(),
   finalApiBaseUrl: API_BASE_URL,
-  hostname: window.location.hostname
+  envVariable: import.meta.env.VITE_API_BASE_URL
 });
 
 interface ApiResponse<T> {
