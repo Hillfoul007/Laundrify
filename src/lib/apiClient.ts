@@ -2,6 +2,12 @@
 import { config, getApiUrl } from "@/config/env";
 
 const API_BASE_URL = config.API_URL || getApiUrl();
+console.log(`🔧 API Client Base URL:`, {
+  configApiUrl: config.API_URL,
+  getApiUrlResult: getApiUrl(),
+  finalApiBaseUrl: API_BASE_URL,
+  hostname: window.location.hostname
+});
 
 interface ApiResponse<T> {
   data?: T;
