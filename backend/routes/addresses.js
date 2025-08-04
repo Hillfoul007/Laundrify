@@ -4,6 +4,15 @@ const User = require("../models/User");
 
 const router = express.Router();
 
+// Test route to check if addresses endpoint is working
+router.get("/test", (req, res) => {
+  res.json({
+    success: true,
+    message: "Addresses endpoint is working",
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Middleware to verify user (simple version - you may want to add JWT verification)
 const verifyUser = async (req, res, next) => {
   try {
