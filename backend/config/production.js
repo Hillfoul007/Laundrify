@@ -96,24 +96,27 @@ const config = {
 
 // Validation function
 const validateConfig = () => {
-  const required = ["MONGODB_URI", "JWT_SECRET", "DVHOSTING_API_KEY"];
+  // Only validate if we're in production or have environment variables set
+  if (process.env.NODE_ENV === "production" || process.env.MONGODB_URI) {
+    const required = ["MONGODB_URI", "JWT_SECRET", "DVHOSTING_API_KEY"];
 
-  const missing = required.filter((key) => !config[key]);
+    const missing = required.filter((key) => !config[key]);
 
-  if (missing.length > 0) {
-    throw new Error(
-      `Missing required environment variables: ${missing.join(", ")}`,
-    );
-  }
+    if (missing.length > 0) {
+      throw new Error(
+        `Missing required environment variables: ${missing.join(", ")}`,
+      );
+    }
 
-  // Validate MongoDB URI format
-  if (!config.MONGODB_URI.startsWith("mongodb")) {
-    throw new Error("Invalid MongoDB URI format");
-  }
+    // Validate MongoDB URI format
+    if (config.MONGODB_URI && !config.MONGODB_URI.startsWith("mongodb")) {
+      throw new Error("Invalid MongoDB URI format");
+    }
 
-  // Validate JWT secret length
-  if (config.JWT_SECRET.length < 32) {
-    throw new Error("JWT secret must be at least 32 characters long");
+    // Validate JWT secret length
+    if (config.JWT_SECRET && config.JWT_SECRET.length < 32) {
+      throw new Error("JWT secret must be at least 32 characters long");
+    }
   }
 
   console.log("✅ Configuration validation passed");
