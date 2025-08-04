@@ -76,6 +76,13 @@ class EnhancedApiClient {
       ? endpoint
       : `${this.baseURL}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
 
+    console.log(`🔧 API Client URL Construction:`, {
+      endpoint,
+      baseURL: this.baseURL,
+      constructedURL: url,
+      isFullURL: endpoint.startsWith("http")
+    });
+
     // Create request key for deduplication
     const requestKey = this.createRequestKey(url, options);
 
