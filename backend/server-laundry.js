@@ -19,7 +19,11 @@ try {
   productionConfig.validateConfig();
 } catch (error) {
   console.error("❌ Configuration Error:", error.message);
-  process.exit(1);
+  if (productionConfig.isProduction()) {
+    process.exit(1);
+  } else {
+    console.log("⚠️ Running in development mode with partial configuration");
+  }
 }
 
 const app = express();
