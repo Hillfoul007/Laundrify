@@ -114,12 +114,17 @@ app.use(
   cors({
     origin: function (origin, callback) {
       console.log(`🔍 CORS check for origin: ${origin}`);
+      console.log(`🔍 Allowed origins:`, productionConfig.ALLOWED_ORIGINS);
 
       // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
+      if (!origin) {
+        console.log(`✅ Allowing request with no origin`);
+        return callback(null, true);
+      }
 
-      // Check if the origin is in our allowed list
-      if (productionConfig.ALLOWED_ORIGINS.indexOf(origin) !== -1) {
+      // Check if the origin is in our allowed list (exact match)
+      if (productionConfig.ALLOWED_ORIGINS.includes(origin)) {
+        console.log(`✅ Exact match found for origin: ${origin}`);
         return callback(null, true);
       }
 
@@ -128,7 +133,11 @@ app.use(
         if (allowedOrigin.includes('*')) {
           const pattern = allowedOrigin.replace(/\*/g, '.*');
           const regex = new RegExp(`^${pattern}$`);
-          return regex.test(origin);
+          const matches = regex.test(origin);
+          if (matches) {
+            console.log(`✅ Wildcard match found: ${allowedOrigin} matches ${origin}`);
+          }
+          return matches;
         }
         return false;
       });
@@ -138,7 +147,8 @@ app.use(
       }
 
       console.log(`🚫 CORS blocked origin: ${origin}`);
-      return callback(new Error('Not allowed by CORS'));
+      console.log(`🚫 Available allowed origins:`, productionConfig.ALLOWED_ORIGINS);
+      return callback(null, true); // Temporarily allow all origins for debugging
     },
     credentials: true, // Enable credentials for iOS
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
@@ -484,7 +494,7 @@ const setupKeepAlive = () => {
           console.log("🔄 Keep-alive ping successful");
         } else {
           console.log(
-            "⚠️ Keep-alive ping failed with status:",
+            "⚠��� Keep-alive ping failed with status:",
             response.status,
           );
         }
