@@ -139,7 +139,7 @@ const AdminBookingManagement: React.FC = () => {
     if (!editingBooking) return;
 
     try {
-      const response = await apiClient.request<{booking: Booking}>(`/admin/bookings/${editingBooking._id}`, {
+      const response = await apiClient.adminRequest<{booking: Booking}>(`/admin/bookings/${editingBooking._id}`, {
         method: "PUT",
         body: editingBooking,
       });
