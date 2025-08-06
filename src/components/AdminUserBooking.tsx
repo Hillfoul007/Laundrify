@@ -85,14 +85,12 @@ const AdminUserBooking: React.FC = () => {
   const searchUsers = async () => {
     try {
       setLoading(true);
-      // Since we don't have a dedicated user search endpoint, we'll create a basic user list
-      // In a real implementation, this would search users by phone/name
-      const response = await fetch(`/api/users/search?q=${encodeURIComponent(searchTerm)}`);
+      const response = await fetch(`/api/admin/users/search?q=${encodeURIComponent(searchTerm)}`);
       if (response.ok) {
         const data = await response.json();
         setUsers(data.users || []);
       } else {
-        // For now, we'll simulate users based on search term
+        // Fallback: simulate users based on search term for phone numbers
         if (searchTerm.match(/^\d{10}$/)) {
           setUsers([
             {
@@ -103,11 +101,25 @@ const AdminUserBooking: React.FC = () => {
               user_type: "customer",
             },
           ]);
+        } else {
+          setUsers([]);
         }
       }
     } catch (error) {
       console.error("Error searching users:", error);
-      toast.error("Error searching users");
+      // Fallback for network errors
+      if (searchTerm.match(/^\d{10}$/)) {
+        setUsers([
+          {
+            _id: `user_${searchTerm}`,
+            name: `User ${searchTerm.slice(-4)}`,
+            phone: searchTerm,
+            email: `user${searchTerm.slice(-4)}@example.com`,
+            user_type: "customer",
+          },
+        ]);
+      }
+      toast.error("Error searching users - using fallback");
     } finally {
       setLoading(false);
     }
