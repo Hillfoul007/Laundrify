@@ -116,12 +116,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     onLogout();
   };
 
-  const stats = {
-    totalBookings: 247,
-    pendingBookings: 12,
-    activeUsers: 156,
-    totalRevenue: "₹45,680",
-  };
+  // stats is now managed by state
 
   const renderOverview = () => (
     <div className="space-y-6">
