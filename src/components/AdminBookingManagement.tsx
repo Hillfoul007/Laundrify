@@ -133,7 +133,7 @@ const AdminBookingManagement: React.FC = () => {
     if (!editingBooking) return;
 
     try {
-      const response = await fetch(`/api/bookings/${editingBooking._id}`, {
+      const response = await fetch(`/api/admin/bookings/${editingBooking._id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
