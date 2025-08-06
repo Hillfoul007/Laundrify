@@ -142,7 +142,7 @@ const AdminUserBooking: React.FC = () => {
         ...bookingData,
         services: [...bookingData.services, { ...newService }],
       });
-      setNewService({ name: "", quantity: 1, price: 0 });
+      setNewService({ id: "", name: "", quantity: 1, price: 0, unit: "PC", category: "" });
     }
   };
 
