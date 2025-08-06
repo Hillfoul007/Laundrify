@@ -227,31 +227,29 @@ connectDB();
 
 // Google Sheets services removed
 
-// Import routes with error handling - temporarily disabled for debugging
+// Import routes with error handling
 let otpAuthRoutes, bookingRoutes, locationRoutes;
 
-console.log("🔧 Route imports temporarily disabled for debugging");
+try {
+  otpAuthRoutes = require("./routes/otp-auth");
+  console.log("✅ OTP Auth routes loaded");
+} catch (error) {
+  console.error("❌ Failed to load OTP Auth routes:", error.message);
+}
 
-// try {
-//   otpAuthRoutes = require("./routes/otp-auth");
-//   console.log("✅ OTP Auth routes loaded");
-// } catch (error) {
-//   console.error("❌ Failed to load OTP Auth routes:", error.message);
-// }
+try {
+  bookingRoutes = require("./routes/bookings");
+  console.log("✅ Booking routes loaded");
+} catch (error) {
+  console.error("❌ Failed to load Booking routes:", error.message);
+}
 
-// try {
-//   bookingRoutes = require("./routes/bookings");
-//   console.log("✅ Booking routes loaded");
-// } catch (error) {
-//   console.error("❌ Failed to load Booking routes:", error.message);
-// }
-
-// try {
-//   locationRoutes = require("./routes/location");
-//   console.log("✅ Location routes loaded");
-// } catch (error) {
-//   console.error("❌ Failed to load Location routes:", error.message);
-// }
+try {
+  locationRoutes = require("./routes/location");
+  console.log("✅ Location routes loaded");
+} catch (error) {
+  console.error("❌ Failed to load Location routes:", error.message);
+}
 
 // Serve static frontend files in production - temporarily disabled for debugging
 console.log("🔧 Static file serving temporarily disabled for debugging");
@@ -586,7 +584,7 @@ const gracefulShutdown = async (signal) => {
 
   // Force shutdown after 30 seconds
   setTimeout(() => {
-    console.error("⚠��  Forced shutdown after 30 seconds");
+    console.error("⚠️  Forced shutdown after 30 seconds");
     process.exit(1);
   }, 30000);
 };
