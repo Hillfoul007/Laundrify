@@ -220,18 +220,15 @@ const AdminUserBooking: React.FC = () => {
 
       console.log("Submitting booking:", bookingPayload);
 
-      const response = await fetch("/api/bookings", {
+      // Use real API client
+      const response = await apiClient.request<{booking: any}>("/admin/bookings", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(bookingPayload),
+        body: bookingPayload,
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        toast.success(`Booking created successfully! Order ID: ${result.booking?.custom_order_id}`);
-        
+      if (response.data) {
+        toast.success(`Booking created successfully! Order ID: ${response.data.booking?.custom_order_id}`);
+
         // Reset form
         setSelectedUser(null);
         setBookingData({
@@ -246,8 +243,7 @@ const AdminUserBooking: React.FC = () => {
           discount_amount: 0,
         });
       } else {
-        const error = await response.json();
-        toast.error(`Failed to create booking: ${error.error || "Unknown error"}`);
+        toast.error(`Failed to create booking: ${response.error || "Unknown error"}`);
       }
     } catch (error) {
       console.error("Error creating booking:", error);
