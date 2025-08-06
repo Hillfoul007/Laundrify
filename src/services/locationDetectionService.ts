@@ -101,7 +101,7 @@ export class LocationDetectionService {
 
       if (!this.apiBaseUrl || !shouldUseBackend()) {
         // Use local check when backend is not available
-        const localResult = this.checkAvailabilityLocal(city, pincode, coordinates);
+        const localResult = this.checkAvailabilityLocal(city, pincode, coordinates, fullAddress);
         console.log("📍 Local availability check result:", localResult);
         return localResult;
       }
@@ -124,7 +124,7 @@ export class LocationDetectionService {
 
       if (!response.ok) {
         console.warn(`❌ Backend availability check failed (${response.status}), falling back to local check`);
-        const localResult = this.checkAvailabilityLocal(city, pincode, coordinates);
+        const localResult = this.checkAvailabilityLocal(city, pincode, coordinates, fullAddress);
         console.log("📍 Fallback local availability check result:", localResult);
         return localResult;
       }
@@ -135,7 +135,7 @@ export class LocationDetectionService {
     } catch (error) {
       console.error("❌ Failed to check availability:", error);
       // Fallback to local check
-      return this.checkAvailabilityLocal(city, pincode, coordinates);
+      return this.checkAvailabilityLocal(city, pincode, coordinates, fullAddress);
     }
   }
 
@@ -159,16 +159,52 @@ export class LocationDetectionService {
     city: string,
     pincode?: string,
     coordinates?: { lat: number; lng: number },
+    fullAddress?: string,
   ): LocationAvailabilityResponse {
     const normalizedCity = city?.toLowerCase().trim();
 
-    // Check pincode 122101 first - this is the only allowed pincode
+    // Define available locations with keywords (matching backend logic)
+    const availableLocations = [
+      {
+        city: "gurgaon",
+        area: "sector 69",
+        pincode: "122101",
+        keywords: ["tulip", "sector 69", "sector-69"]
+      },
+      {
+        city: "gurugram",
+        area: "sector 69",
+        pincode: "122101",
+        keywords: ["tulip", "sector 69", "sector-69", "dlf"]
+      }
+    ];
+
+    // Check pincode 122101 first - exact match
     if (pincode && pincode.trim() === "122101") {
       return {
         success: true,
         is_available: true,
         message: "Service available for pincode 122101",
       };
+    }
+
+    // Check keywords in full address before rejecting based on pincode
+    if (fullAddress) {
+      const addressLower = fullAddress.toLowerCase();
+
+      const matchByKeyword = availableLocations.find(location =>
+        location.keywords.some(keyword =>
+          addressLower.includes(keyword.toLowerCase())
+        )
+      );
+
+      if (matchByKeyword) {
+        return {
+          success: true,
+          is_available: true,
+          message: `Service available in your area (${matchByKeyword.area}, ${matchByKeyword.city})`,
+        };
+      }
     }
 
     // Check coordinates for Sector 69 if available (legacy support)
@@ -179,14 +215,6 @@ export class LocationDetectionService {
         message: "Service available in Sector 69, Gurugram (GPS verified)",
       };
     }
-
-    // Available locations for city name checks
-    const availableLocations = [
-      { city: "gurgaon", area: "sector 69", pincode: "122101" },
-      { city: "gurugram", area: "sector 69", pincode: "122101" },
-      { city: "gurgaon", area: "sector-69", pincode: "122101" },
-      { city: "gurugram", area: "sector-69", pincode: "122101" },
-    ];
 
     // Check by city name and area
     const isAvailableByCity = availableLocations.some(
@@ -204,19 +232,15 @@ export class LocationDetectionService {
       };
     }
 
-    // If pincode is provided but not 122101, service not available
-    if (pincode && pincode.trim() !== "122101") {
-      return {
-        success: true,
-        is_available: false,
-        message: `Service currently not available for pincode ${pincode}. Available only for pincode 122101.`,
-      };
-    }
+    // If no matches found
+    const availableAreas = availableLocations
+      .map(loc => `${loc.area}, ${loc.city} (${loc.pincode})`)
+      .join("; ");
 
     return {
       success: true,
       is_available: false,
-      message: "Service not available in your area. Currently serving pincode 122101 only.",
+      message: `Service not available in your area. Currently serving: ${availableAreas}`,
     };
   }
 
