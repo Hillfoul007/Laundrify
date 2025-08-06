@@ -70,7 +70,7 @@ const AdminBookingManagement: React.FC = () => {
   const fetchBookings = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/bookings?limit=100");
+      const response = await fetch("/api/admin/bookings?limit=100");
       if (response.ok) {
         const data = await response.json();
         setBookings(data.bookings || []);
