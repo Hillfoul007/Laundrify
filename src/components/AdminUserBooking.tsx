@@ -201,6 +201,8 @@ const AdminUserBooking: React.FC = () => {
 
       const bookingPayload = {
         customer_id: selectedUser._id,
+        name: selectedUser.name || selectedUser.full_name || "Admin Customer",
+        phone: selectedUser.phone,
         service: bookingData.service || bookingData.services[0]?.name || "Laundry Service",
         service_type: "laundry",
         services: bookingData.services,
