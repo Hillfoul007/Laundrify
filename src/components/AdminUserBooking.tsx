@@ -220,8 +220,8 @@ const AdminUserBooking: React.FC = () => {
 
       console.log("Submitting booking:", bookingPayload);
 
-      // Use real API client
-      const response = await apiClient.request<{booking: any}>("/admin/bookings", {
+      // Use real API client with admin authentication
+      const response = await apiClient.adminRequest<{booking: any}>("/admin/bookings", {
         method: "POST",
         body: bookingPayload,
       });
