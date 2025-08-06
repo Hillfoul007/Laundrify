@@ -157,6 +157,7 @@ app.use(
       "Authorization",
       "Accept",
       "user-id",
+      "admin-token", // Add admin-token header support
       "Cache-Control", // Add Cache-Control header support
       "Pragma",
       "Expires",
@@ -261,7 +262,7 @@ if (productionConfig.isProduction()) {
 // API Routes with error handling
 if (otpAuthRoutes) {
   app.use("/api/auth", otpAuthRoutes);
-  console.log("�� Auth routes registered at /api/auth");
+  console.log("🔗 Auth routes registered at /api/auth");
 }
 
 if (bookingRoutes) {
@@ -535,7 +536,7 @@ const setupKeepAlive = () => {
           );
         }
       } catch (error) {
-        console.log("��️ Keep-alive ping error:", error.message);
+        console.log("⚠️ Keep-alive ping error:", error.message);
       }
     }, keepAliveInterval);
 
