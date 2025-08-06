@@ -227,29 +227,31 @@ connectDB();
 
 // Google Sheets services removed
 
-// Import routes with error handling
+// Import routes with error handling - temporarily disabled for debugging
 let otpAuthRoutes, bookingRoutes, locationRoutes;
 
-try {
-  otpAuthRoutes = require("./routes/otp-auth");
-  console.log("✅ OTP Auth routes loaded");
-} catch (error) {
-  console.error("❌ Failed to load OTP Auth routes:", error.message);
-}
+console.log("🔧 Route imports temporarily disabled for debugging");
 
-try {
-  bookingRoutes = require("./routes/bookings");
-  console.log("✅ Booking routes loaded");
-} catch (error) {
-  console.error("❌ Failed to load Booking routes:", error.message);
-}
+// try {
+//   otpAuthRoutes = require("./routes/otp-auth");
+//   console.log("✅ OTP Auth routes loaded");
+// } catch (error) {
+//   console.error("❌ Failed to load OTP Auth routes:", error.message);
+// }
 
-try {
-  locationRoutes = require("./routes/location");
-  console.log("✅ Location routes loaded");
-} catch (error) {
-  console.error("❌ Failed to load Location routes:", error.message);
-}
+// try {
+//   bookingRoutes = require("./routes/bookings");
+//   console.log("✅ Booking routes loaded");
+// } catch (error) {
+//   console.error("❌ Failed to load Booking routes:", error.message);
+// }
+
+// try {
+//   locationRoutes = require("./routes/location");
+//   console.log("✅ Location routes loaded");
+// } catch (error) {
+//   console.error("❌ Failed to load Location routes:", error.message);
+// }
 
 // Serve static frontend files in production
 if (productionConfig.isProduction()) {
