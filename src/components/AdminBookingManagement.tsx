@@ -121,19 +121,13 @@ const AdminBookingManagement: React.FC = () => {
 
   const updateBookingStatus = async (bookingId: string, newStatus: string) => {
     try {
-      const response = await fetch(`/api/bookings/${bookingId}/status`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
+      const response = await apiClient.updateBookingStatus(bookingId, newStatus);
 
-      if (response.ok) {
+      if (response.data) {
         toast.success(`Booking status updated to ${newStatus}`);
         fetchBookings();
       } else {
-        toast.error("Failed to update booking status");
+        toast.error(response.error || "Failed to update booking status");
       }
     } catch (error) {
       console.error("Error updating booking status:", error);
