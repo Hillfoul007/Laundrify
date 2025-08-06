@@ -942,10 +942,10 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
 
         {/* WhatsApp Floating Action Button - Mobile */}
         <div 
-          className="fixed bottom-4 right-4 z-[9999]"
+          className="fixed bottom-20 right-4 z-[9999]"
           style={{ 
             position: 'fixed',
-            bottom: '16px',
+            bottom: '80px',
             right: '16px',
             zIndex: 9999
           }}
@@ -956,14 +956,14 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
               const message = encodeURIComponent("Hi! I need help with laundry services.");
               window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
             }}
-            className="bg-green-500 hover:bg-green-600 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-xl border-2 border-white transition-all duration-300 active:scale-95"
+            className="bg-green-500 hover:bg-green-600 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-xl border-2 border-white transition-all duration-300 active:scale-95"
             title="Chat with us on WhatsApp"
             style={{ 
               WebkitTapHighlightColor: 'transparent',
               touchAction: 'manipulation'
             }}
           >
-            <MessageCircle className="h-6 w-6" />
+            <MessageCircle className="h-5 w-5" />
           </button>
         </div>
       </div>
