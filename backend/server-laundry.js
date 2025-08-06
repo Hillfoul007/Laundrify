@@ -251,13 +251,12 @@ try {
   console.error("❌ Failed to load Location routes:", error.message);
 }
 
-// Serve static frontend files in production - temporarily disabled for debugging
-console.log("🔧 Static file serving temporarily disabled for debugging");
-// if (productionConfig.isProduction()) {
-//   const frontendPath = path.join(__dirname, "../dist");
-//   app.use(express.static(frontendPath));
-//   console.log("📁 Serving frontend static files from:", frontendPath);
-// }
+// Serve static frontend files in production
+if (productionConfig.isProduction()) {
+  const frontendPath = path.join(__dirname, "../dist");
+  app.use(express.static(frontendPath));
+  console.log("📁 Serving frontend static files from:", frontendPath);
+}
 
 // API Routes with error handling
 if (otpAuthRoutes) {
