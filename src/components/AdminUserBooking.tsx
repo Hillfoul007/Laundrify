@@ -84,11 +84,13 @@ const AdminUserBooking: React.FC = () => {
   const searchUsers = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/admin/users/search?q=${encodeURIComponent(searchTerm)}`);
-      if (response.ok) {
-        const data = await response.json();
-        setUsers(data.users || []);
-      } else {
+
+      // Use the real API client
+      const response = await apiClient.request<{users: User[]}>(`/admin/users/search?q=${encodeURIComponent(searchTerm)}`);
+
+      if (response.data) {
+        setUsers(response.data.users || []);
+      } else if (response.error) {
         // Fallback: simulate users based on search term for phone numbers
         if (searchTerm.match(/^\d{10}$/)) {
           setUsers([
@@ -100,8 +102,10 @@ const AdminUserBooking: React.FC = () => {
               user_type: "customer",
             },
           ]);
+          toast.info("Using fallback user data (API not available)");
         } else {
           setUsers([]);
+          toast.error(response.error);
         }
       }
     } catch (error) {
@@ -117,8 +121,10 @@ const AdminUserBooking: React.FC = () => {
             user_type: "customer",
           },
         ]);
+        toast.info("Using fallback user data (Network error)");
+      } else {
+        toast.error("Error searching users");
       }
-      toast.error("Error searching users - using fallback");
     } finally {
       setLoading(false);
     }
