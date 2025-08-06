@@ -139,21 +139,18 @@ const AdminBookingManagement: React.FC = () => {
     if (!editingBooking) return;
 
     try {
-      const response = await fetch(`/api/admin/bookings/${editingBooking._id}`, {
+      const response = await apiClient.request<{booking: Booking}>(`/admin/bookings/${editingBooking._id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(editingBooking),
+        body: editingBooking,
       });
 
-      if (response.ok) {
+      if (response.data) {
         toast.success("Booking updated successfully");
         setShowEditDialog(false);
         setEditingBooking(null);
         fetchBookings();
       } else {
-        toast.error("Failed to update booking");
+        toast.error(response.error || "Failed to update booking");
       }
     } catch (error) {
       console.error("Error updating booking:", error);
