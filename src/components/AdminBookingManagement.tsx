@@ -71,12 +71,23 @@ const AdminBookingManagement: React.FC = () => {
   const fetchBookings = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/admin/bookings?limit=100");
-      if (response.ok) {
-        const data = await response.json();
-        setBookings(data.bookings || []);
-      } else {
-        toast.error("Failed to fetch bookings");
+
+      // Try admin endpoint first, fallback to regular bookings
+      const response = await apiClient.request<{bookings: Booking[]}>("/admin/bookings?limit=100");
+
+      if (response.data) {
+        setBookings(response.data.bookings || []);
+      } else if (response.error) {
+        // Fallback to regular bookings endpoint
+        console.log("Admin endpoint failed, trying regular bookings...");
+        const fallbackResponse = await apiClient.request<{bookings: Booking[]}>("/bookings?limit=100");
+
+        if (fallbackResponse.data) {
+          setBookings(fallbackResponse.data.bookings || []);
+          toast.info("Using regular bookings API (admin endpoint not available)");
+        } else {
+          toast.error(response.error);
+        }
       }
     } catch (error) {
       console.error("Error fetching bookings:", error);
