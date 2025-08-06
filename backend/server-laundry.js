@@ -333,6 +333,7 @@ try {
   console.log("🔗 Admin routes registered at /api/admin");
 } catch (error) {
   console.error("❌ Failed to load Admin routes:", error.message);
+  console.error("❌ Full admin routes error:", error);
 }
 
 // Google Sheets integration removed
