@@ -22,6 +22,8 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
+import { laundryServices, serviceCategories, getCategoryDisplay } from "@/data/laundryServices";
+import { apiClient } from "@/lib/apiClient";
 
 interface User {
   _id: string;
