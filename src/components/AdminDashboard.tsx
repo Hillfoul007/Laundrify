@@ -54,7 +54,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   // Fetch real statistics from API
   const fetchStats = async () => {
     try {
-      const response = await apiClient.request<any>("/admin/stats");
+      const response = await apiClient.adminRequest<any>("/admin/stats");
 
       if (response.data) {
         const statsData = response.data.stats;
