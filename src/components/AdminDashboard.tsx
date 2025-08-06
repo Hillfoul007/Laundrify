@@ -43,6 +43,14 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     timeRemaining: string;
   } | null>(null);
 
+  const [stats, setStats] = useState({
+    totalBookings: 0,
+    pendingBookings: 0,
+    activeUsers: 0,
+    totalRevenue: "₹0",
+    loading: true,
+  });
+
   // Update session info periodically
   useEffect(() => {
     const updateSessionInfo = () => {
