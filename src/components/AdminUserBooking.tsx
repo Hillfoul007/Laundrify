@@ -63,21 +63,15 @@ const AdminUserBooking: React.FC = () => {
   });
 
   const [newService, setNewService] = useState<ServiceItem>({
+    id: "",
     name: "",
     quantity: 1,
     price: 0,
+    unit: "PC",
+    category: "",
   });
 
-  const availableServices = [
-    { name: "Washing & Ironing", price: 15 },
-    { name: "Dry Cleaning", price: 25 },
-    { name: "Steam Press", price: 10 },
-    { name: "Shoe Cleaning", price: 50 },
-    { name: "Curtain Cleaning", price: 100 },
-    { name: "Carpet Cleaning", price: 200 },
-    { name: "Blanket Cleaning", price: 80 },
-    { name: "Leather Cleaning", price: 150 },
-  ];
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   useEffect(() => {
     if (searchTerm.length >= 3) {
