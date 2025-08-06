@@ -164,8 +164,15 @@ const AdminUserBooking: React.FC = () => {
     return Math.max(0, calculateTotal() - bookingData.discount_amount);
   };
 
-  const selectServiceFromList = (serviceName: string, price: number) => {
-    setNewService({ ...newService, name: serviceName, price });
+  const selectServiceFromList = (service: typeof laundryServices[0]) => {
+    setNewService({
+      id: service.id,
+      name: service.name,
+      price: service.price,
+      quantity: 1,
+      unit: service.unit,
+      category: service.category,
+    });
   };
 
   const submitBooking = async () => {
