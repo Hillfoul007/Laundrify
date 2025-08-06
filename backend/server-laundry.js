@@ -326,7 +326,14 @@ try {
   console.error("❌ Failed to load Coupon routes:", error.message);
 }
 
-
+// Admin routes
+try {
+  const adminRoutes = require("./routes/admin");
+  app.use("/api/admin", adminRoutes);
+  console.log("🔗 Admin routes registered at /api/admin");
+} catch (error) {
+  console.error("❌ Failed to load Admin routes:", error.message);
+}
 
 // Google Sheets integration removed
 
