@@ -85,8 +85,8 @@ const AdminUserBooking: React.FC = () => {
     try {
       setLoading(true);
 
-      // Use the real API client
-      const response = await apiClient.request<{users: User[]}>(`/admin/users/search?q=${encodeURIComponent(searchTerm)}`);
+      // Use the real API client with admin authentication
+      const response = await apiClient.adminRequest<{users: User[]}>(`/admin/users/search?q=${encodeURIComponent(searchTerm)}`);
 
       if (response.data) {
         setUsers(response.data.users || []);
