@@ -379,21 +379,47 @@ const AdminUserBooking: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Service Category Filter */}
+            <div>
+              <Label>Service Category</Label>
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {serviceCategories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.icon} {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             {/* Quick Service Selection */}
             <div>
               <Label>Quick Add Services</Label>
-              <div className="grid grid-cols-2 gap-2 mt-2">
-                {availableServices.map((service, index) => (
-                  <Button
-                    key={index}
-                    variant="outline"
-                    size="sm"
-                    className="text-xs justify-start"
-                    onClick={() => selectServiceFromList(service.name, service.price)}
-                  >
-                    {service.name} (₹{service.price})
-                  </Button>
-                ))}
+              <div className="grid grid-cols-1 gap-2 mt-2 max-h-60 overflow-y-auto">
+                {laundryServices
+                  .filter(service => selectedCategory === "all" || service.category === selectedCategory)
+                  .map((service) => (
+                    <Button
+                      key={service.id}
+                      variant="outline"
+                      size="sm"
+                      className="text-xs justify-between h-auto py-2 px-3"
+                      onClick={() => selectServiceFromList(service)}
+                    >
+                      <div className="flex flex-col items-start">
+                        <span className="font-medium">{service.name}</span>
+                        <span className="text-xs text-gray-500">{getCategoryDisplay(service.category)}</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold">₹{service.price}</div>
+                        <div className="text-xs text-gray-500">per {service.unit}</div>
+                      </div>
+                    </Button>
+                  ))}
               </div>
             </div>
 
@@ -445,7 +471,7 @@ const AdminUserBooking: React.FC = () => {
                       <div>
                         <div className="font-medium">{service.name}</div>
                         <div className="text-sm text-gray-600">
-                          {service.quantity} × ₹{service.price} = ₹{service.quantity * service.price}
+                          {service.quantity} × ₹{service.price} = ��{service.quantity * service.price}
                         </div>
                       </div>
                       <Button
