@@ -205,7 +205,7 @@ const AdminUserBooking: React.FC = () => {
         phone: selectedUser.phone,
         service: bookingData.service || bookingData.services[0]?.name || "Laundry Service",
         service_type: "laundry",
-        services: bookingData.services,
+        services: bookingData.services.map(service => `${service.name} x${service.quantity} (₹${service.price}/${service.unit})`),
         scheduled_date: bookingData.scheduled_date,
         scheduled_time: bookingData.scheduled_time,
         delivery_date: bookingData.delivery_date || bookingData.scheduled_date,
