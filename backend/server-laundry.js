@@ -261,7 +261,7 @@ if (productionConfig.isProduction()) {
 // API Routes with error handling
 if (otpAuthRoutes) {
   app.use("/api/auth", otpAuthRoutes);
-  console.log("🔗 Auth routes registered at /api/auth");
+  console.log("�� Auth routes registered at /api/auth");
 }
 
 if (bookingRoutes) {
@@ -469,34 +469,50 @@ if (productionConfig.isDevelopment()) {
   });
 }
 
-// Handle 404 routes
-app.use("*", (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: `Route ${req.originalUrl} not found`,
-    availableRoutes: [
-      "/api/health",
-      "/api/test",
-      "/api/auth",
-      "/api/bookings",
-      "/api/addresses",
-      "/api/location",
-      "/api/whatsapp",
-      "/api/sheets/order",
-      "/api/sheets/test",
-      "/api/sheets/sync",
-    ],
-  });
-});
-
 // Catch-all handler: send back React's index.html file for frontend routing
 if (productionConfig.isProduction()) {
   app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../dist/index.html"));
+    // Only handle 404 for API routes, serve React app for all other routes
+    if (req.originalUrl.startsWith('/api/')) {
+      res.status(404).json({
+        success: false,
+        message: `Route ${req.originalUrl} not found`,
+        availableRoutes: [
+          "/api/health",
+          "/api/test",
+          "/api/auth",
+          "/api/bookings",
+          "/api/addresses",
+          "/api/location",
+          "/api/whatsapp",
+          "/api/admin",
+        ],
+      });
+    } else {
+      res.sendFile(path.join(__dirname, "../dist/index.html"));
+    }
   });
   console.log(
     "🔗 Frontend routing configured - all non-API routes serve index.html",
   );
+} else {
+  // Handle 404 routes in development
+  app.use("*", (req, res) => {
+    res.status(404).json({
+      success: false,
+      message: `Route ${req.originalUrl} not found`,
+      availableRoutes: [
+        "/api/health",
+        "/api/test",
+        "/api/auth",
+        "/api/bookings",
+        "/api/addresses",
+        "/api/location",
+        "/api/whatsapp",
+        "/api/admin",
+      ],
+    });
+  });
 }
 
 // Keep-alive mechanism for Render deployment
@@ -519,7 +535,7 @@ const setupKeepAlive = () => {
           );
         }
       } catch (error) {
-        console.log("⚠️ Keep-alive ping error:", error.message);
+        console.log("��️ Keep-alive ping error:", error.message);
       }
     }, keepAliveInterval);
 
