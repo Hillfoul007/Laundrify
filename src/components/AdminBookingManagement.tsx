@@ -73,7 +73,7 @@ const AdminBookingManagement: React.FC = () => {
       setLoading(true);
 
       // Try admin endpoint first, fallback to regular bookings
-      const response = await apiClient.request<{bookings: Booking[]}>("/admin/bookings?limit=100");
+      const response = await apiClient.adminRequest<{bookings: Booking[]}>("/admin/bookings?limit=100");
 
       if (response.data) {
         setBookings(response.data.bookings || []);
