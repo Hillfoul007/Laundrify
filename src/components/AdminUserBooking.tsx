@@ -484,8 +484,11 @@ const AdminUserBooking: React.FC = () => {
                       <div>
                         <div className="font-medium">{service.name}</div>
                         <div className="text-sm text-gray-600">
-                          {service.quantity} × ₹{service.price} = ₹{service.quantity * service.price}
+                          {service.quantity} {service.unit} × ₹{service.price} = ₹{service.quantity * service.price}
                         </div>
+                        {service.category && (
+                          <div className="text-xs text-gray-500">{getCategoryDisplay(service.category)}</div>
+                        )}
                       </div>
                       <Button
                         size="sm"
