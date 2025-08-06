@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import LaundryIndex from "@/pages/LaundryIndex";
 import LocationConfigPage from "@/pages/LocationConfigPage";
+import AdminPortal from "@/pages/AdminPortal";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import InstallPrompt from "@/components/InstallPrompt";
 import PWAUpdateNotification from "@/components/PWAUpdateNotification";
