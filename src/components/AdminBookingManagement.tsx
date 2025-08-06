@@ -26,6 +26,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
+import { apiClient } from "@/lib/apiClient";
 
 interface Booking {
   _id: string;
