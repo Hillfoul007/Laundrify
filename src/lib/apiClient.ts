@@ -547,6 +547,23 @@ class EnhancedApiClient {
 
 
 
+  // Admin-specific methods
+  async adminRequest<T>(
+    endpoint: string,
+    options: RequestOptions = {},
+  ): Promise<ApiResponse<T>> {
+    // Add admin token to headers if available
+    const adminHeaders = {
+      "admin-token": "admin", // Simple admin token for now
+      ...((options.headers as Record<string, string>) || {}),
+    };
+
+    return this.request(endpoint, {
+      ...options,
+      headers: adminHeaders,
+    });
+  }
+
   // Clear all pending requests (useful for component unmount)
   clearPendingRequests(): void {
     this.requestQueue.clear();
