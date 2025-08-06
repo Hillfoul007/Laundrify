@@ -35,9 +35,12 @@ interface User {
 }
 
 interface ServiceItem {
+  id: string;
   name: string;
   quantity: number;
   price: number;
+  unit: string;
+  category: string;
 }
 
 const AdminUserBooking: React.FC = () => {
