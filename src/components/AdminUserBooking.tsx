@@ -451,6 +451,19 @@ const AdminUserBooking: React.FC = () => {
                   }
                   className="w-20"
                 />
+                <Select
+                  value={newService.unit}
+                  onValueChange={(value) => setNewService({ ...newService, unit: value })}
+                >
+                  <SelectTrigger className="w-20">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="PC">PC</SelectItem>
+                    <SelectItem value="KG">KG</SelectItem>
+                    <SelectItem value="SET">SET</SelectItem>
+                  </SelectContent>
+                </Select>
                 <Button onClick={addService} className="flex-1">
                   <Plus className="h-4 w-4 mr-2" />
                   Add Service
@@ -471,7 +484,7 @@ const AdminUserBooking: React.FC = () => {
                       <div>
                         <div className="font-medium">{service.name}</div>
                         <div className="text-sm text-gray-600">
-                          {service.quantity} × ₹{service.price} = ��{service.quantity * service.price}
+                          {service.quantity} × ₹{service.price} = ₹{service.quantity * service.price}
                         </div>
                       </div>
                       <Button
