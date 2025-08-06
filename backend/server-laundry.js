@@ -29,14 +29,15 @@ try {
 const app = express();
 const PORT = process.env.PORT || productionConfig.PORT || 3001;
 
-// Security middleware
-app.use(
-  helmet({
-    contentSecurityPolicy: false, // Disable for API
-    crossOriginEmbedderPolicy: false,
-    frameguard: false, // Allow iframe display for development
-  }),
-);
+// Security middleware - temporarily disabled for debugging
+console.log("🔧 Security middleware temporarily disabled for debugging");
+// app.use(
+//   helmet({
+//     contentSecurityPolicy: false, // Disable for API
+//     crossOriginEmbedderPolicy: false,
+//     frameguard: false, // Allow iframe display for development
+//   }),
+// );
 
 // Compression middleware
 app.use(compression());
