@@ -20,6 +20,7 @@ import {
   Smartphone,
   Monitor,
   Bell,
+  MessageCircle,
 } from "lucide-react";
 import {
   laundryServices,
@@ -932,12 +933,39 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
           </div>
         )}
 
-        {/* Auth Modal */}
+{/* Auth Modal */}
         <PhoneOtpAuthModal
           isOpen={showAuthModal}
           onClose={() => setShowAuthModal(false)}
           onSuccess={handleAuthSuccess}
         />
+
+        {/* WhatsApp Floating Action Button - Mobile */}
+        <div 
+          className="fixed bottom-4 right-4 z-[9999]"
+          style={{ 
+            position: 'fixed',
+            bottom: '16px',
+            right: '16px',
+            zIndex: 9999
+          }}
+        >
+          <button
+            onClick={() => {
+              const phoneNumber = "917011585587"; // Your WhatsApp number
+              const message = encodeURIComponent("Hi! I need help with laundry services.");
+              window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
+            }}
+            className="bg-green-500 hover:bg-green-600 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-xl border-2 border-white transition-all duration-300 active:scale-95"
+            title="Chat with us on WhatsApp"
+            style={{ 
+              WebkitTapHighlightColor: 'transparent',
+              touchAction: 'manipulation'
+            }}
+          >
+            <MessageCircle className="h-6 w-6" />
+          </button>
+        </div>
       </div>
     );
   }
@@ -1341,9 +1369,22 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
           }}
         />
 
-        {/* Google Sheets integration removed */}
-      </div>
+        {/* WhatsApp Floating Action Button */}
+        <div className="fixed bottom-20 right-6 z-50">
+          <Button
+            onClick={() => {
+              const phoneNumber = "917011585587"; // Replace with your WhatsApp business number
+              const message = encodeURIComponent("Hi! I need help with laundry services.");
+              window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
+            }}
+            className="bg-green-500 hover:bg-green-600 text-white rounded-full w-12 h-12 p-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
+            title="Chat with us on WhatsApp"
+          >
+            <MessageCircle className="h-5 w-5" />
+          </Button>
+        </div>
     </div>
+      </div>
   );
 };
 export default ResponsiveLaundryHome;
