@@ -81,6 +81,7 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
   const [showLocationUnavailable, setShowLocationUnavailable] = useState(false);
   const [detectedLocationText, setDetectedLocationText] = useState("");
   const [showQuickBookModal, setShowQuickBookModal] = useState(false);
+  const [showQuickBookAfterLogin, setShowQuickBookAfterLogin] = useState(false);
   const dvhostingSmsService = DVHostingSmsService.getInstance();
   const locationDetectionService = LocationDetectionService.getInstance();
 
