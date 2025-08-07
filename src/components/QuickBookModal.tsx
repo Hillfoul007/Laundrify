@@ -271,8 +271,8 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
           </div>
 
           {/* Fixed bottom section for submit button */}
-          <div className="px-6 py-4 border-t bg-gray-50">
-            <Button 
+          <div className="flex-shrink-0 px-6 py-4 border-t bg-gray-50">
+            <Button
               type="submit"
               className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 rounded-xl shadow-lg transition-all duration-200"
               disabled={loading}
