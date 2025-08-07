@@ -157,12 +157,15 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-purple-600" />
+      <DialogContent className="sm:max-w-md max-w-[95vw] w-full mx-auto max-h-[90vh] overflow-hidden flex flex-col p-0">
+        <DialogHeader className="px-6 py-4 border-b bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+          <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
+            <Clock className="h-5 w-5" />
             Quick Book Pickup
           </DialogTitle>
+          <p className="text-purple-100 text-sm mt-1">
+            Schedule a pickup and our rider will assess your items
+          </p>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
