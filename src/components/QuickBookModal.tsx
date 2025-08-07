@@ -188,29 +188,34 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
             </CardContent>
           </Card>
 
-          {/* Pickup Date */}
-          <div>
-            <Label htmlFor="pickup_date">Pickup Date *</Label>
-            <Input
-              id="pickup_date"
-              type="date"
-              value={formData.pickup_date}
-              onChange={(e) => setFormData(prev => ({ ...prev, pickup_date: e.target.value }))}
-              min={new Date().toISOString().split('T')[0]}
-              required
-            />
-          </div>
+            {/* Pickup Date */}
+            <div className="space-y-2">
+              <Label htmlFor="pickup_date" className="text-sm font-medium text-gray-700">
+                📅 Pickup Date *
+              </Label>
+              <Input
+                id="pickup_date"
+                type="date"
+                value={formData.pickup_date}
+                onChange={(e) => setFormData(prev => ({ ...prev, pickup_date: e.target.value }))}
+                min={new Date().toISOString().split('T')[0]}
+                className="h-12 text-base border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+                required
+              />
+            </div>
 
-          {/* Pickup Time */}
-          <div>
-            <Label htmlFor="pickup_time">Pickup Time *</Label>
-            <Select 
-              value={formData.pickup_time} 
-              onValueChange={(value) => setFormData(prev => ({ ...prev, pickup_time: value }))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select pickup time" />
-              </SelectTrigger>
+            {/* Pickup Time */}
+            <div className="space-y-2">
+              <Label htmlFor="pickup_time" className="text-sm font-medium text-gray-700">
+                ⏰ Pickup Time *
+              </Label>
+              <Select
+                value={formData.pickup_time}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, pickup_time: value }))}
+              >
+                <SelectTrigger className="h-12 text-base border-gray-300 focus:border-purple-500">
+                  <SelectValue placeholder="Select pickup time" />
+                </SelectTrigger>
               <SelectContent>
                 {timeSlots.map((time) => (
                   <SelectItem key={time} value={time}>
@@ -221,43 +226,49 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
             </Select>
           </div>
 
-          {/* Address */}
-          <div>
-            <Label htmlFor="address">Pickup Address *</Label>
-            <div className="flex gap-2">
-              <Input
-                id="address"
-                value={formData.address}
-                onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-                placeholder="Enter pickup address"
-                required
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={detectLocation}
-                disabled={detectingLocation}
-              >
-                {detectingLocation ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Navigation className="h-4 w-4" />
-                )}
-              </Button>
+            {/* Address */}
+            <div className="space-y-2">
+              <Label htmlFor="address" className="text-sm font-medium text-gray-700">
+                📍 Pickup Address *
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  id="address"
+                  value={formData.address}
+                  onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+                  placeholder="Enter your pickup address"
+                  className="h-12 text-base border-gray-300 focus:border-purple-500 focus:ring-purple-500 flex-1"
+                  required
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-12 w-12 border-gray-300 hover:border-purple-500 hover:bg-purple-50"
+                  onClick={detectLocation}
+                  disabled={detectingLocation}
+                >
+                  {detectingLocation ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-purple-600" />
+                  ) : (
+                    <Navigation className="h-4 w-4 text-purple-600" />
+                  )}
+                </Button>
+              </div>
             </div>
-          </div>
 
-          {/* Special Instructions */}
-          <div>
-            <Label htmlFor="special_instructions">Special Instructions (Optional)</Label>
-            <Input
-              id="special_instructions"
-              value={formData.special_instructions}
-              onChange={(e) => setFormData(prev => ({ ...prev, special_instructions: e.target.value }))}
-              placeholder="Any special instructions for pickup"
-            />
-          </div>
+            {/* Special Instructions */}
+            <div className="space-y-2">
+              <Label htmlFor="special_instructions" className="text-sm font-medium text-gray-700">
+                💬 Special Instructions (Optional)
+              </Label>
+              <Input
+                id="special_instructions"
+                value={formData.special_instructions}
+                onChange={(e) => setFormData(prev => ({ ...prev, special_instructions: e.target.value }))}
+                placeholder="Any special instructions for our rider"
+                className="h-12 text-base border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+              />
+            </div>
 
           {/* Info Alert */}
           <Alert>
