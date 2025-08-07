@@ -48,6 +48,7 @@ import NotificationPanel from "./NotificationPanel";
 import VoiceSearch from "./VoiceSearch";
 import AdminServicesManager from "./AdminServicesManager";
 import LocationUnavailableModal from "./LocationUnavailableModal";
+import QuickBookModal from "./QuickBookModal";
 import { DVHostingSmsService } from "@/services/dvhostingSmsService";
 import { LocationDetectionService } from "@/services/locationDetectionService";
 import { saveCartData, getCartData } from "@/utils/formPersistence";
