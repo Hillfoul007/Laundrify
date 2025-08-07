@@ -237,14 +237,19 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
               <Label htmlFor="pickup_time" className="text-sm font-medium text-gray-700">
                 ⏰ Pickup Time *
               </Label>
-              <Select 
-                value={formData.pickup_time} 
+              <Select
+                value={formData.pickup_time}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, pickup_time: value }))}
               >
                 <SelectTrigger className="h-12 text-base border-gray-300 focus:border-purple-500">
                   <SelectValue placeholder="Select pickup time" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent
+                  className="z-[9999]"
+                  style={{ zIndex: 9999 }}
+                  position="popper"
+                  sideOffset={4}
+                >
                   {timeSlots.map((time) => (
                     <SelectItem key={time} value={time}>
                       {time}
