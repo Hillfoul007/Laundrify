@@ -518,6 +518,16 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
     }
   };
 
+  const handleQuickBook = () => {
+    if (!currentUser) {
+      // User not logged in, show login modal first
+      setShowAuthModal(true);
+      return;
+    }
+    // User is logged in, show quick book modal
+    setShowQuickBookModal(true);
+  };
+
   const EmptyStateCard = () => (
     <Card className="border-0 shadow-lg rounded-2xl overflow-hidden mx-auto max-w-md">
       <CardContent className="text-center py-12 px-6">
