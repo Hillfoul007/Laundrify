@@ -246,10 +246,12 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
                   <SelectValue placeholder="Select pickup time" />
                 </SelectTrigger>
                 <SelectContent
-                  className="z-[9999]"
+                  className="z-[9999] bg-white shadow-xl border border-gray-200"
                   style={{ zIndex: 9999 }}
                   position="popper"
                   sideOffset={4}
+                  alignOffset={0}
+                  container={document.body}
                 >
                   {timeSlots.map((time) => (
                     <SelectItem key={time} value={time}>
