@@ -155,10 +155,38 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
     }
   };
 
-  const timeSlots = [
-    "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", 
-    "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"
-  ];
+  // Generate dynamic time slots based on current time and selected date
+  const generateTimeSlots = () => {
+    const now = new Date();
+    const selectedDate = new Date(formData.pickup_date);
+    const isToday = selectedDate.toDateString() === now.toDateString();
+
+    const slots = [];
+    const startHour = 9; // 9 AM
+    const endHour = 20; // 8 PM
+
+    for (let hour = startHour; hour <= endHour; hour++) {
+      const timeString = `${hour.toString().padStart(2, '0')}:00`;
+
+      if (isToday) {
+        // If selected date is today, check if time slot is at least 30 minutes from now
+        const slotTime = new Date();
+        slotTime.setHours(hour, 0, 0, 0);
+        const thirtyMinutesFromNow = new Date(now.getTime() + 30 * 60 * 1000);
+
+        if (slotTime >= thirtyMinutesFromNow) {
+          slots.push(timeString);
+        }
+      } else {
+        // For future dates, all slots are available
+        slots.push(timeString);
+      }
+    }
+
+    return slots;
+  };
+
+  const availableTimeSlots = generateTimeSlots();
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
