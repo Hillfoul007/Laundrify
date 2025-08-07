@@ -530,7 +530,8 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
 
   const handleQuickBook = () => {
     if (!currentUser) {
-      // User not logged in, show login modal first
+      // User not logged in, show login modal first and remember the intent
+      setShowQuickBookAfterLogin(true);
       setShowAuthModal(true);
       return;
     }
