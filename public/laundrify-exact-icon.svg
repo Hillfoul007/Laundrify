@@ -1,0 +1,42 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient exactly matching uploaded design -->
+  <defs>
+    <linearGradient id="exactBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5CF6"/>
+      <stop offset="100%" style="stop-color:#EC4899"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background with exact rounded corners -->
+  <rect width="512" height="512" rx="115" fill="url(#exactBg)"/>
+  
+  <!-- White t-shirt icon - centered and properly sized -->
+  <g transform="translate(150, 130)">
+    <!-- T-shirt main body -->
+    <path d="M50 70 L50 190 Q50 210 70 210 L142 210 Q162 210 162 190 L162 70 Q162 50 142 50 L130 50 L130 35 Q130 15 106 15 Q82 15 82 35 L82 50 L70 50 Q50 50 50 70 Z" 
+          fill="white" 
+          stroke="none"/>
+    
+    <!-- T-shirt sleeves -->
+    <ellipse cx="32" cy="85" rx="15" ry="32" fill="white"/>
+    <ellipse cx="180" cy="85" rx="15" ry="32" fill="white"/>
+    
+    <!-- T-shirt neckline -->
+    <path d="M82 35 Q82 15 106 15 Q130 15 130 35 L130 50 L82 50 Z" 
+          fill="white"/>
+  </g>
+  
+  <!-- Yellow circular accent element with inner design -->
+  <g transform="translate(120, 320)">
+    <!-- Yellow rounded square background -->
+    <rect x="0" y="0" width="80" height="80" rx="20" fill="#FCD34D"/>
+    
+    <!-- Inner circular design -->
+    <circle cx="40" cy="40" r="25" fill="none" stroke="white" stroke-width="4"/>
+    <circle cx="40" cy="40" r="8" fill="white"/>
+    
+    <!-- Small accent dots -->
+    <circle cx="32" cy="52" r="3" fill="white" opacity="0.8"/>
+    <circle cx="48" cy="28" r="2" fill="white" opacity="0.6"/>
+  </g>
+</svg>
