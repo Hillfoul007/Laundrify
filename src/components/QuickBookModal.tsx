@@ -372,14 +372,31 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
                   </SelectContent>
                 </Select>
               </div>
-              <p className="text-xs text-gray-500">
-                {formData.pickup_date && availableTimeSlots.length > 0 && (
-                  <>Available slots: {availableTimeSlots.length} time{availableTimeSlots.length !== 1 ? 's' : ''}</>
+              <div className="flex items-center justify-between text-xs">
+                <div className="text-gray-500">
+                  {formData.pickup_date && availableTimeSlots.length > 0 && (
+                    <span className="flex items-center gap-1">
+                      <CheckCircle className="h-3 w-3 text-green-500" />
+                      {availableTimeSlots.length} slot{availableTimeSlots.length !== 1 ? 's' : ''} available
+                    </span>
+                  )}
+                  {formData.pickup_date && availableTimeSlots.length === 0 && (
+                    <span className="flex items-center gap-1 text-amber-600">
+                      <Clock className="h-3 w-3" />
+                      No slots available today
+                    </span>
+                  )}
+                </div>
+                {formData.pickup_date && (
+                  <div className="text-purple-600 font-medium">
+                    {new Date(formData.pickup_date).toLocaleDateString('en-US', {
+                      weekday: 'short',
+                      month: 'short',
+                      day: 'numeric'
+                    })}
+                  </div>
                 )}
-                {formData.pickup_date && availableTimeSlots.length === 0 && (
-                  <span className="text-amber-600">No slots available today. Please select tomorrow or later.</span>
-                )}
-              </p>
+              </div>
             </div>
 
             {/* Address */}
