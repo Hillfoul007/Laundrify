@@ -135,9 +135,40 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.pickup_date || !formData.pickup_time || !formData.address.trim()) {
-      toast.error("Please fill in all required fields");
+
+    // Validate date
+    if (!formData.pickup_date) {
+      toast.error("Please select a pickup date");
+      return;
+    }
+
+    // Validate date is not in the past
+    const selectedDate = new Date(formData.pickup_date);
+    const minDate = new Date(getMinSelectableDate());
+    if (selectedDate < minDate) {
+      toast.error("Please select a current or future date");
+      return;
+    }
+
+    // Validate time slot is available
+    if (!formData.pickup_time) {
+      if (availableTimeSlots.length === 0) {
+        toast.error("No time slots available for the selected date. Please choose a different date.");
+      } else {
+        toast.error("Please select a pickup time");
+      }
+      return;
+    }
+
+    // Validate selected time is still available
+    if (!availableTimeSlots.includes(formData.pickup_time)) {
+      toast.error("Selected time slot is no longer available. Please choose another time.");
+      return;
+    }
+
+    // Validate address
+    if (!formData.address.trim()) {
+      toast.error("Please enter a pickup address");
       return;
     }
 
