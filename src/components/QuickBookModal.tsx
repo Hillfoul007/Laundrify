@@ -404,11 +404,13 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
                           <SelectItem
                             key={time}
                             value={time}
-                            className="cursor-pointer hover:bg-purple-50 focus:bg-purple-50 rounded-md transition-colors"
+                            className="cursor-pointer hover:bg-purple-50 focus:bg-purple-50 rounded-md transition-colors py-3"
                           >
-                            <div className="flex items-center justify-between w-full">
-                              <span className="font-medium">{time}</span>
-                              <span className="text-xs text-gray-500">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                                <Clock className="h-4 w-4 text-purple-600" />
+                              </div>
+                              <span className="font-medium text-gray-900">
                                 {new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', {
                                   hour: 'numeric',
                                   minute: '2-digit',
