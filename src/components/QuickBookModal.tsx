@@ -171,22 +171,24 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
         <div className="flex-1 overflow-y-auto px-6 py-4">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* User Info Display */}
-            <Card className="border-purple-200 bg-purple-50">
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-3">
-                <User className="h-4 w-4 text-gray-500" />
-                <div>
-                  <div className="font-medium">
-                    {currentUser.name || currentUser.full_name || "User"}
+            <Card className="border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center">
+                    <User className="h-6 w-6 text-white" />
                   </div>
-                  <div className="text-sm text-gray-500 flex items-center gap-1">
-                    <Phone className="h-3 w-3" />
-                    {currentUser.phone}
+                  <div className="flex-1">
+                    <div className="font-semibold text-gray-900 text-lg">
+                      {currentUser.name || currentUser.full_name || "User"}
+                    </div>
+                    <div className="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                      <Phone className="h-4 w-4" />
+                      {currentUser.phone}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
             {/* Pickup Date */}
             <div className="space-y-2">
@@ -270,14 +272,13 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
               />
             </div>
 
-          {/* Info Alert */}
-          <Alert>
-            <CheckCircle className="h-4 w-4" />
-            <AlertDescription>
-              Our rider will visit at the scheduled time to collect your items. 
-              You don't need to specify what items - our professional will assess and handle everything!
-            </AlertDescription>
-          </Alert>
+            {/* Info Alert */}
+            <Alert className="bg-green-50 border-green-200">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              <AlertDescription className="text-green-800 leading-relaxed">
+                🚚 <strong>How it works:</strong> Our professional rider will visit at your scheduled time to assess and collect your items. No need to specify what items - we handle everything!
+              </AlertDescription>
+            </Alert>
 
           </form>
         </div>
