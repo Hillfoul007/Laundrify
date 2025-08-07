@@ -143,8 +143,8 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md max-w-[95vw] w-full mx-auto max-h-[90vh] overflow-hidden flex flex-col p-0">
-        <DialogHeader className="px-6 py-4 border-b bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+      <DialogContent className="sm:max-w-md max-w-[95vw] w-full mx-auto h-[90vh] flex flex-col p-0 overflow-hidden">
+        <DialogHeader className="flex-shrink-0 px-6 py-4 border-b bg-gradient-to-r from-purple-600 to-pink-600 text-white">
           <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
             <Clock className="h-5 w-5" />
             Quick Book Pickup
@@ -154,8 +154,11 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
           </p>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="flex-1 flex flex-col">
-          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
+          <div className="flex-1 overflow-y-auto overscroll-contain px-6 py-4 space-y-6" style={{
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'thin'
+          }}>
             {/* User Info Display */}
             <Card className="border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50">
               <CardContent className="p-4">
