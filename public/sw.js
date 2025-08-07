@@ -1,8 +1,9 @@
-const CACHE_NAME = "laundrify-v4";
-const STATIC_CACHE = "laundrify-static-v4";
+const CACHE_NAME = "laundrify-v5";
+const STATIC_CACHE = "laundrify-static-v5";
 const urlsToCache = [
   "/",
   "/manifest.json",
+  "/laundrify-exact-icon.svg?v=2",
   "/icons/icon-72x72.png",
   "/icons/icon-96x96.png",
   "/icons/icon-128x128.png",
