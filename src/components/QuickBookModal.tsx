@@ -40,23 +40,52 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
   onClose,
   currentUser,
 }) => {
-  // Add mobile viewport fix on modal open
+  // Add mobile viewport fix and z-index styles on modal open
   React.useEffect(() => {
+    let styleElement: HTMLStyleElement | null = null;
+
     if (isOpen) {
       // Prevent body scroll when modal is open
       document.body.style.overflow = 'hidden';
+
       // Fix for iOS Safari viewport issues
       const viewport = document.querySelector('meta[name=viewport]');
       if (viewport) {
         viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
       }
+
+      // Add z-index styles for Select dropdown
+      styleElement = document.createElement('style');
+      styleElement.id = 'quick-book-modal-styles';
+      styleElement.textContent = `
+        [data-radix-popper-content-wrapper] {
+          z-index: 999999 !important;
+        }
+        [data-radix-select-content] {
+          z-index: 999999 !important;
+        }
+        .select-portal {
+          z-index: 999999 !important;
+        }
+      `;
+      document.head.appendChild(styleElement);
     } else {
       // Restore body scroll when modal is closed
       document.body.style.overflow = 'unset';
+
+      // Remove z-index styles
+      const existingStyle = document.getElementById('quick-book-modal-styles');
+      if (existingStyle) {
+        document.head.removeChild(existingStyle);
+      }
     }
 
     return () => {
       document.body.style.overflow = 'unset';
+      // Clean up styles on unmount
+      if (styleElement && document.head.contains(styleElement)) {
+        document.head.removeChild(styleElement);
+      }
     };
   }, [isOpen]);
   const [loading, setLoading] = useState(false);
