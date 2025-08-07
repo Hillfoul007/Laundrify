@@ -68,17 +68,43 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
     special_instructions: "",
   });
 
-  useEffect(() => {
-    if (isOpen) {
-      // Set default pickup date to tomorrow
+  // Get minimum selectable date (today or tomorrow based on available time slots)
+  const getMinSelectableDate = () => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+
+    // If it's after 7:30 PM (19:30), user can only book for tomorrow or later
+    if (currentHour >= 19 && currentMinute >= 30) {
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
+      return tomorrow.toISOString().split('T')[0];
+    }
+
+    // Otherwise, they can book for today if there are available slots
+    return now.toISOString().split('T')[0];
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      const minDate = getMinSelectableDate();
       setFormData(prev => ({
         ...prev,
-        pickup_date: tomorrow.toISOString().split('T')[0],
+        pickup_date: minDate,
+        pickup_time: "", // Reset time when modal opens
       }));
     }
   }, [isOpen]);
+
+  // Reset pickup time when date changes
+  useEffect(() => {
+    if (formData.pickup_date) {
+      setFormData(prev => ({
+        ...prev,
+        pickup_time: "", // Reset time when date changes
+      }));
+    }
+  }, [formData.pickup_date]);
 
   const detectLocation = async () => {
     setDetectingLocation(true);
