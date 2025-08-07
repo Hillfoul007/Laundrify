@@ -74,26 +74,12 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
 
       const { latitude, longitude } = position.coords;
       
-      // Use reverse geocoding to get address
-      const response = await fetch(
-        `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=YOUR_API_KEY`
-      );
-      
-      if (response.ok) {
-        const data = await response.json();
-        if (data.results && data.results[0]) {
-          const address = data.results[0].formatted;
-          setFormData(prev => ({ ...prev, address }));
-          toast.success("Location detected successfully!");
-        }
-      } else {
-        // Fallback to approximate address
-        setFormData(prev => ({ 
-          ...prev, 
-          address: `Location: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
-        }));
-        toast.success("Location coordinates detected!");
-      }
+      // Fallback to approximate address
+      setFormData(prev => ({ 
+        ...prev, 
+        address: `Location: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
+      }));
+      toast.success("Location coordinates detected!");
     } catch (error) {
       console.error("Location detection failed:", error);
       toast.error("Failed to detect location. Please enter address manually.");
@@ -168,8 +154,8 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
           </p>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto px-6 py-4">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col">
+          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
             {/* User Info Display */}
             <Card className="border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50">
               <CardContent className="p-4">
@@ -211,22 +197,22 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
               <Label htmlFor="pickup_time" className="text-sm font-medium text-gray-700">
                 ⏰ Pickup Time *
               </Label>
-              <Select
-                value={formData.pickup_time}
+              <Select 
+                value={formData.pickup_time} 
                 onValueChange={(value) => setFormData(prev => ({ ...prev, pickup_time: value }))}
               >
                 <SelectTrigger className="h-12 text-base border-gray-300 focus:border-purple-500">
                   <SelectValue placeholder="Select pickup time" />
                 </SelectTrigger>
-              <SelectContent>
-                {timeSlots.map((time) => (
-                  <SelectItem key={time} value={time}>
-                    {time}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+                <SelectContent>
+                  {timeSlots.map((time) => (
+                    <SelectItem key={time} value={time}>
+                      {time}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
             {/* Address */}
             <div className="space-y-2">
@@ -279,33 +265,29 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
                 🚚 <strong>How it works:</strong> Our professional rider will visit at your scheduled time to assess and collect your items. No need to specify what items - we handle everything!
               </AlertDescription>
             </Alert>
+          </div>
 
-          </form>
-        </div>
-
-        {/* Fixed bottom section for submit button */}
-        <div className="px-6 py-4 border-t bg-gray-50">
-          <Button
-            onClick={(e) => {
-              e.preventDefault();
-              handleSubmit(e);
-            }}
-            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 rounded-xl shadow-lg transition-all duration-200"
-            disabled={loading}
-          >
-            {loading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Creating Quick Book...
-              </>
-            ) : (
-              <>
-                <Clock className="h-4 w-4 mr-2" />
-                Confirm Quick Book
-              </>
-            )}
-          </Button>
-        </div>
+          {/* Fixed bottom section for submit button */}
+          <div className="px-6 py-4 border-t bg-gray-50">
+            <Button 
+              type="submit"
+              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 rounded-xl shadow-lg transition-all duration-200"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Creating Quick Book...
+                </>
+              ) : (
+                <>
+                  <Clock className="h-4 w-4 mr-2" />
+                  Confirm Quick Book
+                </>
+              )}
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );
