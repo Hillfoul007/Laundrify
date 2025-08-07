@@ -80,6 +80,7 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
   const [isRequestingLocation, setIsRequestingLocation] = useState(false);
   const [showLocationUnavailable, setShowLocationUnavailable] = useState(false);
   const [detectedLocationText, setDetectedLocationText] = useState("");
+  const [showQuickBookModal, setShowQuickBookModal] = useState(false);
   const dvhostingSmsService = DVHostingSmsService.getInstance();
   const locationDetectionService = LocationDetectionService.getInstance();
 
@@ -167,7 +168,7 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
               await locationDetectionService.detectLocationGPS();
 
             if (detectedLocation) {
-              console.log("📍 Auto-detected location:", detectedLocation);
+              console.log("�� Auto-detected location:", detectedLocation);
               setDetectedLocationText(detectedLocation.full_address);
 
               // Save detected location to database
