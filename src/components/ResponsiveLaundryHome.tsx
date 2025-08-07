@@ -680,17 +680,32 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
         <div className="p-4">
           {/* Delivery Time & Location */}
           <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-white">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium">
-                🕐 Pick up in {deliveryTime}
-              </span>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">
+                  🕐 Pick up in {deliveryTime}
+                </span>
+                <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
+                  Available
+                </span>
+              </div>
+
+              {/* Professional Quick Book Button */}
               <Button
                 onClick={handleQuickBook}
-                size="sm"
-                className="bg-purple-600 hover:bg-purple-700 text-white font-medium px-4 py-2 rounded-lg shadow-lg transition-all duration-200 hover:scale-105 active:scale-95"
+                className="w-full bg-gradient-to-r from-white to-gray-50 text-purple-700 font-semibold py-3 px-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl"
+                style={{
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
+                }}
               >
-                <Clock className="h-4 w-4 mr-1" />
-                Quick Book
+                <div className="flex items-center justify-center gap-2">
+                  <Clock className="h-5 w-5 text-purple-600" />
+                  <span className="text-base">Quick Book</span>
+                  <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center ml-1">
+                    <span className="text-white text-xs font-bold">⚡</span>
+                  </div>
+                </div>
               </Button>
             </div>
             <div
