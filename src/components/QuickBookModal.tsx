@@ -259,15 +259,6 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
           zIndex: 50
         }}
       >
-        {/* Global style for Select portal */}
-        <style jsx global>{`
-          [data-radix-popper-content-wrapper] {
-            z-index: 999999 !important;
-          }
-          .select-portal {
-            z-index: 999999 !important;
-          }
-        `}</style>
         <DialogHeader className="flex-shrink-0 px-6 py-4 border-b bg-gradient-to-r from-purple-600 to-pink-600 text-white">
           <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
             <Clock className="h-5 w-5" />
