@@ -482,6 +482,15 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
   const handleAuthSuccess = (user: any) => {
     setShowAuthModal(false);
     onLoginSuccess(user);
+
+    // If user just logged in and Quick Book was the trigger, open Quick Book modal
+    // We'll check this by adding a temporary state to track login intent
+    if (showQuickBookAfterLogin) {
+      setTimeout(() => {
+        setShowQuickBookModal(true);
+        setShowQuickBookAfterLogin(false);
+      }, 500); // Small delay for better UX
+    }
   };
 
   const handleLogout = () => {
