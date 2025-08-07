@@ -673,7 +673,14 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
               <span className="text-sm font-medium">
                 🕐 Pick up in {deliveryTime}
               </span>
-              <Badge className="bg-white/20 text-white">Available</Badge>
+              <Button
+                onClick={handleQuickBook}
+                size="sm"
+                className="bg-purple-600 hover:bg-purple-700 text-white font-medium px-4 py-2 rounded-lg shadow-lg transition-all duration-200 hover:scale-105 active:scale-95"
+              >
+                <Clock className="h-4 w-4 mr-1" />
+                Quick Book
+              </Button>
             </div>
             <div
               className={`flex items-center gap-2 text-sm ${
