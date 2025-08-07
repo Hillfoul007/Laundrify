@@ -16,7 +16,7 @@ const urlsToCache = [
 
 // Install service worker
 self.addEventListener("install", (event) => {
-  console.log("Service Worker: Installing v4...");
+  console.log("Service Worker: Installing v5...");
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log("Service Worker: Caching app shell");
@@ -28,7 +28,7 @@ self.addEventListener("install", (event) => {
 
 // Activate service worker
 self.addEventListener("activate", (event) => {
-  console.log("Service Worker: Activating v4...");
+  console.log("Service Worker: Activating v5...");
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
