@@ -337,6 +337,16 @@ try {
   console.error("❌ Full admin routes error:", error);
 }
 
+// Quick Book routes
+try {
+  const quickBookRoutes = require("./routes/quick-book");
+  app.use("/api/quick-book", quickBookRoutes);
+  console.log("🔗 Quick Book routes registered at /api/quick-book");
+} catch (error) {
+  console.error("❌ Failed to load Quick Book routes:", error.message);
+  console.error("❌ Full quick book routes error:", error);
+}
+
 // Google Sheets integration removed
 
 // Push notification endpoints
