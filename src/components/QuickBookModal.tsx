@@ -183,16 +183,17 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
           </p>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col" style={{ height: 'calc(100% - 80px)' }}>
           <div
-            className="flex-1 overflow-y-auto overscroll-contain px-6 py-4 space-y-6"
+            className="flex-1 overflow-y-scroll px-6 py-4 space-y-6"
             style={{
               WebkitOverflowScrolling: 'touch',
               scrollbarWidth: 'thin',
-              minHeight: '0',
-              height: '100%',
+              height: 'calc(100vh - 250px)',
+              maxHeight: 'calc(90vh - 200px)',
               overflowY: 'scroll',
-              touchAction: 'pan-y'
+              touchAction: 'pan-y',
+              scrollBehavior: 'smooth'
             }}
           >
             {/* User Info Display */}
