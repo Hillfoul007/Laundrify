@@ -522,6 +522,7 @@ if (productionConfig.isProduction()) {
         "/api/location",
         "/api/whatsapp",
         "/api/admin",
+        "/api/quick-book",
       ],
     });
   });
