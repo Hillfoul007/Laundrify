@@ -143,7 +143,17 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md max-w-[95vw] w-full mx-auto h-[90vh] flex flex-col p-0 overflow-hidden">
+      <DialogContent
+        className="sm:max-w-md max-w-[95vw] w-full mx-auto h-[90vh] flex flex-col p-0 overflow-hidden"
+        style={{
+          position: 'fixed',
+          top: '5vh',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          maxHeight: '90vh',
+          height: '90vh'
+        }}
+      >
         <DialogHeader className="flex-shrink-0 px-6 py-4 border-b bg-gradient-to-r from-purple-600 to-pink-600 text-white">
           <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
             <Clock className="h-5 w-5" />
