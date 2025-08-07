@@ -276,15 +276,28 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
               <Label htmlFor="pickup_date" className="text-sm font-medium text-gray-700">
                 📅 Pickup Date *
               </Label>
-              <Input
-                id="pickup_date"
-                type="date"
-                value={formData.pickup_date}
-                onChange={(e) => setFormData(prev => ({ ...prev, pickup_date: e.target.value }))}
-                min={new Date().toISOString().split('T')[0]}
-                className="h-12 text-base border-gray-300 focus:border-purple-500 focus:ring-purple-500"
-                required
-              />
+              <div className="relative">
+                <Input
+                  id="pickup_date"
+                  type="date"
+                  value={formData.pickup_date}
+                  onChange={(e) => setFormData(prev => ({ ...prev, pickup_date: e.target.value }))}
+                  min={getMinSelectableDate()}
+                  max={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]} // 30 days from now
+                  className="h-12 text-base border-gray-300 focus:border-purple-500 focus:ring-purple-500 focus:ring-2 focus:ring-opacity-20 transition-all duration-200 bg-white"
+                  style={{
+                    colorScheme: 'light',
+                    WebkitAppearance: 'none',
+                  }}
+                  required
+                />
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <Clock className="h-5 w-5 text-gray-400" />
+                </div>
+              </div>
+              <p className="text-xs text-gray-500">
+                Select a date from today onwards (up to 30 days)
+              </p>
             </div>
 
             {/* Pickup Time */}
