@@ -165,10 +165,17 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
-          <div className="flex-1 overflow-y-auto overscroll-contain px-6 py-4 space-y-6" style={{
-            WebkitOverflowScrolling: 'touch',
-            scrollbarWidth: 'thin'
-          }}>
+          <div
+            className="flex-1 overflow-y-auto overscroll-contain px-6 py-4 space-y-6"
+            style={{
+              WebkitOverflowScrolling: 'touch',
+              scrollbarWidth: 'thin',
+              minHeight: '0',
+              height: '100%',
+              overflowY: 'scroll',
+              touchAction: 'pan-y'
+            }}
+          >
             {/* User Info Display */}
             <Card className="border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50">
               <CardContent className="p-4">
