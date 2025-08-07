@@ -168,9 +168,10 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
           </p>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* User Info Display */}
-          <Card>
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* User Info Display */}
+            <Card className="border-purple-200 bg-purple-50">
             <CardContent className="pt-4">
               <div className="flex items-center gap-3">
                 <User className="h-4 w-4 text-gray-500" />
@@ -267,10 +268,14 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
             </AlertDescription>
           </Alert>
 
-          {/* Submit Button */}
-          <Button 
-            type="submit" 
-            className="w-full bg-purple-600 hover:bg-purple-700"
+          </form>
+        </div>
+
+        {/* Fixed bottom section for submit button */}
+        <div className="px-6 py-4 border-t bg-gray-50">
+          <Button
+            onClick={handleSubmit}
+            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 rounded-xl shadow-lg transition-all duration-200"
             disabled={loading}
           >
             {loading ? (
@@ -285,7 +290,7 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
               </>
             )}
           </Button>
-        </form>
+        </div>
       </DialogContent>
     </Dialog>
   );
