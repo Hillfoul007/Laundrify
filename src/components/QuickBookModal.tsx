@@ -238,28 +238,20 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
               <Label htmlFor="pickup_time" className="text-sm font-medium text-gray-700">
                 ⏰ Pickup Time *
               </Label>
-              <Select
+              <select
+                id="pickup_time"
                 value={formData.pickup_time}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, pickup_time: value }))}
+                onChange={(e) => setFormData(prev => ({ ...prev, pickup_time: e.target.value }))}
+                className="h-12 w-full text-base border border-gray-300 rounded-md px-3 py-2 bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500 focus:ring-opacity-20 outline-none transition-colors"
+                required
               >
-                <SelectTrigger className="h-12 text-base border-gray-300 focus:border-purple-500">
-                  <SelectValue placeholder="Select pickup time" />
-                </SelectTrigger>
-                <SelectContent
-                  className="z-[9999] bg-white shadow-xl border border-gray-200"
-                  style={{ zIndex: 9999 }}
-                  position="popper"
-                  sideOffset={4}
-                  alignOffset={0}
-                  container={document.body}
-                >
-                  {timeSlots.map((time) => (
-                    <SelectItem key={time} value={time}>
-                      {time}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <option value="" disabled>Select pickup time</option>
+                {timeSlots.map((time) => (
+                  <option key={time} value={time}>
+                    {time}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Address */}
