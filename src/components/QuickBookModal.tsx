@@ -305,20 +305,72 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
               <Label htmlFor="pickup_time" className="text-sm font-medium text-gray-700">
                 ⏰ Pickup Time *
               </Label>
-              <select
-                id="pickup_time"
-                value={formData.pickup_time}
-                onChange={(e) => setFormData(prev => ({ ...prev, pickup_time: e.target.value }))}
-                className="h-12 w-full text-base border border-gray-300 rounded-md px-3 py-2 bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500 focus:ring-opacity-20 outline-none transition-colors"
-                required
-              >
-                <option value="" disabled>Select pickup time</option>
-                {timeSlots.map((time) => (
-                  <option key={time} value={time}>
-                    {time}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <Select
+                  value={formData.pickup_time}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, pickup_time: value }))}
+                  disabled={!formData.pickup_date || availableTimeSlots.length === 0}
+                >
+                  <SelectTrigger className="h-12 text-base border-gray-300 focus:border-purple-500 focus:ring-purple-500 focus:ring-2 focus:ring-opacity-20 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <SelectValue placeholder={
+                      !formData.pickup_date
+                        ? "Select date first"
+                        : availableTimeSlots.length === 0
+                          ? "No slots available for today"
+                          : "Select pickup time"
+                    } />
+                  </SelectTrigger>
+                  <SelectContent
+                    className="z-[999999] max-h-[200px] overflow-y-auto bg-white shadow-2xl border border-gray-200 rounded-lg"
+                    position="popper"
+                    side="bottom"
+                    align="start"
+                    sideOffset={4}
+                    avoidCollisions={true}
+                    sticky="always"
+                  >
+                    <div className="p-2">
+                      <div className="text-xs text-gray-500 px-2 py-1 border-b mb-1">
+                        Available Time Slots
+                      </div>
+                      {availableTimeSlots.length === 0 ? (
+                        <div className="px-2 py-4 text-center text-gray-500 text-sm">
+                          No time slots available for this date.
+                          <br />
+                          <span className="text-xs">Try selecting tomorrow or later.</span>
+                        </div>
+                      ) : (
+                        availableTimeSlots.map((time) => (
+                          <SelectItem
+                            key={time}
+                            value={time}
+                            className="cursor-pointer hover:bg-purple-50 focus:bg-purple-50 rounded-md transition-colors"
+                          >
+                            <div className="flex items-center justify-between w-full">
+                              <span className="font-medium">{time}</span>
+                              <span className="text-xs text-gray-500">
+                                {new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', {
+                                  hour: 'numeric',
+                                  minute: '2-digit',
+                                  hour12: true
+                                })}
+                              </span>
+                            </div>
+                          </SelectItem>
+                        ))
+                      )}
+                    </div>
+                  </SelectContent>
+                </Select>
+              </div>
+              <p className="text-xs text-gray-500">
+                {formData.pickup_date && availableTimeSlots.length > 0 && (
+                  <>Available slots: {availableTimeSlots.length} time{availableTimeSlots.length !== 1 ? 's' : ''}</>
+                )}
+                {formData.pickup_date && availableTimeSlots.length === 0 && (
+                  <span className="text-amber-600">No slots available today. Please select tomorrow or later.</span>
+                )}
+              </p>
             </div>
 
             {/* Address */}
