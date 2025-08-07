@@ -970,6 +970,13 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
           onSuccess={handleAuthSuccess}
         />
 
+        {/* Quick Book Modal */}
+        <QuickBookModal
+          isOpen={showQuickBookModal}
+          onClose={() => setShowQuickBookModal(false)}
+          currentUser={currentUser}
+        />
+
         {/* WhatsApp Floating Action Button - Mobile */}
         <div 
           className="fixed bottom-20 right-4 z-[9999]"
