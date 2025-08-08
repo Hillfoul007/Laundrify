@@ -701,24 +701,6 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
                   Available
                 </span>
               </div>
-
-              {/* Professional Quick Book Button */}
-              <Button
-                onClick={handleQuickBook}
-                className="w-full bg-gradient-to-r from-white to-gray-50 text-purple-700 font-semibold py-3 px-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl"
-                style={{
-                  backdropFilter: 'blur(10px)',
-                  WebkitBackdropFilter: 'blur(10px)',
-                }}
-              >
-                <div className="flex items-center justify-center gap-2">
-                  <Clock className="h-5 w-5 text-purple-600" />
-                  <span className="text-base">Quick Book</span>
-                  <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center ml-1">
-                    <span className="text-white text-xs font-bold">⚡</span>
-                  </div>
-                </div>
-              </Button>
             </div>
             <div
               className={`flex items-center gap-2 text-sm ${
@@ -754,6 +736,24 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
                   : userLocation || "Detect Location"}
               </span>
             </div>
+
+            {/* Professional Quick Book Button */}
+            <Button
+              onClick={handleQuickBook}
+              className="w-full bg-gradient-to-r from-white to-gray-50 text-purple-700 font-semibold py-3 px-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl mt-3"
+              style={{
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+              }}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <Clock className="h-5 w-5 text-purple-600" />
+                <span className="text-base">Quick Book</span>
+                <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center ml-1">
+                  <span className="text-white text-xs font-bold">⚡</span>
+                </div>
+              </div>
+            </Button>
           </div>
         </div>
 
