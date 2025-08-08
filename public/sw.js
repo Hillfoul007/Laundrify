@@ -3,15 +3,7 @@ const STATIC_CACHE = "laundrify-static-v5";
 const urlsToCache = [
   "/",
   "/manifest.json",
-  "/laundrify-exact-icon.svg?v=2",
-  "/icons/icon-72x72.png",
-  "/icons/icon-96x96.png",
-  "/icons/icon-128x128.png",
-  "/icons/icon-144x144.png",
-  "/icons/icon-152x152.png",
-  "/icons/icon-192x192.png",
-  "/icons/icon-384x384.png",
-  "/icons/icon-512x512.png",
+  "/laundrify-exact-icon.svg?v=4",
 ];
 
 // Install service worker
