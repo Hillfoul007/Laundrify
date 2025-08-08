@@ -937,9 +937,9 @@ router.get("/customer/:customerId", async (req, res) => {
 });
 
 // Get pending bookings for riders (within 10km range)
-router.get("/pending/:riderLat/:riderLng", async (req, res) => {
+router.get("/pending", async (req, res) => {
   try {
-    const { riderLat, riderLng } = req.params;
+    const { riderLat, riderLng } = req.query;
     const lat = parseFloat(riderLat);
     const lng = parseFloat(riderLng);
 
