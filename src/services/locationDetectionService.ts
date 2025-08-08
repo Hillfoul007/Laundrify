@@ -6,11 +6,19 @@ export interface DetectedLocationData {
   state?: string;
   country?: string;
   pincode?: string;
+  house_number?: string;
+  building_name?: string;
+  street_name?: string;
+  neighborhood?: string;
+  landmark?: string;
+  formatted_address?: string;
   coordinates?: {
     lat: number;
     lng: number;
   };
-  detection_method: "gps" | "ip" | "manual" | "autocomplete";
+  detection_method: "gps" | "ip" | "manual" | "autocomplete" | "precise_gps";
+  accuracy?: number;
+  confidence_score?: number;
 }
 
 export interface LocationAvailabilityResponse {
