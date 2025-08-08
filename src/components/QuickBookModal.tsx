@@ -566,6 +566,9 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
                   )}
                 </Button>
               </div>
+              <p className="text-xs text-gray-500 mt-1">
+                📍 Currently serving: Sector 69 Gurugram (122101), areas with keywords: Tulip, DLF
+              </p>
             </div>
 
             {/* Special Instructions */}
