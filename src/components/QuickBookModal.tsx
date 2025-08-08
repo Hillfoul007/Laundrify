@@ -92,12 +92,16 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
   }, [isOpen]);
   const [loading, setLoading] = useState(false);
   const [detectingLocation, setDetectingLocation] = useState(false);
+  const [showLocationUnavailable, setShowLocationUnavailable] = useState(false);
+  const [detectedLocationText, setDetectedLocationText] = useState("");
   const [formData, setFormData] = useState({
     pickup_date: "",
     pickup_time: "",
     address: "",
     special_instructions: "",
   });
+
+  const locationDetectionService = LocationDetectionService.getInstance();
 
   // Get minimum selectable date (today or tomorrow based on available time slots)
   const getMinSelectableDate = () => {
