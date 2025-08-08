@@ -108,7 +108,7 @@ export class LocationDetectionService {
       if (!this.apiBaseUrl || !shouldUseBackend()) {
         // Use local check when backend is not available
         const localResult = this.checkAvailabilityLocal(city, pincode, coordinates, fullAddress);
-        console.log("�� Local availability check result:", localResult);
+        console.log("📍 Local availability check result:", localResult);
         return localResult;
       }
 
@@ -418,13 +418,17 @@ export class LocationDetectionService {
   }
 
   /**
-   * Parse Google Maps geocoding result
+   * Parse Google Maps geocoding result with enhanced address component extraction
    */
   private parseGoogleMapsResult(
     result: any,
   ): Omit<DetectedLocationData, "coordinates" | "detection_method"> {
     const components = result.address_components || [];
 
+    let houseNumber = "";
+    let route = "";
+    let neighborhood = "";
+    let sublocality = "";
     let city = "";
     let state = "";
     let country = "";
@@ -433,7 +437,15 @@ export class LocationDetectionService {
     components.forEach((component: any) => {
       const types = component.types || [];
 
-      if (
+      if (types.includes("street_number")) {
+        houseNumber = component.long_name;
+      } else if (types.includes("route")) {
+        route = component.long_name;
+      } else if (types.includes("neighborhood")) {
+        neighborhood = component.long_name;
+      } else if (types.includes("sublocality") || types.includes("sublocality_level_1")) {
+        sublocality = component.long_name;
+      } else if (
         types.includes("locality") ||
         types.includes("administrative_area_level_2")
       ) {
@@ -447,8 +459,23 @@ export class LocationDetectionService {
       }
     });
 
+    // Build enhanced address with house number and detailed components
+    const addressParts = [];
+
+    if (houseNumber) addressParts.push(houseNumber);
+    if (route) addressParts.push(route);
+    if (neighborhood) addressParts.push(neighborhood);
+    if (sublocality) addressParts.push(sublocality);
+    if (city) addressParts.push(city);
+    if (state) addressParts.push(state);
+    if (pincode) addressParts.push(pincode);
+
+    const enhancedAddress = addressParts.length > 0
+      ? addressParts.join(', ')
+      : (result.formatted_address || "Unknown address");
+
     return {
-      full_address: result.formatted_address || "Unknown address",
+      full_address: enhancedAddress,
       city: city || "Unknown",
       state,
       country: country || "India",
