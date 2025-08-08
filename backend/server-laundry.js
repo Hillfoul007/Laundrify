@@ -246,9 +246,8 @@ try {
 }
 
 try {
-  // locationRoutes = require("./routes/location");
-  // console.log("✅ Location routes loaded");
-  console.log("🔧 Location routes temporarily disabled");
+  locationRoutes = require("./routes/location");
+  console.log("✅ Location routes loaded");
 } catch (error) {
   console.error("❌ Failed to load Location routes:", error.message);
 }
@@ -271,10 +270,10 @@ if (bookingRoutes) {
   console.log("🔗 Booking routes registered at /api/bookings");
 }
 
-// if (locationRoutes) {
-//   app.use("/api/location", locationRoutes);
-//   console.log("🔗 Location routes registered at /api/location");
-// }
+if (locationRoutes) {
+  app.use("/api/location", locationRoutes);
+  console.log("🔗 Location routes registered at /api/location");
+}
 
 // WhatsApp Auth routes
 try {
