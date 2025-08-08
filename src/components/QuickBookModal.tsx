@@ -416,15 +416,20 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
         {!currentUser ? (
           <div className="flex-1 flex items-center justify-center px-6 py-8">
             <div className="text-center">
-              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <User className="h-8 w-8 text-purple-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Login Required</h3>
-              <p className="text-gray-600 mb-6">Please log in to use the Quick Book feature</p>
-              <Button onClick={onClose} className="bg-purple-600 hover:bg-purple-700 text-white">
-                Close
-              </Button>
+            <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <User className="h-8 w-8 text-purple-600" />
             </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Login Required</h3>
+            <p className="text-gray-600 mb-6">Please log in to use the Quick Book feature</p>
+            <Button onClick={onClose} className="bg-purple-600 hover:bg-purple-700 text-white">
+              Close
+            </Button>
+            {process.env.NODE_ENV === 'development' && (
+              <div className="mt-4 text-xs text-gray-500">
+                Debug: currentUser = {JSON.stringify(currentUser, null, 2)}
+              </div>
+            )}
+          </div>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="flex-1 flex flex-col" style={{ height: 'calc(100% - 80px)' }}>
