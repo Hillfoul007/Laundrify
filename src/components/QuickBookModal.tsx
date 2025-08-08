@@ -248,6 +248,10 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    console.log("🚀 CONFIRM QUICK BOOK BUTTON CLICKED!");
+    console.log("📋 Form data:", formData);
+    console.log("👤 Current user:", currentUser);
+
     // Validate date
     if (!formData.pickup_date) {
       toast.error("Please select a pickup date");
