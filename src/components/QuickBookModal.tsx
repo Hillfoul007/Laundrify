@@ -42,9 +42,18 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
   onClose,
   currentUser,
 }) => {
-  // Early return if no user provided
+  // Early return if no user provided - but still need to handle the Dialog state
   if (!currentUser) {
-    return null;
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-md">
+          <div className="p-6 text-center">
+            <p className="text-gray-600">Please log in to use Quick Book</p>
+            <Button onClick={onClose} className="mt-4">Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
   }
   // Add mobile viewport fix and z-index styles on modal open
   React.useEffect(() => {
