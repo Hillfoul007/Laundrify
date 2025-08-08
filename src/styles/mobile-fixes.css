@@ -520,6 +520,13 @@ body.modal-open {
     justify-content: center !important;
   }
 
+  /* Override minHeight for small screens */
+  @media (max-width: 640px) {
+    [data-quick-pickup-modal] .safe-area-bottom {
+      min-height: 0px !important;
+    }
+  }
+
   /* Handle mobile viewport height variations */
   [data-quick-pickup-modal] {
     max-height: calc(100vh - 4vh) !important;
