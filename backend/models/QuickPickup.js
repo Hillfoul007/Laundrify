@@ -25,6 +25,11 @@ const quickPickupSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    house_number: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     address: {
       type: String,
       required: true,
