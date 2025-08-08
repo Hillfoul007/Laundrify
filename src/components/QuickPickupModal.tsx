@@ -446,7 +446,6 @@ const QuickPickupModal: React.FC<QuickPickupModalProps> = ({
         pickup_time: formData.pickup_time,
         house_number: formData.house_number,
         address: formData.address,
-        special_instructions: formData.special_instructions,
         status: "pending",
         created_at: new Date().toISOString(),
       };
