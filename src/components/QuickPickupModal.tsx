@@ -469,7 +469,6 @@ const QuickPickupModal: React.FC<QuickPickupModalProps> = ({
           pickup_time: "",
           house_number: "",
           address: "",
-          special_instructions: "",
         });
       } else {
         toast.error(response.error || "Failed to create quick pickup");
