@@ -96,6 +96,12 @@ export class LocationDetectionService {
     coordinates?: { lat: number; lng: number },
   ): Promise<LocationAvailabilityResponse> {
     try {
+      // Validate that city is provided and not empty
+      if (!city || city.trim() === "") {
+        console.warn("⚠️ City is empty or undefined, using fallback value");
+        city = "unknown";
+      }
+
       // Always perform local check as primary method for consistency
       console.log("🔍 Checking location availability:", { city, pincode, fullAddress });
 
@@ -106,6 +112,15 @@ export class LocationDetectionService {
         return localResult;
       }
 
+      const requestData = {
+        city: city.trim(),
+        pincode: pincode?.trim() || undefined,
+        full_address: fullAddress?.trim() || undefined,
+        coordinates: coordinates || undefined,
+      };
+
+      console.log("🌐 Backend request data:", requestData);
+
       const response = await fetch(
         `${this.apiBaseUrl}/detected-locations/check-availability`,
         {
@@ -113,23 +128,30 @@ export class LocationDetectionService {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            city,
-            pincode,
-            full_address: fullAddress,
-            coordinates,
-          }),
+          body: JSON.stringify(requestData),
         },
       );
 
+      const responseText = await response.text();
+      console.log("🌐 Backend response text:", responseText);
+
       if (!response.ok) {
-        console.warn(`❌ Backend availability check failed (${response.status}), falling back to local check`);
+        console.warn(`❌ Backend availability check failed (${response.status}): ${responseText}`);
+        console.warn("Falling back to local check");
         const localResult = this.checkAvailabilityLocal(city, pincode, coordinates, fullAddress);
         console.log("📍 Fallback local availability check result:", localResult);
         return localResult;
       }
 
-      const result = await response.json();
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error("❌ Failed to parse backend response:", parseError);
+        console.log("Falling back to local check");
+        return this.checkAvailabilityLocal(city, pincode, coordinates, fullAddress);
+      }
+
       console.log("✅ Backend availability check result:", result);
       return result;
     } catch (error) {
