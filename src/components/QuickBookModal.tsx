@@ -288,9 +288,9 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
     setLoading(true);
     try {
       const quickBookData = {
-        customer_id: currentUser._id,
-        customer_name: currentUser.name || currentUser.full_name || "Quick Book User",
-        customer_phone: currentUser.phone,
+        customer_id: currentUser?._id,
+        customer_name: currentUser?.name || currentUser?.full_name || "Quick Book User",
+        customer_phone: currentUser?.phone || "",
         pickup_date: formData.pickup_date,
         pickup_time: formData.pickup_time,
         address: formData.address,
