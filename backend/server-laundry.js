@@ -164,7 +164,6 @@ app.use(
 // Handle preflight requests explicitly
 app.options('*', (req, res) => {
   const origin = req.headers.origin;
-  console.log(`✅ Preflight request from: ${origin}`);
 
   // Check if origin is allowed
   const isAllowed = !origin || productionConfig.ALLOWED_ORIGINS.includes(origin) ||
