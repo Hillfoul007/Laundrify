@@ -940,6 +940,11 @@ router.get("/customer/:customerId", async (req, res) => {
 router.get("/pending", async (req, res) => {
   try {
     const { riderLat, riderLng } = req.query;
+
+    if (!riderLat || !riderLng) {
+      return res.status(400).json({ error: "riderLat and riderLng query parameters are required" });
+    }
+
     const lat = parseFloat(riderLat);
     const lng = parseFloat(riderLng);
 
