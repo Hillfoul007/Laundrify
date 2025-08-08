@@ -503,7 +503,7 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
             {/* Pickup Time */}
             <div className="space-y-2">
               <Label htmlFor="pickup_time" className="text-sm font-medium text-gray-700">
-                �� Pickup Time *
+                ⏰ Pickup Time *
               </Label>
               <div className="relative">
                 <Select
@@ -652,10 +652,13 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
 
           {/* Fixed bottom section for submit button */}
           <div
-            className="flex-shrink-0 px-6 pt-4 pb-6 border-t bg-gray-50 safe-area-bottom"
+            className="flex-shrink-0 px-6 pt-4 border-t bg-gray-50 safe-area-bottom"
             style={{
-              paddingBottom: 'max(1.5rem, calc(1rem + env(safe-area-inset-bottom, 0px)))',
-              marginTop: 'auto'
+              paddingBottom: 'max(2rem, calc(1.5rem + env(safe-area-inset-bottom, 1rem)))',
+              marginTop: 'auto',
+              position: 'sticky',
+              bottom: 0,
+              zIndex: 10
             }}
           >
             <Button
