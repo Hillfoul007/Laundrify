@@ -379,19 +379,33 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
           </p>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="flex-1 flex flex-col" style={{ height: 'calc(100% - 80px)' }}>
-          <div
-            className="flex-1 overflow-y-scroll px-6 py-4 space-y-6"
-            style={{
-              WebkitOverflowScrolling: 'touch',
-              scrollbarWidth: 'thin',
-              height: 'calc(100vh - 250px)',
-              maxHeight: 'calc(90vh - 200px)',
-              overflowY: 'scroll',
-              touchAction: 'pan-y',
-              scrollBehavior: 'smooth'
-            }}
-          >
+        {!currentUser ? (
+          <div className="flex-1 flex items-center justify-center px-6 py-8">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <User className="h-8 w-8 text-purple-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Login Required</h3>
+              <p className="text-gray-600 mb-6">Please log in to use the Quick Book feature</p>
+              <Button onClick={onClose} className="bg-purple-600 hover:bg-purple-700 text-white">
+                Close
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="flex-1 flex flex-col" style={{ height: 'calc(100% - 80px)' }}>
+            <div
+              className="flex-1 overflow-y-scroll px-6 py-4 space-y-6"
+              style={{
+                WebkitOverflowScrolling: 'touch',
+                scrollbarWidth: 'thin',
+                height: 'calc(100vh - 250px)',
+                maxHeight: 'calc(90vh - 200px)',
+                overflowY: 'scroll',
+                touchAction: 'pan-y',
+                scrollBehavior: 'smooth'
+              }}
+            >
             {/* User Info Display */}
             <Card className="border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50">
               <CardContent className="p-4">
@@ -610,8 +624,9 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
                 </>
               )}
             </Button>
-          </div>
-        </form>
+            </div>
+          </form>
+        )}
       </DialogContent>
 
       {/* Location Unavailable Modal with higher z-index */}
