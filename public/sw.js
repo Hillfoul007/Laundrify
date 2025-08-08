@@ -131,12 +131,12 @@ self.addEventListener("push", (event) => {
       {
         action: "view",
         title: "View Details",
-        icon: "/icons/icon-72x72.png",
+        icon: "/laundrify-exact-icon.svg",
       },
       {
         action: "close",
         title: "Close",
-        icon: "/icons/icon-72x72.png",
+        icon: "/laundrify-exact-icon.svg",
       },
     ],
   };
