@@ -740,7 +740,7 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
             {/* Professional Quick Book Button */}
             <Button
               onClick={handleQuickBook}
-              className="w-full bg-gradient-to-r from-white to-gray-50 text-purple-700 font-semibold py-3 px-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl mt-3"
+              className="w-full bg-gradient-to-r from-white to-gray-50 text-purple-700 font-semibold py-3 px-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl mt-3 mb-4 relative z-[60]"
               style={{
                 backdropFilter: 'blur(10px)',
                 WebkitBackdropFilter: 'blur(10px)',
