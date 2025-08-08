@@ -320,6 +320,65 @@ export class LocationDetectionService {
   }
 
   /**
+   * High-precision GPS detection with multiple geocoding providers for Quick Pickup
+   */
+  async detectPreciseLocationGPS(): Promise<DetectedLocationData | null> {
+    try {
+      if (!navigator.geolocation) {
+        throw new Error("Geolocation not supported");
+      }
+
+      console.log("🎯 Starting high-precision location detection...");
+
+      // Request high-accuracy position with more aggressive settings
+      const position = await new Promise<GeolocationPosition>(
+        (resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+            timeout: 20000, // Longer timeout for better accuracy
+            maximumAge: 0, // Always get fresh location
+          });
+        },
+      );
+
+      const { latitude, longitude, accuracy } = position.coords;
+      console.log("🎯 High-precision GPS coordinates:", {
+        latitude,
+        longitude,
+        accuracy: accuracy ? `${accuracy}m` : 'unknown'
+      });
+
+      // Try multiple geocoding providers for best results
+      const geocodingResults = await this.multiProviderGeocode(latitude, longitude);
+
+      if (geocodingResults.length > 0) {
+        // Use the best result (highest confidence)
+        const bestResult = geocodingResults[0];
+
+        return {
+          ...bestResult,
+          coordinates: { lat: latitude, lng: longitude },
+          detection_method: "precise_gps",
+          accuracy: accuracy,
+          confidence_score: bestResult.confidence_score || 0.9,
+        };
+      }
+
+      // Fallback if no geocoding worked
+      return {
+        full_address: `High-precision coordinates: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+        city: "Unknown",
+        coordinates: { lat: latitude, lng: longitude },
+        detection_method: "precise_gps",
+        accuracy: accuracy,
+      };
+    } catch (error) {
+      console.error("�� High-precision GPS detection failed:", error);
+      return null;
+    }
+  }
+
+  /**
    * Reverse geocode coordinates to address with enhanced house number detection
    */
   private async reverseGeocode(
