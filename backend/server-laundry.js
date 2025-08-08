@@ -137,8 +137,8 @@ app.use(
         return callback(null, true);
       }
 
+      // Only log CORS blocks (actual issues)
       console.log(`🚫 CORS blocked origin: ${origin}`);
-      console.log(`🚫 Available allowed origins:`, productionConfig.ALLOWED_ORIGINS);
       return callback(null, true); // Temporarily allow all origins for debugging
     },
     credentials: true, // Enable credentials for iOS
