@@ -91,6 +91,21 @@ const InstallPrompt: React.FC = () => {
     localStorage.setItem("pwa-install-prompted", "true");
   };
 
+  const handleIOSInstall = () => {
+    // Show more detailed instructions for iOS
+    alert(
+      `To install Laundrify:\n\n` +
+      `1. Tap the Share button (📤) at the bottom of this page\n` +
+      `2. Scroll down and tap "Add to Home Screen"\n` +
+      `3. Tap "Add" to confirm\n\n` +
+      `The app icon will appear on your home screen!`
+    );
+
+    // Mark as prompted to prevent showing again
+    localStorage.setItem("pwa-install-prompted", "true");
+    setShowInstallPrompt(false);
+  };
+
   if (isInStandaloneMode || !showInstallPrompt) {
     return null;
   }
