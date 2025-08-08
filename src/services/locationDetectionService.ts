@@ -108,7 +108,7 @@ export class LocationDetectionService {
       if (!this.apiBaseUrl || !shouldUseBackend()) {
         // Use local check when backend is not available
         const localResult = this.checkAvailabilityLocal(city, pincode, coordinates, fullAddress);
-        console.log("📍 Local availability check result:", localResult);
+        console.log("�� Local availability check result:", localResult);
         return localResult;
       }
 
@@ -312,7 +312,7 @@ export class LocationDetectionService {
   }
 
   /**
-   * Reverse geocode coordinates to address
+   * Reverse geocode coordinates to address with enhanced house number detection
    */
   private async reverseGeocode(
     lat: number,
@@ -322,7 +322,7 @@ export class LocationDetectionService {
     "coordinates" | "detection_method"
   > | null> {
     try {
-      // Try Google Maps Geocoding API if available
+      // Try Google Maps Geocoding API if available (more accurate for house numbers)
       if ((window as any).google?.maps) {
         const geocoder = new (window as any).google.maps.Geocoder();
         const result = await new Promise((resolve, reject) => {
@@ -341,25 +341,75 @@ export class LocationDetectionService {
         return this.parseGoogleMapsResult(result);
       }
 
-      // Fallback to a free geocoding service (example with Nominatim)
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
-      );
+      // Enhanced Nominatim request for more detailed address info
+      const nominatimUrl = new URL('https://nominatim.openstreetmap.org/reverse');
+      nominatimUrl.searchParams.set('lat', lat.toString());
+      nominatimUrl.searchParams.set('lon', lng.toString());
+      nominatimUrl.searchParams.set('format', 'json');
+      nominatimUrl.searchParams.set('addressdetails', '1');
+      nominatimUrl.searchParams.set('zoom', '18'); // Higher zoom for more detailed address
+
+      const response = await fetch(nominatimUrl.toString());
 
       if (!response.ok) throw new Error("Nominatim request failed");
 
       const data = await response.json();
 
+      // Enhanced address parsing to include house numbers and building names
+      const addressComponents = [];
+      const address = data.address || {};
+
+      // Add house number if available
+      if (address.house_number) {
+        addressComponents.push(address.house_number);
+      }
+
+      // Add building or house name
+      if (address.building || address.house) {
+        addressComponents.push(address.building || address.house);
+      }
+
+      // Add road/street
+      if (address.road) {
+        addressComponents.push(address.road);
+      }
+
+      // Add neighborhood/suburb
+      if (address.neighbourhood || address.suburb) {
+        addressComponents.push(address.neighbourhood || address.suburb);
+      }
+
+      // Add sector or residential area
+      if (address.residential) {
+        addressComponents.push(address.residential);
+      }
+
+      // Add city/town
+      const city = address.city || address.town || address.village || "Unknown";
+      if (city !== "Unknown") {
+        addressComponents.push(city);
+      }
+
+      // Add state
+      if (address.state) {
+        addressComponents.push(address.state);
+      }
+
+      // Add postal code
+      if (address.postcode) {
+        addressComponents.push(address.postcode);
+      }
+
+      const enhancedAddress = addressComponents.length > 0
+        ? addressComponents.join(', ')
+        : (data.display_name || "Unknown address");
+
       return {
-        full_address: data.display_name || "Unknown address",
-        city:
-          data.address?.city ||
-          data.address?.town ||
-          data.address?.village ||
-          "Unknown",
-        state: data.address?.state || "",
-        country: data.address?.country || "India",
-        pincode: data.address?.postcode || "",
+        full_address: enhancedAddress,
+        city: city,
+        state: address.state || "",
+        country: address.country || "India",
+        pincode: address.postcode || "",
       };
     } catch (error) {
       console.error("❌ Reverse geocoding failed:", error);
