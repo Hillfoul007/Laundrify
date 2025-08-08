@@ -358,6 +358,7 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
         className="sm:max-w-md max-w-[95vw] w-full mx-auto h-[90vh] flex flex-col p-0 overflow-hidden z-[50]"
+        data-quick-book-modal
         style={{
           position: 'fixed',
           top: '5vh',
