@@ -84,6 +84,7 @@ router.post("/", async (req, res) => {
         customer_phone,
         pickup_date,
         pickup_time,
+        house_number: house_number || "",
         address,
         special_instructions: special_instructions || "",
         status: "pending",
