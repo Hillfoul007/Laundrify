@@ -147,7 +147,7 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
 
   // Reset pickup time when date changes
   useEffect(() => {
-    if (formData.pickup_date) {
+    if (formData.pickup_date && formData.pickup_time) {
       setFormData(prev => ({
         ...prev,
         pickup_time: "", // Reset time when date changes
