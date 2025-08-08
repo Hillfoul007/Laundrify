@@ -26,7 +26,7 @@ export async function testAddressValidation() {
   ];
 
   console.log("🧪 Testing Address Validation for Quick Book & Cart");
-  console.log("="repeat(50));
+  console.log("=".repeat(50));
 
   for (const test of testAddresses) {
     try {
