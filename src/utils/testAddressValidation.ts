@@ -25,7 +25,7 @@ export async function testAddressValidation() {
     { address: "122102", description: "Different pincode (should fail)" },
   ];
 
-  console.log("🧪 Testing Address Validation for Quick Book & Cart");
+  console.log("🧪 Testing Address Validation for Quick Pickup & Cart");
   console.log("=".repeat(50));
 
   for (const test of testAddresses) {
