@@ -425,7 +425,7 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
                   id="pickup_date"
                   type="date"
                   value={formData.pickup_date}
-                  onChange={(e) => setFormData(prev => ({ ...prev, pickup_date: e.target.value }))}
+                  onChange={(e) => handleDateChange(e.target.value)}
                   min={getMinSelectableDate()}
                   max={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]} // 30 days from now
                   className="h-12 text-base border-gray-300 focus:border-purple-500 focus:ring-purple-500 focus:ring-2 focus:ring-opacity-20 transition-all duration-200 bg-white"
