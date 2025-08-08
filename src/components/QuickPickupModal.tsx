@@ -446,7 +446,7 @@ const QuickPickupModal: React.FC<QuickPickupModalProps> = ({
       };
 
       console.log("📋 Submitting quick pickup data:", quickPickupData);
-      console.log("�� API Client status:", apiClient.getConnectionStatus());
+      console.log("🔧 API Client status:", apiClient.getConnectionStatus());
 
       const response = await apiClient.request<any>("/quick-pickup", {
         method: "POST",
@@ -760,6 +760,14 @@ const QuickPickupModal: React.FC<QuickPickupModalProps> = ({
                 <div className="flex items-center gap-2 text-xs text-purple-600">
                   <Loader2 className="h-3 w-3 animate-spin" />
                   <span>Using GPS and multiple providers for maximum accuracy...</span>
+                </div>
+              ) : addressAutoDetected ? (
+                <div className="flex items-center gap-2 text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
+                  <CheckCircle className="h-3 w-3" />
+                  <span>
+                    ✅ Address auto-detected with precision
+                    {detectionAccuracy && ` (±${Math.round(detectionAccuracy)}m accuracy)`}
+                  </span>
                 </div>
               ) : (
                 <p className="text-xs text-gray-500 mt-1">
