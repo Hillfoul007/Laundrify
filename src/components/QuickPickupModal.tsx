@@ -280,44 +280,73 @@ const QuickPickupModal: React.FC<QuickPickupModalProps> = ({
   const detectLocation = async () => {
     setDetectingLocation(true);
     try {
-      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0,
-        });
-      });
+      console.log("🎯 Manual precise location detection triggered");
 
-      const { latitude, longitude } = position.coords;
+      const detectedLocation = await locationDetectionService.detectPreciseLocationGPS();
 
-      // Use location service to get proper address if possible
-      try {
-        const detectedLocation = await locationDetectionService.detectLocationGPS();
-        if (detectedLocation) {
-          const newAddress = detectedLocation.full_address || `Location: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
-          setFormData(prev => ({ ...prev, address: newAddress }));
+      if (detectedLocation) {
+        console.log("✅ Manual precise location detected:", detectedLocation);
 
-          // Validate the detected location
-          const isValid = await validatePickupAddress(newAddress);
-          if (isValid) {
-            toast.success("Location detected and validated!");
-          }
-        } else {
-          // Fallback to coordinates
-          const coordAddress = `Location: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
-          setFormData(prev => ({ ...prev, address: coordAddress }));
-          await validatePickupAddress(coordAddress);
+        // Build the most comprehensive address possible
+        const addressComponents = [];
+
+        if (detectedLocation.house_number) {
+          addressComponents.push(detectedLocation.house_number);
         }
-      } catch (geoError) {
-        // Fallback to coordinates
-        const coordAddress = `Location: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
-        setFormData(prev => ({ ...prev, address: coordAddress }));
-        await validatePickupAddress(coordAddress);
-        toast.success("Location coordinates detected!");
+        if (detectedLocation.building_name) {
+          addressComponents.push(detectedLocation.building_name);
+        }
+        if (detectedLocation.street_name) {
+          addressComponents.push(detectedLocation.street_name);
+        }
+        if (detectedLocation.neighborhood) {
+          addressComponents.push(detectedLocation.neighborhood);
+        }
+        if (detectedLocation.landmark) {
+          addressComponents.push(`Near ${detectedLocation.landmark}`);
+        }
+        if (detectedLocation.city && detectedLocation.city !== "Unknown") {
+          addressComponents.push(detectedLocation.city);
+        }
+        if (detectedLocation.state) {
+          addressComponents.push(detectedLocation.state);
+        }
+        if (detectedLocation.pincode) {
+          addressComponents.push(detectedLocation.pincode);
+        }
+
+        const comprehensiveAddress = addressComponents.length > 0
+          ? addressComponents.join(', ')
+          : detectedLocation.full_address;
+
+        console.log("🏠 Built comprehensive address:", comprehensiveAddress);
+
+        setFormData(prev => ({ ...prev, address: comprehensiveAddress }));
+
+        // Validate the detected location
+        const isValid = await validatePickupAddress(comprehensiveAddress);
+        if (isValid) {
+          const accuracyText = detectedLocation.accuracy
+            ? ` (±${Math.round(detectedLocation.accuracy)}m accuracy)`
+            : '';
+          toast.success(`📍 Precise location detected${accuracyText}!`);
+        }
+      } else {
+        console.log("⚠️ Could not detect precise location, trying fallback");
+
+        // Fallback to basic GPS
+        const basicLocation = await locationDetectionService.detectLocationGPS();
+        if (basicLocation) {
+          setFormData(prev => ({ ...prev, address: basicLocation.full_address }));
+          await validatePickupAddress(basicLocation.full_address);
+          toast.success("📍 Location detected!");
+        } else {
+          throw new Error("All location detection methods failed");
+        }
       }
     } catch (error) {
-      console.error("Location detection failed:", error);
-      toast.error("Failed to detect location. Please enter address manually.");
+      console.error("❌ Location detection failed:", error);
+      toast.error("Failed to detect location. Please enter address manually or check location permissions.");
     } finally {
       setDetectingLocation(false);
     }
