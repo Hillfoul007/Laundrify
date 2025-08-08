@@ -105,6 +105,8 @@ const QuickPickupModal: React.FC<QuickPickupModalProps> = ({
   const [detectingLocation, setDetectingLocation] = useState(false);
   const [showLocationUnavailable, setShowLocationUnavailable] = useState(false);
   const [detectedLocationText, setDetectedLocationText] = useState("");
+  const [addressAutoDetected, setAddressAutoDetected] = useState(false);
+  const [detectionAccuracy, setDetectionAccuracy] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     pickup_date: "",
     pickup_time: "",
@@ -157,7 +159,7 @@ const QuickPickupModal: React.FC<QuickPickupModalProps> = ({
       const detectedLocation = await locationDetectionService.detectPreciseLocationGPS();
 
       if (detectedLocation) {
-        console.log("��� Precise location detected:", detectedLocation);
+        console.log("✅ Precise location detected:", detectedLocation);
 
         // Build comprehensive address from detected components
         const addressParts = [];
