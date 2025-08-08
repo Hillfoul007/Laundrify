@@ -109,6 +109,8 @@ router.post("/", async (req, res) => {
 
     return res.status(500).json({ error: "Internal server error", details: error.message });
   }
+
+  console.log("📝 Step 9: Route handler completed");
 });
 
 // Get quick bookings for a customer
