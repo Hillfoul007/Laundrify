@@ -48,7 +48,7 @@ import NotificationPanel from "./NotificationPanel";
 import VoiceSearch from "./VoiceSearch";
 import AdminServicesManager from "./AdminServicesManager";
 import LocationUnavailableModal from "./LocationUnavailableModal";
-import QuickBookModal from "./QuickBookModal";
+import QuickPickupModal from "./QuickPickupModal";
 import { DVHostingSmsService } from "@/services/dvhostingSmsService";
 import { LocationDetectionService } from "@/services/locationDetectionService";
 import { saveCartData, getCartData } from "@/utils/formPersistence";
@@ -80,8 +80,8 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
   const [isRequestingLocation, setIsRequestingLocation] = useState(false);
   const [showLocationUnavailable, setShowLocationUnavailable] = useState(false);
   const [detectedLocationText, setDetectedLocationText] = useState("");
-  const [showQuickBookModal, setShowQuickBookModal] = useState(false);
-  const [showQuickBookAfterLogin, setShowQuickBookAfterLogin] = useState(false);
+  const [showQuickPickupModal, setShowQuickPickupModal] = useState(false);
+  const [showQuickPickupAfterLogin, setShowQuickPickupAfterLogin] = useState(false);
   const dvhostingSmsService = DVHostingSmsService.getInstance();
   const locationDetectionService = LocationDetectionService.getInstance();
 
@@ -484,12 +484,12 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
     setShowAuthModal(false);
     onLoginSuccess(user);
 
-    // If user just logged in and Quick Book was the trigger, open Quick Book modal
+    // If user just logged in and Quick Pickup was the trigger, open Quick Pickup modal
     // We'll check this by adding a temporary state to track login intent
-    if (showQuickBookAfterLogin) {
+    if (showQuickPickupAfterLogin) {
       setTimeout(() => {
-        setShowQuickBookModal(true);
-        setShowQuickBookAfterLogin(false);
+        setShowQuickPickupModal(true);
+        setShowQuickPickupAfterLogin(false);
       }, 500); // Small delay for better UX
     }
   };
@@ -528,26 +528,26 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
     }
   };
 
-  const handleQuickBook = () => {
-    console.log("🚀 Quick Book button clicked!");
+  const handleQuickPickup = () => {
+    console.log("🚀 Quick Pickup button clicked!");
     console.log("👤 Current user:", currentUser);
-    console.log("🎯 showQuickBookModal state:", showQuickBookModal);
+    console.log("🎯 showQuickPickupModal state:", showQuickPickupModal);
 
     if (!currentUser) {
       console.log("❌ No current user, showing auth modal");
       // User not logged in, show login modal first and remember the intent
-      setShowQuickBookAfterLogin(true);
+      setShowQuickPickupAfterLogin(true);
       setShowAuthModal(true);
       return;
     }
 
-    console.log("✅ User logged in, showing Quick Book modal");
-    // User is logged in, show quick book modal
-    setShowQuickBookModal(true);
+    console.log("✅ User logged in, showing Quick Pickup modal");
+    // User is logged in, show quick pickup modal
+    setShowQuickPickupModal(true);
 
     // Add a slight delay to ensure state update
     setTimeout(() => {
-      console.log("🔄 Quick Book modal state after update:", showQuickBookModal);
+      console.log("🔄 Quick Pickup modal state after update:", showQuickPickupModal);
     }, 100);
   };
 
@@ -737,9 +737,9 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
               </span>
             </div>
 
-            {/* Professional Quick Book Button */}
+            {/* Professional Quick Pickup Button */}
             <Button
-              onClick={handleQuickBook}
+              onClick={handleQuickPickup}
               className="w-full bg-gradient-to-r from-white to-gray-50 text-purple-700 font-semibold py-3 px-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl mt-3 mb-4 relative z-[60]"
               style={{
                 backdropFilter: 'blur(10px)',
@@ -748,7 +748,7 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
             >
               <div className="flex items-center justify-center gap-2">
                 <Clock className="h-5 w-5 text-purple-600" />
-                <span className="text-base">Quick Book</span>
+                <span className="text-base">Quick Pickup</span>
                 <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center ml-1">
                   <span className="text-white text-xs font-bold">⚡</span>
                 </div>
@@ -997,10 +997,10 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
           onSuccess={handleAuthSuccess}
         />
 
-        {/* Quick Book Modal */}
-        <QuickBookModal
-          isOpen={showQuickBookModal}
-          onClose={() => setShowQuickBookModal(false)}
+        {/* Quick Pickup Modal */}
+        <QuickPickupModal
+          isOpen={showQuickPickupModal}
+          onClose={() => setShowQuickPickupModal(false)}
           currentUser={currentUser}
         />
 
