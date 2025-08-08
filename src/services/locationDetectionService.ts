@@ -586,6 +586,8 @@ export class LocationDetectionService {
     let state = "";
     let country = "";
     let pincode = "";
+    let buildingName = "";
+    let landmark = "";
 
     components.forEach((component: any) => {
       const types = component.types || [];
@@ -598,6 +600,10 @@ export class LocationDetectionService {
         neighborhood = component.long_name;
       } else if (types.includes("sublocality") || types.includes("sublocality_level_1")) {
         sublocality = component.long_name;
+      } else if (types.includes("premise") || types.includes("establishment")) {
+        buildingName = component.long_name;
+      } else if (types.includes("point_of_interest")) {
+        landmark = component.long_name;
       } else if (
         types.includes("locality") ||
         types.includes("administrative_area_level_2")
@@ -612,10 +618,11 @@ export class LocationDetectionService {
       }
     });
 
-    // Build enhanced address with house number and detailed components
+    // Build comprehensive address with all available details
     const addressParts = [];
 
     if (houseNumber) addressParts.push(houseNumber);
+    if (buildingName) addressParts.push(buildingName);
     if (route) addressParts.push(route);
     if (neighborhood) addressParts.push(neighborhood);
     if (sublocality) addressParts.push(sublocality);
@@ -629,10 +636,63 @@ export class LocationDetectionService {
 
     return {
       full_address: enhancedAddress,
+      formatted_address: result.formatted_address || enhancedAddress,
       city: city || "Unknown",
       state,
       country: country || "India",
       pincode,
+      house_number: houseNumber,
+      building_name: buildingName,
+      street_name: route,
+      neighborhood: neighborhood || sublocality,
+      landmark: landmark,
+    };
+  }
+
+  /**
+   * Parse Nominatim result with detailed address extraction
+   */
+  private parseNominatimResult(data: any): Omit<DetectedLocationData, "coordinates" | "detection_method"> {
+    const address = data.address || {};
+
+    // Extract detailed components
+    const houseNumber = address.house_number || "";
+    const buildingName = address.building || address.house || "";
+    const streetName = address.road || "";
+    const neighborhood = address.neighbourhood || address.suburb || address.residential || "";
+    const city = address.city || address.town || address.village || "Unknown";
+    const state = address.state || "";
+    const country = address.country || "India";
+    const pincode = address.postcode || "";
+    const landmark = address.amenity || address.shop || "";
+
+    // Build comprehensive address
+    const addressParts = [];
+
+    if (houseNumber) addressParts.push(houseNumber);
+    if (buildingName) addressParts.push(buildingName);
+    if (streetName) addressParts.push(streetName);
+    if (neighborhood) addressParts.push(neighborhood);
+    if (city !== "Unknown") addressParts.push(city);
+    if (state) addressParts.push(state);
+    if (pincode) addressParts.push(pincode);
+
+    const enhancedAddress = addressParts.length > 0
+      ? addressParts.join(', ')
+      : (data.display_name || "Unknown address");
+
+    return {
+      full_address: enhancedAddress,
+      formatted_address: data.display_name || enhancedAddress,
+      city: city,
+      state,
+      country,
+      pincode,
+      house_number: houseNumber,
+      building_name: buildingName,
+      street_name: streetName,
+      neighborhood: neighborhood,
+      landmark: landmark,
     };
   }
 }
