@@ -635,6 +635,9 @@ const QuickPickupModal: React.FC<QuickPickupModalProps> = ({
                   )}
                 </Button>
               </div>
+              <p className="text-xs text-gray-500 mt-1">
+                💡 For best results, include house/flat number, building name, and landmarks
+              </p>
             </div>
 
             {/* Special Instructions */}
