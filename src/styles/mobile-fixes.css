@@ -491,10 +491,10 @@ body.modal-open {
 /* Ensure Quick Book button is always visible on mobile */
 @media (max-width: 768px) {
   [data-quick-book-modal] {
-    top: 5vh !important;
+    top: 2vh !important;
     height: auto !important;
-    max-height: 90vh !important;
-    margin-bottom: max(1rem, env(safe-area-inset-bottom, 0px)) !important;
+    max-height: 96vh !important;
+    margin-bottom: max(2rem, env(safe-area-inset-bottom, 1rem)) !important;
   }
 
   [data-quick-book-modal] .flex-shrink-0:last-child {
@@ -504,5 +504,19 @@ body.modal-open {
     z-index: 10 !important;
     border-top: 1px solid #e5e7eb !important;
     box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1) !important;
+    padding-bottom: max(2rem, calc(1.5rem + env(safe-area-inset-bottom, 1rem))) !important;
+  }
+
+  /* Ensure adequate spacing from viewport bottom */
+  [data-quick-book-modal] {
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+  }
+
+  /* Force proper button container height */
+  [data-quick-book-modal] .safe-area-bottom {
+    min-height: 80px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
   }
 }
