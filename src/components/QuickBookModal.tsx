@@ -399,14 +399,14 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
         data-quick-book-modal
         style={{
           position: 'fixed',
-          top: '5vh',
+          top: '2vh',
           left: '50%',
           transform: 'translateX(-50%)',
-          maxHeight: '90vh',
+          maxHeight: '96vh',
           height: 'auto',
-          minHeight: '80vh',
+          minHeight: '70vh',
           zIndex: 50,
-          marginBottom: 'max(1rem, env(safe-area-inset-bottom, 0px))'
+          marginBottom: 'max(2rem, env(safe-area-inset-bottom, 1rem))'
         }}
       >
         <DialogHeader className="flex-shrink-0 px-6 py-4 border-b bg-gradient-to-r from-purple-600 to-pink-600 text-white">
@@ -503,7 +503,7 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
             {/* Pickup Time */}
             <div className="space-y-2">
               <Label htmlFor="pickup_time" className="text-sm font-medium text-gray-700">
-                ⏰ Pickup Time *
+                �� Pickup Time *
               </Label>
               <div className="relative">
                 <Select
