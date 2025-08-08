@@ -759,7 +759,7 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
 
         {/* Sticky Search and Categories Only */}
         <div className="sticky top-0 bg-gradient-to-b from-laundrify-purple to-laundrify-pink z-40 shadow-lg">
-          <div className="px-4 pt-4 pb-2 space-y-3">
+          <div className="px-4 pt-4 pb-2 space-y-3 sm:mt-0 -mt-1 sm:pl-4 pl-4">
             {/* Search Bar */}
             <div className="bg-gray-800 rounded-xl flex items-center px-4 py-3 mobile-sticky-search">
               <Search className="h-5 w-5 text-gray-400 mr-3" />
