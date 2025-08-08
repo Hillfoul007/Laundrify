@@ -99,13 +99,13 @@ detectedLocationSchema.statics.checkAvailability = function (city, pincode) {
       city: "Gurgaon",
       area: "Sector 69",
       pincode: "122101",
-      keywords: ["tulip", "sector 69", "sector-69", "tulip violet"],
+      keywords: ["tulip", "sector 69", "sector-69", "tulip violet", "sector 69 gurugram", "sector 69 gurgaon"],
     },
     {
       city: "Gurugram",
       area: "Sector 69",
       pincode: "122101",
-      keywords: ["tulip", "sector 69", "sector-69", "tulip violet"],
+      keywords: ["tulip", "sector 69", "sector-69", "tulip violet", "sector 69 gurugram", "sector 69 gurgaon"],
     },
   ];
 
