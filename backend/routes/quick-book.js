@@ -27,36 +27,62 @@ router.post("/", async (req, res) => {
       });
     }
 
-    // Validate customer exists
-    if (mongoose.Types.ObjectId.isValid(customer_id)) {
-      const customer = await User.findById(customer_id);
-      if (!customer) {
-        return res.status(404).json({ error: "Customer not found" });
+    // Check if database is connected
+    const isDatabaseConnected = mongoose.connection.readyState === 1;
+
+    if (isDatabaseConnected) {
+      // Validate customer exists
+      if (mongoose.Types.ObjectId.isValid(customer_id)) {
+        const customer = await User.findById(customer_id);
+        if (!customer) {
+          return res.status(404).json({ error: "Customer not found" });
+        }
       }
+
+      // Create quick booking
+      const quickBook = new QuickBook({
+        customer_id,
+        customer_name,
+        customer_phone,
+        pickup_date,
+        pickup_time,
+        address,
+        special_instructions: special_instructions || "",
+        status: "pending",
+      });
+
+      await quickBook.save();
+
+      // Populate customer data
+      await quickBook.populate("customer_id", "name full_name phone email");
+
+      console.log("✅ Quick booking created:", quickBook._id);
+      res.status(201).json({
+        message: "Quick booking created successfully",
+        quickBook,
+      });
+    } else {
+      // Mock mode when database is not connected
+      console.log("⚠️ Database not connected, running in mock mode");
+      const mockQuickBook = {
+        _id: "mock_" + Date.now(),
+        customer_id,
+        customer_name,
+        customer_phone,
+        pickup_date,
+        pickup_time,
+        address,
+        special_instructions: special_instructions || "",
+        status: "pending",
+        created_at: new Date(),
+      };
+
+      console.log("✅ Mock quick booking created:", mockQuickBook._id);
+      res.status(201).json({
+        message: "Quick booking created successfully (mock mode)",
+        quickBook: mockQuickBook,
+      });
     }
-
-    // Create quick booking
-    const quickBook = new QuickBook({
-      customer_id,
-      customer_name,
-      customer_phone,
-      pickup_date,
-      pickup_time,
-      address,
-      special_instructions: special_instructions || "",
-      status: "pending",
-    });
-
-    await quickBook.save();
-
-    // Populate customer data
-    await quickBook.populate("customer_id", "name full_name phone email");
-
-    console.log("✅ Quick booking created:", quickBook._id);
-    res.status(201).json({
-      message: "Quick booking created successfully",
-      quickBook,
-    });
   } catch (error) {
     console.error("❌ Error creating quick booking:", error);
     console.error("❌ Error name:", error.name);
@@ -97,7 +123,7 @@ router.get("/customer/:customerId", async (req, res) => {
 
     res.json({ quickBooks });
   } catch (error) {
-    console.error("�� Error fetching customer quick bookings:", error);
+    console.error("❌ Error fetching customer quick bookings:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
