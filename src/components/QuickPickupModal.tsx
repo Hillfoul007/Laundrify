@@ -145,6 +145,11 @@ const QuickPickupModal: React.FC<QuickPickupModalProps> = ({
       // Automatically trigger precise location detection when modal opens
       console.log("🎯 Quick Pickup modal opened - starting auto location detection");
       autoDetectPreciseLocation();
+    } else {
+      // Reset indicators when modal closes
+      setAddressAutoDetected(false);
+      setDetectionAccuracy(null);
+      setDetectingLocation(false);
     }
   }, [isOpen]);
 
