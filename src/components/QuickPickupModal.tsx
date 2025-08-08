@@ -139,8 +139,76 @@ const QuickPickupModal: React.FC<QuickPickupModalProps> = ({
         pickup_date: minDate,
         pickup_time: "", // Reset time when modal opens
       }));
+
+      // Automatically trigger precise location detection when modal opens
+      console.log("🎯 Quick Pickup modal opened - starting auto location detection");
+      autoDetectPreciseLocation();
     }
   }, [isOpen]);
+
+  // Auto-detect precise location when modal opens
+  const autoDetectPreciseLocation = async () => {
+    if (detectingLocation) return; // Prevent multiple simultaneous requests
+
+    setDetectingLocation(true);
+    try {
+      console.log("🎯 Starting automatic precise location detection...");
+
+      const detectedLocation = await locationDetectionService.detectPreciseLocationGPS();
+
+      if (detectedLocation) {
+        console.log("✅ Precise location detected:", detectedLocation);
+
+        // Build comprehensive address from detected components
+        const addressParts = [];
+
+        if (detectedLocation.house_number) {
+          addressParts.push(detectedLocation.house_number);
+        }
+        if (detectedLocation.building_name) {
+          addressParts.push(detectedLocation.building_name);
+        }
+        if (detectedLocation.street_name) {
+          addressParts.push(detectedLocation.street_name);
+        }
+        if (detectedLocation.neighborhood) {
+          addressParts.push(detectedLocation.neighborhood);
+        }
+        if (detectedLocation.city && detectedLocation.city !== "Unknown") {
+          addressParts.push(detectedLocation.city);
+        }
+        if (detectedLocation.pincode) {
+          addressParts.push(detectedLocation.pincode);
+        }
+
+        const preciseAddress = addressParts.length > 0
+          ? addressParts.join(', ')
+          : detectedLocation.full_address;
+
+        console.log("🏠 Built precise address:", preciseAddress);
+
+        // Auto-populate the address field
+        setFormData(prev => ({
+          ...prev,
+          address: preciseAddress
+        }));
+
+        // Validate the detected location
+        const isValid = await validatePickupAddress(preciseAddress);
+        if (isValid) {
+          toast.success("📍 Precise location detected and validated!");
+        }
+      } else {
+        console.log("⚠️ Could not detect precise location");
+        toast.info("📍 Tap the location button to detect your address");
+      }
+    } catch (error) {
+      console.error("❌ Auto location detection failed:", error);
+      // Silently fail for auto-detection to avoid annoying users
+    } finally {
+      setDetectingLocation(false);
+    }
+  };
 
   // Helper function to handle date change and reset time
   const handleDateChange = (newDate: string) => {
