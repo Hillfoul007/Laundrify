@@ -805,6 +805,13 @@ const QuickPickupModal: React.FC<QuickPickupModalProps> = ({
               )}
             </div>
 
+            {/* Info Alert */}
+            <Alert className="bg-green-50 border-green-200">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              <AlertDescription className="text-green-800 leading-relaxed">
+                🚚 <strong>How it works:</strong> Our professional rider will visit at your scheduled time to assess and collect your items.
+              </AlertDescription>
+            </Alert>
           </div>
 
           {/* Fixed bottom section for submit button */}
