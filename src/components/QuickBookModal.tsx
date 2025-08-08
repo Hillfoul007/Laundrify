@@ -265,6 +265,12 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
       return;
     }
 
+    // Validate pickup address for service availability
+    const isAddressValid = await validatePickupAddress(formData.address);
+    if (!isAddressValid) {
+      return; // Address validation will show the location unavailable modal
+    }
+
     setLoading(true);
     try {
       const quickBookData = {
