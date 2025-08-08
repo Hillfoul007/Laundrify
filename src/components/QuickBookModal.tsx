@@ -141,6 +141,45 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
     }
   }, [formData.pickup_date]);
 
+  // Validate pickup address for service availability
+  const validatePickupAddress = async (address: string): Promise<boolean> => {
+    if (!address.trim()) return true; // Allow empty for now, will be caught by form validation
+
+    try {
+      // Parse address for validation components
+      const addressLower = address.toLowerCase();
+
+      // Extract potential pincode
+      const pincodeMatch = address.match(/\b\d{6}\b/);
+      const pincode = pincodeMatch ? pincodeMatch[0] : undefined;
+
+      // Extract potential city
+      let city = "";
+      if (addressLower.includes("gurugram") || addressLower.includes("gurgaon")) {
+        city = addressLower.includes("gurugram") ? "gurugram" : "gurgaon";
+      }
+
+      // Check availability using the same logic as cart page
+      const availability = await locationDetectionService.checkLocationAvailability(
+        city,
+        pincode,
+        address
+      );
+
+      if (!availability.is_available) {
+        setDetectedLocationText(address);
+        setShowLocationUnavailable(true);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Error validating address:", error);
+      // Allow address if validation fails (fallback)
+      return true;
+    }
+  };
+
   const detectLocation = async () => {
     setDetectingLocation(true);
     try {
@@ -153,13 +192,32 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
       });
 
       const { latitude, longitude } = position.coords;
-      
-      // Fallback to approximate address
-      setFormData(prev => ({ 
-        ...prev, 
-        address: `Location: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
-      }));
-      toast.success("Location coordinates detected!");
+
+      // Use location service to get proper address if possible
+      try {
+        const detectedLocation = await locationDetectionService.detectLocationGPS();
+        if (detectedLocation) {
+          const newAddress = detectedLocation.full_address || `Location: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+          setFormData(prev => ({ ...prev, address: newAddress }));
+
+          // Validate the detected location
+          const isValid = await validatePickupAddress(newAddress);
+          if (isValid) {
+            toast.success("Location detected and validated!");
+          }
+        } else {
+          // Fallback to coordinates
+          const coordAddress = `Location: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+          setFormData(prev => ({ ...prev, address: coordAddress }));
+          await validatePickupAddress(coordAddress);
+        }
+      } catch (geoError) {
+        // Fallback to coordinates
+        const coordAddress = `Location: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+        setFormData(prev => ({ ...prev, address: coordAddress }));
+        await validatePickupAddress(coordAddress);
+        toast.success("Location coordinates detected!");
+      }
     } catch (error) {
       console.error("Location detection failed:", error);
       toast.error("Failed to detect location. Please enter address manually.");
