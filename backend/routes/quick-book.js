@@ -70,7 +70,7 @@ router.post("/", async (req, res) => {
       });
     } else {
       // Mock mode when database is not connected
-      console.log("⚠️ Database not connected, running in mock mode");
+      console.log("📝 Step 5: Using mock mode (database not connected)");
       const mockQuickBook = {
         _id: "mock_" + Date.now(),
         customer_id,
@@ -84,11 +84,15 @@ router.post("/", async (req, res) => {
         created_at: new Date(),
       };
 
-      console.log("✅ Mock quick booking created:", mockQuickBook._id);
+      console.log("📝 Step 6: Mock booking object created:", mockQuickBook._id);
+      console.log("📝 Step 7: Sending response...");
+
       res.status(201).json({
         message: "Quick booking created successfully (mock mode)",
         quickBook: mockQuickBook,
       });
+
+      console.log("✅ Step 8: Response sent successfully");
     }
   } catch (error) {
     console.error("❌ Error creating quick booking:", error);
