@@ -1,5 +1,5 @@
 /**
- * Test utility to verify address validation for Quick Book and Cart
+ * Test utility to verify address validation for Quick Pickup and Cart
  * Tests the new keywords: "sector 69 gurugram" and "tulip"
  */
 
