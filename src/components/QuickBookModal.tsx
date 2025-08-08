@@ -602,6 +602,22 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
           </div>
         </form>
       </DialogContent>
+
+      {/* Location Unavailable Modal with higher z-index */}
+      <LocationUnavailableModal
+        isOpen={showLocationUnavailable}
+        onClose={() => setShowLocationUnavailable(false)}
+        detectedLocation={detectedLocationText}
+        onExplore={() => {
+          // Close both modals and let user explore services
+          setShowLocationUnavailable(false);
+          onClose();
+        }}
+        onNavigateHome={() => {
+          // Navigate to home to explore available services
+          window.location.href = "/";
+        }}
+      />
     </Dialog>
   );
 };
