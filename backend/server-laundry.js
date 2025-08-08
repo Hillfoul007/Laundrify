@@ -271,10 +271,10 @@ if (bookingRoutes) {
   console.log("🔗 Booking routes registered at /api/bookings");
 }
 
-if (locationRoutes) {
-  app.use("/api/location", locationRoutes);
-  console.log("🔗 Location routes registered at /api/location");
-}
+// if (locationRoutes) {
+//   app.use("/api/location", locationRoutes);
+//   console.log("🔗 Location routes registered at /api/location");
+// }
 
 // WhatsApp Auth routes
 try {
