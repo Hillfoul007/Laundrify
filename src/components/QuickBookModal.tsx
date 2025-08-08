@@ -695,7 +695,7 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
           </div>
 
           {/* Fixed bottom section for submit button */}
-          <div className="flex-shrink-0 px-6 py-4 border-t bg-gray-50">
+          <div className="flex-shrink-0 px-6 py-4 border-t bg-gray-50" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom, 0px))' }}>
             <Button
               type="submit"
               onClick={(e) => {
