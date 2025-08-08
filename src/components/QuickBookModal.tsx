@@ -291,7 +291,7 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
     e.preventDefault();
 
     console.log("🚀 CONFIRM QUICK BOOK BUTTON CLICKED!");
-    console.log("�� Form data:", formData);
+    console.log("📋 Form data:", formData);
     console.log("👤 Current user:", currentUser);
 
     // Validate date
@@ -648,7 +648,7 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
                       await validatePickupAddress(e.target.value);
                     }
                   }}
-                  placeholder="Enter your pickup address"
+                  placeholder="e.g., Sector 21, Gurugram 122001 or Block A, Noida 201301"
                   className="h-12 text-base border-gray-300 focus:border-purple-500 focus:ring-purple-500 flex-1"
                   required
                 />
