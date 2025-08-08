@@ -8,7 +8,7 @@ const router = express.Router();
 // Create a new quick booking
 router.post("/", async (req, res) => {
   try {
-    console.log("📝 Quick booking request:", req.body);
+    console.log("📝 Step 1: Quick booking request received:", req.body);
 
     const {
       customer_id,
@@ -20,12 +20,17 @@ router.post("/", async (req, res) => {
       special_instructions,
     } = req.body;
 
+    console.log("📝 Step 2: Request data extracted");
+
     // Validate required fields
     if (!customer_id || !customer_name || !customer_phone || !pickup_date || !pickup_time || !address) {
+      console.log("❌ Step 3: Validation failed - missing required fields");
       return res.status(400).json({
         error: "Missing required fields: customer_id, customer_name, customer_phone, pickup_date, pickup_time, address",
       });
     }
+
+    console.log("✅ Step 3: Validation passed");
 
     // Check if database is connected
     const isDatabaseConnected = mongoose.connection.readyState === 1;
