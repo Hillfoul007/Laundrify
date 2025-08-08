@@ -1,5 +1,5 @@
-const CACHE_NAME = "laundrify-v5";
-const STATIC_CACHE = "laundrify-static-v5";
+const CACHE_NAME = "laundrify-v6";
+const STATIC_CACHE = "laundrify-static-v6";
 const urlsToCache = [
   "/",
   "/manifest.json",
