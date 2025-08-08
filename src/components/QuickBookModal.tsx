@@ -532,6 +532,11 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
                   id="address"
                   value={formData.address}
                   onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+                  onBlur={async (e) => {
+                    if (e.target.value.trim()) {
+                      await validatePickupAddress(e.target.value);
+                    }
+                  }}
                   placeholder="Enter your pickup address"
                   className="h-12 text-base border-gray-300 focus:border-purple-500 focus:ring-purple-500 flex-1"
                   required
