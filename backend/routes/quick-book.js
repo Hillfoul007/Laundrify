@@ -59,7 +59,10 @@ router.post("/", async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Error creating quick booking:", error);
-    
+    console.error("❌ Error name:", error.name);
+    console.error("❌ Error message:", error.message);
+    console.error("❌ Error stack:", error.stack);
+
     if (error.name === "ValidationError") {
       return res.status(400).json({
         error: "Validation error",
@@ -67,7 +70,7 @@ router.post("/", async (req, res) => {
       });
     }
 
-    res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: "Internal server error", details: error.message });
   }
 });
 
@@ -94,7 +97,7 @@ router.get("/customer/:customerId", async (req, res) => {
 
     res.json({ quickBooks });
   } catch (error) {
-    console.error("❌ Error fetching customer quick bookings:", error);
+    console.error("�� Error fetching customer quick bookings:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
