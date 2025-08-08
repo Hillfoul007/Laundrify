@@ -375,7 +375,7 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
             Quick Book Pickup
           </DialogTitle>
           <p className="text-purple-100 text-sm mt-1">
-            Schedule a pickup and our rider will assess your items
+            {!currentUser ? "Please log in to continue" : "Schedule a pickup and our rider will assess your items"}
           </p>
         </DialogHeader>
 
