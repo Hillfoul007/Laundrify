@@ -24,7 +24,7 @@ router.post("/", async (req, res) => {
 
     // Validate required fields
     if (!customer_id || !customer_name || !customer_phone || !pickup_date || !pickup_time || !address) {
-      console.log("❌ Step 3: Validation failed - missing required fields");
+      console.log("��� Step 3: Validation failed - missing required fields");
       return res.status(400).json({
         error: "Missing required fields: customer_id, customer_name, customer_phone, pickup_date, pickup_time, address",
       });
@@ -85,8 +85,12 @@ router.post("/", async (req, res) => {
 
       console.log("📝 Step 13: Populating customer data...");
       try {
-        await quickBook.populate("customer_id", "name full_name phone email");
-        console.log("✅ Step 14: Customer data populated successfully");
+        if (customerExists) {
+          await quickBook.populate("customer_id", "name full_name phone email");
+          console.log("✅ Step 14: Customer data populated successfully");
+        } else {
+          console.log("⚠️ Step 14: Skipping customer population (customer doesn't exist)");
+        }
       } catch (populateError) {
         console.error("❌ Step 14: Error populating customer data:", populateError);
         // Continue without population if it fails
