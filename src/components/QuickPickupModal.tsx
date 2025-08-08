@@ -341,7 +341,7 @@ const QuickPickupModal: React.FC<QuickPickupModalProps> = ({
       console.log("📋 Submitting quick pickup data:", quickPickupData);
       console.log("🔧 API Client status:", apiClient.getConnectionStatus());
 
-      const response = await apiClient.request<any>("/quick-book", {
+      const response = await apiClient.request<any>("/quick-pickup", {
         method: "POST",
         body: quickPickupData,
       });
