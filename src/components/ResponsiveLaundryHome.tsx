@@ -757,9 +757,6 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
           </div>
         </div>
 
-        {/* Spacing to prevent overlap */}
-        <div className="h-4"></div>
-
         {/* Sticky Search and Categories Only */}
         <div className="sticky top-0 bg-gradient-to-b from-laundrify-purple to-laundrify-pink z-40 shadow-lg">
           <div className="px-4 pt-4 pb-2 space-y-3">
