@@ -741,14 +741,14 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
               }
             >
               <MapPin
-                className={`h-4 w-4 ${
+                className={`h-4 w-4 sm:mt-0 mt-2 ${
                   userLocation?.includes("denied") ||
                   userLocation?.includes("access denied")
                     ? "animate-pulse"
                     : ""
                 }`}
               />
-              <span>
+              <span className="sm:mb-0 mb-auto sm:pt-0 pt-2">
                 {isRequestingLocation
                   ? "Requesting location..."
                   : userLocation || "Detect Location"}
