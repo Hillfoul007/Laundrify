@@ -145,15 +145,14 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
     }
   }, [isOpen]);
 
-  // Reset pickup time when date changes
-  useEffect(() => {
-    if (formData.pickup_date && formData.pickup_time) {
-      setFormData(prev => ({
-        ...prev,
-        pickup_time: "", // Reset time when date changes
-      }));
-    }
-  }, [formData.pickup_date]);
+  // Helper function to handle date change and reset time
+  const handleDateChange = (newDate: string) => {
+    setFormData(prev => ({
+      ...prev,
+      pickup_date: newDate,
+      pickup_time: "", // Reset time when date changes
+    }));
+  };
 
   // Validate pickup address for service availability
   const validatePickupAddress = async (address: string): Promise<boolean> => {
