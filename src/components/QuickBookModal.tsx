@@ -56,7 +56,7 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
         viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
       }
 
-      // Add z-index styles for Select dropdown
+      // Add z-index styles for Select dropdown and modal layering
       styleElement = document.createElement('style');
       styleElement.id = 'quick-book-modal-styles';
       styleElement.textContent = `
@@ -68,6 +68,16 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
         }
         .select-portal {
           z-index: 999999 !important;
+        }
+
+        /* Location Unavailable Modal should appear above Quick Book Modal */
+        .mobile-modal[data-radix-dialog-content] {
+          z-index: 99999999 !important;
+        }
+
+        /* Quick Book Modal z-index */
+        [data-quick-book-modal] {
+          z-index: 50 !important;
         }
       `;
       document.head.appendChild(styleElement);
