@@ -327,11 +327,21 @@ try {
   console.error("❌ Full admin routes error:", error);
 }
 
-// Quick Book routes
+// Quick Pickup routes (new)
+try {
+  const quickPickupRoutes = require("./routes/quick-pickup");
+  app.use("/api/quick-pickup", quickPickupRoutes);
+  console.log("🔗 Quick Pickup routes registered at /api/quick-pickup");
+} catch (error) {
+  console.error("❌ Failed to load Quick Pickup routes:", error.message);
+  console.error("❌ Full quick pickup routes error:", error);
+}
+
+// Quick Book routes (legacy support)
 try {
   const quickBookRoutes = require("./routes/quick-book");
   app.use("/api/quick-book", quickBookRoutes);
-  console.log("🔗 Quick Book routes registered at /api/quick-book");
+  console.log("🔗 Quick Book routes registered at /api/quick-book (legacy support)");
 } catch (error) {
   console.error("❌ Failed to load Quick Book routes:", error.message);
   console.error("❌ Full quick book routes error:", error);
