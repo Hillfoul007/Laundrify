@@ -82,14 +82,24 @@ export default defineConfig(({ mode }) => {
                 theme_color: "#C46DD8",
                 icons: [
                   {
-                    src: "placeholder.svg",
+                    src: "/laundrify-exact-icon.svg",
                     sizes: "192x192",
                     type: "image/svg+xml",
                   },
                   {
-                    src: "placeholder.svg",
+                    src: "/laundrify-exact-icon.svg",
                     sizes: "512x512",
                     type: "image/svg+xml",
+                  },
+                  {
+                    src: "/icons/icon-192x192.png",
+                    sizes: "192x192",
+                    type: "image/png",
+                  },
+                  {
+                    src: "/icons/icon-512x512.png",
+                    sizes: "512x512",
+                    type: "image/png",
                   },
                 ],
               },
