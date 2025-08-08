@@ -132,6 +132,136 @@ router.get("/geocode/:lat/:lng", async (req, res) => {
 });
 */
 
+// Replacement geocode route using query parameters
+router.get("/geocode", async (req, res) => {
+  try {
+    const { lat, lng } = req.query;
+    log(`Geocoding request for coordinates: ${lat}, ${lng}`);
+
+    if (!lat || !lng) {
+      return res.status(400).json({
+        success: false,
+        message: "Latitude and longitude query parameters are required",
+      });
+    }
+
+    // Validate coordinates
+    const latitude = parseFloat(lat);
+    const longitude = parseFloat(lng);
+
+    if (isNaN(latitude) || isNaN(longitude)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid coordinates provided",
+      });
+    }
+
+    if (
+      latitude < -90 ||
+      latitude > 90 ||
+      longitude < -180 ||
+      longitude > 180
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Coordinates out of valid range",
+      });
+    }
+
+    // Try OpenStreetMap Nominatim API for reverse geocoding
+    try {
+      const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=16&addressdetails=1`;
+
+      const response = await fetch(nominatimUrl, {
+        headers: {
+          "User-Agent": "CleanCare-Pro/1.0",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        if (data && data.address) {
+          // Extract meaningful address components
+          const address = data.address;
+          let formattedAddress = "";
+          let cityName = "";
+
+          // Build city name
+          const city = address.city || address.town || address.village;
+          const locality =
+            address.suburb || address.neighbourhood || address.quarter;
+          const state = address.state;
+
+          if (city) {
+            cityName = city;
+            if (state && state !== city) {
+              cityName += `, ${state}`;
+            }
+          } else if (locality) {
+            cityName = locality;
+            if (state && state !== locality) {
+              cityName += `, ${state}`;
+            }
+          } else if (state) {
+            cityName = state;
+          }
+
+          // Build formatted address
+          const components = [
+            address.house_number,
+            address.road,
+            locality,
+            city,
+            state,
+            address.country,
+          ].filter(Boolean);
+
+          formattedAddress = components.join(", ");
+
+          log(`Geocoding successful: ${cityName}`);
+
+          return res.json({
+            success: true,
+            data: {
+              address: formattedAddress || data.display_name,
+              city: cityName,
+              components: address,
+              display_name: data.display_name,
+              coordinates: {
+                lat: latitude,
+                lng: longitude,
+              },
+            },
+          });
+        }
+      }
+    } catch (nominatimError) {
+      log(`Nominatim API error: ${nominatimError.message}`);
+    }
+
+    // Fallback response
+    log(`Geocoding fallback for: ${latitude}, ${longitude}`);
+    res.json({
+      success: true,
+      data: {
+        address: `Location at ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
+        city: "Unknown Location",
+        coordinates: {
+          lat: latitude,
+          lng: longitude,
+        },
+      },
+    });
+  } catch (error) {
+    log(`Geocoding error: ${error.message}`, error.stack);
+    res.status(500).json({
+      success: false,
+      message: "Failed to geocode location",
+    });
+  }
+});
+
 // Search for places/addresses
 router.get("/search/:query", async (req, res) => {
   try {
