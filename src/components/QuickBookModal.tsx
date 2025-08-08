@@ -666,6 +666,9 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
                   )}
                 </Button>
               </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Include sector/block/colony name and 6-digit pincode for faster service
+              </p>
             </div>
 
             {/* Special Instructions */}
