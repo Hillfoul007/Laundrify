@@ -39,21 +39,23 @@ router.post("/", async (req, res) => {
     if (isDatabaseConnected) {
       console.log("📝 Step 5: Using database mode");
 
-      // Validate customer exists
+      // Validate customer exists (optional for quick bookings)
       console.log("📝 Step 6: Validating customer ID:", customer_id);
+      let customerExists = false;
       if (mongoose.Types.ObjectId.isValid(customer_id)) {
         console.log("📝 Step 7: Customer ID is valid ObjectId, checking database...");
         try {
           const customer = await User.findById(customer_id);
+          customerExists = !!customer;
           console.log("📝 Step 8: Customer lookup result:", customer ? "Found" : "Not Found");
-          if (!customer) {
-            console.log("❌ Step 9: Customer not found, returning 404");
-            return res.status(404).json({ error: "Customer not found" });
+          if (customer) {
+            console.log("✅ Step 9: Customer validation passed");
+          } else {
+            console.log("⚠️ Step 9: Customer not found, proceeding with quick booking anyway");
           }
-          console.log("✅ Step 9: Customer validation passed");
         } catch (customerError) {
           console.error("❌ Step 8: Error during customer lookup:", customerError);
-          return res.status(500).json({ error: "Customer lookup failed", details: customerError.message });
+          console.log("⚠️ Proceeding with quick booking despite lookup error");
         }
       } else {
         console.log("⚠️ Step 7: Customer ID is not a valid ObjectId, skipping validation");
