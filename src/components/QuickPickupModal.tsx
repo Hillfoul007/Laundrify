@@ -329,6 +329,10 @@ const QuickPickupModal: React.FC<QuickPickupModalProps> = ({
 
         setFormData(prev => ({ ...prev, address: comprehensiveAddress }));
 
+        // Set visual indicators
+        setAddressAutoDetected(true);
+        setDetectionAccuracy(detectedLocation.accuracy || null);
+
         // Validate the detected location
         const isValid = await validatePickupAddress(comprehensiveAddress);
         if (isValid) {
@@ -442,7 +446,7 @@ const QuickPickupModal: React.FC<QuickPickupModalProps> = ({
       };
 
       console.log("📋 Submitting quick pickup data:", quickPickupData);
-      console.log("🔧 API Client status:", apiClient.getConnectionStatus());
+      console.log("�� API Client status:", apiClient.getConnectionStatus());
 
       const response = await apiClient.request<any>("/quick-pickup", {
         method: "POST",
