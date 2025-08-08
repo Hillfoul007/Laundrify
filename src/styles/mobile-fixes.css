@@ -470,3 +470,39 @@ body.modal-open {
     border: 1px solid currentColor;
   }
 }
+
+/* Quick Book Modal specific fixes */
+[data-quick-book-modal] {
+  max-height: 90vh !important;
+  overflow: hidden !important;
+}
+
+[data-quick-book-modal] form {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  min-height: 0 !important;
+}
+
+[data-quick-book-modal] .safe-area-bottom {
+  padding-bottom: max(1.5rem, calc(1rem + env(safe-area-inset-bottom, 0px))) !important;
+}
+
+/* Ensure Quick Book button is always visible on mobile */
+@media (max-width: 768px) {
+  [data-quick-book-modal] {
+    top: 5vh !important;
+    height: auto !important;
+    max-height: 90vh !important;
+    margin-bottom: max(1rem, env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  [data-quick-book-modal] .flex-shrink-0:last-child {
+    position: sticky !important;
+    bottom: 0 !important;
+    background: #f9fafb !important;
+    z-index: 10 !important;
+    border-top: 1px solid #e5e7eb !important;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1) !important;
+  }
+}
