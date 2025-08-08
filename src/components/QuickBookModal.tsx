@@ -606,7 +606,7 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
                       await validatePickupAddress(e.target.value);
                     }
                   }}
-                  placeholder="e.g., Sector 21, Gurugram 122001 or Block A, Noida 201301"
+                  placeholder="Enter your pickup address"
                   className="h-12 text-base border-gray-300 focus:border-purple-500 focus:ring-purple-500 flex-1"
                   required
                 />
@@ -624,9 +624,6 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
                   )}
                 </Button>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
-                Include sector/block/colony name and 6-digit pincode for faster service
-              </p>
             </div>
 
             {/* Special Instructions */}
