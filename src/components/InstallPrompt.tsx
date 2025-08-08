@@ -119,7 +119,7 @@ const InstallPrompt: React.FC = () => {
           )}
 
           <div className="flex gap-2">
-            {!isIOS && (
+            {!isIOS ? (
               <Button
                 onClick={handleInstallClick}
                 size="sm"
@@ -127,6 +127,21 @@ const InstallPrompt: React.FC = () => {
               >
                 <Plus className="h-3 w-3 mr-1" />
                 Install
+              </Button>
+            ) : (
+              <Button
+                onClick={() => {
+                  // For iOS, scroll to show share button in Safari
+                  window.scrollTo(0, document.body.scrollHeight);
+                  // Mark as prompted to prevent showing again
+                  localStorage.setItem("pwa-install-prompted", "true");
+                  setShowInstallPrompt(false);
+                }}
+                size="sm"
+                className="bg-white text-laundrify-blue hover:bg-white/90 h-8 px-3 text-xs font-medium"
+              >
+                <Plus className="h-3 w-3 mr-1" />
+                Show Me How
               </Button>
             )}
 
