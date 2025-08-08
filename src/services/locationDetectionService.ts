@@ -191,13 +191,13 @@ export class LocationDetectionService {
         city: "gurgaon",
         area: "sector 69",
         pincode: "122101",
-        keywords: ["tulip", "sector 69", "sector-69"]
+        keywords: ["tulip", "sector 69", "sector-69", "sector 69 gurugram", "sector 69 gurgaon"]
       },
       {
         city: "gurugram",
         area: "sector 69",
         pincode: "122101",
-        keywords: ["tulip", "sector 69", "sector-69", "dlf"]
+        keywords: ["tulip", "sector 69", "sector-69", "dlf", "sector 69 gurugram", "sector 69 gurgaon"]
       }
     ];
 
