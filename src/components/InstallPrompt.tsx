@@ -145,18 +145,12 @@ const InstallPrompt: React.FC = () => {
               </Button>
             ) : (
               <Button
-                onClick={() => {
-                  // For iOS, scroll to show share button in Safari
-                  window.scrollTo(0, document.body.scrollHeight);
-                  // Mark as prompted to prevent showing again
-                  localStorage.setItem("pwa-install-prompted", "true");
-                  setShowInstallPrompt(false);
-                }}
+                onClick={handleIOSInstall}
                 size="sm"
                 className="bg-white text-laundrify-blue hover:bg-white/90 h-8 px-3 text-xs font-medium"
               >
                 <Plus className="h-3 w-3 mr-1" />
-                Show Me How
+                Install
               </Button>
             )}
 
