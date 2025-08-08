@@ -723,7 +723,14 @@ const QuickPickupModal: React.FC<QuickPickupModalProps> = ({
                 <Input
                   id="address"
                   value={formData.address}
-                  onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, address: e.target.value }));
+                    // Reset auto-detection indicators when user manually edits
+                    if (addressAutoDetected) {
+                      setAddressAutoDetected(false);
+                      setDetectionAccuracy(null);
+                    }
+                  }}
                   onBlur={async (e) => {
                     if (e.target.value.trim()) {
                       await validatePickupAddress(e.target.value);
