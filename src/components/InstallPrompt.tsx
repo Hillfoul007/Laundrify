@@ -109,7 +109,7 @@ const InstallPrompt: React.FC = () => {
 
           {isIOS ? (
             <p className="text-xs text-white/80 mb-3">
-              Tap the <span className="font-medium">Share</span> button below,
+              Tap the <span className="font-medium">Share</span> button (📤) at the bottom,
               then tap <span className="font-medium">"Add to Home Screen"</span>
             </p>
           ) : (
