@@ -246,8 +246,9 @@ try {
 }
 
 try {
-  locationRoutes = require("./routes/location");
-  console.log("✅ Location routes loaded");
+  // locationRoutes = require("./routes/location");
+  // console.log("✅ Location routes loaded");
+  console.log("🔧 Location routes temporarily disabled");
 } catch (error) {
   console.error("❌ Failed to load Location routes:", error.message);
 }
