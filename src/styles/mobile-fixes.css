@@ -519,4 +519,17 @@ body.modal-open {
     flex-direction: column !important;
     justify-content: center !important;
   }
+
+  /* Handle mobile viewport height variations */
+  [data-quick-book-modal] {
+    max-height: calc(100vh - 4vh) !important;
+    max-height: calc(100dvh - 4vh) !important; /* Dynamic viewport height for mobile */
+  }
+
+  /* Ensure button is never below fold */
+  @supports (height: 100dvh) {
+    [data-quick-book-modal] {
+      max-height: 96dvh !important;
+    }
+  }
 }
