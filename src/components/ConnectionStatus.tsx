@@ -92,11 +92,17 @@ const ConnectionStatus: React.FC<ConnectionStatusProps> = ({
     }
 
     if (backendStatus === "offline") {
+      // Check if we're in a hosted environment
+      const isHostedEnv =
+        window.location.hostname.includes("builder.codes") ||
+        window.location.hostname.includes("fly.dev") ||
+        document.querySelector("[data-loc]") !== null;
+
       return {
         icon: CloudOff,
-        text: "Local Mode",
+        text: isHostedEnv ? "Demo Mode" : "Local Mode",
         color: "bg-yellow-100 text-yellow-800",
-        description: "Data saved locally",
+        description: isHostedEnv ? "Demo data only" : "Data saved locally",
       };
     }
 
