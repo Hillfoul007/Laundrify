@@ -157,7 +157,7 @@ const QuickPickupModal: React.FC<QuickPickupModalProps> = ({
       const detectedLocation = await locationDetectionService.detectPreciseLocationGPS();
 
       if (detectedLocation) {
-        console.log("✅ Precise location detected:", detectedLocation);
+        console.log("��� Precise location detected:", detectedLocation);
 
         // Build comprehensive address from detected components
         const addressParts = [];
@@ -703,6 +703,11 @@ const QuickPickupModal: React.FC<QuickPickupModalProps> = ({
             <div className="space-y-2">
               <Label htmlFor="address" className="text-sm font-medium text-gray-700">
                 📍 Pickup Address *
+                {detectingLocation && (
+                  <span className="ml-2 text-xs text-purple-600 animate-pulse">
+                    🎯 Auto-detecting precise location...
+                  </span>
+                )}
               </Label>
               <div className="flex gap-2">
                 <Input
@@ -714,16 +719,25 @@ const QuickPickupModal: React.FC<QuickPickupModalProps> = ({
                       await validatePickupAddress(e.target.value);
                     }
                   }}
-                  placeholder="Enter full address with house number (e.g., 123, Tulip Violet, Sector 69, Gurugram 122101)"
-                  className="h-12 text-base border-gray-300 focus:border-purple-500 focus:ring-purple-500 flex-1"
+                  placeholder={detectingLocation
+                    ? "🎯 Detecting your precise address..."
+                    : "Enter full address with house number (e.g., 123, Tulip Violet, Sector 69, Gurugram 122101)"
+                  }
+                  className={`h-12 text-base border-gray-300 focus:border-purple-500 focus:ring-purple-500 flex-1 ${
+                    detectingLocation ? 'bg-purple-50 border-purple-200' : ''
+                  }`}
                   required
+                  disabled={detectingLocation}
                 />
                 <Button
                   type="button"
                   variant="outline"
-                  className="h-12 w-12 border-gray-300 hover:border-purple-500 hover:bg-purple-50"
+                  className={`h-12 w-12 border-gray-300 hover:border-purple-500 hover:bg-purple-50 ${
+                    detectingLocation ? 'border-purple-300 bg-purple-50' : ''
+                  }`}
                   onClick={detectLocation}
                   disabled={detectingLocation}
+                  title={detectingLocation ? "Detecting precise location..." : "Detect my precise location"}
                 >
                   {detectingLocation ? (
                     <Loader2 className="h-4 w-4 animate-spin text-purple-600" />
@@ -732,9 +746,16 @@ const QuickPickupModal: React.FC<QuickPickupModalProps> = ({
                   )}
                 </Button>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
-                💡 For best results, include house/flat number, building name, and landmarks
-              </p>
+              {detectingLocation ? (
+                <div className="flex items-center gap-2 text-xs text-purple-600">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  <span>Using GPS and multiple providers for maximum accuracy...</span>
+                </div>
+              ) : (
+                <p className="text-xs text-gray-500 mt-1">
+                  💡 Auto-detection starts when modal opens. For best results, include house/flat number, building name, and landmarks
+                </p>
+              )}
             </div>
 
             {/* Special Instructions */}
