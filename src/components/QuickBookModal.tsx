@@ -42,6 +42,10 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
   onClose,
   currentUser,
 }) => {
+  // Early return if no user provided
+  if (!currentUser) {
+    return null;
+  }
   // Add mobile viewport fix and z-index styles on modal open
   React.useEffect(() => {
     let styleElement: HTMLStyleElement | null = null;
