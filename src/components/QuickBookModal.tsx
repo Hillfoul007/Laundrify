@@ -325,6 +325,7 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
       };
 
       console.log("📋 Submitting quick book data:", quickBookData);
+      console.log("🔧 API Client status:", apiClient.getConnectionStatus());
 
       const response = await apiClient.request<any>("/quick-book", {
         method: "POST",
