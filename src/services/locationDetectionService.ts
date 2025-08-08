@@ -373,9 +373,95 @@ export class LocationDetectionService {
         accuracy: accuracy,
       };
     } catch (error) {
-      console.error("�� High-precision GPS detection failed:", error);
+      console.error("❌ High-precision GPS detection failed:", error);
       return null;
     }
+  }
+
+  /**
+   * Multi-provider geocoding for best accuracy
+   */
+  private async multiProviderGeocode(lat: number, lng: number): Promise<DetectedLocationData[]> {
+    const results: DetectedLocationData[] = [];
+
+    try {
+      // Try Google Maps first (most accurate for Indian addresses)
+      console.log("🗺️ Trying Google Maps geocoding...");
+      const googleResult = await this.geocodeWithGoogle(lat, lng);
+      if (googleResult) {
+        results.push({ ...googleResult, confidence_score: 0.95 });
+      }
+    } catch (error) {
+      console.warn("Google Maps geocoding failed:", error);
+    }
+
+    try {
+      // Try Nominatim (OpenStreetMap) as backup
+      console.log("🌍 Trying Nominatim geocoding...");
+      const nominatimResult = await this.geocodeWithNominatim(lat, lng);
+      if (nominatimResult) {
+        results.push({ ...nominatimResult, confidence_score: 0.8 });
+      }
+    } catch (error) {
+      console.warn("Nominatim geocoding failed:", error);
+    }
+
+    // Sort by confidence score
+    results.sort((a, b) => (b.confidence_score || 0) - (a.confidence_score || 0));
+
+    console.log(`🎯 Geocoding results: ${results.length} providers successful`);
+    return results;
+  }
+
+  /**
+   * Geocode with Google Maps API
+   */
+  private async geocodeWithGoogle(lat: number, lng: number): Promise<Omit<DetectedLocationData, "coordinates" | "detection_method"> | null> {
+    if (!(window as any).google?.maps) {
+      throw new Error("Google Maps not available");
+    }
+
+    const geocoder = new (window as any).google.maps.Geocoder();
+    const result = await new Promise((resolve, reject) => {
+      geocoder.geocode(
+        { location: { lat, lng } },
+        (results: any, status: any) => {
+          if (status === "OK" && results[0]) {
+            resolve(results[0]);
+          } else {
+            reject(new Error("Google geocoding failed"));
+          }
+        },
+      );
+    });
+
+    return this.parseGoogleMapsResult(result);
+  }
+
+  /**
+   * Geocode with Nominatim (OpenStreetMap)
+   */
+  private async geocodeWithNominatim(lat: number, lng: number): Promise<Omit<DetectedLocationData, "coordinates" | "detection_method"> | null> {
+    const nominatimUrl = new URL('https://nominatim.openstreetmap.org/reverse');
+    nominatimUrl.searchParams.set('lat', lat.toString());
+    nominatimUrl.searchParams.set('lon', lng.toString());
+    nominatimUrl.searchParams.set('format', 'json');
+    nominatimUrl.searchParams.set('addressdetails', '1');
+    nominatimUrl.searchParams.set('zoom', '18'); // Maximum detail
+    nominatimUrl.searchParams.set('extratags', '1'); // Additional building info
+
+    const response = await fetch(nominatimUrl.toString(), {
+      headers: {
+        'User-Agent': 'QuickPickupApp/1.0'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error("Nominatim request failed");
+    }
+
+    const data = await response.json();
+    return this.parseNominatimResult(data);
   }
 
   /**
