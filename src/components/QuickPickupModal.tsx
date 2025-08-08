@@ -617,7 +617,7 @@ const QuickPickupModal: React.FC<QuickPickupModalProps> = ({
                       await validatePickupAddress(e.target.value);
                     }
                   }}
-                  placeholder="Enter your pickup address"
+                  placeholder="Enter full address with house number (e.g., 123, Tulip Violet, Sector 69, Gurugram 122101)"
                   className="h-12 text-base border-gray-300 focus:border-purple-500 focus:ring-purple-500 flex-1"
                   required
                 />
