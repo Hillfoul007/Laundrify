@@ -38,14 +38,28 @@ router.post("/", async (req, res) => {
 
     if (isDatabaseConnected) {
       console.log("📝 Step 5: Using database mode");
+
       // Validate customer exists
+      console.log("📝 Step 6: Validating customer ID:", customer_id);
       if (mongoose.Types.ObjectId.isValid(customer_id)) {
-        const customer = await User.findById(customer_id);
-        if (!customer) {
-          return res.status(404).json({ error: "Customer not found" });
+        console.log("📝 Step 7: Customer ID is valid ObjectId, checking database...");
+        try {
+          const customer = await User.findById(customer_id);
+          console.log("📝 Step 8: Customer lookup result:", customer ? "Found" : "Not Found");
+          if (!customer) {
+            console.log("❌ Step 9: Customer not found, returning 404");
+            return res.status(404).json({ error: "Customer not found" });
+          }
+          console.log("✅ Step 9: Customer validation passed");
+        } catch (customerError) {
+          console.error("❌ Step 8: Error during customer lookup:", customerError);
+          return res.status(500).json({ error: "Customer lookup failed", details: customerError.message });
         }
+      } else {
+        console.log("⚠️ Step 7: Customer ID is not a valid ObjectId, skipping validation");
       }
 
+      console.log("📝 Step 10: Creating QuickBook object...");
       // Create quick booking
       const quickBook = new QuickBook({
         customer_id,
@@ -58,16 +72,31 @@ router.post("/", async (req, res) => {
         status: "pending",
       });
 
-      await quickBook.save();
+      console.log("📝 Step 11: Saving QuickBook to database...");
+      try {
+        await quickBook.save();
+        console.log("✅ Step 12: QuickBook saved successfully");
+      } catch (saveError) {
+        console.error("❌ Step 12: Error saving QuickBook:", saveError);
+        return res.status(500).json({ error: "Failed to save booking", details: saveError.message });
+      }
 
-      // Populate customer data
-      await quickBook.populate("customer_id", "name full_name phone email");
+      console.log("📝 Step 13: Populating customer data...");
+      try {
+        await quickBook.populate("customer_id", "name full_name phone email");
+        console.log("✅ Step 14: Customer data populated successfully");
+      } catch (populateError) {
+        console.error("❌ Step 14: Error populating customer data:", populateError);
+        // Continue without population if it fails
+      }
 
+      console.log("📝 Step 15: Sending success response...");
       console.log("✅ Quick booking created:", quickBook._id);
       res.status(201).json({
         message: "Quick booking created successfully",
         quickBook,
       });
+      console.log("✅ Step 16: Response sent successfully");
     } else {
       // Mock mode when database is not connected
       console.log("📝 Step 5: Using mock mode (database not connected)");
