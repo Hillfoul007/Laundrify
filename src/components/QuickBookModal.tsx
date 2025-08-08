@@ -405,11 +405,11 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
                   </div>
                   <div className="flex-1">
                     <div className="font-semibold text-gray-900 text-lg">
-                      {currentUser.name || currentUser.full_name || "User"}
+                      {currentUser?.name || currentUser?.full_name || "User"}
                     </div>
                     <div className="text-sm text-gray-600 flex items-center gap-1 mt-1">
                       <Phone className="h-4 w-4" />
-                      {currentUser.phone}
+                      {currentUser?.phone || "No phone"}
                     </div>
                   </div>
                 </div>
