@@ -471,33 +471,33 @@ body.modal-open {
   }
 }
 
-/* Quick Book Modal specific fixes */
-[data-quick-book-modal] {
+/* Quick Pickup Modal specific fixes */
+[data-quick-pickup-modal] {
   max-height: 90vh !important;
   overflow: hidden !important;
 }
 
-[data-quick-book-modal] form {
+[data-quick-pickup-modal] form {
   display: flex !important;
   flex-direction: column !important;
   height: 100% !important;
   min-height: 0 !important;
 }
 
-[data-quick-book-modal] .safe-area-bottom {
+[data-quick-pickup-modal] .safe-area-bottom {
   padding-bottom: max(1.5rem, calc(1rem + env(safe-area-inset-bottom, 0px))) !important;
 }
 
-/* Ensure Quick Book button is always visible on mobile */
+/* Ensure Quick Pickup button is always visible on mobile */
 @media (max-width: 768px) {
-  [data-quick-book-modal] {
+  [data-quick-pickup-modal] {
     top: 2vh !important;
     height: auto !important;
     max-height: 96vh !important;
     margin-bottom: max(2rem, env(safe-area-inset-bottom, 1rem)) !important;
   }
 
-  [data-quick-book-modal] .flex-shrink-0:last-child {
+  [data-quick-pickup-modal] .flex-shrink-0:last-child {
     position: sticky !important;
     bottom: 0 !important;
     background: #f9fafb !important;
@@ -508,12 +508,12 @@ body.modal-open {
   }
 
   /* Ensure adequate spacing from viewport bottom */
-  [data-quick-book-modal] {
+  [data-quick-pickup-modal] {
     padding-bottom: env(safe-area-inset-bottom, 0px) !important;
   }
 
   /* Force proper button container height */
-  [data-quick-book-modal] .safe-area-bottom {
+  [data-quick-pickup-modal] .safe-area-bottom {
     min-height: 80px !important;
     display: flex !important;
     flex-direction: column !important;
@@ -521,14 +521,14 @@ body.modal-open {
   }
 
   /* Handle mobile viewport height variations */
-  [data-quick-book-modal] {
+  [data-quick-pickup-modal] {
     max-height: calc(100vh - 4vh) !important;
     max-height: calc(100dvh - 4vh) !important; /* Dynamic viewport height for mobile */
   }
 
   /* Ensure button is never below fold */
   @supports (height: 100dvh) {
-    [data-quick-book-modal] {
+    [data-quick-pickup-modal] {
       max-height: 96dvh !important;
     }
   }
