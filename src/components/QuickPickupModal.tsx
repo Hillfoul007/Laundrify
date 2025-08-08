@@ -112,7 +112,6 @@ const QuickPickupModal: React.FC<QuickPickupModalProps> = ({
     pickup_time: "",
     house_number: "",
     address: "",
-    special_instructions: "",
   });
 
   const locationDetectionService = LocationDetectionService.getInstance();
