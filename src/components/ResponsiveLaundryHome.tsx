@@ -529,14 +529,26 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
   };
 
   const handleQuickBook = () => {
+    console.log("🚀 Quick Book button clicked!");
+    console.log("👤 Current user:", currentUser);
+    console.log("🎯 showQuickBookModal state:", showQuickBookModal);
+
     if (!currentUser) {
+      console.log("❌ No current user, showing auth modal");
       // User not logged in, show login modal first and remember the intent
       setShowQuickBookAfterLogin(true);
       setShowAuthModal(true);
       return;
     }
+
+    console.log("✅ User logged in, showing Quick Book modal");
     // User is logged in, show quick book modal
     setShowQuickBookModal(true);
+
+    // Add a slight delay to ensure state update
+    setTimeout(() => {
+      console.log("🔄 Quick Book modal state after update:", showQuickBookModal);
+    }, 100);
   };
 
   const EmptyStateCard = () => (
