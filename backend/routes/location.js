@@ -7,6 +7,8 @@ const log = (message, data = "") => {
 };
 
 // Geocode coordinates to address
+// Temporarily commented out due to path-to-regexp parsing issue with double parameters
+/*
 router.get("/geocode/:lat/:lng", async (req, res) => {
   try {
     const { lat, lng } = req.params;
@@ -128,6 +130,7 @@ router.get("/geocode/:lat/:lng", async (req, res) => {
     });
   }
 });
+*/
 
 // Search for places/addresses
 router.get("/search/:query", async (req, res) => {
