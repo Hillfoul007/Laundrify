@@ -43,6 +43,19 @@ const ConnectionStatus: React.FC<ConnectionStatusProps> = ({
   try {
     setBackendStatus("checking");
 
+    // Detect hosted environment (same logic as ApiClient)
+    const isHostedEnv =
+      window.location.hostname.includes("builder.codes") ||
+      window.location.hostname.includes("fly.dev") ||
+      document.querySelector("[data-loc]") !== null;
+
+    // In hosted environments, skip backend check and show as offline (local mode)
+    if (isHostedEnv) {
+      console.log("ConnectionStatus: Hosted environment detected, showing local mode");
+      setBackendStatus("offline");
+      return;
+    }
+
     // Use relative path to leverage the proxy configuration
     const healthUrl = "/api/health";
 
@@ -57,6 +70,7 @@ const ConnectionStatus: React.FC<ConnectionStatusProps> = ({
     clearTimeout(timeoutId);
     setBackendStatus(response.ok ? "online" : "offline");
   } catch (error) {
+    console.warn("ConnectionStatus: Backend health check failed:", error);
     setBackendStatus("offline");
   }
 };
