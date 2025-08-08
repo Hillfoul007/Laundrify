@@ -113,18 +113,13 @@ console.log("🌐 CORS allowed origins:", productionConfig.ALLOWED_ORIGINS);
 app.use(
   cors({
     origin: function (origin, callback) {
-      console.log(`🔍 CORS check for origin: ${origin}`);
-      console.log(`🔍 Allowed origins:`, productionConfig.ALLOWED_ORIGINS);
-
       // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) {
-        console.log(`✅ Allowing request with no origin`);
         return callback(null, true);
       }
 
       // Check if the origin is in our allowed list (exact match)
       if (productionConfig.ALLOWED_ORIGINS.includes(origin)) {
-        console.log(`✅ Exact match found for origin: ${origin}`);
         return callback(null, true);
       }
 
@@ -133,11 +128,7 @@ app.use(
         if (allowedOrigin.includes('*')) {
           const pattern = allowedOrigin.replace(/\*/g, '.*');
           const regex = new RegExp(`^${pattern}$`);
-          const matches = regex.test(origin);
-          if (matches) {
-            console.log(`✅ Wildcard match found: ${allowedOrigin} matches ${origin}`);
-          }
-          return matches;
+          return regex.test(origin);
         }
         return false;
       });
@@ -568,7 +559,7 @@ const server = app.listen(PORT, () => {
   console.log(`��� Health check: http://localhost:${PORT}/api/health`);
   console.log(`🔒 Security: Helmet enabled`);
   console.log(`⚡ Compression: Enabled`);
-  console.log(`🛡️  Rate limiting: Enabled`);
+  console.log(`🛡��  Rate limiting: Enabled`);
 
   if (productionConfig.FEATURES.SMS_VERIFICATION) {
     console.log(`📱 SMS Service: DVHosting`);
