@@ -151,7 +151,7 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
     }));
   };
 
-  // Validate pickup address for service availability
+  // Validate pickup address for service availability - enhanced to match cart validation
   const validatePickupAddress = async (address: string): Promise<boolean> => {
     if (!address.trim()) return true; // Allow empty for now, will be caught by form validation
 
@@ -159,22 +159,64 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
       // Parse address for validation components
       const addressLower = address.toLowerCase();
 
-      // Extract potential pincode
+      // Extract potential pincode - require 6-digit pincode
       const pincodeMatch = address.match(/\b\d{6}\b/);
       const pincode = pincodeMatch ? pincodeMatch[0] : undefined;
 
-      // Extract potential city - ensure we always have a city value
+      // Validate pincode requirement
+      if (!pincode) {
+        toast.error("Please include a valid 6-digit pincode in your address");
+        return false;
+      }
+
+      // Extract potential city and validate sector/keyword requirements
       let city = "unknown";
+      let hasRequiredKeywords = false;
+
+      // Check for city keywords
       if (addressLower.includes("gurugram") || addressLower.includes("gurgaon")) {
         city = addressLower.includes("gurugram") ? "gurugram" : "gurgaon";
+        hasRequiredKeywords = addressLower.includes("sector") ||
+                            addressLower.includes("phase") ||
+                            addressLower.includes("block") ||
+                            addressLower.includes("dlf") ||
+                            addressLower.includes("cyber");
       } else if (addressLower.includes("delhi")) {
         city = "delhi";
+        hasRequiredKeywords = addressLower.includes("sector") ||
+                            addressLower.includes("block") ||
+                            addressLower.includes("colony") ||
+                            addressLower.includes("nagar") ||
+                            addressLower.includes("vihar") ||
+                            addressLower.includes("enclave");
+      } else if (addressLower.includes("noida")) {
+        city = "noida";
+        hasRequiredKeywords = addressLower.includes("sector") ||
+                            addressLower.includes("block") ||
+                            addressLower.includes("phase");
+      } else if (addressLower.includes("faridabad")) {
+        city = "faridabad";
+        hasRequiredKeywords = addressLower.includes("sector") ||
+                            addressLower.includes("block");
       } else if (addressLower.includes("sector")) {
         // If address contains sector but no specific city, assume Gurugram
         city = "gurugram";
+        hasRequiredKeywords = true;
       }
 
-      console.log("🔍 Validating address:", { address, city, pincode });
+      // Validate required keywords for specific areas
+      if ((city === "gurugram" || city === "gurgaon") && !hasRequiredKeywords) {
+        toast.error("For Gurugram addresses, please include sector/phase/block/DLF/cyber details");
+        return false;
+      } else if (city === "delhi" && !hasRequiredKeywords) {
+        toast.error("For Delhi addresses, please include sector/block/colony/nagar details");
+        return false;
+      } else if (city === "noida" && !hasRequiredKeywords) {
+        toast.error("For Noida addresses, please include sector/block/phase details");
+        return false;
+      }
+
+      console.log("🔍 Validating address:", { address, city, pincode, hasRequiredKeywords });
 
       // Check availability using the same logic as cart page
       const availability = await locationDetectionService.checkLocationAvailability(
@@ -249,7 +291,7 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
     e.preventDefault();
 
     console.log("🚀 CONFIRM QUICK BOOK BUTTON CLICKED!");
-    console.log("📋 Form data:", formData);
+    console.log("�� Form data:", formData);
     console.log("👤 Current user:", currentUser);
 
     // Validate date
