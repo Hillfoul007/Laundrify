@@ -715,6 +715,23 @@ const QuickPickupModal: React.FC<QuickPickupModalProps> = ({
               </div>
             </div>
 
+            {/* House Number / Flat Number */}
+            <div className="space-y-2">
+              <Label htmlFor="house_number" className="text-sm font-medium text-gray-700">
+                🏠 House No / Flat No (Optional)
+              </Label>
+              <Input
+                id="house_number"
+                value={formData.house_number}
+                onChange={(e) => setFormData(prev => ({ ...prev, house_number: e.target.value }))}
+                placeholder="Enter house number, flat number, or unit (e.g., 123, Flat 4B, Unit 205)"
+                className="h-12 text-base border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+              />
+              <p className="text-xs text-gray-500">
+                💡 This helps our rider locate you more easily
+              </p>
+            </div>
+
             {/* Address */}
             <div className="space-y-2">
               <Label htmlFor="address" className="text-sm font-medium text-gray-700">
