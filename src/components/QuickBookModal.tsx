@@ -651,7 +651,13 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
           </div>
 
           {/* Fixed bottom section for submit button */}
-          <div className="flex-shrink-0 px-6 py-4 border-t bg-gray-50" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom, 0px))' }}>
+          <div
+            className="flex-shrink-0 px-6 pt-4 pb-6 border-t bg-gray-50 safe-area-bottom"
+            style={{
+              paddingBottom: 'max(1.5rem, calc(1rem + env(safe-area-inset-bottom, 0px)))',
+              marginTop: 'auto'
+            }}
+          >
             <Button
               type="submit"
               onClick={(e) => {
@@ -659,7 +665,7 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
                 console.log("📝 Loading state:", loading);
                 console.log("🎯 Button disabled:", loading);
               }}
-              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 rounded-xl shadow-lg transition-all duration-200"
+              className="w-full h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 rounded-xl shadow-lg transition-all duration-200 mobile-touch"
               disabled={loading}
             >
               {loading ? (
