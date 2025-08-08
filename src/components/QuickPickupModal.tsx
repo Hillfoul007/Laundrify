@@ -469,6 +469,7 @@ const QuickPickupModal: React.FC<QuickPickupModalProps> = ({
         setFormData({
           pickup_date: "",
           pickup_time: "",
+          house_number: "",
           address: "",
           special_instructions: "",
         });
