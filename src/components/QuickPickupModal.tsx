@@ -818,7 +818,8 @@ const QuickPickupModal: React.FC<QuickPickupModalProps> = ({
               marginTop: 'auto',
               position: 'sticky',
               bottom: 0,
-              zIndex: 10
+              zIndex: 10,
+              minHeight: '80px'
             }}
           >
             <Button
