@@ -34,8 +34,10 @@ router.post("/", async (req, res) => {
 
     // Check if database is connected
     const isDatabaseConnected = mongoose.connection.readyState === 1;
+    console.log("📝 Step 4: Database connection status:", isDatabaseConnected ? "Connected" : "Disconnected");
 
     if (isDatabaseConnected) {
+      console.log("📝 Step 5: Using database mode");
       // Validate customer exists
       if (mongoose.Types.ObjectId.isValid(customer_id)) {
         const customer = await User.findById(customer_id);
