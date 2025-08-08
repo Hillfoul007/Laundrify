@@ -163,11 +163,18 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
       const pincodeMatch = address.match(/\b\d{6}\b/);
       const pincode = pincodeMatch ? pincodeMatch[0] : undefined;
 
-      // Extract potential city
-      let city = "";
+      // Extract potential city - ensure we always have a city value
+      let city = "unknown";
       if (addressLower.includes("gurugram") || addressLower.includes("gurgaon")) {
         city = addressLower.includes("gurugram") ? "gurugram" : "gurgaon";
+      } else if (addressLower.includes("delhi")) {
+        city = "delhi";
+      } else if (addressLower.includes("sector")) {
+        // If address contains sector but no specific city, assume Gurugram
+        city = "gurugram";
       }
+
+      console.log("🔍 Validating address:", { address, city, pincode });
 
       // Check availability using the same logic as cart page
       const availability = await locationDetectionService.checkLocationAvailability(
@@ -175,6 +182,8 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
         pincode,
         address
       );
+
+      console.log("✅ Address validation result:", availability);
 
       if (!availability.is_available) {
         setDetectedLocationText(address);
@@ -283,10 +292,30 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
 
     setLoading(true);
     try {
+      // Validate required customer data before submission
+      const customerName = currentUser?.name || currentUser?.full_name;
+      const customerPhone = currentUser?.phone;
+      const customerId = currentUser?._id;
+
+      if (!customerId) {
+        toast.error("User ID is missing. Please log in again.");
+        return;
+      }
+
+      if (!customerName) {
+        toast.error("User name is missing. Please update your profile.");
+        return;
+      }
+
+      if (!customerPhone) {
+        toast.error("Phone number is missing. Please update your profile.");
+        return;
+      }
+
       const quickBookData = {
-        customer_id: currentUser?._id,
-        customer_name: currentUser?.name || currentUser?.full_name || "Quick Book User",
-        customer_phone: currentUser?.phone || "",
+        customer_id: customerId,
+        customer_name: customerName,
+        customer_phone: customerPhone,
         pickup_date: formData.pickup_date,
         pickup_time: formData.pickup_time,
         address: formData.address,
@@ -295,10 +324,14 @@ const QuickBookModal: React.FC<QuickBookModalProps> = ({
         created_at: new Date().toISOString(),
       };
 
+      console.log("📋 Submitting quick book data:", quickBookData);
+
       const response = await apiClient.request<any>("/quick-book", {
         method: "POST",
         body: quickBookData,
       });
+
+      console.log("📋 Quick book response:", response);
 
       if (response.data) {
         toast.success("Quick booking created successfully! Our rider will contact you soon.");
