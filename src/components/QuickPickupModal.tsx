@@ -808,27 +808,6 @@ const QuickPickupModal: React.FC<QuickPickupModalProps> = ({
               )}
             </div>
 
-            {/* Special Instructions */}
-            <div className="space-y-2">
-              <Label htmlFor="special_instructions" className="text-sm font-medium text-gray-700">
-                💬 Special Instructions (Optional)
-              </Label>
-              <Input
-                id="special_instructions"
-                value={formData.special_instructions}
-                onChange={(e) => setFormData(prev => ({ ...prev, special_instructions: e.target.value }))}
-                placeholder="Any special instructions for our rider"
-                className="h-12 text-base border-gray-300 focus:border-purple-500 focus:ring-purple-500"
-              />
-            </div>
-
-            {/* Info Alert */}
-            <Alert className="bg-green-50 border-green-200">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-              <AlertDescription className="text-green-800 leading-relaxed">
-                🚚 <strong>How it works:</strong> Our professional rider will visit at your scheduled time to assess and collect your items. No need to specify what items - we handle everything!
-              </AlertDescription>
-            </Alert>
           </div>
 
           {/* Fixed bottom section for submit button */}
