@@ -44,10 +44,10 @@ export class CouponService {
         isActive: true,
       },
       {
-        code: "NEW10",
-        discount: 10,
+        code: "NEW20",
+        discount: 20,
         maxDiscount: 200,
-        description: "10% off on all orders (up to ₹200)",
+        description: "20% off on all orders (up to ₹200)",
         type: "general",
         isActive: true,
       },
