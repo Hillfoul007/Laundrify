@@ -14,9 +14,10 @@ const mockCoupons = [
     isActive: true,
   },
   {
-    code: "NEW10",
-    discount: 10,
-    description: "10% off on all orders",
+    code: "NEW20",
+    discount: 20,
+    maxDiscount: 200,
+    description: "20% off on all orders (up to ₹200)",
     type: "general",
     isActive: true,
   },
