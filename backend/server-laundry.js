@@ -347,6 +347,16 @@ try {
   console.error("❌ Full quick book routes error:", error);
 }
 
+// Rider routes
+try {
+  const riderRoutes = require("./routes/riders");
+  app.use("/api/riders", riderRoutes);
+  console.log("🔗 Rider routes registered at /api/riders");
+} catch (error) {
+  console.error("❌ Failed to load Rider routes:", error.message);
+  console.error("❌ Full rider routes error:", error);
+}
+
 // Google Sheets integration removed
 
 // Push notification endpoints
