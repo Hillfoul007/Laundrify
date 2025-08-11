@@ -281,12 +281,6 @@ const ProfessionalDateTimePicker: React.FC<ProfessionalDateTimePickerProps> = ({
                   <SelectItem
                     key={slot.value}
                     value={slot.value}
-                    onSelect={() => {
-                      const currentScroll = window.scrollY;
-                      setTimeout(() => {
-                        window.scrollTo(0, currentScroll);
-                      }, 0);
-                    }}
                   >
                     {slot.groupLabel}
                   </SelectItem>
