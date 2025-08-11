@@ -540,3 +540,38 @@ body.modal-open {
     }
   }
 }
+
+/* Prevent Select components from causing page scroll */
+[data-radix-select-content] {
+  scroll-margin: 0 !important;
+  scroll-behavior: auto !important;
+}
+
+[data-radix-select-trigger] {
+  scroll-margin: 0 !important;
+}
+
+/* Prevent focus-related scrolling */
+[data-radix-select-trigger]:focus {
+  scroll-margin: 0 !important;
+  scroll-behavior: auto !important;
+}
+
+/* Ensure Select portal doesn't affect page scroll */
+[data-radix-portal] {
+  scroll-margin: 0 !important;
+}
+
+/* Prevent automatic scroll to focused elements in selects */
+[data-radix-select-content] [data-radix-select-item] {
+  scroll-margin: 0 !important;
+}
+
+/* Override any scroll behavior from Radix components */
+[data-radix-select-content],
+[data-radix-select-viewport],
+[data-radix-select-item] {
+  scroll-behavior: auto !important;
+  scroll-margin: 0 !important;
+  scroll-snap-align: none !important;
+}
