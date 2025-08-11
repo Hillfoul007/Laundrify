@@ -8,7 +8,6 @@ import AdminPortal from "@/pages/AdminPortal";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import InstallPrompt from "@/components/InstallPrompt";
 import PWAUpdateNotification from "@/components/PWAUpdateNotification";
-import AddressSearchDemo from "@/components/AddressSearchDemo";
 import MapsPerformanceIndicator from "@/components/MapsPerformanceIndicator";
 
 import {
