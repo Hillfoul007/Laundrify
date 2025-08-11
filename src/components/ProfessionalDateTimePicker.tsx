@@ -276,18 +276,6 @@ const ProfessionalDateTimePicker: React.FC<ProfessionalDateTimePickerProps> = ({
                 onCloseAutoFocus={(e) => {
                   e.preventDefault();
                 }}
-                onEscapeKeyDown={(e) => {
-                  const currentScroll = window.scrollY;
-                  setTimeout(() => {
-                    window.scrollTo(0, currentScroll);
-                  }, 0);
-                }}
-                onInteractOutside={(e) => {
-                  const currentScroll = window.scrollY;
-                  setTimeout(() => {
-                    window.scrollTo(0, currentScroll);
-                  }, 0);
-                }}
               >
                 {timeSlots.map((slot) => (
                   <SelectItem
