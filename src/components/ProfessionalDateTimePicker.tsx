@@ -229,51 +229,64 @@ const ProfessionalDateTimePicker: React.FC<ProfessionalDateTimePickerProps> = ({
             <Clock className="h-4 w-4" />
             Select Time
           </Label>
-          <Select
-            value={selectedTime}
-            onValueChange={(value) => {
-              // Call the time change handler
-              onTimeChange(value);
-              // Restore scroll position after value change
-              if (scrollPosition > 0) {
-                requestAnimationFrame(() => {
-                  window.scrollTo(0, scrollPosition);
-                });
-              }
-            }}
-            onOpenChange={(open) => {
-              setTimeSelectOpen(open);
-              if (open) {
-                // Store current scroll position when opening
-                setScrollPosition(window.scrollY);
-              } else {
-                // Restore scroll position when closing with a slight delay
-                if (scrollPosition > 0) {
-                  setTimeout(() => {
-                    window.scrollTo({ top: scrollPosition, behavior: 'instant' });
-                  }, 50);
-                }
-              }
-            }}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Choose pickup time" />
-            </SelectTrigger>
-            <SelectContent
-              position="popper"
-              sideOffset={4}
-              onCloseAutoFocus={(e) => {
-                // Prevent auto focus behavior that might cause scrolling
-                e.preventDefault();
+          <div style={{ scrollMarginTop: 0, scrollSnapAlign: 'none' }}>
+            <Select
+              value={selectedTime}
+              onValueChange={(value) => {
+                const currentScroll = window.scrollY;
+                onTimeChange(value);
+                // Force immediate scroll restoration
+                setTimeout(() => {
+                  window.scrollTo(0, currentScroll);
+                }, 0);
               }}
             >
-              {timeSlots.map((slot) => (
-                <SelectItem key={slot.value} value={slot.value}>
-                  {slot.groupLabel}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+              <SelectTrigger
+                className="w-full"
+                onFocus={(e) => {
+                  // Prevent focus from triggering scroll
+                  e.preventDefault();
+                }}
+              >
+                <SelectValue placeholder="Choose pickup time" />
+              </SelectTrigger>
+              <SelectContent
+                position="popper"
+                sideOffset={4}
+                align="start"
+                onCloseAutoFocus={(e) => {
+                  e.preventDefault();
+                }}
+                onEscapeKeyDown={(e) => {
+                  const currentScroll = window.scrollY;
+                  setTimeout(() => {
+                    window.scrollTo(0, currentScroll);
+                  }, 0);
+                }}
+                onInteractOutside={(e) => {
+                  const currentScroll = window.scrollY;
+                  setTimeout(() => {
+                    window.scrollTo(0, currentScroll);
+                  }, 0);
+                }}
+              >
+                {timeSlots.map((slot) => (
+                  <SelectItem
+                    key={slot.value}
+                    value={slot.value}
+                    onSelect={() => {
+                      const currentScroll = window.scrollY;
+                      setTimeout(() => {
+                        window.scrollTo(0, currentScroll);
+                      }, 0);
+                    }}
+                  >
+                    {slot.groupLabel}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       )}
     </div>
