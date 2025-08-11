@@ -309,7 +309,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
       {/* Main Content */}
       <main className="p-6">
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabValue)}>
-          <TabsList className="grid w-full grid-cols-5 mb-6">
+          <TabsList className="grid w-full grid-cols-6 mb-6">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Overview
@@ -325,6 +325,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             <TabsTrigger value="locations" className="flex items-center gap-2">
               <MapPin className="h-4 w-4" />
               Locations
+            </TabsTrigger>
+            <TabsTrigger value="riders" className="flex items-center gap-2">
+              <Package className="h-4 w-4" />
+              Riders
             </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <Building className="h-4 w-4" />
