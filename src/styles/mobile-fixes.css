@@ -575,3 +575,25 @@ body.modal-open {
   scroll-margin: 0 !important;
   scroll-snap-align: none !important;
 }
+
+/* Comprehensive Select scroll prevention */
+[data-radix-select-trigger],
+[data-radix-select-trigger]:focus,
+[data-radix-select-trigger]:focus-visible {
+  scroll-margin: 0 !important;
+  scroll-behavior: auto !important;
+}
+
+/* Prevent any scroll when Select components are focused */
+[data-radix-select-trigger]:focus-within {
+  scroll-margin: 0 !important;
+}
+
+/* Additional scroll prevention for mobile Safari */
+@media (max-width: 768px) {
+  [data-radix-select-trigger],
+  [data-radix-select-trigger]:focus {
+    transform: translateZ(0); /* Force GPU acceleration to prevent scroll jump */
+    will-change: auto;
+  }
+}
