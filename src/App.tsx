@@ -52,7 +52,6 @@ function App() {
             <Routes>
               <Route path="/" element={<LaundryIndex />} />
               <Route path="/admin" element={<AdminPortal />} />
-              <Route path="/address-demo" element={<AddressSearchDemo />} />
               <Route
                 path="/admin/location-config"
                 element={<LocationConfigPage />}
