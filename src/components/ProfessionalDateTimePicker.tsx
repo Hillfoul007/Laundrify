@@ -250,12 +250,14 @@ const ProfessionalDateTimePicker: React.FC<ProfessionalDateTimePickerProps> = ({
             <Select
               value={selectedTime}
               onValueChange={(value) => {
-                const currentScroll = window.scrollY;
                 onTimeChange(value);
-                // Force immediate scroll restoration
-                setTimeout(() => {
-                  window.scrollTo(0, currentScroll);
-                }, 0);
+                setTimeSelectOpen(false);
+              }}
+              onOpenChange={(open) => {
+                if (open) {
+                  setScrollPosition(window.scrollY);
+                }
+                setTimeSelectOpen(open);
               }}
             >
               <SelectTrigger
