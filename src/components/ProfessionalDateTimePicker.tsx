@@ -233,12 +233,7 @@ const ProfessionalDateTimePicker: React.FC<ProfessionalDateTimePickerProps> = ({
                 onTimeChange(value);
                 setTimeSelectOpen(false);
               }}
-              onOpenChange={(open) => {
-                if (open) {
-                  setScrollPosition(window.scrollY);
-                }
-                setTimeSelectOpen(open);
-              }}
+              onOpenChange={setTimeSelectOpen}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Choose pickup time" />
