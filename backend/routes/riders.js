@@ -1,311 +1,401 @@
 const express = require("express");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 const Rider = require("../models/Rider");
-const User = require("../models/User");
 const Booking = require("../models/Booking");
 
 const router = express.Router();
 
-// Create or update rider profile
-router.post("/profile", async (req, res) => {
-  try {
-    const {
-      user_id,
-      vehicle_type,
-      vehicle_number,
-      license_number,
-      is_online = false,
-      current_location,
-      coordinates,
-    } = req.body;
-
-    if (!user_id) {
-      return res.status(400).json({ error: "User ID is required" });
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadPath = path.join(__dirname, '../uploads/riders');
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
     }
+    cb(null, uploadPath);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
 
-    // Verify user exists
-    const user = await User.findById(user_id);
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    // Check if rider profile already exists
-    let rider = await Rider.findOne({ user_id }).populate(
-      "user_id",
-      "full_name phone email",
-    );
-
-    if (rider) {
-      // Update existing rider
-      if (vehicle_type) rider.vehicle_type = vehicle_type;
-      if (vehicle_number) rider.vehicle_number = vehicle_number;
-      if (license_number) rider.license_number = license_number;
-      if (is_online !== undefined) rider.is_online = is_online;
-      if (current_location) rider.current_location = current_location;
-      if (coordinates) rider.coordinates = coordinates;
-
-      await rider.save();
-
-      res.json({
-        message: "Rider profile updated successfully",
-        rider,
-      });
+const upload = multer({ 
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+  fileFilter: function (req, file, cb) {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
     } else {
-      // Create new rider profile
-      if (!vehicle_type || !vehicle_number || !license_number) {
-        return res.status(400).json({
-          error:
-            "Vehicle type, vehicle number, and license number are required for new riders",
-        });
-      }
-
-      rider = new Rider({
-        user_id,
-        vehicle_type,
-        vehicle_number,
-        license_number,
-        is_online,
-        current_location,
-        coordinates,
-      });
-
-      await rider.save();
-      await rider.populate("user_id", "full_name phone email");
-
-      res.status(201).json({
-        message: "Rider profile created successfully",
-        rider,
-      });
+      cb(new Error('Only image files are allowed!'), false);
     }
-  } catch (error) {
-    console.error("Rider profile error:", error);
-
-    // Handle duplicate key errors
-    if (error.code === 11000) {
-      return res.status(409).json({
-        error: "A rider profile already exists for this user",
-      });
-    }
-
-    res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// Get rider profile by user ID
-router.get("/profile/:userId", async (req, res) => {
-  try {
-    const { userId } = req.params;
-
-    const rider = await Rider.findOne({ user_id: userId }).populate(
-      "user_id",
-      "full_name phone email",
-    );
-
-    if (!rider) {
-      return res.status(404).json({ error: "Rider profile not found" });
-    }
-
-    res.json({ rider });
-  } catch (error) {
-    console.error("Rider profile fetch error:", error);
-    res.status(500).json({ error: "Internal server error" });
+// Middleware to verify rider token
+const verifyRiderToken = (req, res, next) => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+  
+  if (!token) {
+    return res.status(401).json({ message: 'Access denied. No token provided.' });
   }
-});
 
-// Get rider by ID
-router.get("/:riderId", async (req, res) => {
   try {
-    const { riderId } = req.params;
-
-    const rider = await Rider.findById(riderId).populate(
-      "user_id",
-      "full_name phone email",
-    );
-
-    if (!rider) {
-      return res.status(404).json({ error: "Rider not found" });
-    }
-
-    res.json({ rider });
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
+    req.rider = decoded;
+    next();
   } catch (error) {
-    console.error("Rider fetch error:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(400).json({ message: 'Invalid token.' });
   }
-});
+};
 
-// Update rider online status and location
-router.put("/:riderId/status", async (req, res) => {
+// Register new rider
+router.post('/register', upload.fields([
+  { name: 'aadharImage', maxCount: 1 },
+  { name: 'selfieImage', maxCount: 1 }
+]), async (req, res) => {
   try {
-    const { riderId } = req.params;
-    const { is_online, current_location, coordinates } = req.body;
-
-    const updateData = {};
-    if (is_online !== undefined) updateData.is_online = is_online;
-    if (current_location) updateData.current_location = current_location;
-    if (coordinates) updateData.coordinates = coordinates;
-
-    const rider = await Rider.findByIdAndUpdate(riderId, updateData, {
-      new: true,
-      runValidators: true,
-    }).populate("user_id", "full_name phone email");
-
-    if (!rider) {
-      return res.status(404).json({ error: "Rider not found" });
+    const { name, phone, aadharNumber } = req.body;
+    
+    // Check if rider already exists
+    const existingRider = await Rider.findOne({
+      $or: [{ phone }, { aadharNumber }]
+    });
+    
+    if (existingRider) {
+      return res.status(400).json({ 
+        message: 'Rider with this phone number or Aadhar number already exists' 
+      });
     }
 
-    res.json({
-      message: "Rider status updated successfully",
-      rider,
+    // Check if files were uploaded
+    if (!req.files?.aadharImage?.[0] || !req.files?.selfieImage?.[0]) {
+      return res.status(400).json({ 
+        message: 'Both Aadhar card image and selfie are required' 
+      });
+    }
+
+    // Generate default password (phone number for now)
+    const hashedPassword = await bcrypt.hash(phone, 10);
+
+    // Create new rider
+    const rider = new Rider({
+      name,
+      phone,
+      aadharNumber,
+      password: hashedPassword,
+      aadharImageUrl: `/uploads/riders/${req.files.aadharImage[0].filename}`,
+      selfieImageUrl: `/uploads/riders/${req.files.selfieImage[0].filename}`,
+    });
+
+    await rider.save();
+    
+    res.status(201).json({ 
+      message: 'Registration submitted successfully. Please wait for admin approval.',
+      riderId: rider._id 
     });
   } catch (error) {
-    console.error("Rider status update error:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error('Rider registration error:', error);
+    res.status(500).json({ message: 'Registration failed', error: error.message });
   }
 });
 
-// Get all online riders
-router.get("/online", async (req, res) => {
+// Login rider
+router.post('/login', async (req, res) => {
   try {
-    const { lat, lng, radius = 10 } = req.query;
-
-    let riders = await Rider.find({
-      is_online: true,
-      status: "approved",
-    }).populate("user_id", "full_name phone");
-
-    // Filter by distance if coordinates provided
-    if (lat && lng) {
-      const userLat = parseFloat(lat);
-      const userLng = parseFloat(lng);
-      const radiusKm = parseFloat(radius);
-
-      riders = riders.filter((rider) => {
-        if (
-          !rider.coordinates ||
-          !rider.coordinates.lat ||
-          !rider.coordinates.lng
-        ) {
-          return false;
-        }
-
-        const distance = rider.distanceFrom(userLat, userLng);
-        return distance !== null && distance <= radiusKm;
-      });
+    const { phone, password } = req.body;
+    
+    // Find rider by phone
+    const rider = await Rider.findOne({ phone });
+    if (!rider) {
+      return res.status(400).json({ message: 'Invalid phone number or password' });
     }
 
-    res.json({ riders });
+    // Check password
+    const isMatch = await bcrypt.compare(password, rider.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Invalid phone number or password' });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { riderId: rider._id, phone: rider.phone },
+      process.env.JWT_SECRET || 'fallback_secret',
+      { expiresIn: '7d' }
+    );
+
+    res.json({
+      token,
+      rider: {
+        _id: rider._id,
+        name: rider.name,
+        phone: rider.phone,
+        status: rider.status,
+        isActive: rider.isActive,
+      }
+    });
   } catch (error) {
-    console.error("Online riders fetch error:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error('Rider login error:', error);
+    res.status(500).json({ message: 'Login failed', error: error.message });
   }
 });
 
-// Get rider statistics
-router.get("/:riderId/stats", async (req, res) => {
+// Update rider location
+router.post('/location', verifyRiderToken, async (req, res) => {
+  try {
+    const { location } = req.body;
+    
+    const rider = await Rider.findById(req.rider.riderId);
+    if (!rider) {
+      return res.status(404).json({ message: 'Rider not found' });
+    }
+
+    await rider.updateLocation(location.lat, location.lng);
+    
+    res.json({ message: 'Location updated successfully' });
+  } catch (error) {
+    console.error('Location update error:', error);
+    res.status(500).json({ message: 'Failed to update location', error: error.message });
+  }
+});
+
+// Toggle rider active status
+router.post('/toggle-status', verifyRiderToken, async (req, res) => {
+  try {
+    const { isActive, location } = req.body;
+    
+    const rider = await Rider.findById(req.rider.riderId);
+    if (!rider) {
+      return res.status(404).json({ message: 'Rider not found' });
+    }
+
+    if (rider.status !== 'approved') {
+      return res.status(400).json({ message: 'Only approved riders can go active' });
+    }
+
+    rider.isActive = isActive;
+    
+    if (isActive && location) {
+      await rider.updateLocation(location.lat, location.lng);
+    }
+    
+    await rider.save();
+    
+    res.json({ 
+      message: `Status updated to ${isActive ? 'active' : 'inactive'}`,
+      isActive: rider.isActive 
+    });
+  } catch (error) {
+    console.error('Status toggle error:', error);
+    res.status(500).json({ message: 'Failed to update status', error: error.message });
+  }
+});
+
+// Get rider's assigned orders
+router.get('/orders', verifyRiderToken, async (req, res) => {
+  try {
+    const rider = await Rider.findById(req.rider.riderId).populate('assignedOrders');
+    if (!rider) {
+      return res.status(404).json({ message: 'Rider not found' });
+    }
+
+    res.json(rider.assignedOrders);
+  } catch (error) {
+    console.error('Get orders error:', error);
+    res.status(500).json({ message: 'Failed to fetch orders', error: error.message });
+  }
+});
+
+// Get specific order details
+router.get('/orders/:orderId', verifyRiderToken, async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    
+    const order = await Booking.findOne({
+      _id: orderId,
+      assignedRider: req.rider.riderId
+    });
+    
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found or not assigned to you' });
+    }
+
+    res.json(order);
+  } catch (error) {
+    console.error('Get order details error:', error);
+    res.status(500).json({ message: 'Failed to fetch order details', error: error.message });
+  }
+});
+
+// Update order items and details
+router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { items, notes } = req.body;
+    
+    const order = await Booking.findOne({
+      _id: orderId,
+      assignedRider: req.rider.riderId
+    });
+    
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found or not assigned to you' });
+    }
+
+    // Update order items
+    order.items = items;
+    order.notes = notes || order.notes;
+    order.updatedBy = 'rider';
+    order.lastModified = new Date();
+    
+    await order.save();
+    
+    res.json({ message: 'Order updated successfully', order });
+  } catch (error) {
+    console.error('Order update error:', error);
+    res.status(500).json({ message: 'Failed to update order', error: error.message });
+  }
+});
+
+// Handle order actions (accept, start, complete)
+router.post('/order-action', verifyRiderToken, async (req, res) => {
+  try {
+    const { orderId, action, location } = req.body;
+    
+    const order = await Booking.findOne({
+      _id: orderId,
+      assignedRider: req.rider.riderId
+    });
+    
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found or not assigned to you' });
+    }
+
+    switch (action) {
+      case 'accept':
+        order.riderStatus = 'accepted';
+        order.acceptedAt = new Date();
+        break;
+      case 'start':
+        order.riderStatus = 'picked_up';
+        order.pickedUpAt = new Date();
+        break;
+      case 'complete':
+        order.riderStatus = 'completed';
+        order.completedAt = new Date();
+        break;
+      default:
+        return res.status(400).json({ message: 'Invalid action' });
+    }
+    
+    await order.save();
+    
+    res.json({ message: `Order ${action}ed successfully`, order });
+  } catch (error) {
+    console.error('Order action error:', error);
+    res.status(500).json({ message: 'Failed to perform action', error: error.message });
+  }
+});
+
+// Admin routes for rider management
+router.get('/admin/riders', async (req, res) => {
+  try {
+    const riders = await Rider.find().sort({ createdAt: -1 });
+    res.json(riders);
+  } catch (error) {
+    console.error('Get riders error:', error);
+    res.status(500).json({ message: 'Failed to fetch riders', error: error.message });
+  }
+});
+
+// Admin: Get active riders
+router.get('/admin/riders/active', async (req, res) => {
+  try {
+    const activeRiders = await Rider.find({ 
+      isActive: true, 
+      status: 'approved' 
+    }).populate('assignedOrders');
+    
+    res.json(activeRiders);
+  } catch (error) {
+    console.error('Get active riders error:', error);
+    res.status(500).json({ message: 'Failed to fetch active riders', error: error.message });
+  }
+});
+
+// Admin: Verify rider
+router.post('/admin/riders/:riderId/verify', async (req, res) => {
   try {
     const { riderId } = req.params;
-
-    // Get rider basic info
+    const { status, rejectionReason } = req.body;
+    
     const rider = await Rider.findById(riderId);
     if (!rider) {
-      return res.status(404).json({ error: "Rider not found" });
+      return res.status(404).json({ message: 'Rider not found' });
     }
 
-    // Get booking statistics
-    const bookings = await Booking.find({ rider_id: riderId });
-
-    // Calculate statistics
-    const totalBookings = bookings.length;
-    const completedBookings = bookings.filter(
-      (b) => b.status === "completed",
-    ).length;
-    const totalEarnings = bookings
-      .filter((b) => b.status === "completed")
-      .reduce((sum, b) => sum + (b.final_amount || 0), 0);
-
-    // Today's statistics
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    const todayBookings = bookings.filter(
-      (b) => b.created_at >= today && b.created_at < tomorrow,
-    );
-    const todayCompleted = todayBookings.filter(
-      (b) => b.status === "completed",
-    ).length;
-    const todayEarnings = todayBookings
-      .filter((b) => b.status === "completed")
-      .reduce((sum, b) => sum + (b.final_amount || 0), 0);
-
-    // This week's statistics
-    const weekAgo = new Date();
-    weekAgo.setDate(weekAgo.getDate() - 7);
-    weekAgo.setHours(0, 0, 0, 0);
-
-    const weekBookings = bookings.filter((b) => b.created_at >= weekAgo);
-    const weekCompleted = weekBookings.filter(
-      (b) => b.status === "completed",
-    ).length;
-    const weekEarnings = weekBookings
-      .filter((b) => b.status === "completed")
-      .reduce((sum, b) => sum + (b.final_amount || 0), 0);
-
-    res.json({
-      rider_id: riderId,
-      rating: rider.rating,
-      member_since: rider.created_at,
-      total: {
-        bookings: totalBookings,
-        completed: completedBookings,
-        earnings: totalEarnings,
-      },
-      today: {
-        bookings: todayBookings.length,
-        completed: todayCompleted,
-        earnings: todayEarnings,
-      },
-      week: {
-        bookings: weekBookings.length,
-        completed: weekCompleted,
-        earnings: weekEarnings,
-      },
+    rider.status = status;
+    rider.verifiedAt = new Date();
+    rider.verifiedBy = 'admin'; // You can get actual admin info from token
+    
+    if (status === 'rejected' && rejectionReason) {
+      rider.rejectionReason = rejectionReason;
+    }
+    
+    await rider.save();
+    
+    res.json({ 
+      message: `Rider ${status} successfully`,
+      rider 
     });
   } catch (error) {
-    console.error("Rider stats error:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error('Rider verification error:', error);
+    res.status(500).json({ message: 'Failed to verify rider', error: error.message });
   }
 });
 
-// Get all riders (admin function)
-router.get("/", async (req, res) => {
+// Admin: Assign order to rider
+router.post('/admin/orders/assign', async (req, res) => {
   try {
-    const { status, is_online, limit = 50, offset = 0 } = req.query;
+    const { orderId, riderId } = req.body;
+    
+    const order = await Booking.findById(orderId);
+    const rider = await Rider.findById(riderId);
+    
+    if (!order || !rider) {
+      return res.status(404).json({ message: 'Order or rider not found' });
+    }
 
-    let query = {};
-    if (status) query.status = status;
-    if (is_online !== undefined) query.is_online = is_online === "true";
+    if (rider.status !== 'approved' || !rider.isActive) {
+      return res.status(400).json({ message: 'Rider is not available for assignment' });
+    }
 
-    const riders = await Rider.find(query)
-      .populate("user_id", "full_name phone email")
-      .sort({ created_at: -1 })
-      .limit(parseInt(limit))
-      .skip(parseInt(offset));
-
-    const total = await Rider.countDocuments(query);
-
-    res.json({
-      riders,
-      pagination: {
-        total,
-        limit: parseInt(limit),
-        offset: parseInt(offset),
-        pages: Math.ceil(total / parseInt(limit)),
-      },
+    // Assign order to rider
+    order.assignedRider = riderId;
+    order.riderStatus = 'assigned';
+    order.assignedAt = new Date();
+    
+    // Add to rider's assigned orders
+    if (!rider.assignedOrders.includes(orderId)) {
+      rider.assignedOrders.push(orderId);
+    }
+    
+    await Promise.all([order.save(), rider.save()]);
+    
+    res.json({ 
+      message: 'Order assigned successfully',
+      order,
+      rider: rider.name 
     });
   } catch (error) {
-    console.error("Riders fetch error:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error('Order assignment error:', error);
+    res.status(500).json({ message: 'Failed to assign order', error: error.message });
   }
 });
 
