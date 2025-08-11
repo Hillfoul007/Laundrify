@@ -256,9 +256,6 @@ const ProfessionalDateTimePicker: React.FC<ProfessionalDateTimePickerProps> = ({
                 onCloseAutoFocus={(e) => {
                   e.preventDefault();
                 }}
-                onOpenAutoFocus={(e) => {
-                  e.preventDefault();
-                }}
               >
                 {timeSlots.map((slot) => (
                   <SelectItem
