@@ -33,6 +33,23 @@ const ProfessionalDateTimePicker: React.FC<ProfessionalDateTimePickerProps> = ({
   // Store scroll position when time select opens
   const [scrollPosition, setScrollPosition] = useState(0);
 
+  // Lock body scroll when select is open
+  useEffect(() => {
+    if (timeSelectOpen) {
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+
+      return () => {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [timeSelectOpen]);
+
   // Generate dates for next 7 days starting from today (no past dates)
   const generateAvailableDates = () => {
     const dates = [];
