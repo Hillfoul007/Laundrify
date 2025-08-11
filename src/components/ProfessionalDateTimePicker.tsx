@@ -28,25 +28,10 @@ const ProfessionalDateTimePicker: React.FC<ProfessionalDateTimePickerProps> = ({
   className,
 }) => {
   const [showDropdown, setShowDropdown] = useState(false);
+  const [timeSelectOpen, setTimeSelectOpen] = useState(false);
 
-  // Prevent unwanted scroll behavior during Select interactions
-  useEffect(() => {
-    const handleSelectInteraction = (e: Event) => {
-      // Check if the event target is within a Select component
-      const target = e.target as HTMLElement;
-      if (target && target.closest('[data-radix-select-content]')) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    };
-
-    // Add event listeners to prevent scroll during Select operations
-    document.addEventListener('scroll', handleSelectInteraction, { capture: true, passive: false });
-
-    return () => {
-      document.removeEventListener('scroll', handleSelectInteraction, { capture: true });
-    };
-  }, []);
+  // Store scroll position when time select opens
+  const [scrollPosition, setScrollPosition] = useState(0);
 
   // Generate dates for next 7 days starting from today (no past dates)
   const generateAvailableDates = () => {
