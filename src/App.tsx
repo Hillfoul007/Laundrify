@@ -5,6 +5,8 @@ import { NotificationProvider } from "@/contexts/NotificationContext";
 import LaundryIndex from "@/pages/LaundryIndex";
 import LocationConfigPage from "@/pages/LocationConfigPage";
 import AdminPortal from "@/pages/AdminPortal";
+import RiderAuth from "@/pages/rider/RiderAuth";
+import RiderLayout from "@/components/rider/RiderLayout";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import InstallPrompt from "@/components/InstallPrompt";
 import PWAUpdateNotification from "@/components/PWAUpdateNotification";
@@ -56,6 +58,7 @@ function App() {
                 path="/admin/location-config"
                 element={<LocationConfigPage />}
               />
+              <Route path="/rider/*" element={<RiderAuth />} />
               <Route path="*" element={<LaundryIndex />} />
             </Routes>
             <Toaster />
