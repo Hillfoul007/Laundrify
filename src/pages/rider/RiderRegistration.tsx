@@ -43,8 +43,24 @@ export default function RiderRegistration() {
 
   const startCamera = async () => {
     try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'user' } 
+      // Check if we're in a secure context and camera is available
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        toast.error('Camera not available in this environment');
+        return;
+      }
+
+      // Check if we're in an iframe with restricted permissions
+      if (window.self !== window.top) {
+        toast.error('Camera access not available in embedded view. Please use file upload instead.');
+        return;
+      }
+
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: 'user',
+          width: { ideal: 640 },
+          height: { ideal: 480 }
+        }
       });
       setStream(mediaStream);
       if (videoRef.current) {
@@ -52,7 +68,17 @@ export default function RiderRegistration() {
       }
       setIsCameraOpen(true);
     } catch (err) {
-      toast.error('Camera access denied or not available');
+      console.error('Camera access error:', err);
+
+      if (err.name === 'NotAllowedError') {
+        toast.error('Camera permission denied. Please allow camera access or use file upload instead.');
+      } else if (err.name === 'NotFoundError') {
+        toast.error('No camera found. Please use file upload instead.');
+      } else if (err.name === 'NotSupportedError') {
+        toast.error('Camera not supported in this browser. Please use file upload instead.');
+      } else {
+        toast.error('Camera not available. Please use file upload instead.');
+      }
     }
   };
 
