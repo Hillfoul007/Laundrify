@@ -232,25 +232,41 @@ const ProfessionalDateTimePicker: React.FC<ProfessionalDateTimePickerProps> = ({
           <Select
             value={selectedTime}
             onValueChange={(value) => {
-              // Prevent page scroll when time is selected
+              // Call the time change handler
               onTimeChange(value);
+              // Restore scroll position after value change
+              if (scrollPosition > 0) {
+                requestAnimationFrame(() => {
+                  window.scrollTo(0, scrollPosition);
+                });
+              }
             }}
             onOpenChange={(open) => {
-              // Prevent scroll restoration when Select opens/closes
+              setTimeSelectOpen(open);
               if (open) {
                 // Store current scroll position when opening
-                const scrollY = window.scrollY;
-                // Restore scroll position after a brief delay
-                setTimeout(() => {
-                  window.scrollTo(0, scrollY);
-                }, 0);
+                setScrollPosition(window.scrollY);
+              } else {
+                // Restore scroll position when closing with a slight delay
+                if (scrollPosition > 0) {
+                  setTimeout(() => {
+                    window.scrollTo({ top: scrollPosition, behavior: 'instant' });
+                  }, 50);
+                }
               }
             }}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Choose pickup time" />
             </SelectTrigger>
-            <SelectContent position="popper" sideOffset={4}>
+            <SelectContent
+              position="popper"
+              sideOffset={4}
+              onCloseAutoFocus={(e) => {
+                // Prevent auto focus behavior that might cause scrolling
+                e.preventDefault();
+              }}
+            >
               {timeSlots.map((slot) => (
                 <SelectItem key={slot.value} value={slot.value}>
                   {slot.groupLabel}
