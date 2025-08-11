@@ -41,6 +41,18 @@ export default function RiderRegistration() {
     }
   };
 
+  const handleSelfieUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('File size should be less than 5MB');
+        return;
+      }
+      setSelfieImage(file);
+      toast.success('Selfie uploaded successfully!');
+    }
+  };
+
   const startCamera = async () => {
     try {
       // Check if we're in a secure context and camera is available
