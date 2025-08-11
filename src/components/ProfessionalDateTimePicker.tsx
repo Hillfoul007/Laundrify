@@ -225,11 +225,28 @@ const ProfessionalDateTimePicker: React.FC<ProfessionalDateTimePickerProps> = ({
             <Clock className="h-4 w-4" />
             Select Time
           </Label>
-          <Select value={selectedTime} onValueChange={onTimeChange}>
+          <Select
+            value={selectedTime}
+            onValueChange={(value) => {
+              // Prevent page scroll when time is selected
+              onTimeChange(value);
+            }}
+            onOpenChange={(open) => {
+              // Prevent scroll restoration when Select opens/closes
+              if (open) {
+                // Store current scroll position when opening
+                const scrollY = window.scrollY;
+                // Restore scroll position after a brief delay
+                setTimeout(() => {
+                  window.scrollTo(0, scrollY);
+                }, 0);
+              }
+            }}
+          >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Choose pickup time" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent position="popper" sideOffset={4}>
               {timeSlots.map((slot) => (
                 <SelectItem key={slot.value} value={slot.value}>
                   {slot.groupLabel}
