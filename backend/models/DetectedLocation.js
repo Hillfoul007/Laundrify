@@ -168,8 +168,10 @@ detectedLocationSchema.statics.saveDetectedLocation = async function (
     const detectedLocation = new this({
       ...locationData,
       device_fingerprint: fingerprint,
+
       is_available: availabilityResult.is_available, // Extract boolean value
       availability_message: availabilityResult.message, // Store message separately
+
     });
 
     await detectedLocation.save();

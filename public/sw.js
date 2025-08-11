@@ -1,5 +1,7 @@
+
 const CACHE_NAME = "laundrify-v6";
 const STATIC_CACHE = "laundrify-static-v6";
+
 const urlsToCache = [
   "/",
   "/manifest.json",
@@ -8,7 +10,9 @@ const urlsToCache = [
 
 // Install service worker
 self.addEventListener("install", (event) => {
+
   console.log("Service Worker: Installing v6...");
+
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log("Service Worker: Caching app shell");
@@ -48,7 +52,7 @@ self.addEventListener("fetch", (event) => {
     event.request.url.includes("/api/") ||
     event.request.url.includes("onrender.com") ||
     event.request.url.includes("localhost:3001") ||
-    event.request.url.includes("laundrify") ||
+    event.request.url.includes("railway.app") ||
     event.request.method !== "GET"
   ) {
     // Let these requests pass through without any service worker intervention

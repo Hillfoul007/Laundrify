@@ -2,7 +2,9 @@
   "name": "Laundrify - Quick clean & convenient",
   "short_name": "Laundrify",
   "description": "Quick clean & convenient thats laundrify",
+
   "start_url": "/?utm_source=homescreen",
+
   "display": "standalone",
   "background_color": "#C46DD8",
   "theme_color": "#C46DD8",
