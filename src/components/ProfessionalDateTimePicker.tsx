@@ -260,13 +260,7 @@ const ProfessionalDateTimePicker: React.FC<ProfessionalDateTimePickerProps> = ({
                 setTimeSelectOpen(open);
               }}
             >
-              <SelectTrigger
-                className="w-full"
-                onFocus={(e) => {
-                  // Prevent focus from triggering scroll
-                  e.preventDefault();
-                }}
-              >
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Choose pickup time" />
               </SelectTrigger>
               <SelectContent
