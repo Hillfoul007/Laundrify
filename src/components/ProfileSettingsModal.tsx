@@ -18,7 +18,7 @@ import {
   Copy,
   MapPin,
 } from "lucide-react";
-import { ReferralService } from "@/services/referralService";
+
 import { useToast } from "@/hooks/use-toast";
 import UserService from "@/services/userService";
 import SavedAddressesModal from "./SavedAddressesModal";
@@ -48,9 +48,7 @@ const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
   const { toast } = useToast();
   const userService = UserService.getInstance();
 
-  const referralService = ReferralService.getInstance();
-  const userCoupons = referralService.getUserCoupons(currentUser);
-  const userReferralCode = referralService.generateReferralCode(currentUser);
+
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -228,84 +226,9 @@ const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
             </div>
           )}
 
-          {/* Offers & Coupons Section */}
-          <div className="pt-6 border-t border-gray-200">
-            <div className="flex items-center gap-2 mb-4">
-              <Gift className="h-5 w-5 text-green-600" />
-              <h3 className="text-lg font-semibold text-gray-900">
-                Offers & Coupons
-              </h3>
-            </div>
-
-            {/* Your Referral Code */}
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-200 mb-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-1">
-                    Your Referral Code
-                  </h4>
-                  <p className="text-sm text-gray-600">
-                    Share with friends to earn rewards
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="bg-white px-3 py-2 rounded-lg border border-green-300 font-mono text-green-700 font-bold">
-                    {userReferralCode}
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      navigator.clipboard.writeText(userReferralCode);
-                      toast({
-                        title: "Copied!",
-                        description: "Referral code copied to clipboard",
-                      });
-                    }}
-                    className="border-green-300 text-green-600 hover:bg-green-50"
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
 
 
-          </div>
 
-          {/* Address Management Section */}
-          <div className="pt-6 border-t border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-green-600" />
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Saved Addresses
-                </h3>
-              </div>
-              <Button
-                onClick={() => setShowAddressModal(true)}
-                variant="outline"
-                size="sm"
-                className="text-green-600 border-green-200 hover:bg-green-50 hover:border-green-300"
-              >
-                Manage
-              </Button>
-            </div>
-
-            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-xl border border-blue-200">
-              <p className="text-sm text-gray-600 mb-2">
-                Manage your delivery addresses for faster checkout
-              </p>
-              <Button
-                onClick={() => setShowAddressModal(true)}
-                variant="ghost"
-                size="sm"
-                className="text-blue-600 hover:bg-blue-100 p-0 h-auto font-medium"
-              >
-                View & Edit Addresses →
-              </Button>
-            </div>
-          </div>
 
           {/* Logout Button */}
           {onLogout && (

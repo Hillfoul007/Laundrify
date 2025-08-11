@@ -337,21 +337,20 @@ const DeliveryDateTimePicker: React.FC<DeliveryDateTimePickerProps> = ({
             <Clock className="h-4 w-4" />
             Delivery Time
           </Label>
-          <Select
+          <select
             value={selectedDeliveryTime}
-            onValueChange={onDeliveryTimeChange}
+            onChange={(e) => onDeliveryTimeChange(e.target.value)}
+            className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Choose delivery time" />
-            </SelectTrigger>
-            <SelectContent>
-              {timeSlots.map((slot) => (
-                <SelectItem key={slot.value} value={slot.value}>
-                  {slot.groupLabel}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            <option value="" disabled>
+              Choose delivery time
+            </option>
+            {timeSlots.map((slot) => (
+              <option key={slot.value} value={slot.value}>
+                {slot.groupLabel}
+              </option>
+            ))}
+          </select>
 
           {timeSlots.length === 0 && (
             <p className="text-xs text-red-600">

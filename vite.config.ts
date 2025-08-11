@@ -24,6 +24,15 @@ export default defineConfig(({ mode }) => {
           target: "http://localhost:3001",
           changeOrigin: true,
           secure: false,
+          // Add CORS headers for development
+          configure: (proxy, options) => {
+            proxy.on('proxyReq', (proxyReq, req, res) => {
+              console.log('🔄 Proxying API request:', req.url);
+            });
+            proxy.on('error', (err, req, res) => {
+              console.error('❌ Proxy error:', err);
+            });
+          }
         },
       },
     },
@@ -73,12 +82,12 @@ export default defineConfig(({ mode }) => {
                 theme_color: "#C46DD8",
                 icons: [
                   {
-                    src: "placeholder.svg",
+                    src: "/laundrify-exact-icon.svg",
                     sizes: "192x192",
                     type: "image/svg+xml",
                   },
                   {
-                    src: "placeholder.svg",
+                    src: "/laundrify-exact-icon.svg",
                     sizes: "512x512",
                     type: "image/svg+xml",
                   },

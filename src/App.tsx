@@ -4,17 +4,19 @@ import { Toaster } from "@/components/ui/toaster";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import LaundryIndex from "@/pages/LaundryIndex";
 import LocationConfigPage from "@/pages/LocationConfigPage";
+import AdminPortal from "@/pages/AdminPortal";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import InstallPrompt from "@/components/InstallPrompt";
 import PWAUpdateNotification from "@/components/PWAUpdateNotification";
 import AddressSearchDemo from "@/components/AddressSearchDemo";
 import MapsPerformanceIndicator from "@/components/MapsPerformanceIndicator";
-import ReferralLoginPage from "@/pages/ReferralLoginPage";
+
 import {
   initializeAuthPersistence,
   restoreAuthState,
 } from "@/utils/authPersistence";
 import { initializePWAUpdates } from "@/utils/swCleanup";
+import "@/utils/testEnvironment"; // Auto-run environment tests in development
 import "./App.css";
 import "./styles/mobile-fixes.css";
 import "./styles/mobile-touch-fixes.css";
@@ -50,8 +52,7 @@ function App() {
           <div className="App">
             <Routes>
               <Route path="/" element={<LaundryIndex />} />
-              <Route path="/login" element={<ReferralLoginPage />} />
-              <Route path="/refer" element={<ReferralLoginPage />} />
+              <Route path="/admin" element={<AdminPortal />} />
               <Route path="/address-demo" element={<AddressSearchDemo />} />
               <Route
                 path="/admin/location-config"

@@ -3,32 +3,23 @@
  * Handles proper API URL detection for production deployment
  */
 
-// Define the correct production API URL - always point to the backend
-// Updated to use the Railway deployment URL as specified by user
-export const PRODUCTION_API_URL = "https://cleancare-pro-api-production-129e.up.railway.app/api";
+import { getApiUrl } from './env';
+
+// Define the correct production API URL - now uses centralized config
+export const PRODUCTION_API_URL = "https://backend-vaxf.onrender.com/api";
 
 export const getProductionApiUrl = (): string => {
-  // Check if we're in production based on hostname
-  const hostname = window.location.hostname;
-  const isProduction =
-    !hostname.includes("localhost") && !hostname.includes("127.0.0.1");
+  // Use centralized API URL detection
+  const apiUrl = getApiUrl();
 
   console.log("🔍 API URL Detection:", {
-    hostname,
-    isProduction,
+    hostname: window.location.hostname,
     currentUrl: window.location.href,
-    apiUrl: isProduction ? PRODUCTION_API_URL : "http://localhost:3001/api",
+    apiUrl,
   });
 
-  if (isProduction) {
-    console.log(
-      "🚀 Production environment detected, using:",
-      PRODUCTION_API_URL,
-    );
-    return PRODUCTION_API_URL;
-  }
-
-  return "http://localhost:3001/api";
+  console.log("🚀 Using centralized API URL:", apiUrl);
+  return apiUrl;
 };
 
 // Export a flag to check if backend should be used

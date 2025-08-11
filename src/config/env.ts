@@ -1,54 +1,160 @@
 /**
- * Centralized environment configuration for API URLs
- * This ensures consistent API URL handling across the entire application
+ * Centralized Environment Configuration
+ * Single source of truth for all URLs and environment variables
  */
 
-import { getProductionApiUrl, shouldUseBackend } from "./production-env";
+// Environment detection
+export const isDevelopment = () => import.meta.env.DEV;
+export const isProduction = () => import.meta.env.PROD;
 
-export const getApiBaseUrl = (): string => {
-  // First, check for explicit environment variable
-  const envUrl = import.meta.env.VITE_API_BASE_URL;
+// URL Configuration
+const DEVELOPMENT_API_URL = "http://localhost:3001/api";
+const PRODUCTION_API_URL = "https://backend-vaxf.onrender.com/api";
 
-  if (envUrl && envUrl !== "") {
-    console.log("🔧 Using environment variable API URL:", envUrl);
-    return envUrl;
+// Frontend URLs for CORS configuration
+export const FRONTEND_URLS = {
+  development: [
+    "http://localhost:10000",
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:10000",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:3000"
+  ],
+  production: [
+    "https://laundrify.online",
+    "https://www.laundrify.online",
+    "https://laundrify-app-5su7.onrender.com",
+    "https://testversion.onrender.com", 
+    "https://cleancarepro-1-p2oc.onrender.com",
+    "https://cleancare-pro-production.up.railway.app",
+    // Add Builder.io domains
+    "https://*.builder.codes",
+    "https://*.fly.dev",
+    "https://*.vercel.app",
+    "https://*.netlify.app"
+  ]
+};
+
+// Backend URLs
+export const BACKEND_URLS = {
+  development: DEVELOPMENT_API_URL,
+  production: PRODUCTION_API_URL
+};
+
+// Main API URL getter
+export const getApiUrl = (): string => {
+  // First check for explicit environment variable
+  const envApiUrl = import.meta.env.VITE_API_BASE_URL;
+  if (envApiUrl && envApiUrl.trim() !== "") {
+    console.log(`🔧 Using explicit env API URL: ${envApiUrl}`);
+    return envApiUrl.endsWith('/api') ? envApiUrl : `${envApiUrl}/api`;
   }
 
-  // Use production configuration logic
-  const apiUrl = getProductionApiUrl();
+  // Detect environment based on hostname
+  const hostname = window.location.hostname;
+  const isLocalhost = hostname.includes("localhost") || hostname.includes("127.0.0.1");
+  const isFlyDev = hostname.includes("fly.dev");
+  const isBuilderCodes = hostname.includes("builder.codes");
+  const isProductionDomain = hostname === "www.laundrify.online" || hostname === "laundrify.online";
 
-  // Check if backend should be disabled for certain environments
-  if (!shouldUseBackend()) {
-    console.log("🌐 Backend disabled for this environment");
-    return ""; // Empty string indicates no backend available
+  console.log(`🔍 API URL Detection:`, {
+    hostname,
+    isLocalhost,
+    isFlyDev,
+    isBuilderCodes,
+    isProductionDomain,
+    envApiUrl,
+    developmentUrl: DEVELOPMENT_API_URL,
+    productionUrl: PRODUCTION_API_URL
+  });
+
+  // For localhost, use development API
+  if (isLocalhost) {
+    console.log(`🏠 Using development API: ${DEVELOPMENT_API_URL}`);
+    return DEVELOPMENT_API_URL;
   }
 
-  return apiUrl;
+  // For all hosted environments (fly.dev, builder.codes, production), use production backend
+  if (isFlyDev || isBuilderCodes || isProductionDomain) {
+    console.log(`🌐 Using production backend API: ${PRODUCTION_API_URL}`);
+    return PRODUCTION_API_URL;
+  }
+
+  // Default fallback
+  console.log(`🚀 Using default production API: ${PRODUCTION_API_URL}`);
+  return PRODUCTION_API_URL;
 };
 
-export const isBackendAvailable = (): boolean => {
-  return getApiBaseUrl() !== "";
+// Check if backend is available (for hosted environments)
+export const shouldUseBackend = (): boolean => {
+  const hostname = window.location.hostname;
+
+  // Allow backend for your specific app domain
+  if (hostname.includes("856f989be1cb4050ba0283a2e091d533-f5a549ca82f54c089dcd22f9b.fly.dev")) {
+    return true;
+  }
+
+  // Disable backend for other fly.dev environments that don't have backend
+  if (hostname.includes("fly.dev") && !hostname.includes("backend")) {
+    return false;
+  }
+
+  return true;
 };
 
-export const config = {
-  apiBaseUrl: getApiBaseUrl(),
-  isProduction: window.location.hostname !== "localhost",
-  isBackendAvailable: isBackendAvailable(),
+// Backward compatibility aliases
+export const isBackendAvailable = shouldUseBackend;
+export const getApiBaseUrl = getApiUrl;
 
-  // Auth token storage key
-  authTokenKey: "cleancare_auth_token",
-
-  // User storage key
-  userStorageKey: "current_user",
-
-  // Booking storage key
-  bookingStorageKey: "user_bookings",
+// Environment variables
+export const ENV_CONFIG = {
+  // API Configuration
+  API_URL: getApiUrl(),
+  USE_BACKEND: shouldUseBackend(),
+  
+  // Authentication
+  AUTH_TOKEN_KEY: "laundrify_token",
+  USER_DATA_KEY: "laundrify_user",
+  
+  // Google Services
+  GOOGLE_MAPS_API_KEY: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+  
+  // SMS Service
+  DVHOSTING_API_KEY: import.meta.env.VITE_DVHOSTING_API_KEY,
+  
+  // App Settings
+  APP_NAME: "Laundrify",
+  APP_VERSION: "1.0.0",
+  
+  // Timeouts
+  API_TIMEOUT: 30000, // 30 seconds
+  OTP_TIMEOUT: 5 * 60 * 1000, // 5 minutes
+  
+  // Development flags
+  DEBUG_MODE: isDevelopment(),
+  ENABLE_LOGGING: isDevelopment()
 };
 
-// Log configuration on startup
-console.log("🔧 Environment Configuration:", {
-  hostname: window.location.hostname,
-  apiBaseUrl: config.apiBaseUrl,
-  isProduction: config.isProduction,
-  isBackendAvailable: config.isBackendAvailable,
-});
+// Helper functions
+export const log = (...args: any[]) => {
+  if (ENV_CONFIG.ENABLE_LOGGING) {
+    console.log(...args);
+  }
+};
+
+export const logError = (...args: any[]) => {
+  console.error(...args);
+};
+
+export const getAuthHeaders = () => {
+  const token = localStorage.getItem(ENV_CONFIG.AUTH_TOKEN_KEY) || localStorage.getItem("auth_token");
+  return {
+    "Content-Type": "application/json",
+    ...(token && { Authorization: `Bearer ${token}` }),
+  };
+};
+
+// Export as both 'config' and 'ENV_CONFIG' for compatibility
+export const config = ENV_CONFIG;
+export default ENV_CONFIG;

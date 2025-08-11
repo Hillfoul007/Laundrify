@@ -33,8 +33,22 @@ export class AddressService {
   private apiBaseUrl: string;
 
   constructor() {
-    // Use relative path for proxy compatibility in development
-    this.apiBaseUrl = config.isProduction ? config.apiBaseUrl : "/api";
+    // Force correct backend URL for all hosted environments
+    const hostname = window.location.hostname;
+    const isLocalhost = hostname.includes("localhost") || hostname.includes("127.0.0.1");
+
+    if (isLocalhost) {
+      this.apiBaseUrl = "http://localhost:3001/api";
+    } else {
+      // For all hosted environments, use production backend
+      this.apiBaseUrl = "https://backend-vaxf.onrender.com/api";
+    }
+
+    console.log(`🏠 AddressService API URL:`, {
+      hostname,
+      isLocalhost,
+      apiBaseUrl: this.apiBaseUrl
+    });
   }
 
   public static getInstance(): AddressService {

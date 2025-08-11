@@ -23,7 +23,7 @@ import { adaptiveBookingHelpers } from "@/integrations/adaptive/bookingHelpers";
 import { userValidation } from "@/utils/userValidation";
 import { bookingTestHelper } from "@/utils/bookingTestHelper";
 import { getServicePriceWithFallback } from "@/utils/servicePricing";
-import { CouponService } from "@/services/couponService";
+
 
 interface BookingFlowProps {
   provider?: any;
@@ -61,11 +61,8 @@ const BookingFlow: React.FC<BookingFlowProps> = ({
     instructions: "",
   });
   const [additionalDetails, setAdditionalDetails] = useState("");
-  const [couponCode, setCouponCode] = useState("");
-  const [appliedCoupon, setAppliedCoupon] = useState<{
-    code: string;
-    discount: number;
-  } | null>(null);
+
+
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -92,72 +89,20 @@ const BookingFlow: React.FC<BookingFlowProps> = ({
     return 0; // Free handling fee as shown in UI
   };
 
-  const getCouponDiscount = () => {
-    if (!appliedCoupon) return 0;
-    const basePrice = calculateTotalPrice();
 
-    const discountAmount = Math.round(
-      (basePrice * appliedCoupon.discount) / 100
-    );
-
-    // Apply max discount limit if specified
-    if (appliedCoupon.maxDiscount) {
-      return Math.min(discountAmount, appliedCoupon.maxDiscount);
-    }
-
-    return discountAmount;
-  };
 
   const calculateFinalAmount = () => {
     const basePrice = calculateTotalPrice();
     const deliveryCharge = getDeliveryCharge();
     const handlingFee = getHandlingFee();
     const subtotal = basePrice + deliveryCharge + handlingFee;
-    const couponDiscount = getCouponDiscount();
 
-    return Math.round((subtotal - couponDiscount) * 100) / 100;
+    return Math.round(subtotal * 100) / 100;
   };
 
-  const applyCoupon = async () => {
-    const code = couponCode.trim();
 
-    if (!code) {
-      setError("Please enter a coupon code");
-      return;
-    }
 
-    if (!currentUser) {
-      setError("Please sign in to apply coupons");
-      return;
-    }
 
-    try {
-      const couponService = CouponService.getInstance();
-      const validation = await couponService.validateCoupon(
-        code,
-        currentUser.id || currentUser._id,
-        calculateTotal()
-      );
-
-      if (validation.valid && validation.coupon) {
-        setAppliedCoupon({
-          code: validation.coupon.code,
-          discount: validation.coupon.discount
-        });
-        setError("");
-      } else {
-        setError(validation.error || "Invalid coupon code");
-      }
-    } catch (error) {
-      console.error('❌ Error applying coupon:', error);
-      setError("Failed to validate coupon. Please try again.");
-    }
-  };
-
-  const removeCoupon = () => {
-    setAppliedCoupon(null);
-    setCouponCode("");
-  };
 
   const handleBookService = async () => {
     console.log("🚀 Starting booking process...");
@@ -270,7 +215,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({
           .join("\n"),
         total_price: calculateTotalPrice(),
         final_amount: calculateFinalAmount(),
-        discount_amount: getCouponDiscount(),
+
         special_instructions: [
           additionalDetails,
           addressDetails.instructions,
@@ -289,7 +234,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({
           tax_amount:
             (calculateTotalPrice() + getDeliveryCharge() + getHandlingFee()) *
             0.12,
-          discount: getCouponDiscount(),
+
         },
         // For backward compatibility with different booking systems
         pickupDate: selectedDate.toISOString().split("T")[0],
@@ -683,56 +628,10 @@ const BookingFlow: React.FC<BookingFlowProps> = ({
                     <span className="font-medium">FREE</span>
                   </div>
                 </div>
-                {appliedCoupon && (
-                  <div className="flex justify-between text-sm text-green-600">
-                    <span>
-                      Coupon ({appliedCoupon.code}) - {appliedCoupon.discount}%
-                      off
-                    </span>
-                    <span>-${getCouponDiscount()}</span>
-                  </div>
-                )}
+
               </div>
 
-              {/* Coupon Section */}
-              <div className="border-t pt-4">
-                <Label htmlFor="coupon" className="text-sm font-medium">
-                  Have a coupon?
-                </Label>
-                <div className="flex gap-2 mt-2">
-                  <Input
-                    id="coupon"
-                    placeholder="Enter coupon code"
-                    value={couponCode}
-                    onChange={(e) =>
-                      setCouponCode(e.target.value.toUpperCase())
-                    }
-                    disabled={!!appliedCoupon}
-                    className="flex-1"
-                  />
-                  {appliedCoupon ? (
-                    <Button variant="outline" onClick={removeCoupon} size="sm">
-                      Remove
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        applyCoupon();
-                      }}
-                      size="sm"
-                      type="button"
-                    >
-                      Apply
-                    </Button>
-                  )}
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  Try "NEW10" for 10% off or "FIRST30" for 30% off your first order!
-                </p>
-              </div>
+
 
               <div className="border-t pt-2">
                 <div className="flex justify-between font-semibold text-lg">

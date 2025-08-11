@@ -1,8 +1,19 @@
 const express = require("express");
+const express = require("express");
 const Address = require("../models/Address");
 const User = require("../models/User");
 
 const router = express.Router();
+
+// Test route to check if addresses endpoint is working
+router.get("/test", (req, res) => {
+  res.json({
+    success: true,
+    message: "Addresses endpoint is working",
+    timestamp: new Date().toISOString(),
+    version: "v2-with-express-import-fix"
+  });
+});
 
 // Middleware to verify user (simple version - you may want to add JWT verification)
 const verifyUser = async (req, res, next) => {
@@ -25,13 +36,36 @@ const verifyUser = async (req, res, next) => {
 };
 
 // Get all addresses for a user
-router.get("/", verifyUser, async (req, res) => {
+router.get("/", async (req, res) => {
   try {
-    const addresses = await Address.getUserAddresses(req.userId);
+    console.log("📡 GET /api/addresses called:", {
+      headers: req.headers,
+      userId: req.headers["user-id"]
+    });
+
+    // Check if user-id header is provided
+    const userId = req.headers["user-id"];
+    if (!userId) {
+      return res.status(401).json({
+        error: "User ID required",
+        message: "Please provide user-id header"
+      });
+    }
+
+    // Check if user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        error: "User not found",
+        userId: userId
+      });
+    }
+
+    const addresses = await Address.getUserAddresses(userId);
     res.json({ data: addresses, error: null });
   } catch (error) {
     console.error("Get addresses error:", error);
-    res.status(500).json({ error: "Failed to fetch addresses" });
+    res.status(500).json({ error: "Failed to fetch addresses", details: error.message });
   }
 });
 

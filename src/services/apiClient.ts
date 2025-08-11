@@ -1,4 +1,6 @@
 // API client for MongoDB operations through backend
+import { getApiUrl } from '../config/env';
+
 export interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
@@ -13,9 +15,7 @@ export class ApiClient {
   constructor() {
     // Use relative path for proxy compatibility in development
     const isProduction = window.location.hostname !== "localhost";
-    this.baseUrl = isProduction
-      ? (import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api")
-      : "/api";
+    this.baseUrl = isProduction ? getApiUrl() : "/api";
   }
 
   public static getInstance(): ApiClient {

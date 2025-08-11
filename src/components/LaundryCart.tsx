@@ -31,7 +31,7 @@ import {
   getCategoryDisplay,
 } from "@/data/laundryServices";
 import { OTPAuthService } from "@/services/otpAuthService";
-import { ReferralService } from "@/services/referralService";
+
 import {
   saveBookingFormData,
   getBookingFormData,
@@ -53,6 +53,7 @@ import ZomatoAddAddressPage from "./ZomatoAddAddressPage";
 import { AddressService } from "@/services/addressService";
 import { SessionManager } from "@/utils/sessionManager";
 import { CouponService } from "@/services/couponService";
+
 
 interface LaundryCartProps {
   onBack: () => void;
@@ -80,18 +81,18 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
   const [appliedCoupon, setAppliedCoupon] = useState<{
     code: string;
     discount: number;
-    maxDiscount?: number;
-    isReferral?: boolean;
+    maxDiscount: number;
   } | null>(null);
   const [couponError, setCouponError] = useState("");
+
 
   // Location availability modal state
   const [showLocationUnavailable, setShowLocationUnavailable] = useState(false);
   const [unavailableLocationText, setUnavailableLocationText] = useState("");
 
   const authService = OTPAuthService.getInstance();
-  const referralService = ReferralService.getInstance();
   const couponService = CouponService.getInstance();
+
 
   // Load saved form data on component mount (excluding date autofill)
   useEffect(() => {
@@ -105,8 +106,8 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
     if (savedFormData.additionalDetails)
       setSpecialInstructions(savedFormData.additionalDetails);
     if (savedFormData.couponCode) setCouponCode(savedFormData.couponCode);
-    if (savedFormData.appliedCoupon)
-      setAppliedCoupon(savedFormData.appliedCoupon);
+    if (savedFormData.appliedCoupon) setAppliedCoupon(savedFormData.appliedCoupon);
+
   }, []);
 
   // Auto-save form data when it changes
@@ -119,6 +120,7 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
       additionalDetails: specialInstructions,
       couponCode,
       appliedCoupon,
+
     });
   }, [
     selectedDate,
@@ -194,7 +196,7 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
             if (state.deliveryTime) setDeliveryTime(state.deliveryTime);
             if (state.specialInstructions)
               setSpecialInstructions(state.specialInstructions);
-            if (state.appliedCoupon) setAppliedCoupon(state.appliedCoupon);
+
 
             console.log("���� Restored checkout form state after login");
           }
@@ -222,7 +224,7 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
             if (state.deliveryTime) setDeliveryTime(state.deliveryTime);
             if (state.specialInstructions)
               setSpecialInstructions(state.specialInstructions);
-            if (state.appliedCoupon) setAppliedCoupon(state.appliedCoupon);
+
 
             // If redirectToAddress flag is set, open address page
             if (state.redirectToAddress) {
@@ -309,20 +311,12 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
     return 0; // Free handling fee as shown in UI
   };
 
-    const getCouponDiscount = () => {
+  
+
+  const getCouponDiscount = () => {
     if (!appliedCoupon) return 0;
     const subtotal = getSubtotal();
-
-    const discountAmount = Math.round(
-      subtotal * (appliedCoupon.discount / 100),
-    );
-
-    // Apply max discount limit if specified
-    if (appliedCoupon.maxDiscount) {
-      return Math.min(discountAmount, appliedCoupon.maxDiscount);
-    }
-
-    return discountAmount;
+    return couponService.calculateDiscount(subtotal, appliedCoupon);
   };
 
   const getTotal = () => {
@@ -338,36 +332,19 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
     console.log("applyCoupon function called with code:", couponCode);
     setCouponError(""); // Clear any previous errors
 
+    if (!couponCode.trim()) {
+      setCouponError("Please enter a coupon code");
+      return;
+    }
+
     try {
-      // First check if it's a referral code
-      const referralDiscount = await referralService.validateReferralCode(
-        couponCode,
-        currentUser,
-      );
-
-      if (referralDiscount) {
-        setAppliedCoupon({
-          code: referralDiscount.code,
-          discount: referralDiscount.discount,
-          maxDiscount: referralDiscount.maxDiscount,
-          isReferral: true,
-        });
-
-        addNotification(
-          createSuccessNotification(
-            "Referral Code Applied!",
-            referralDiscount.description,
-          ),
-        );
-        return;
-      }
-
-      // Use the new CouponService for validation
       const sessionManager = SessionManager.getInstance();
       const session = sessionManager.ensureValidSession();
       const userId = session.userId || "guest";
 
-      const validation = await couponService.validateCoupon(couponCode, userId, getSubtotal());
+      console.log("🎫 Validating coupon:", { couponCode, userId, subtotal: getSubtotal() });
+
+      const validation = couponService.validateCoupon(couponCode, userId, getSubtotal());
 
       if (validation.valid && validation.coupon) {
         const coupon = validation.coupon;
@@ -375,19 +352,19 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
         setAppliedCoupon({
           code: coupon.code,
           discount: coupon.discount,
-          maxDiscount: coupon.maxDiscount || undefined,
+          maxDiscount: coupon.maxDiscount,
         });
 
-        console.log("✅ Coupon applied successfully:", coupon.code);
         addNotification(
           createSuccessNotification(
-            "Coupon Applied",
-            coupon.description,
+            "Coupon Applied!",
+            `${coupon.discount}% discount applied (up to ₹${coupon.maxDiscount})`,
           ),
         );
+        console.log("✅ Coupon applied successfully:", coupon.code);
       } else {
-        console.log("❌ Invalid coupon:", validation.error);
         setCouponError(validation.error || "Invalid coupon code");
+        console.log("❌ Invalid coupon:", validation.error);
       }
     } catch (error) {
       console.error("Error in applyCoupon:", error);
@@ -400,6 +377,12 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
     setCouponCode("");
     setCouponError("");
   };
+
+
+
+
+
+
 
   const updateQuantity = (serviceId: string, change: number) => {
     setCart((prev) => {
@@ -444,7 +427,7 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
     // Prevent multiple submissions
     if (isProcessingCheckout) {
       console.log(
-        "⚠��� Checkout already in progress, ignoring duplicate click",
+        "⚠���� Checkout already in progress, ignoring duplicate click",
       );
       return;
     }
@@ -487,7 +470,7 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
           deliveryDate: deliveryDate?.toISOString(),
           deliveryTime,
           specialInstructions,
-          appliedCoupon,
+
           timestamp: Date.now(),
         };
         localStorage.setItem(
@@ -626,8 +609,7 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
       const deliveryCharge = getDeliveryCharge() || 0;
       const handlingFee = getHandlingFee() || 0;
       const couponDiscount = getCouponDiscount() || 0;
-      const finalTotal =
-        serviceTotal + deliveryCharge + handlingFee - couponDiscount;
+      const finalTotal = serviceTotal + deliveryCharge + handlingFee - couponDiscount;
 
       console.log("Price breakdown:", {
         serviceTotal,
@@ -648,6 +630,10 @@ const LaundryCart: React.FC<LaundryCartProps> = ({
         address: addressData,
         phone: phoneNumber || currentUser?.phone,
         instructions: specialInstructions,
+        // Explicit coupon information
+        coupon_code: appliedCoupon?.code || null,
+        discount_amount: couponDiscount,
+        original_total: serviceTotal + deliveryCharge + handlingFee,
         charges_breakdown: {
           base_price: serviceTotal,
           delivery_fee: deliveryCharge,
@@ -668,6 +654,7 @@ ${services.map((s) => `• ${s.name} x${s.quantity} - ₹${s.price * s.quantity}
 Pickup: ${selectedDate.toLocaleDateString()} at ${selectedTime}
 Delivery: ${finalDeliveryDate.toLocaleDateString()} at ${finalDeliveryTime}
 
+${appliedCoupon ? `Coupon Applied: ${appliedCoupon.code} (-₹${couponDiscount})` : ""}
 Total Amount: ₹${finalTotal}
 
 Confirm this booking?`;
@@ -685,6 +672,21 @@ Confirm this booking?`;
 
           console.log("✅ Checkout initiated successfully");
 
+          // Track coupon usage if a coupon was applied
+          if (appliedCoupon) {
+            const sessionManager = SessionManager.getInstance();
+            const session = sessionManager.ensureValidSession();
+            const userId = session.userId || "guest";
+
+            couponService.markCouponAsUsed(
+              appliedCoupon.code,
+              userId,
+              serviceTotal,
+              couponDiscount
+            );
+            console.log(`✅ Marked coupon ${appliedCoupon.code} as used`);
+          }
+
           // Mark user as having made an order (no longer first-time)
           const sessionManager = SessionManager.getInstance();
           const session = sessionManager.ensureValidSession();
@@ -694,32 +696,7 @@ Confirm this booking?`;
             console.log(`✅ Marked user ${userId} as having order history`);
           }
 
-          // Track coupon usage for general coupons
-          if (appliedCoupon) {
-            const sessionManager = SessionManager.getInstance();
-            const session = sessionManager.ensureValidSession();
-            const userId = session.userId || "guest";
 
-            if (appliedCoupon.isReferral) {
-              // Track referral usage
-              referralService.trackReferralUsage(
-                appliedCoupon.code,
-                userId,
-                getCouponDiscount(),
-              );
-              // Award bonus to referrer (this would normally be done on backend after payment confirmation)
-              referralService.awardReferralBonus(appliedCoupon.code);
-            } else {
-              // Track general coupon usage
-              couponService.markCouponAsUsed(
-                appliedCoupon.code,
-                userId,
-                getSubtotal(),
-                getCouponDiscount()
-              );
-              console.log(`✅ Marked coupon ${appliedCoupon.code} as used`);
-            }
-          }
 
           // Clear cart after successful booking
           console.log("🧹 Clearing cart after successful booking");
@@ -792,7 +769,7 @@ Confirm this booking?`;
           ),
         );
 
-        console.log("✅ New address saved to backend and selected");
+        console.log("��� New address saved to backend and selected");
       } else {
         // Still save locally and proceed
         const addressWithId = {
@@ -1072,7 +1049,7 @@ Confirm this booking?`;
                         deliveryDate: deliveryDate?.toISOString(),
                         deliveryTime,
                         specialInstructions,
-                        appliedCoupon,
+              
                         timestamp: Date.now(),
                         redirectToAddress: true, // Flag to indicate address flow
                       };
@@ -1193,85 +1170,87 @@ Confirm this booking?`;
             <div className="flex justify-between text-sm text-laundrify-blue">
               <span>Handling Fee</span>
               <div className="flex items-center gap-2">
-                <span className="line-through text-gray-400 text-xs">₹9</span>
+                <span className="line-through text-gray-400 text-xs">
+                  <p>
+                    <span style={{fontSize: '12px'}}>₹</span>9
+                  </p>
+                </span>
                 <span className="font-medium">FREE</span>
               </div>
             </div>
 
-            {/* Ultra Compact Coupon Section */}
-                        {!appliedCoupon ? (
-              <div className="space-y-1">
-                <div className="flex gap-1 pt-1">
-                  <Input
-                    placeholder="Coupon"
-                    value={couponCode}
-                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        if (couponCode.trim()) {
-                          applyCoupon();
+            {/* Coupon Section */}
+            <div className="space-y-2 pt-2 border-t">
+              {!appliedCoupon ? (
+                <>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Coupon"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          if (couponCode.trim()) {
+                            applyCoupon();
+                          }
                         }
-                      }
-                    }}
-                    className="flex-1 h-7 text-xs"
-                  />
+                      }}
+                      className="flex-1 h-8 text-sm"
+                    />
+                    <Button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        applyCoupon();
+                      }}
+                      variant="outline"
+                      disabled={!couponCode.trim()}
+                      className="h-8 px-3 text-sm"
+                      type="button"
+                    >
+                      Apply
+                    </Button>
+                  </div>
+
+                  {/* Available coupons info */}
+                  <div className="text-xs text-gray-500 space-y-1">
+                    <div>FIRST30 - 30% off for first order only (up to ₹200)</div>
+                    <div>NEW20 - 20% off on all orders (up to ₹200)</div>
+                  </div>
+
+                  {/* Coupon Error Message */}
+                  {couponError && (
+                    <div className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded">
+                      {couponError}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="flex justify-between items-center text-sm">
+                  <div className="flex items-center gap-1">
+                    <span className="text-green-600 font-medium text-xs">
+                      ✓ {appliedCoupon.code}
+                    </span>
+                    <span className="text-xs text-green-600">
+                      ({appliedCoupon.discount}% off)
+                    </span>
+                  </div>
                   <Button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      console.log("Apply button clicked");
-                      applyCoupon();
-                    }}
-                    variant="outline"
-                    disabled={!couponCode.trim()}
-                    className="h-7 px-2 text-xs"
-                    type="button"
+                    onClick={removeCoupon}
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0 text-red-500 hover:bg-red-50"
                   >
-                    Apply
+                    ✕
                   </Button>
                 </div>
-                {/* Coupon Error Message */}
-                {couponError && (
-                  <div className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded">
-                    {couponError}
-                  </div>
-                )}
-                {/* Coupon Help Text */}
-                <div className="text-xs text-gray-500 space-y-0.5">
-                  <div className="flex items-center gap-1">
-                    <span className="text-laundrify-blue font-medium">FIRST30</span>
-                    <span>- 30% off for first order only (up to ₹200)</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-blue-600 font-medium">NEW10</span>
-                    <span>- 10% off on all orders</span>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="flex justify-between items-center text-sm">
-                <div className="flex items-center gap-1">
-                  <span className="text-laundrify-blue font-medium text-xs">
-                    ✓ {appliedCoupon.code}
-                  </span>
-                  <span className="text-xs text-laundrify-blue">
-                    ({appliedCoupon.discount}%)
-                  </span>
-                </div>
-                <Button
-                  onClick={removeCoupon}
-                  variant="ghost"
-                  size="sm"
-                  className="h-5 w-5 p-0 text-laundrify-blue hover:bg-laundrify-mint/20"
-                >
-                  ✕
-                </Button>
-              </div>
-            )}
+              )}
+            </div>
 
+            {/* Show discount if coupon is applied */}
             {appliedCoupon && (
-              <div className="flex justify-between text-laundrify-blue text-sm">
+              <div className="flex justify-between text-sm text-green-600">
                 <span>Discount</span>
                 <span>-₹{getCouponDiscount()}</span>
               </div>
@@ -1305,7 +1284,7 @@ Confirm this booking?`;
               try {
                 handleProceedToCheckout();
               } catch (error) {
-                console.error("💥 Checkout handler failed:", error);
+                console.error("��� Checkout handler failed:", error);
                 addNotification(
                   createErrorNotification(
                     "Checkout Error",

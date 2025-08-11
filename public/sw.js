@@ -1,21 +1,18 @@
-const CACHE_NAME = "laundrify-v5";
-const STATIC_CACHE = "laundrify-static-v5";
+
+const CACHE_NAME = "laundrify-v6";
+const STATIC_CACHE = "laundrify-static-v6";
+
 const urlsToCache = [
   "/",
   "/manifest.json",
-  "/icons/icon-72x72.png",
-  "/icons/icon-96x96.png",
-  "/icons/icon-128x128.png",
-  "/icons/icon-144x144.png",
-  "/icons/icon-152x152.png",
-  "/icons/icon-192x192.png",
-  "/icons/icon-384x384.png",
-  "/icons/icon-512x512.png",
+  "/laundrify-exact-icon.svg?v=4",
 ];
 
 // Install service worker
 self.addEventListener("install", (event) => {
-  console.log("Service Worker: Installing v5...");
+
+  console.log("Service Worker: Installing v6...");
+
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log("Service Worker: Caching app shell");
@@ -138,12 +135,12 @@ self.addEventListener("push", (event) => {
       {
         action: "view",
         title: "View Details",
-        icon: "/icons/icon-72x72.png",
+        icon: "/laundrify-exact-icon.svg",
       },
       {
         action: "close",
         title: "Close",
-        icon: "/icons/icon-72x72.png",
+        icon: "/laundrify-exact-icon.svg",
       },
     ],
   };

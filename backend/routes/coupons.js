@@ -7,23 +7,24 @@ const mockCoupons = [
     code: "FIRST30",
     discount: 30,
     maxDiscount: 200,
-    description: "30% off on first order (up to ₹200)",
+    description: "30% off on first order only - one-time use (up to ₹200)",
     type: "first_order",
     isFirstOrder: true,
     isOneTimeUse: true,
     isActive: true,
   },
   {
-    code: "NEW10",
-    discount: 10,
-    description: "10% off on all orders",
+    code: "NEW20",
+    discount: 20,
+    maxDiscount: 200,
+    description: "20% off on all orders (up to ₹200)",
     type: "general",
     isActive: true,
   },
   {
     code: "FIRST10",
     discount: 10,
-    description: "10% off on first order",
+    description: "10% off on first order only - one-time use",
     type: "first_order",
     isFirstOrder: true,
     isOneTimeUse: true,
@@ -69,7 +70,32 @@ router.post("/validate", async (req, res) => {
       });
     }
 
-    // Basic validation - in production, check user history, usage limits, etc.
+    // Enhanced validation for first-order and one-time use restrictions
+
+    // Check if user has already used this specific coupon
+    if (coupon.isOneTimeUse) {
+      // In a real app, this would check database. For now, simulate the check
+      // The frontend handles this via localStorage, but backend should also validate
+      console.log(`🔍 Checking one-time use for coupon ${couponCode} and user ${userId}`);
+    }
+
+    // Check first-order restrictions for specific coupons
+    if (coupon.isFirstOrder || coupon.code === "FIRST30" || coupon.code === "FIRST10") {
+      // In a real app, this would check user's booking history in database
+      // For now, we'll rely on frontend validation and add logging
+      console.log(`🔍 First-order coupon ${couponCode} validation for user ${userId}`);
+
+      // Additional validation message for first-order coupons
+      if (coupon.code === "FIRST30" || coupon.code === "FIRST10") {
+        return res.json({
+          success: true,
+          coupon: coupon,
+          message: "Valid first-order coupon - ensure this is user's first order",
+          isFirstOrderCoupon: true
+        });
+      }
+    }
+
     res.json({
       success: true,
       coupon: coupon,

@@ -61,10 +61,23 @@ export class BookingService {
 
   constructor() {
     this.mongoService = MongoDBService.getInstance();
-    // Use relative path for proxy compatibility in development
-    this.apiBaseUrl = config.isProduction ? config.apiBaseUrl : "/api";
 
-    console.log("📡 BookingService API URL:", this.apiBaseUrl);
+    // Force correct backend URL for all hosted environments
+    const hostname = window.location.hostname;
+    const isLocalhost = hostname.includes("localhost") || hostname.includes("127.0.0.1");
+
+    if (isLocalhost) {
+      this.apiBaseUrl = "http://localhost:3001/api";
+    } else {
+      // For all hosted environments, use production backend
+      this.apiBaseUrl = "https://backend-vaxf.onrender.com/api";
+    }
+
+    console.log("📡 BookingService API URL:", {
+      hostname,
+      isLocalhost,
+      apiBaseUrl: this.apiBaseUrl
+    });
   }
 
   /**

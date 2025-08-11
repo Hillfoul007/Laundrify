@@ -91,6 +91,21 @@ const InstallPrompt: React.FC = () => {
     localStorage.setItem("pwa-install-prompted", "true");
   };
 
+  const handleIOSInstall = () => {
+    // Show more detailed instructions for iOS
+    alert(
+      `To install Laundrify:\n\n` +
+      `1. Tap the Share button (📤) at the bottom of this page\n` +
+      `2. Scroll down and tap "Add to Home Screen"\n` +
+      `3. Tap "Add" to confirm\n\n` +
+      `The app icon will appear on your home screen!`
+    );
+
+    // Mark as prompted to prevent showing again
+    localStorage.setItem("pwa-install-prompted", "true");
+    setShowInstallPrompt(false);
+  };
+
   if (isInStandaloneMode || !showInstallPrompt) {
     return null;
   }
@@ -109,7 +124,7 @@ const InstallPrompt: React.FC = () => {
 
           {isIOS ? (
             <p className="text-xs text-white/80 mb-3">
-              Tap the <span className="font-medium">Share</span> button below,
+              Tap the <span className="font-medium">Share</span> button (📤) at the bottom,
               then tap <span className="font-medium">"Add to Home Screen"</span>
             </p>
           ) : (
@@ -119,9 +134,18 @@ const InstallPrompt: React.FC = () => {
           )}
 
           <div className="flex gap-2">
-            {!isIOS && (
+            {!isIOS ? (
               <Button
                 onClick={handleInstallClick}
+                size="sm"
+                className="bg-white text-laundrify-blue hover:bg-white/90 h-8 px-3 text-xs font-medium"
+              >
+                <Plus className="h-3 w-3 mr-1" />
+                Install
+              </Button>
+            ) : (
+              <Button
+                onClick={handleIOSInstall}
                 size="sm"
                 className="bg-white text-laundrify-blue hover:bg-white/90 h-8 px-3 text-xs font-medium"
               >

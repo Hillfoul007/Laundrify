@@ -20,6 +20,7 @@ import {
   Smartphone,
   Monitor,
   Bell,
+  MessageCircle,
 } from "lucide-react";
 import {
   laundryServices,
@@ -47,6 +48,7 @@ import NotificationPanel from "./NotificationPanel";
 import VoiceSearch from "./VoiceSearch";
 import AdminServicesManager from "./AdminServicesManager";
 import LocationUnavailableModal from "./LocationUnavailableModal";
+import QuickPickupModal from "./QuickPickupModal";
 import { DVHostingSmsService } from "@/services/dvhostingSmsService";
 import { LocationDetectionService } from "@/services/locationDetectionService";
 import { saveCartData, getCartData } from "@/utils/formPersistence";
@@ -78,6 +80,8 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
   const [isRequestingLocation, setIsRequestingLocation] = useState(false);
   const [showLocationUnavailable, setShowLocationUnavailable] = useState(false);
   const [detectedLocationText, setDetectedLocationText] = useState("");
+  const [showQuickPickupModal, setShowQuickPickupModal] = useState(false);
+  const [showQuickPickupAfterLogin, setShowQuickPickupAfterLogin] = useState(false);
   const dvhostingSmsService = DVHostingSmsService.getInstance();
   const locationDetectionService = LocationDetectionService.getInstance();
 
@@ -165,7 +169,7 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
               await locationDetectionService.detectLocationGPS();
 
             if (detectedLocation) {
-              console.log("📍 Auto-detected location:", detectedLocation);
+              console.log("�� Auto-detected location:", detectedLocation);
               setDetectedLocationText(detectedLocation.full_address);
 
               // Save detected location to database
@@ -479,6 +483,15 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
   const handleAuthSuccess = (user: any) => {
     setShowAuthModal(false);
     onLoginSuccess(user);
+
+    // If user just logged in and Quick Pickup was the trigger, open Quick Pickup modal
+    // We'll check this by adding a temporary state to track login intent
+    if (showQuickPickupAfterLogin) {
+      setTimeout(() => {
+        setShowQuickPickupModal(true);
+        setShowQuickPickupAfterLogin(false);
+      }, 500); // Small delay for better UX
+    }
   };
 
   const handleLogout = () => {
@@ -513,6 +526,29 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
     if (servicesSection) {
       servicesSection.scrollIntoView({ behavior: "smooth" });
     }
+  };
+
+  const handleQuickPickup = () => {
+    console.log("🚀 Quick Pickup button clicked!");
+    console.log("👤 Current user:", currentUser);
+    console.log("🎯 showQuickPickupModal state:", showQuickPickupModal);
+
+    if (!currentUser) {
+      console.log("❌ No current user, showing auth modal");
+      // User not logged in, show login modal first and remember the intent
+      setShowQuickPickupAfterLogin(true);
+      setShowAuthModal(true);
+      return;
+    }
+
+    console.log("✅ User logged in, showing Quick Pickup modal");
+    // User is logged in, show quick pickup modal
+    setShowQuickPickupModal(true);
+
+    // Add a slight delay to ensure state update
+    setTimeout(() => {
+      console.log("🔄 Quick Pickup modal state after update:", showQuickPickupModal);
+    }, 100);
   };
 
   const EmptyStateCard = () => (
@@ -556,7 +592,7 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 sm:w-14 sm:h-10 rounded-lg overflow-hidden bg-white p-1">
                     <img
-                      src="https://cdn.builder.io/api/v1/image/assets%2Fb0ac7c2f6e7c46a4a84ce74a0fb98c57%2F4c8fe4f8010c411a9eb989e3b42ef6f3?format=webp&width=800"
+                      src="/laundrify-exact-icon.svg"
                       alt="Laundrify Logo"
                       className="w-full h-full object-contain"
                     />
@@ -656,11 +692,15 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
         <div className="p-4">
           {/* Delivery Time & Location */}
           <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-white">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium">
-                🕐 Pick up in {deliveryTime}
-              </span>
-              <Badge className="bg-white/20 text-white">Available</Badge>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">
+                  🕐 Pick up in {deliveryTime}
+                </span>
+                <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
+                  Available
+                </span>
+              </div>
             </div>
             <div
               className={`flex items-center gap-2 text-sm ${
@@ -683,25 +723,43 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
               }
             >
               <MapPin
-                className={`h-4 w-4 ${
+                className={`h-4 w-4 sm:mt-0 mt-2 ${
                   userLocation?.includes("denied") ||
                   userLocation?.includes("access denied")
                     ? "animate-pulse"
                     : ""
                 }`}
               />
-              <span>
+              <span className="sm:mb-0 mb-auto sm:pt-0 pt-2">
                 {isRequestingLocation
                   ? "Requesting location..."
                   : userLocation || "Detect Location"}
               </span>
             </div>
+
+            {/* Professional Quick Pickup Button */}
+            <Button
+              onClick={handleQuickPickup}
+              className="w-full bg-gradient-to-r from-white to-gray-50 text-purple-700 font-semibold py-3 px-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl mt-3 mb-4 relative z-[60]"
+              style={{
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+              }}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <Clock className="h-5 w-5 text-purple-600" />
+                <span className="text-base">Quick Pickup</span>
+                <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center ml-1">
+                  <span className="text-white text-xs font-bold">⚡</span>
+                </div>
+              </div>
+            </Button>
           </div>
         </div>
 
         {/* Sticky Search and Categories Only */}
-        <div className="sticky top-0 bg-gradient-to-b from-laundrify-purple to-laundrify-pink z-50 shadow-lg">
-          <div className="px-4 pt-4 pb-2 space-y-3">
+        <div className="sticky top-0 bg-gradient-to-b from-laundrify-purple to-laundrify-pink z-40 shadow-lg">
+          <div className="px-4 pt-4 pb-2 space-y-3 sm:mt-0 -mt-1 sm:pl-4 pl-4">
             {/* Search Bar */}
             <div className="bg-gray-800 rounded-xl flex items-center px-4 py-3 mobile-sticky-search">
               <Search className="h-5 w-5 text-gray-400 mr-3" />
@@ -932,12 +990,46 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
           </div>
         )}
 
-        {/* Auth Modal */}
+{/* Auth Modal */}
         <PhoneOtpAuthModal
           isOpen={showAuthModal}
           onClose={() => setShowAuthModal(false)}
           onSuccess={handleAuthSuccess}
         />
+
+        {/* Quick Pickup Modal */}
+        <QuickPickupModal
+          isOpen={showQuickPickupModal}
+          onClose={() => setShowQuickPickupModal(false)}
+          currentUser={currentUser}
+        />
+
+        {/* WhatsApp Floating Action Button - Mobile */}
+        <div 
+          className="fixed bottom-20 right-4 z-[9999]"
+          style={{ 
+            position: 'fixed',
+            bottom: '80px',
+            right: '16px',
+            zIndex: 9999
+          }}
+        >
+          <button
+            onClick={() => {
+              const phoneNumber = "917011585587"; // Your WhatsApp number
+              const message = encodeURIComponent("Hi! I need help with laundry services.");
+              window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
+            }}
+            className="bg-green-500 hover:bg-green-600 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-xl border-2 border-white transition-all duration-300 active:scale-95"
+            title="Chat with us on WhatsApp"
+            style={{ 
+              WebkitTapHighlightColor: 'transparent',
+              touchAction: 'manipulation'
+            }}
+          >
+            <MessageCircle className="h-5 w-5" />
+          </button>
+        </div>
       </div>
     );
   }
@@ -953,7 +1045,7 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg overflow-hidden">
                   <img
-                    src="https://cdn.builder.io/api/v1/image/assets%2Fb0ac7c2f6e7c46a4a84ce74a0fb98c57%2F4c8fe4f8010c411a9eb989e3b42ef6f3?format=webp&width=800"
+                    src="/laundrify-exact-icon.svg"
                     alt="Laundrify Logo"
                     className="w-full h-full object-cover"
                   />
@@ -1341,9 +1433,22 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
           }}
         />
 
-        {/* Google Sheets integration removed */}
-      </div>
+        {/* WhatsApp Floating Action Button */}
+        <div className="fixed bottom-20 right-6 z-50">
+          <Button
+            onClick={() => {
+              const phoneNumber = "917011585587"; // Replace with your WhatsApp business number
+              const message = encodeURIComponent("Hi! I need help with laundry services.");
+              window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
+            }}
+            className="bg-green-500 hover:bg-green-600 text-white rounded-full w-12 h-12 p-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
+            title="Chat with us on WhatsApp"
+          >
+            <MessageCircle className="h-5 w-5" />
+          </Button>
+        </div>
     </div>
+      </div>
   );
 };
 export default ResponsiveLaundryHome;

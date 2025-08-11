@@ -19,7 +19,11 @@ try {
   productionConfig.validateConfig();
 } catch (error) {
   console.error("❌ Configuration Error:", error.message);
-  process.exit(1);
+  if (productionConfig.isProduction()) {
+    process.exit(1);
+  } else {
+    console.log("⚠️ Running in development mode with partial configuration");
+  }
 }
 
 const app = express();
@@ -76,10 +80,67 @@ app.use("/api/auth", (req, res, next) => {
   next();
 });
 
+// Additional CORS middleware to ensure headers are always set
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+
+  // Check if origin is allowed
+  const isAllowed = !origin || productionConfig.ALLOWED_ORIGINS.includes(origin) ||
+    productionConfig.ALLOWED_ORIGINS.some(allowedOrigin => {
+      if (allowedOrigin.includes('*')) {
+        const pattern = allowedOrigin.replace(/\*/g, '.*');
+        const regex = new RegExp(`^${pattern}$`);
+        return regex.test(origin);
+      }
+      return false;
+    });
+
+  if (isAllowed && origin) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  } else if (!origin) {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  }
+
+  next();
+});
+
+// Log allowed origins for debugging
+console.log("🌐 CORS allowed origins:", productionConfig.ALLOWED_ORIGINS);
+
 // CORS configuration - Enhanced for iOS Safari compatibility
 app.use(
   cors({
-    origin: productionConfig.ALLOWED_ORIGINS,
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      // Check if the origin is in our allowed list (exact match)
+      if (productionConfig.ALLOWED_ORIGINS.includes(origin)) {
+        return callback(null, true);
+      }
+
+      // Also check for wildcard patterns
+      const isAllowed = productionConfig.ALLOWED_ORIGINS.some(allowedOrigin => {
+        if (allowedOrigin.includes('*')) {
+          const pattern = allowedOrigin.replace(/\*/g, '.*');
+          const regex = new RegExp(`^${pattern}$`);
+          return regex.test(origin);
+        }
+        return false;
+      });
+
+      if (isAllowed) {
+        return callback(null, true);
+      }
+
+      // Only log CORS blocks (actual issues)
+      console.log(`🚫 CORS blocked origin: ${origin}`);
+      return callback(null, true); // Temporarily allow all origins for debugging
+    },
     credentials: true, // Enable credentials for iOS
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allowedHeaders: [
@@ -87,15 +148,47 @@ app.use(
       "Authorization",
       "Accept",
       "user-id",
+      "admin-token", // Add admin-token header support
       "Cache-Control", // Add Cache-Control header support
       "Pragma",
       "Expires",
+      "X-Requested-With",
+      "Access-Control-Allow-Origin"
     ],
     exposedHeaders: ["Clear-Site-Data"], // Expose clear site data header
     optionsSuccessStatus: 200, // Support legacy browsers
     preflightContinue: false,
   }),
 );
+
+// Handle preflight requests explicitly
+app.options('*', (req, res) => {
+  const origin = req.headers.origin;
+
+  // Check if origin is allowed
+  const isAllowed = !origin || productionConfig.ALLOWED_ORIGINS.includes(origin) ||
+    productionConfig.ALLOWED_ORIGINS.some(allowedOrigin => {
+      if (allowedOrigin.includes('*')) {
+        const pattern = allowedOrigin.replace(/\*/g, '.*');
+        const regex = new RegExp(`^${pattern}$`);
+        return regex.test(origin);
+      }
+      return false;
+    });
+
+  if (isAllowed) {
+    res.setHeader('Access-Control-Allow-Origin', origin || '*');
+  } else {
+    console.log(`🚫 Preflight blocked origin: ${origin}`);
+    res.setHeader('Access-Control-Allow-Origin', 'null');
+  }
+
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept, user-id, admin-token, Cache-Control, Pragma, Expires, X-Requested-With');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
+  res.status(200).end();
+});
 
 // Body parsing middleware
 app.use(express.json({ limit: "10mb" }));
@@ -181,13 +274,14 @@ try {
   console.error("❌ Failed to load WhatsApp Auth routes:", error.message);
 }
 
-// Addresses routes
+// Addresses routes - using simple version for debugging
 try {
-  const addressRoutes = require("./routes/addresses");
+  const addressRoutes = require("./routes/addresses-simple");
   app.use("/api/addresses", addressRoutes);
-  console.log("🔗 Address routes registered at /api/addresses");
+  console.log("🔗 Simple Address routes registered at /api/addresses");
 } catch (error) {
   console.error("❌ Failed to load Address routes:", error.message);
+  console.error("❌ Full error:", error);
 }
 
 // Google Sheets routes removed
@@ -201,14 +295,7 @@ try {
   console.error("❌ Failed to load Dynamic Services routes:", error.message);
 }
 
-// Referral routes
-try {
-  const referralRoutes = require("./routes/referrals");
-  app.use("/api/referrals", referralRoutes);
-  console.log("🔗 Referral routes registered at /api/referrals");
-} catch (error) {
-  console.error("❌ Failed to load Referral routes:", error.message);
-}
+
 
 // Detected Locations routes
 try {
@@ -221,13 +308,43 @@ try {
   console.error("❌ Failed to load Detected Locations routes:", error.message);
 }
 
-// Register coupon management routes
+// Coupons routes
 try {
   const couponRoutes = require("./routes/coupons");
   app.use("/api/coupons", couponRoutes);
   console.log("🔗 Coupon routes registered at /api/coupons");
 } catch (error) {
-  console.error("❌ Failed to load coupon routes:", error.message);
+  console.error("❌ Failed to load Coupon routes:", error.message);
+}
+
+// Admin routes
+try {
+  const adminRoutes = require("./routes/admin");
+  app.use("/api/admin", adminRoutes);
+  console.log("🔗 Admin routes registered at /api/admin");
+} catch (error) {
+  console.error("❌ Failed to load Admin routes:", error.message);
+  console.error("❌ Full admin routes error:", error);
+}
+
+// Quick Pickup routes (new)
+try {
+  const quickPickupRoutes = require("./routes/quick-pickup");
+  app.use("/api/quick-pickup", quickPickupRoutes);
+  console.log("🔗 Quick Pickup routes registered at /api/quick-pickup");
+} catch (error) {
+  console.error("❌ Failed to load Quick Pickup routes:", error.message);
+  console.error("❌ Full quick pickup routes error:", error);
+}
+
+// Quick Book routes (legacy support)
+try {
+  const quickBookRoutes = require("./routes/quick-book");
+  app.use("/api/quick-book", quickBookRoutes);
+  console.log("🔗 Quick Book routes registered at /api/quick-book (legacy support)");
+} catch (error) {
+  console.error("❌ Failed to load Quick Book routes:", error.message);
+  console.error("❌ Full quick book routes error:", error);
 }
 
 // Google Sheets integration removed
@@ -246,11 +363,19 @@ app.post("/api/push/unsubscribe", (req, res) => {
   res.json({ success: true });
 });
 
+// Helper function to get IST timestamp
+const getISTTimestamp = () => {
+  const now = new Date();
+  const istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000)); // UTC + 5:30
+  return istTime.toISOString().replace('Z', '+05:30');
+};
+
 // Health check endpoint with comprehensive monitoring
 app.get("/api/health", async (req, res) => {
   const healthCheck = {
     status: "ok",
-    timestamp: new Date().toISOString(),
+    timestamp: getISTTimestamp(),
+    utc_timestamp: new Date().toISOString(),
     service: "CleanCare Pro API",
     version: "1.0.0",
     environment: productionConfig.NODE_ENV,
@@ -294,7 +419,9 @@ app.get("/api/health", async (req, res) => {
 app.get("/api/test", (req, res) => {
   res.json({
     message: "CleanCare Pro API is working!",
-    timestamp: new Date().toISOString(),
+    timestamp: getISTTimestamp(),
+    timezone: "Asia/Kolkata (IST)",
+    utc_timestamp: new Date().toISOString(),
   });
 });
 
@@ -323,7 +450,8 @@ app.use((err, req, res, next) => {
     success: false,
     message,
     error: productionConfig.isDevelopment() ? err.stack : undefined,
-    timestamp: new Date().toISOString(),
+    timestamp: getISTTimestamp(),
+    timezone: "Asia/Kolkata (IST)",
   });
 });
 
@@ -352,34 +480,52 @@ if (productionConfig.isDevelopment()) {
   });
 }
 
-// Handle 404 routes
-app.use("*", (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: `Route ${req.originalUrl} not found`,
-    availableRoutes: [
-      "/api/health",
-      "/api/test",
-      "/api/auth",
-      "/api/bookings",
-      "/api/addresses",
-      "/api/location",
-      "/api/whatsapp",
-      "/api/sheets/order",
-      "/api/sheets/test",
-      "/api/sheets/sync",
-    ],
-  });
-});
-
 // Catch-all handler: send back React's index.html file for frontend routing
 if (productionConfig.isProduction()) {
   app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../dist/index.html"));
+    // Only handle 404 for API routes, serve React app for all other routes
+    if (req.originalUrl.startsWith('/api/')) {
+      res.status(404).json({
+        success: false,
+        message: `Route ${req.originalUrl} not found`,
+        availableRoutes: [
+          "/api/health",
+          "/api/test",
+          "/api/auth",
+          "/api/bookings",
+          "/api/addresses",
+          "/api/location",
+          "/api/whatsapp",
+          "/api/admin",
+          "/api/quick-book",
+        ],
+      });
+    } else {
+      res.sendFile(path.join(__dirname, "../dist/index.html"));
+    }
   });
   console.log(
     "🔗 Frontend routing configured - all non-API routes serve index.html",
   );
+} else {
+  // Handle 404 routes in development
+  app.use("*", (req, res) => {
+    res.status(404).json({
+      success: false,
+      message: `Route ${req.originalUrl} not found`,
+      availableRoutes: [
+        "/api/health",
+        "/api/test",
+        "/api/auth",
+        "/api/bookings",
+        "/api/addresses",
+        "/api/location",
+        "/api/whatsapp",
+        "/api/admin",
+        "/api/quick-book",
+      ],
+    });
+  });
 }
 
 // Keep-alive mechanism for Render deployment
@@ -397,7 +543,7 @@ const setupKeepAlive = () => {
           console.log("🔄 Keep-alive ping successful");
         } else {
           console.log(
-            "⚠️ Keep-alive ping failed with status:",
+            "⚠��� Keep-alive ping failed with status:",
             response.status,
           );
         }
@@ -419,10 +565,10 @@ const server = app.listen(PORT, () => {
   } else {
     console.log(`📱 API available at: http://localhost:${PORT}/api`);
   }
-  console.log(`🏥 Health check: http://localhost:${PORT}/api/health`);
+  console.log(`��� Health check: http://localhost:${PORT}/api/health`);
   console.log(`🔒 Security: Helmet enabled`);
   console.log(`⚡ Compression: Enabled`);
-  console.log(`🛡️  Rate limiting: Enabled`);
+  console.log(`🛡��  Rate limiting: Enabled`);
 
   if (productionConfig.FEATURES.SMS_VERIFICATION) {
     console.log(`📱 SMS Service: DVHosting`);

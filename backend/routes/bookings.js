@@ -2,7 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const Booking = require("../models/Booking");
 const User = require("../models/User");
-const Referral = require("../models/Referral");
+
 const Address = require("../models/Address");
 
 const router = express.Router();
@@ -60,6 +60,7 @@ router.post("/", async (req, res) => {
       total_price,
       discount_amount,
       final_amount,
+      coupon_code,
       special_instructions,
       charges_breakdown,
     } = req.body;
@@ -529,12 +530,19 @@ router.post("/", async (req, res) => {
       total_price,
       discount_amount: discount_amount || 0,
       final_amount: final_amount || total_price - (discount_amount || 0),
+      coupon_code: coupon_code || null,
       special_instructions,
       charges_breakdown,
       item_prices, // Store individual service prices
     });
 
     console.log("🔍 SAVING BOOKING: About to save booking to database...");
+    console.log("🎫 Coupon Info:", {
+      coupon_code: coupon_code,
+      discount_amount: discount_amount,
+      total_price: total_price,
+      final_amount: final_amount,
+    });
 
     console.log(
       "📦 Final booking object (before save):",
@@ -661,73 +669,7 @@ router.post("/", async (req, res) => {
       // Don't fail the booking if address saving fails
     }
 
-    // Handle referral discounts after successful booking save
-    try {
-      console.log("��� Checking for referral discounts...");
 
-      // Check if this user has available referral discounts
-      const userWithDiscounts = await User.findById(customer._id);
-      const availableDiscount = userWithDiscounts?.available_discounts?.find(
-        (d) =>
-          d.type === "referee_discount" &&
-          !d.used &&
-          new Date() < new Date(d.expires_at),
-      );
-
-      if (availableDiscount) {
-        console.log(
-          "🎉 Found available referral discount:",
-          availableDiscount.percentage + "%",
-        );
-
-        // Apply referral discount to this booking
-        const referral = await Referral.findOne({
-          referee_id: customer._id,
-          status: "registered",
-        });
-
-        if (referral && referral.canApplyRefereeDiscount()) {
-          console.log("🎁 Applying referral discount for first-time customer");
-
-          // Mark the referral as first payment completed
-          await referral.markFirstPaymentCompleted(booking._id);
-
-          // Mark the discount as used
-          await User.findByIdAndUpdate(
-            customer._id,
-            {
-              $set: {
-                "available_discounts.$[elem].used": true,
-                "available_discounts.$[elem].booking_id": booking._id,
-              },
-            },
-            {
-              arrayFilters: [
-                { "elem.type": "referee_discount", "elem.used": false },
-              ],
-            },
-          );
-
-          // Add reward discount for referrer
-          await User.findByIdAndUpdate(referral.referrer_id, {
-            $push: {
-              available_discounts: {
-                type: "referral_reward",
-                amount: 0, // Will be calculated at booking time
-                percentage: referral.discount_percentage,
-                expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-              },
-            },
-            $inc: { "referral_stats.pending_rewards": 1 },
-          });
-
-          console.log("✅ Referral discount applied successfully");
-        }
-      }
-    } catch (referralError) {
-      console.error("❌ Error handling referral discount:", referralError);
-      // Don't fail the booking if referral processing fails
-    }
 
     // Verify the booking was saved with custom_order_id
     const savedBooking = await Booking.findById(booking._id);
@@ -995,9 +937,14 @@ router.get("/customer/:customerId", async (req, res) => {
 });
 
 // Get pending bookings for riders (within 10km range)
-router.get("/pending/:riderLat/:riderLng", async (req, res) => {
+router.get("/pending", async (req, res) => {
   try {
-    const { riderLat, riderLng } = req.params;
+    const { riderLat, riderLng } = req.query;
+
+    if (!riderLat || !riderLng) {
+      return res.status(400).json({ error: "riderLat and riderLng query parameters are required" });
+    }
+
     const lat = parseFloat(riderLat);
     const lng = parseFloat(riderLng);
 
@@ -1234,7 +1181,7 @@ router.put("/:bookingId/cancel", async (req, res) => {
     const { bookingId } = req.params;
     let userId = req.headers["user-id"] || req.body.user_id;
 
-    console.log("��� Booking cancellation request:", { bookingId, userId });
+    console.log("����� Booking cancellation request:", { bookingId, userId });
 
     // Get booking details first
     const booking = await Booking.findById(bookingId);

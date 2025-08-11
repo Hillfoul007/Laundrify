@@ -31,6 +31,12 @@ export const initializeAuthPersistence = () => {
 
   // Handle storage events (syncing auth across tabs) - with safeguards to prevent auto-logout
   window.addEventListener("storage", (event) => {
+    // Skip processing if user explicitly logged out
+    if (localStorage.getItem("explicit_logout") === "true") {
+      console.log("🚪 Explicit logout detected - ignoring storage events");
+      return;
+    }
+
     if (
       event.key === "current_user" ||
       event.key === "cleancare_user" ||
@@ -131,6 +137,14 @@ export const initializeAuthPersistence = () => {
  */
 export const restoreAuthState = async (): Promise<boolean> => {
   try {
+    // Check if user explicitly logged out
+    const explicitLogout = localStorage.getItem("explicit_logout");
+    if (explicitLogout === "true") {
+      console.log("🚪 User explicitly logged out - not restoring session");
+      localStorage.removeItem("explicit_logout"); // Clear the flag
+      return false;
+    }
+
     const authService = DVHostingSmsService.getInstance();
 
     // First try iPhone-specific restoration if on iOS

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -28,6 +28,7 @@ const ProfessionalDateTimePicker: React.FC<ProfessionalDateTimePickerProps> = ({
   className,
 }) => {
   const [showDropdown, setShowDropdown] = useState(false);
+  const [timeSelectOpen, setTimeSelectOpen] = useState(false);
 
   // Generate dates for next 7 days starting from today (no past dates)
   const generateAvailableDates = () => {
@@ -70,7 +71,7 @@ const ProfessionalDateTimePicker: React.FC<ProfessionalDateTimePickerProps> = ({
   const generateTimeSlots = () => {
     const slots = [];
     const now = new Date();
-    const currentHour = now.getHours();
+    const currentTime = new Date();
 
     // Generate slots from 8 AM to 9 PM (1-hour intervals)
     for (let hour = 8; hour <= 21; hour++) {
@@ -80,9 +81,18 @@ const ProfessionalDateTimePicker: React.FC<ProfessionalDateTimePickerProps> = ({
         "h:mm a",
       );
 
-      // Skip past times for today
-      const isDisabled =
-        selectedDate && isToday(selectedDate) && hour <= currentHour;
+      // Skip slots that are less than 30 minutes from current time for today
+      let isDisabled = false;
+      if (selectedDate && isToday(selectedDate)) {
+        const slotTime = new Date();
+        slotTime.setHours(hour, 0, 0, 0);
+
+        // Calculate the difference in minutes between slot time and current time
+        const timeDifferenceMinutes = (slotTime.getTime() - currentTime.getTime()) / (1000 * 60);
+
+        // Disable if slot is in the past or less than 30 minutes from now
+        isDisabled = timeDifferenceMinutes < 30;
+      }
 
       if (!isDisabled) {
         let period = "Morning";
@@ -209,25 +219,30 @@ const ProfessionalDateTimePicker: React.FC<ProfessionalDateTimePickerProps> = ({
         </div>
       </div>
 
-      {/* Time Selection Dropdown */}
+      {/* Time Selection */}
       {selectedDate && (
         <div className="space-y-3">
           <Label className="text-sm font-medium flex items-center gap-2">
             <Clock className="h-4 w-4" />
             Select Time
           </Label>
-          <Select value={selectedTime} onValueChange={onTimeChange}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Choose pickup time" />
-            </SelectTrigger>
-            <SelectContent>
+          <div>
+            {/* Use native select on mobile to prevent scroll issues */}
+            <select
+              value={selectedTime}
+              onChange={(e) => onTimeChange(e.target.value)}
+              className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <option value="" disabled>
+                Choose pickup time
+              </option>
               {timeSlots.map((slot) => (
-                <SelectItem key={slot.value} value={slot.value}>
+                <option key={slot.value} value={slot.value}>
                   {slot.groupLabel}
-                </SelectItem>
+                </option>
               ))}
-            </SelectContent>
-          </Select>
+            </select>
+          </div>
         </div>
       )}
     </div>

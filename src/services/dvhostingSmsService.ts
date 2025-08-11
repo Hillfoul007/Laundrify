@@ -1,21 +1,7 @@
-const getApiBaseUrl = () => {
-  const envUrl = import.meta.env.VITE_API_BASE_URL;
-  if (envUrl && envUrl !== "") {
-    return envUrl;
-  }
+// Import centralized configuration
+import { getApiUrl, shouldUseBackend, log, logError } from '../config/env';
 
-  const hostname = window.location.hostname;
-  const isProduction =
-    !hostname.includes("localhost") && !hostname.includes("127.0.0.1");
-
-  if (isProduction) {
-    return "https://backend-vaxf.onrender.com/api";
-  }
-
-  return "http://localhost:3001/api";
-};
-
-const apiBaseUrl = getApiBaseUrl();
+const apiBaseUrl = getApiUrl();
 export class DVHostingSmsService {
   private static instance: DVHostingSmsService;
   private currentPhone: string = "";
@@ -30,9 +16,7 @@ export class DVHostingSmsService {
   }
 
   private log(...args: any[]) {
-    if (this.debugMode) {
-      console.log(...args);
-    }
+    log(...args);
   }
 
   static getInstance(): DVHostingSmsService {
@@ -684,7 +668,7 @@ export class DVHostingSmsService {
     } catch (error) {
       console.error("Error getting current user:", error);
       // Never clear data on errors - try to preserve whatever we can
-      console.warn("🔒 Error parsing user data, but preserving session");
+      console.warn("���� Error parsing user data, but preserving session");
 
       // Try to return a basic user object if localStorage has data
       const userStr =
@@ -701,6 +685,9 @@ export class DVHostingSmsService {
   setCurrentUser(user: any, token?: string): void {
     try {
       if (user) {
+        // Clear logout flag when user logs in
+        localStorage.removeItem("explicit_logout");
+
         // Store in both keys for backward compatibility
         localStorage.setItem("cleancare_user", JSON.stringify(user));
         localStorage.setItem("current_user", JSON.stringify(user));
@@ -745,18 +732,49 @@ export class DVHostingSmsService {
 
   logout(): void {
     try {
-      // Clear all auth-related localStorage
-      localStorage.removeItem("current_user");
-      localStorage.removeItem("cleancare_user");
-      localStorage.removeItem("cleancare_auth_token");
-      localStorage.removeItem("auth_token");
+      console.log("🚪 Starting comprehensive logout...");
 
-      // Clear sessionStorage for iOS compatibility
+      // Set logout flag to prevent automatic session restoration
+      localStorage.setItem("explicit_logout", "true");
+
+      // Clear ALL auth-related localStorage keys
+      const authKeys = [
+        "current_user", "cleancare_user",
+        "auth_token", "cleancare_auth_token", "cleancare_token",
+        "ios_backup_user", "ios_backup_token", "ios_auth_timestamp",
+        "user_bookings", "last_detected_location", "user_location_data",
+        "pending_location_data"
+      ];
+
+      authKeys.forEach(key => {
+        localStorage.removeItem(key);
+        console.log(`🗑️ Cleared: ${key}`);
+      });
+
+      // Clear any user-specific keys (phone-based)
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('user_') || key.startsWith('used_coupons_') ||
+            key.startsWith('has_ordered_') || key.includes('_token_')) {
+          localStorage.removeItem(key);
+          console.log(`🗑️ Cleared user-specific: ${key}`);
+        }
+      });
+
+      // Clear sessionStorage completely
       sessionStorage.clear();
+      console.log("🗑️ Cleared sessionStorage");
 
       // Clear current phone and OTP storage
       this.currentPhone = "";
       this.otpStorage.clear();
+
+      // Clear IndexedDB for iOS devices
+      if (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+          (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)) {
+        this.clearIosIndexedDB().catch(error => {
+          console.warn("Failed to clear iOS IndexedDB:", error);
+        });
+      }
 
       // Call backend logout for session clearing (only if backend is available)
       const apiBaseUrl = this.getApiBaseUrl();
@@ -767,28 +785,28 @@ export class DVHostingSmsService {
             "Content-Type": "application/json",
             "Cache-Control": "no-cache",
           },
-        }).catch(() => {
-          // Ignore backend errors during logout
+          credentials: 'include', // Required for Clear-Site-Data header to work
+          mode: 'cors', // Explicitly set CORS mode
+          timeout: 5000 // Add timeout
+        }).catch((error) => {
+          // Silently ignore backend errors during logout - local logout is sufficient
+          console.log("ℹ️ Backend logout failed (offline mode):", error.message);
         });
       }
 
-      this.log("✅ User logged out successfully");
+      console.log("✅ Comprehensive logout completed - all authentication data cleared");
     } catch (error) {
       console.error("Error during logout:", error);
     }
   }
 
   private getApiBaseUrl(): string {
-    // Check if we're in a hosted environment without backend
-    const isHostedEnv =
-      window.location.hostname.includes("fly.dev") ||
-      window.location.hostname.includes("builder.codes");
-
-    if (isHostedEnv) {
+    // Use centralized backend availability check
+    if (!shouldUseBackend()) {
       return ""; // Return empty string to indicate no backend available
     }
 
-    return import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api";
+    return getApiUrl();
   }
 
   /**
@@ -808,19 +826,8 @@ export class DVHostingSmsService {
         return false; // Return false instead of throwing error
       }
 
-      // Use the same URL detection as booking helpers
-      let apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-
-      if (!apiBaseUrl || apiBaseUrl === "") {
-        if (
-          window.location.hostname.includes("vercel.app") ||
-          window.location.hostname.includes("builder.codes")
-        ) {
-          apiBaseUrl = "https://backend-vaxf.onrender.com/api";
-        } else {
-          apiBaseUrl = "http://localhost:3001/api";
-        }
-      }
+      // Use centralized API URL
+      const apiBaseUrl = getApiUrl();
 
       // Clean the phone number
       const cleanedPhone = this.cleanPhone(user.phone);
@@ -896,16 +903,8 @@ export class DVHostingSmsService {
         return null; // Skip backend calls in hosted environments
       }
 
-      // Use the same URL detection as other services
-      let apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-
-      if (!apiBaseUrl || apiBaseUrl === "") {
-        if (window.location.hostname.includes("vercel.app")) {
-          apiBaseUrl = "https://backend-vaxf.onrender.com/api";
-        } else {
-          apiBaseUrl = "http://localhost:3001/api";
-        }
-      }
+      // Use centralized API URL
+      const apiBaseUrl = getApiUrl();
 
       this.log("🔄 Restoring user from backend:", phone);
 
@@ -955,6 +954,13 @@ export class DVHostingSmsService {
    */
   async restoreSession(): Promise<boolean> {
     try {
+      // Check if user explicitly logged out
+      const explicitLogout = localStorage.getItem("explicit_logout");
+      if (explicitLogout === "true") {
+        this.log("🚪 Explicit logout detected - skipping session restoration");
+        return false;
+      }
+
       const localUser = this.getCurrentUser();
       if (!localUser || !localUser.phone) {
         return false;
@@ -974,6 +980,33 @@ export class DVHostingSmsService {
     } catch (error) {
       this.log("⚠️ Session restore failed:", error);
       return false;
+    }
+  }
+
+  /**
+   * Clear IndexedDB data for iOS devices during logout
+   */
+  private async clearIosIndexedDB(): Promise<void> {
+    try {
+      // Clear the iOS auth IndexedDB
+      const deleteDB = (dbName: string) => {
+        return new Promise<void>((resolve, reject) => {
+          const deleteRequest = indexedDB.deleteDatabase(dbName);
+          deleteRequest.onsuccess = () => resolve();
+          deleteRequest.onerror = () => reject(deleteRequest.error);
+          deleteRequest.onblocked = () => {
+            console.warn(`IndexedDB deletion blocked for: ${dbName}`);
+            resolve(); // Don't fail, just warn
+          };
+        });
+      };
+
+      // Clear known iOS auth databases
+      await deleteDB('ios_auth_storage');
+      await deleteDB('ios_backup_auth');
+      console.log("🍎 iOS IndexedDB cleared");
+    } catch (error) {
+      console.warn("Failed to clear iOS IndexedDB:", error);
     }
   }
 }

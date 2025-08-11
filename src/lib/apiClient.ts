@@ -1,7 +1,15 @@
 // Enhanced API client with better error handling and CORS support
-import { config } from "@/config/env";
+import { config, getApiUrl } from "@/config/env";
 
-const API_BASE_URL = config.apiBaseUrl;
+// Force fresh evaluation of API URL
+const API_BASE_URL = getApiUrl();
+console.log(`🔧 API Client Initialization:`, {
+  hostname: window.location.hostname,
+  configApiUrl: config.API_URL,
+  getApiUrlResult: getApiUrl(),
+  finalApiBaseUrl: API_BASE_URL,
+  envVariable: import.meta.env.VITE_API_BASE_URL
+});
 
 interface ApiResponse<T> {
   data?: T;
@@ -23,7 +31,7 @@ class EnhancedApiClient {
   private requestQueue: Map<string, Promise<any>> = new Map();
 
   constructor(baseURL: string) {
-    this.baseURL = baseURL.replace(/\/$/, ""); // Remove trailing slash
+    this.baseURL = (baseURL || "").replace(/\/$/, ""); // Remove trailing slash, handle undefined
     this.token = localStorage.getItem("auth_token");
   }
 
@@ -75,6 +83,13 @@ class EnhancedApiClient {
     const url = endpoint.startsWith("http")
       ? endpoint
       : `${this.baseURL}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
+
+    console.log(`🔧 API Client URL Construction:`, {
+      endpoint,
+      baseURL: this.baseURL,
+      constructedURL: url,
+      isFullURL: endpoint.startsWith("http")
+    });
 
     // Create request key for deduplication
     const requestKey = this.createRequestKey(url, options);
@@ -530,43 +545,22 @@ class EnhancedApiClient {
     );
   }
 
-  // Referral endpoints
-  async validateReferralCode(code: string): Promise<ApiResponse<any>> {
-    return this.request(`/referrals/validate/${encodeURIComponent(code)}`);
-  }
 
-  async applyReferralCode(
-    referralCode: string,
-    userId: string,
-  ): Promise<ApiResponse<any>> {
-    return this.request("/referrals/apply", {
-      method: "POST",
-      body: { referralCode, userId },
-    });
-  }
 
-  async generateReferralCode(userId: string): Promise<ApiResponse<any>> {
-    return this.request("/referrals/generate", {
-      method: "POST",
-      body: { userId },
-    });
-  }
+  // Admin-specific methods
+  async adminRequest<T>(
+    endpoint: string,
+    options: RequestOptions = {},
+  ): Promise<ApiResponse<T>> {
+    // Add admin token to headers if available
+    const adminHeaders = {
+      "admin-token": "admin", // Simple admin token for now
+      ...((options.headers as Record<string, string>) || {}),
+    };
 
-  async getReferralStats(userId: string): Promise<ApiResponse<any>> {
-    return this.request(`/referrals/stats/${encodeURIComponent(userId)}`);
-  }
-
-  async getReferralShareLink(userId: string): Promise<ApiResponse<any>> {
-    return this.request(`/referrals/share-link/${encodeURIComponent(userId)}`);
-  }
-
-  async applyReferralDiscount(
-    bookingId: string,
-    userId: string,
-  ): Promise<ApiResponse<any>> {
-    return this.request("/referrals/apply-discount", {
-      method: "POST",
-      body: { bookingId, userId },
+    return this.request(endpoint, {
+      ...options,
+      headers: adminHeaders,
     });
   }
 
@@ -591,7 +585,27 @@ class EnhancedApiClient {
 }
 
 // Create and export the enhanced API client instance
-export const apiClient = new EnhancedApiClient(API_BASE_URL);
+// Force production backend for hosted environments
+const getCorrectApiUrl = () => {
+  const hostname = window.location.hostname;
+  const isLocalhost = hostname.includes("localhost") || hostname.includes("127.0.0.1");
+
+  if (isLocalhost) {
+    return "http://localhost:3001/api";
+  }
+
+  // For all hosted environments, force backend URL
+  return "https://backend-vaxf.onrender.com/api";
+};
+
+const CORRECT_API_URL = getCorrectApiUrl();
+console.log(`🎯 API Client forced URL:`, {
+  hostname: window.location.hostname,
+  apiUrl: CORRECT_API_URL,
+  originalApiBaseUrl: API_BASE_URL
+});
+
+export const apiClient = new EnhancedApiClient(CORRECT_API_URL);
 
 // Export types for better TypeScript support
 export type { ApiResponse, RequestOptions };
