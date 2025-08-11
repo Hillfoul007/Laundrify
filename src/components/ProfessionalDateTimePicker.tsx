@@ -226,16 +226,27 @@ const ProfessionalDateTimePicker: React.FC<ProfessionalDateTimePickerProps> = ({
             <Clock className="h-4 w-4" />
             Select Time
           </Label>
-          <div style={{ scrollMarginTop: 0, scrollSnapAlign: 'none' }}>
+          <div>
             <Select
               value={selectedTime}
               onValueChange={(value) => {
                 onTimeChange(value);
                 setTimeSelectOpen(false);
               }}
-              onOpenChange={setTimeSelectOpen}
+              onOpenChange={(open) => {
+                setTimeSelectOpen(open);
+                if (open) {
+                  // Prevent any auto-scroll when opening
+                  const currentScrollY = window.scrollY;
+                  setTimeout(() => {
+                    if (window.scrollY !== currentScrollY) {
+                      window.scrollTo({ top: currentScrollY, behavior: 'instant' });
+                    }
+                  }, 0);
+                }
+              }}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full" style={{ scrollMargin: 0 }}>
                 <SelectValue placeholder="Choose pickup time" />
               </SelectTrigger>
               <SelectContent
@@ -243,6 +254,9 @@ const ProfessionalDateTimePicker: React.FC<ProfessionalDateTimePickerProps> = ({
                 sideOffset={4}
                 align="start"
                 onCloseAutoFocus={(e) => {
+                  e.preventDefault();
+                }}
+                onOpenAutoFocus={(e) => {
                   e.preventDefault();
                 }}
               >
