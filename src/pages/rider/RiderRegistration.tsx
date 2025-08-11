@@ -281,19 +281,40 @@ export default function RiderRegistration() {
         <div className="space-y-2">
           <Label className="flex items-center space-x-2">
             <Camera className="h-4 w-4" />
-            <span>Capture Live Selfie *</span>
+            <span>Capture Live Selfie or Upload Photo *</span>
           </Label>
-          
+
           {!isCameraOpen && !selfieImage && (
-            <Button
-              type="button"
-              onClick={startCamera}
-              variant="outline"
-              className="w-full"
-            >
-              <Camera className="h-4 w-4 mr-2" />
-              Open Camera
-            </Button>
+            <div className="space-y-2">
+              <Button
+                type="button"
+                onClick={startCamera}
+                variant="outline"
+                className="w-full"
+              >
+                <Camera className="h-4 w-4 mr-2" />
+                Open Camera
+              </Button>
+
+              <div className="text-center text-gray-500 text-sm">or</div>
+
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleSelfieUpload}
+                  className="hidden"
+                  id="selfie-upload"
+                />
+                <label htmlFor="selfie-upload" className="cursor-pointer block text-center">
+                  <div className="text-gray-500">
+                    <Upload className="h-8 w-8 mx-auto mb-2" />
+                    <p>Click to upload your photo</p>
+                    <p className="text-sm">Max size: 5MB</p>
+                  </div>
+                </label>
+              </div>
+            </div>
           )}
 
           {isCameraOpen && (
@@ -327,19 +348,33 @@ export default function RiderRegistration() {
           {selfieImage && (
             <div className="text-center p-4 bg-green-50 rounded-lg">
               <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-2" />
-              <p className="text-green-700">Selfie captured successfully!</p>
-              <Button
-                type="button"
-                onClick={() => {
-                  setSelfieImage(null);
-                  startCamera();
-                }}
-                variant="outline"
-                size="sm"
-                className="mt-2"
-              >
-                Retake Selfie
-              </Button>
+              <p className="text-green-700">
+                {selfieImage.name ? 'Photo uploaded successfully!' : 'Selfie captured successfully!'}
+              </p>
+              <div className="flex space-x-2 mt-2">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setSelfieImage(null);
+                    startCamera();
+                  }}
+                  variant="outline"
+                  size="sm"
+                >
+                  Take with Camera
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setSelfieImage(null);
+                    document.getElementById('selfie-upload')?.click();
+                  }}
+                  variant="outline"
+                  size="sm"
+                >
+                  Upload New Photo
+                </Button>
+              </div>
             </div>
           )}
         </div>
