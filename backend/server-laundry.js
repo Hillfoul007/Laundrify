@@ -435,6 +435,10 @@ app.get("/api/test", (req, res) => {
   });
 });
 
+// Serve static files for uploads
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+console.log("📁 Static files served from /uploads");
+
 // Global error handling middleware
 app.use((err, req, res, next) => {
   console.error("💥 Global Error Handler:", err);
