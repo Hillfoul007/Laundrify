@@ -219,7 +219,7 @@ const ProfessionalDateTimePicker: React.FC<ProfessionalDateTimePickerProps> = ({
         </div>
       </div>
 
-      {/* Time Selection Dropdown */}
+      {/* Time Selection */}
       {selectedDate && (
         <div className="space-y-3">
           <Label className="text-sm font-medium flex items-center gap-2">
@@ -227,46 +227,21 @@ const ProfessionalDateTimePicker: React.FC<ProfessionalDateTimePickerProps> = ({
             Select Time
           </Label>
           <div>
-            <Select
+            {/* Use native select on mobile to prevent scroll issues */}
+            <select
               value={selectedTime}
-              onValueChange={(value) => {
-                onTimeChange(value);
-                setTimeSelectOpen(false);
-              }}
-              onOpenChange={(open) => {
-                setTimeSelectOpen(open);
-                if (open) {
-                  // Prevent any auto-scroll when opening
-                  const currentScrollY = window.scrollY;
-                  setTimeout(() => {
-                    if (window.scrollY !== currentScrollY) {
-                      window.scrollTo({ top: currentScrollY, behavior: 'instant' });
-                    }
-                  }, 0);
-                }
-              }}
+              onChange={(e) => onTimeChange(e.target.value)}
+              className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <SelectTrigger className="w-full" style={{ scrollMargin: 0 }}>
-                <SelectValue placeholder="Choose pickup time" />
-              </SelectTrigger>
-              <SelectContent
-                position="popper"
-                sideOffset={4}
-                align="start"
-                onCloseAutoFocus={(e) => {
-                  e.preventDefault();
-                }}
-              >
-                {timeSlots.map((slot) => (
-                  <SelectItem
-                    key={slot.value}
-                    value={slot.value}
-                  >
-                    {slot.groupLabel}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              <option value="" disabled>
+                Choose pickup time
+              </option>
+              {timeSlots.map((slot) => (
+                <option key={slot.value} value={slot.value}>
+                  {slot.groupLabel}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       )}
