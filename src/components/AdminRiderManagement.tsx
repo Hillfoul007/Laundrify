@@ -36,6 +36,12 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
+// Helper function to get the correct API URL for development
+const getAdminApiUrl = (endpoint: string): string => {
+  // Always use relative path - let vite proxy handle it in dev
+  return `/api/admin${endpoint}`;
+};
+
 export default function AdminRiderManagement() {
   const [riders, setRiders] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
