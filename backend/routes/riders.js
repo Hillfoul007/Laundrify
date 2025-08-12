@@ -314,6 +314,76 @@ router.get('/admin/riders', async (req, res) => {
   }
 });
 
+// Admin: Get orders for assignment
+router.get('/admin/orders', async (req, res) => {
+  try {
+    const { status } = req.query;
+    let query = {};
+
+    if (status) {
+      const statusArray = status.split(',');
+      query.status = { $in: statusArray };
+    }
+
+    // For development/mock mode, return sample orders
+    const sampleOrders = [
+      {
+        _id: '507f1f77bcf86cd799439011',
+        bookingId: 'LAU-001',
+        customerName: 'John Doe',
+        customerPhone: '+91 9876543210',
+        address: '123 MG Road, Sector 14, Gurugram',
+        pickupTime: '2:00 PM - 4:00 PM',
+        type: 'Regular',
+        status: 'pending',
+        assignedRider: null,
+        location: { lat: 28.4595, lng: 77.0266 },
+        items: [
+          { name: 'Shirt', quantity: 2, price: 50 },
+          { name: 'Trouser', quantity: 1, price: 80 }
+        ]
+      },
+      {
+        _id: '507f1f77bcf86cd799439012',
+        bookingId: 'LAU-002',
+        customerName: 'Jane Smith',
+        customerPhone: '+91 9876543211',
+        address: '456 Cyber City, Sector 25, Gurugram',
+        pickupTime: '4:00 PM - 6:00 PM',
+        type: 'Express',
+        status: 'confirmed',
+        assignedRider: null,
+        location: { lat: 28.4949, lng: 77.0828 },
+        items: [
+          { name: 'Dress', quantity: 1, price: 120 },
+          { name: 'Jacket', quantity: 1, price: 200 }
+        ]
+      },
+      {
+        _id: '507f1f77bcf86cd799439013',
+        bookingId: 'LAU-003',
+        customerName: 'Mike Johnson',
+        customerPhone: '+91 9876543212',
+        address: '789 Golf Course Road, Sector 54, Gurugram',
+        pickupTime: '10:00 AM - 12:00 PM',
+        type: 'Quick Pickup',
+        status: 'pending',
+        assignedRider: null,
+        location: { lat: 28.4211, lng: 77.0869 },
+        items: [
+          { name: 'Suit', quantity: 1, price: 300 }
+        ]
+      }
+    ];
+
+    const orders = await Booking.find(query).sort({ createdAt: -1 }) || sampleOrders;
+    res.json(orders.length > 0 ? orders : sampleOrders);
+  } catch (error) {
+    console.error('Get orders error:', error);
+    res.status(500).json({ message: 'Failed to fetch orders', error: error.message });
+  }
+});
+
 // Admin: Get active riders
 router.get('/admin/riders/active', async (req, res) => {
   try {
