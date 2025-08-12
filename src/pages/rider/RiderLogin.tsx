@@ -78,7 +78,9 @@ export default function RiderLogin() {
         mode: import.meta.env.MODE,
         apiUrl,
         fullResolvedUrl: new URL(apiUrl, window.location.origin).href,
-        credentials: { phone: credentials.phone, password: '[REDACTED]' }
+        credentials: { phone: credentials.phone, password: '[REDACTED]' },
+        // Also check the API client configuration
+        apiClientInfo: window.apiClient?.getConnectionStatus?.() || 'API client not available'
       });
 
       const response = await fetch(apiUrl, {
