@@ -81,10 +81,15 @@ export default function AdminRiderManagement() {
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch('/api/admin/orders?status=pending,confirmed');
+      const response = await fetch(getAdminApiUrl('/orders?status=pending,confirmed'));
       if (response.ok) {
         const data = await response.json();
         setOrders(data);
+      } else {
+        console.error('Failed to fetch orders:', response.status);
+        if (response.status === 404) {
+          toast.error('Admin orders API not available. Please ensure you are using the local development environment.');
+        }
       }
     } catch (error) {
       console.error('Failed to fetch orders:', error);
