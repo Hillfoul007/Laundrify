@@ -7,6 +7,20 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Phone, Lock, LogIn } from 'lucide-react';
 import { toast } from 'sonner';
 
+// Helper function to get the correct API URL for rider endpoints
+const getRiderApiUrl = (endpoint: string): string => {
+  const hostname = window.location.hostname;
+  const isLocalhost = hostname.includes("localhost") || hostname.includes("127.0.0.1");
+
+  if (isLocalhost) {
+    // Use proxy for localhost development
+    return `/api/riders${endpoint}`;
+  } else {
+    // Force localhost for development testing in hosted environments
+    return `http://localhost:3001/api/riders${endpoint}`;
+  }
+};
+
 export default function RiderLogin() {
   const [credentials, setCredentials] = useState({
     phone: '',
