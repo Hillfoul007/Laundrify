@@ -439,6 +439,28 @@ app.get("/api/test", (req, res) => {
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 console.log("📁 Static files served from /uploads");
 
+// Serve frontend static files and handle React Router routes
+const frontendPath = path.join(__dirname, "../dist");
+app.use(express.static(frontendPath));
+console.log("📁 Serving frontend static files from:", frontendPath);
+
+// Catch-all handler: send back React's index.html file for non-API routes
+app.get("*", (req, res) => {
+  // Don't handle API routes
+  if (req.path.startsWith("/api/")) {
+    return res.status(404).json({ error: "API endpoint not found" });
+  }
+
+  const indexPath = path.join(frontendPath, "index.html");
+  res.sendFile(indexPath, (err) => {
+    if (err) {
+      console.error("Error serving index.html:", err);
+      res.status(500).send("Error loading application");
+    }
+  });
+});
+console.log("🔄 SPA catch-all route configured for React Router");
+
 // Global error handling middleware
 app.use((err, req, res, next) => {
   console.error("💥 Global Error Handler:", err);
@@ -580,7 +602,7 @@ const server = app.listen(PORT, () => {
     console.log(`📱 API available at: http://localhost:${PORT}/api`);
   }
   console.log(`��� Health check: http://localhost:${PORT}/api/health`);
-  console.log(`🔒 Security: Helmet enabled`);
+  console.log(`���� Security: Helmet enabled`);
   console.log(`⚡ Compression: Enabled`);
   console.log(`🛡��  Rate limiting: Enabled`);
 
