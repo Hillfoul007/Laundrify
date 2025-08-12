@@ -137,7 +137,7 @@ export default function AdminRiderManagement() {
     if (!selectedOrder || !selectedRider) return;
 
     try {
-      const response = await fetch('/api/admin/orders/assign', {
+      const response = await fetch(getAdminApiUrl('/orders/assign'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
