@@ -173,15 +173,24 @@ export default function RiderLogin() {
           />
         </div>
 
-        {import.meta.env.DEV && (
-          <div className="bg-blue-50 p-3 rounded-lg">
-            <p className="text-blue-900 text-sm font-medium mb-2">Development Mode</p>
+        <div className="bg-blue-50 p-3 rounded-lg">
+          <p className="text-blue-900 text-sm font-medium mb-2">Rider System Testing</p>
+          <p className="text-blue-700 text-xs mb-2">
+            <strong>For local development:</strong> Use http://localhost:10000/rider
+          </p>
+          <p className="text-blue-700 text-xs mb-2">
+            <strong>Current environment:</strong> {window.location.hostname}
+          </p>
+          {import.meta.env.DEV ? (
             <p className="text-blue-700 text-xs">
-              Since backend is in mock mode, use any phone/password combination to test the UI.
-              The login will succeed with any credentials.
+              ✅ Development mode detected. Use any phone/password to test.
             </p>
-          </div>
-        )}
+          ) : (
+            <p className="text-orange-700 text-xs">
+              ⚠️ Production mode. Rider system may not be available on this domain.
+            </p>
+          )}
+        </div>
 
         <Button
           type="submit"
