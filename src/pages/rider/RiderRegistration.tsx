@@ -176,8 +176,16 @@ export default function RiderRegistration() {
         setIsSuccess(true);
         toast.success('Registration submitted successfully!');
       } else {
-        const error = await response.json();
-        toast.error(error.message || 'Registration failed');
+        if (response.status === 404) {
+          toast.error('Rider system is not available on this server. Please use local development environment.');
+          return;
+        }
+        try {
+          const error = await response.json();
+          toast.error(error.message || 'Registration failed');
+        } catch (e) {
+          toast.error('Registration failed - Server error');
+        }
       }
     } catch (error) {
       toast.error('Network error. Please try again.');
