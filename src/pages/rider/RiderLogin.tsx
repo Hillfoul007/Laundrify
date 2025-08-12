@@ -48,12 +48,26 @@ export default function RiderLogin() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(getRiderApiUrl('/login'), {
+      const apiUrl = getRiderApiUrl('/login');
+      console.log('🔍 Rider Login Debug:', {
+        hostname: window.location.hostname,
+        isDev: import.meta.env.DEV,
+        apiUrl,
+        credentials: { phone: credentials.phone, password: '[REDACTED]' }
+      });
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(credentials),
+      });
+
+      console.log('🔍 Rider Login Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        url: response.url
       });
 
       if (response.ok) {
