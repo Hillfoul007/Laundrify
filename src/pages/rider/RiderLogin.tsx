@@ -47,12 +47,7 @@ export default function RiderLogin() {
     setIsLoading(true);
 
     try {
-      // Use development API URL if running on localhost
-      const hostname = window.location.hostname;
-      const isLocalhost = hostname.includes("localhost") || hostname.includes("127.0.0.1");
-      const apiUrl = isLocalhost ? '/api/riders/login' : 'http://localhost:3001/api/riders/login';
-
-      const response = await fetch(apiUrl, {
+      const response = await fetch(getRiderApiUrl('/login'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
