@@ -115,7 +115,7 @@ export default function AdminRiderManagement() {
 
   const handleVerifyRider = async (riderId: string, status: 'approved' | 'rejected') => {
     try {
-      const response = await fetch(`/api/admin/riders/${riderId}/verify`, {
+      const response = await fetch(getAdminApiUrl(`/riders/${riderId}/verify`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status })
