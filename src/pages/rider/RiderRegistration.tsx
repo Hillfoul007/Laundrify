@@ -167,7 +167,7 @@ export default function RiderRegistration() {
       formDataToSend.append('aadharImage', aadharImage);
       formDataToSend.append('selfieImage', selfieImage);
 
-      const response = await fetch('/api/riders/register', {
+      const response = await fetch(getRiderApiUrl('/register'), {
         method: 'POST',
         body: formDataToSend,
       });
