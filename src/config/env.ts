@@ -75,7 +75,14 @@ export const getApiUrl = (): string => {
     return DEVELOPMENT_API_URL;
   }
 
-  // For all hosted environments (fly.dev, builder.codes, production), use production backend
+  // Check if we're in development mode (vite dev server)
+  const isDevelopment = import.meta.env.DEV;
+  if (isDevelopment) {
+    console.log(`🔧 Development mode detected, using local API via proxy: ${DEVELOPMENT_API_URL}`);
+    return DEVELOPMENT_API_URL;
+  }
+
+  // For production environments only
   if (isFlyDev || isBuilderCodes || isProductionDomain) {
     console.log(`🌐 Using production backend API: ${PRODUCTION_API_URL}`);
     return PRODUCTION_API_URL;
