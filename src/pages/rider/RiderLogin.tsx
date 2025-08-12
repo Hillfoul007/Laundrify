@@ -37,15 +37,37 @@ export default function RiderLogin() {
     });
   };
 
+  const testBackendConnectivity = async () => {
+    try {
+      // Test if backend is reachable
+      const testResponse = await fetch('/api/health', {
+        method: 'GET',
+        timeout: 5000
+      });
+      console.log('🔍 Backend Health Check:', {
+        status: testResponse.status,
+        url: testResponse.url,
+        accessible: testResponse.ok
+      });
+      return testResponse.ok;
+    } catch (error) {
+      console.log('🔍 Backend Health Check Failed:', error);
+      return false;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!credentials.phone || !credentials.password) {
       toast.error('Please fill all fields');
       return;
     }
 
     setIsLoading(true);
+
+    // Test backend connectivity first
+    const backendAccessible = await testBackendConnectivity();
 
     try {
       const apiUrl = getRiderApiUrl('/login');
