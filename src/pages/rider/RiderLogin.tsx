@@ -162,6 +162,16 @@ export default function RiderLogin() {
           />
         </div>
 
+        {import.meta.env.DEV && (
+          <div className="bg-blue-50 p-3 rounded-lg">
+            <p className="text-blue-900 text-sm font-medium mb-2">Development Mode</p>
+            <p className="text-blue-700 text-xs">
+              Since backend is in mock mode, use any phone/password combination to test the UI.
+              The login will succeed with any credentials.
+            </p>
+          </div>
+        )}
+
         <Button
           type="submit"
           className="w-full"
