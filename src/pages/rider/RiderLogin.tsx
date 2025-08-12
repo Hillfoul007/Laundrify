@@ -9,8 +9,17 @@ import { toast } from 'sonner';
 
 // Helper function to get the correct API URL for rider endpoints
 const getRiderApiUrl = (endpoint: string): string => {
-  // Always use relative path - let vite proxy handle it in dev,
-  // and show clear error if not available in production
+  const isDev = import.meta.env.DEV;
+  const hostname = window.location.hostname;
+
+  console.log('🔍 API URL Detection:', {
+    isDev,
+    hostname,
+    mode: import.meta.env.MODE,
+    origin: window.location.origin
+  });
+
+  // Force relative path in all cases to use vite proxy
   return `/api/riders${endpoint}`;
 };
 
