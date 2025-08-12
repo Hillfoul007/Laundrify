@@ -16,8 +16,8 @@ const getRiderApiUrl = (endpoint: string): string => {
     // Use proxy for localhost development
     return `/api/riders${endpoint}`;
   } else {
-    // Force localhost for development testing in hosted environments
-    return `http://localhost:3001/api/riders${endpoint}`;
+    // For production/hosted environments, try local API but fall back gracefully
+    return `/api/riders${endpoint}`;
   }
 };
 
