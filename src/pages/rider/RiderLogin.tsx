@@ -69,6 +69,12 @@ export default function RiderLogin() {
     // Test backend connectivity first
     const backendAccessible = await testBackendConnectivity();
 
+    if (!backendAccessible) {
+      toast.error('Backend server is not accessible. Rider system requires local development environment.');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const apiUrl = getRiderApiUrl('/login');
       console.log('🔍 Rider Login Debug:', {
