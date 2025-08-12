@@ -8,7 +8,7 @@ export const isDevelopment = () => import.meta.env.DEV;
 export const isProduction = () => import.meta.env.PROD;
 
 // URL Configuration
-const DEVELOPMENT_API_URL = "http://localhost:3001/api";
+const DEVELOPMENT_API_URL = "/api"; // Use relative path for vite proxy
 const PRODUCTION_API_URL = "https://backend-vaxf.onrender.com/api";
 
 // Frontend URLs for CORS configuration
