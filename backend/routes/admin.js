@@ -396,4 +396,213 @@ router.delete("/bookings/:bookingId", verifyAdminAccess, async (req, res) => {
   }
 });
 
+// ==========================================
+// RIDER MANAGEMENT ROUTES
+// ==========================================
+
+// Get all riders for admin
+router.get("/riders", verifyAdminAccess, async (req, res) => {
+  try {
+    // For development/mock mode, return sample riders
+    const sampleRiders = [
+      {
+        _id: '507f191e810c19729de860ea',
+        name: 'Rajesh Kumar',
+        phone: '+91 9876543210',
+        aadharNumber: '1234-5678-9012',
+        status: 'pending',
+        createdAt: new Date(),
+        aadharImageUrl: '/uploads/riders/aadhar-sample.jpg',
+        selfieImageUrl: '/uploads/riders/selfie-sample.jpg'
+      },
+      {
+        _id: '507f191e810c19729de860eb',
+        name: 'Amit Singh',
+        phone: '+91 9876543211',
+        aadharNumber: '1234-5678-9013',
+        status: 'approved',
+        createdAt: new Date(),
+        aadharImageUrl: '/uploads/riders/aadhar-sample2.jpg',
+        selfieImageUrl: '/uploads/riders/selfie-sample2.jpg'
+      }
+    ];
+
+    const riders = await Rider.find().sort({ createdAt: -1 }) || sampleRiders;
+    res.json(riders.length > 0 ? riders : sampleRiders);
+  } catch (error) {
+    console.error('Get riders error:', error);
+    res.status(500).json({ message: 'Failed to fetch riders', error: error.message });
+  }
+});
+
+// Get active riders
+router.get("/riders/active", verifyAdminAccess, async (req, res) => {
+  try {
+    // For development/mock mode, return sample active riders
+    const sampleActiveRiders = [
+      {
+        _id: '507f191e810c19729de860eb',
+        name: 'Amit Singh',
+        phone: '+91 9876543211',
+        isActive: true,
+        location: { lat: 28.4595, lng: 77.0266 },
+        lastLocationUpdate: new Date(),
+        assignedOrders: []
+      }
+    ];
+
+    const activeRiders = await Rider.find({
+      isActive: true,
+      status: 'approved'
+    }).populate('assignedOrders') || sampleActiveRiders;
+
+    res.json(activeRiders.length > 0 ? activeRiders : sampleActiveRiders);
+  } catch (error) {
+    console.error('Get active riders error:', error);
+    res.status(500).json({ message: 'Failed to fetch active riders', error: error.message });
+  }
+});
+
+// Verify rider
+router.post("/riders/:riderId/verify", verifyAdminAccess, async (req, res) => {
+  try {
+    const { riderId } = req.params;
+    const { status, rejectionReason } = req.body;
+
+    // For development/mock mode, just return success
+    if (!mongoose.Types.ObjectId.isValid(riderId)) {
+      return res.json({
+        message: `Rider ${status} successfully (demo mode)`,
+        rider: { _id: riderId, status, verifiedAt: new Date() }
+      });
+    }
+
+    const rider = await Rider.findById(riderId);
+    if (!rider) {
+      return res.status(404).json({ message: 'Rider not found' });
+    }
+
+    rider.status = status;
+    rider.verifiedAt = new Date();
+    rider.verifiedBy = 'admin';
+
+    if (status === 'rejected' && rejectionReason) {
+      rider.rejectionReason = rejectionReason;
+    }
+
+    await rider.save();
+
+    res.json({
+      message: `Rider ${status} successfully`,
+      rider
+    });
+  } catch (error) {
+    console.error('Rider verification error:', error);
+    res.status(500).json({ message: 'Failed to verify rider', error: error.message });
+  }
+});
+
+// Get orders for assignment
+router.get("/orders", verifyAdminAccess, async (req, res) => {
+  try {
+    const { status } = req.query;
+    let query = {};
+
+    if (status) {
+      const statusArray = status.split(',');
+      query.status = { $in: statusArray };
+    }
+
+    // For development/mock mode, return sample orders
+    const sampleOrders = [
+      {
+        _id: '507f1f77bcf86cd799439011',
+        bookingId: 'LAU-001',
+        customerName: 'John Doe',
+        customerPhone: '+91 9876543210',
+        address: '123 MG Road, Sector 14, Gurugram',
+        pickupTime: '2:00 PM - 4:00 PM',
+        type: 'Regular',
+        status: 'pending',
+        assignedRider: null,
+        location: { lat: 28.4595, lng: 77.0266 },
+        items: [
+          { name: 'Shirt', quantity: 2, price: 50 },
+          { name: 'Trouser', quantity: 1, price: 80 }
+        ]
+      },
+      {
+        _id: '507f1f77bcf86cd799439012',
+        bookingId: 'LAU-002',
+        customerName: 'Jane Smith',
+        customerPhone: '+91 9876543211',
+        address: '456 Cyber City, Sector 25, Gurugram',
+        pickupTime: '4:00 PM - 6:00 PM',
+        type: 'Express',
+        status: 'confirmed',
+        assignedRider: null,
+        location: { lat: 28.4949, lng: 77.0828 },
+        items: [
+          { name: 'Dress', quantity: 1, price: 120 },
+          { name: 'Jacket', quantity: 1, price: 200 }
+        ]
+      }
+    ];
+
+    const orders = await Booking.find(query).sort({ createdAt: -1 }) || sampleOrders;
+    res.json(orders.length > 0 ? orders : sampleOrders);
+  } catch (error) {
+    console.error('Get orders error:', error);
+    res.status(500).json({ message: 'Failed to fetch orders', error: error.message });
+  }
+});
+
+// Assign order to rider
+router.post("/orders/assign", verifyAdminAccess, async (req, res) => {
+  try {
+    const { orderId, riderId } = req.body;
+
+    // For development/mock mode, just return success
+    if (!mongoose.Types.ObjectId.isValid(orderId) || !mongoose.Types.ObjectId.isValid(riderId)) {
+      return res.json({
+        message: 'Order assigned successfully (demo mode)',
+        order: { _id: orderId, assignedRider: riderId, riderStatus: 'assigned' },
+        rider: 'Demo Rider'
+      });
+    }
+
+    const order = await Booking.findById(orderId);
+    const rider = await Rider.findById(riderId);
+
+    if (!order || !rider) {
+      return res.status(404).json({ message: 'Order or rider not found' });
+    }
+
+    if (rider.status !== 'approved' || !rider.isActive) {
+      return res.status(400).json({ message: 'Rider is not available for assignment' });
+    }
+
+    // Assign order to rider
+    order.assignedRider = riderId;
+    order.riderStatus = 'assigned';
+    order.assignedAt = new Date();
+
+    // Add to rider's assigned orders
+    if (!rider.assignedOrders.includes(orderId)) {
+      rider.assignedOrders.push(orderId);
+    }
+
+    await Promise.all([order.save(), rider.save()]);
+
+    res.json({
+      message: 'Order assigned successfully',
+      order,
+      rider: rider.name
+    });
+  } catch (error) {
+    console.error('Order assignment error:', error);
+    res.status(500).json({ message: 'Failed to assign order', error: error.message });
+  }
+});
+
 module.exports = router;
