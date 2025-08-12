@@ -69,8 +69,16 @@ export default function RiderLogin() {
           toast.error('Your account has been rejected. Please contact admin.');
         }
       } else {
-        const error = await response.json();
-        toast.error(error.message || 'Login failed');
+        if (response.status === 404) {
+          toast.error('Rider system is not available on this server. Please use local development environment.');
+          return;
+        }
+        try {
+          const error = await response.json();
+          toast.error(error.message || 'Login failed');
+        } catch (e) {
+          toast.error('Login failed - Server error');
+        }
       }
     } catch (error) {
       toast.error('Network error. Please try again.');
