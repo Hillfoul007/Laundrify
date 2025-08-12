@@ -71,8 +71,13 @@ export default function RiderLogin() {
       const apiUrl = getRiderApiUrl('/login');
       console.log('🔍 Rider Login Debug:', {
         hostname: window.location.hostname,
+        origin: window.location.origin,
+        href: window.location.href,
         isDev: import.meta.env.DEV,
+        isProd: import.meta.env.PROD,
+        mode: import.meta.env.MODE,
         apiUrl,
+        fullResolvedUrl: new URL(apiUrl, window.location.origin).href,
         credentials: { phone: credentials.phone, password: '[REDACTED]' }
       });
 
