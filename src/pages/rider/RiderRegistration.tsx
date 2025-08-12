@@ -11,12 +11,13 @@ import { toast } from 'sonner';
 const getRiderApiUrl = (endpoint: string): string => {
   const hostname = window.location.hostname;
   const isLocalhost = hostname.includes("localhost") || hostname.includes("127.0.0.1");
+  const isDevelopment = import.meta.env.DEV;
 
-  if (isLocalhost) {
-    // Use proxy for localhost development
+  // For development mode (including fly.dev preview), always try to use local backend
+  if (isDevelopment || isLocalhost) {
     return `/api/riders${endpoint}`;
   } else {
-    // For production/hosted environments, try local API but fall back gracefully
+    // For true production environments
     return `/api/riders${endpoint}`;
   }
 };
