@@ -98,10 +98,15 @@ export default function AdminRiderManagement() {
 
   const fetchActiveRiders = async () => {
     try {
-      const response = await fetch('/api/admin/riders/active');
+      const response = await fetch(getAdminApiUrl('/riders/active'));
       if (response.ok) {
         const data = await response.json();
         setActiveRiders(data);
+      } else {
+        console.error('Failed to fetch active riders:', response.status);
+        if (response.status === 404) {
+          toast.error('Admin active riders API not available. Please ensure you are using the local development environment.');
+        }
       }
     } catch (error) {
       console.error('Failed to fetch active riders:', error);
