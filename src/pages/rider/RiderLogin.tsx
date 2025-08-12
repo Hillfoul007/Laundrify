@@ -9,17 +9,9 @@ import { toast } from 'sonner';
 
 // Helper function to get the correct API URL for rider endpoints
 const getRiderApiUrl = (endpoint: string): string => {
-  const hostname = window.location.hostname;
-  const isLocalhost = hostname.includes("localhost") || hostname.includes("127.0.0.1");
-  const isDevelopment = import.meta.env.DEV;
-
-  // For development mode (including fly.dev preview), always try to use local backend
-  if (isDevelopment || isLocalhost) {
-    return `/api/riders${endpoint}`;
-  } else {
-    // For true production environments
-    return `/api/riders${endpoint}`;
-  }
+  // Always use relative path - let vite proxy handle it in dev,
+  // and show clear error if not available in production
+  return `/api/riders${endpoint}`;
 };
 
 export default function RiderLogin() {
