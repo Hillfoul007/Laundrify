@@ -9,11 +9,14 @@ import RiderLogin from './RiderLogin';
 export default function RiderAuth() {
   const [activeTab, setActiveTab] = useState('login');
 
+  // Add console log to verify component is loading
+  console.log('🔍 RiderAuth component loading...', { activeTab, location: window.location.href });
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-laundrify-purple/10 to-laundrify-pink/10 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-laundrify-purple">
+          <CardTitle className="text-2xl font-bold text-purple-600">
             Rider Portal
           </CardTitle>
           <CardDescription>
@@ -26,11 +29,11 @@ export default function RiderAuth() {
               <TabsTrigger value="login">Login</TabsTrigger>
               <TabsTrigger value="register">Register</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="login">
               <RiderLogin />
             </TabsContent>
-            
+
             <TabsContent value="register">
               <RiderRegistration />
             </TabsContent>
