@@ -139,7 +139,21 @@ export default function RiderLogin() {
         }
       } else {
         if (response.status === 404) {
-          toast.error('Rider system is not available on this server. Please use local development environment.');
+          toast.error('Rider system is not available on this server. Please use local development: http://localhost:10000/rider');
+          return;
+        } else if (response.status === 400) {
+          // Check if this is because rider routes don't exist on production backend
+          try {
+            const error = await response.json();
+            console.log('🔍 400 Error details:', error);
+            if (error.message?.includes('not found') || error.error?.includes('not found')) {
+              toast.error('Rider system is not deployed on this backend. Use local development: http://localhost:10000/rider');
+            } else {
+              toast.error(error.message || error.error || 'Login failed - Invalid credentials');
+            }
+          } catch (e) {
+            toast.error('Rider system is not available on this backend. Use local development: http://localhost:10000/rider');
+          }
           return;
         }
         try {
