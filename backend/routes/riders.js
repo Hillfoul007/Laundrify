@@ -10,6 +10,18 @@ const Booking = require("../models/Booking");
 
 const router = express.Router();
 
+// Test endpoint to verify rider routes are working
+router.get('/test', (req, res) => {
+  console.log('🔍 Rider routes test endpoint hit');
+  res.json({
+    success: true,
+    message: 'Rider routes are working!',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    dbConnected: !!mongoose.connection.readyState
+  });
+});
+
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
