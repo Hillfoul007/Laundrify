@@ -61,23 +61,46 @@ router.post('/register', upload.fields([
   { name: 'selfieImage', maxCount: 1 }
 ]), async (req, res) => {
   try {
+    console.log('🔍 Rider registration attempt:', {
+      hasName: !!req.body.name,
+      hasPhone: !!req.body.phone,
+      hasAadhar: !!req.body.aadharNumber,
+      hasFiles: !!req.files,
+      fileKeys: req.files ? Object.keys(req.files) : []
+    });
+
     const { name, phone, aadharNumber } = req.body;
-    
+
+    if (!name || !phone || !aadharNumber) {
+      return res.status(400).json({
+        message: 'Name, phone, and Aadhar number are required'
+      });
+    }
+
+    // For development/demo mode when no database is connected
+    if (!mongoose.connection.readyState) {
+      console.log('🔧 Demo mode: Accepting rider registration');
+      return res.status(201).json({
+        message: 'Registration submitted successfully (demo mode). Please wait for admin approval.',
+        riderId: 'demo_rider_' + Date.now()
+      });
+    }
+
     // Check if rider already exists
     const existingRider = await Rider.findOne({
       $or: [{ phone }, { aadharNumber }]
     });
-    
+
     if (existingRider) {
-      return res.status(400).json({ 
-        message: 'Rider with this phone number or Aadhar number already exists' 
+      return res.status(400).json({
+        message: 'Rider with this phone number or Aadhar number already exists'
       });
     }
 
     // Check if files were uploaded
     if (!req.files?.aadharImage?.[0] || !req.files?.selfieImage?.[0]) {
-      return res.status(400).json({ 
-        message: 'Both Aadhar card image and selfie are required' 
+      return res.status(400).json({
+        message: 'Both Aadhar card image and selfie are required'
       });
     }
 
@@ -95,13 +118,14 @@ router.post('/register', upload.fields([
     });
 
     await rider.save();
-    
-    res.status(201).json({ 
+
+    console.log('✅ Rider registered successfully:', name);
+    res.status(201).json({
       message: 'Registration submitted successfully. Please wait for admin approval.',
-      riderId: rider._id 
+      riderId: rider._id
     });
   } catch (error) {
-    console.error('Rider registration error:', error);
+    console.error('❌ Rider registration error:', error);
     res.status(500).json({ message: 'Registration failed', error: error.message });
   }
 });
