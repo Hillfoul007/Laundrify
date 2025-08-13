@@ -18,7 +18,20 @@ router.get('/test', (req, res) => {
     message: 'Rider routes are working!',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
-    dbConnected: !!mongoose.connection.readyState
+    dbConnected: !!mongoose.connection.readyState,
+    features: {
+      registration: true,
+      login: true,
+      adminManagement: true,
+      orderAssignment: true,
+      locationTracking: true,
+      demoMode: !mongoose.connection.readyState
+    },
+    demoCredentials: !mongoose.connection.readyState ? {
+      phone: '9876543210',
+      password: 'any_password',
+      note: 'Demo mode accepts any credentials'
+    } : null
   });
 });
 
