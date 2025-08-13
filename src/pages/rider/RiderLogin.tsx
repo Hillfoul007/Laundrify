@@ -235,34 +235,37 @@ export default function RiderLogin() {
         </div>
 
         <div className="bg-blue-50 p-3 rounded-lg">
-          <p className="text-blue-900 text-sm font-medium mb-2">Rider System Status</p>
+          <p className="text-blue-900 text-sm font-medium mb-2">🚀 Rider System - Deployed & Ready!</p>
           <p className="text-blue-700 text-xs mb-2">
-            <strong>Current environment:</strong> {window.location.hostname}
+            <strong>Environment:</strong> {window.location.hostname}
           </p>
           <p className="text-blue-700 text-xs mb-2">
-            <strong>API will call:</strong> {getRiderApiUrl('/login')}
+            <strong>API Endpoint:</strong> {getRiderApiUrl('/login')}
           </p>
           <p className="text-blue-700 text-xs mb-2">
             <strong>Mode:</strong> {import.meta.env.MODE} | <strong>Dev:</strong> {import.meta.env.DEV ? 'Yes' : 'No'}
           </p>
 
           {getRiderApiUrl('/login').includes('backend-vaxf.onrender.com') ? (
-            <div className="bg-orange-50 p-2 rounded mt-2 border border-orange-200">
-              <p className="text-orange-800 text-xs font-medium">⚠️ Production Backend</p>
-              <p className="text-orange-700 text-xs">
-                This backend may not have rider routes deployed yet.
+            <div className="bg-green-50 p-2 rounded mt-2 border border-green-200">
+              <p className="text-green-800 text-xs font-medium">✅ Production Backend</p>
+              <p className="text-green-700 text-xs">
+                Rider routes deployed and ready for testing!
               </p>
-              <p className="text-orange-700 text-xs">
-                <strong>For testing:</strong> Use <a href="http://localhost:10000/rider" className="underline">http://localhost:10000/rider</a>
+              <p className="text-green-700 text-xs">
+                <strong>Demo credentials:</strong> Phone: 9876543210, Password: password123
               </p>
             </div>
           ) : import.meta.env.DEV ? (
-            <p className="text-green-700 text-xs">
-              ✅ Development mode. Use any phone/password to test.
-            </p>
+            <div className="bg-green-50 p-2 rounded mt-2 border border-green-200">
+              <p className="text-green-800 text-xs font-medium">✅ Development Mode</p>
+              <p className="text-green-700 text-xs">
+                Full database functionality. Use demo credentials: 9876543210 / password123
+              </p>
+            </div>
           ) : (
             <p className="text-orange-700 text-xs">
-              ⚠️ Production mode. Rider system availability unknown.
+              ⚠️ Production mode. Testing rider system...
             </p>
           )}
         </div>
