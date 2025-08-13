@@ -147,11 +147,19 @@ export default function RiderLogin() {
 
       if (response.ok) {
         const result = await response.json();
-        
+        console.log('✅ Login successful:', result);
+
         if (result.rider.status === 'approved') {
           localStorage.setItem('riderAuth', JSON.stringify(result.rider));
           localStorage.setItem('riderToken', result.token);
-          toast.success('Login successful!');
+
+          // Show success message with demo mode info if applicable
+          if (result.message?.includes('demo mode')) {
+            toast.success('Demo login successful! (Demo mode active)');
+          } else {
+            toast.success('Login successful!');
+          }
+
           navigate('/rider/dashboard');
         } else if (result.rider.status === 'pending') {
           toast.error('Your account is still pending approval from admin');
