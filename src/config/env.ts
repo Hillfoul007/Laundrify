@@ -56,6 +56,7 @@ export const getApiUrl = (): string => {
   const isLocalhost = hostname.includes("localhost") || hostname.includes("127.0.0.1");
   const isFlyDev = hostname.includes("fly.dev");
   const isBuilderCodes = hostname.includes("builder.codes");
+  const isRenderCom = hostname.includes("onrender.com"); // Add render.com detection
   const isProductionDomain = hostname === "www.laundrify.online" || hostname === "laundrify.online";
 
   console.log(`🔍 API URL Detection:`, {
