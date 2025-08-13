@@ -36,9 +36,36 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-// Helper function to get the correct API URL for development
+// Helper function to get the correct API URL for admin rider endpoints
 const getAdminApiUrl = (endpoint: string): string => {
-  // Always use relative path - let vite proxy handle it in dev
+  const isDev = import.meta.env.DEV;
+  const hostname = window.location.hostname;
+  const isLocalhost = hostname.includes("localhost") || hostname.includes("127.0.0.1");
+  const isRenderCom = hostname.includes("onrender.com");
+  const isLaundrifyDomain = hostname.includes("laundrify.online");
+
+  console.log('🔍 Admin Rider API URL Detection:', {
+    isDev,
+    hostname,
+    isLocalhost,
+    isRenderCom,
+    isLaundrifyDomain,
+    endpoint
+  });
+
+  // Force correct backend URL based on environment
+  if (isLocalhost && isDev) {
+    // Local development - use proxy
+    console.log('🏠 Using local proxy for admin API');
+    return `/api/admin${endpoint}`;
+  } else if (isRenderCom || isLaundrifyDomain || !isLocalhost) {
+    // Any hosted environment - use backend server
+    const backendUrl = 'https://backend-vaxf.onrender.com/api/admin' + endpoint;
+    console.log('🌐 Using backend server for admin API:', backendUrl);
+    return backendUrl;
+  }
+
+  // Fallback
   return `/api/admin${endpoint}`;
 };
 
