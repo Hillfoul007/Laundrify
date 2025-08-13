@@ -85,7 +85,7 @@ export const getApiUrl = (): string => {
   }
 
   // For production environments only
-  if (isFlyDev || isBuilderCodes || isProductionDomain) {
+  if (isFlyDev || isBuilderCodes || isRenderCom || isProductionDomain) {
     console.log(`🌐 Using production backend API: ${PRODUCTION_API_URL}`);
     return PRODUCTION_API_URL;
   }
