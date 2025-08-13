@@ -109,17 +109,53 @@ router.post('/register', upload.fields([
 // Login rider
 router.post('/login', async (req, res) => {
   try {
+    console.log('🔍 Rider login attempt:', {
+      hasPhone: !!req.body.phone,
+      hasPassword: !!req.body.password,
+      bodyKeys: Object.keys(req.body)
+    });
+
     const { phone, password } = req.body;
-    
+
+    if (!phone || !password) {
+      console.log('❌ Missing credentials');
+      return res.status(400).json({ message: 'Phone and password are required' });
+    }
+
+    // For development/demo mode when no database is connected
+    if (!mongoose.connection.readyState) {
+      console.log('🔧 Demo mode: Creating test rider login');
+      const demoRider = {
+        _id: 'demo_rider_' + Date.now(),
+        name: 'Demo Rider',
+        phone: phone,
+        status: 'approved',
+        isActive: false,
+      };
+
+      const token = jwt.sign(
+        { riderId: demoRider._id, phone: demoRider.phone },
+        process.env.JWT_SECRET || 'fallback_secret',
+        { expiresIn: '7d' }
+      );
+
+      return res.json({
+        token,
+        rider: demoRider
+      });
+    }
+
     // Find rider by phone
     const rider = await Rider.findOne({ phone });
     if (!rider) {
+      console.log('❌ Rider not found:', phone);
       return res.status(400).json({ message: 'Invalid phone number or password' });
     }
 
     // Check password
     const isMatch = await bcrypt.compare(password, rider.password);
     if (!isMatch) {
+      console.log('❌ Invalid password for rider:', phone);
       return res.status(400).json({ message: 'Invalid phone number or password' });
     }
 
@@ -130,6 +166,7 @@ router.post('/login', async (req, res) => {
       { expiresIn: '7d' }
     );
 
+    console.log('✅ Rider login successful:', rider.name);
     res.json({
       token,
       rider: {
@@ -141,7 +178,7 @@ router.post('/login', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Rider login error:', error);
+    console.error('❌ Rider login error:', error);
     res.status(500).json({ message: 'Login failed', error: error.message });
   }
 });
