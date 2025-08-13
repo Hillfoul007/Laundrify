@@ -9,17 +9,36 @@ import { toast } from 'sonner';
 
 // Helper function to get the correct API URL for rider endpoints
 const getRiderApiUrl = (endpoint: string): string => {
+  const isDev = import.meta.env.DEV;
   const hostname = window.location.hostname;
   const isLocalhost = hostname.includes("localhost") || hostname.includes("127.0.0.1");
-  const isDevelopment = import.meta.env.DEV;
+  const isRenderCom = hostname.includes("onrender.com");
+  const isLaundrifyDomain = hostname.includes("laundrify.online");
 
-  // For development mode (including fly.dev preview), always try to use local backend
-  if (isDevelopment || isLocalhost) {
+  console.log('🔍 Rider Registration API URL Detection:', {
+    isDev,
+    hostname,
+    isLocalhost,
+    isRenderCom,
+    isLaundrifyDomain,
+    mode: import.meta.env.MODE,
+    origin: window.location.origin
+  });
+
+  // Force correct backend URL based on environment
+  if (isLocalhost && isDev) {
+    // Local development - use proxy
+    console.log('🏠 Using local proxy for rider registration API');
     return `/api/riders${endpoint}`;
-  } else {
-    // For true production environments
-    return `/api/riders${endpoint}`;
+  } else if (isRenderCom || isLaundrifyDomain || !isLocalhost) {
+    // Any hosted environment - use backend server
+    const backendUrl = 'https://backend-vaxf.onrender.com/api/riders' + endpoint;
+    console.log('🌐 Using backend server for rider registration API:', backendUrl);
+    return backendUrl;
   }
+
+  // Fallback
+  return `/api/riders${endpoint}`;
 };
 
 export default function RiderRegistration() {
