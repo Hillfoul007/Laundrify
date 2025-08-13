@@ -555,24 +555,8 @@ if (productionConfig.isProduction()) {
     "🔗 Frontend routing configured - all non-API routes serve index.html",
   );
 } else {
-  // Handle 404 routes in development
-  app.use("*", (req, res) => {
-    res.status(404).json({
-      success: false,
-      message: `Route ${req.originalUrl} not found`,
-      availableRoutes: [
-        "/api/health",
-        "/api/test",
-        "/api/auth",
-        "/api/bookings",
-        "/api/addresses",
-        "/api/location",
-        "/api/whatsapp",
-        "/api/admin",
-        "/api/quick-book",
-      ],
-    });
-  });
+  // In development mode, only handle API 404s - let frontend handle all other routes
+  console.log("🔧 Development mode: Only handling API routes, frontend should handle all others");
 }
 
 // Keep-alive mechanism for Render deployment
