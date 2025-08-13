@@ -194,10 +194,13 @@ export default function RiderLogin() {
         <div className="bg-blue-50 p-3 rounded-lg">
           <p className="text-blue-900 text-sm font-medium mb-2">Rider System Testing</p>
           <p className="text-blue-700 text-xs mb-2">
-            <strong>For local development:</strong> Use http://localhost:10000/rider
+            <strong>Current environment:</strong> {window.location.hostname}
           </p>
           <p className="text-blue-700 text-xs mb-2">
-            <strong>Current environment:</strong> {window.location.hostname}
+            <strong>API will call:</strong> {getRiderApiUrl('/login')}
+          </p>
+          <p className="text-blue-700 text-xs mb-2">
+            <strong>Mode:</strong> {import.meta.env.MODE} | <strong>Dev:</strong> {import.meta.env.DEV ? 'Yes' : 'No'}
           </p>
           {import.meta.env.DEV ? (
             <p className="text-blue-700 text-xs">
