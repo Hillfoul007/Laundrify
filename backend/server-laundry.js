@@ -555,8 +555,38 @@ if (productionConfig.isProduction()) {
     "🔗 Frontend routing configured - all non-API routes serve index.html",
   );
 } else {
-  // In development mode, only handle API 404s - let frontend handle all other routes
-  console.log("🔧 Development mode: Only handling API routes, frontend should handle all others");
+  // In development mode, provide helpful redirect for non-API routes
+  app.get("*", (req, res) => {
+    // Only show helpful message for non-API routes
+    if (!req.path.startsWith("/api/")) {
+      res.send(`
+        <html>
+          <head><title>Backend Server - Redirect Required</title></head>
+          <body style="font-family: Arial, sans-serif; padding: 40px; background: #f5f5f5;">
+            <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+              <h1 style="color: #C46DD8;">🔄 Redirect Required</h1>
+              <p>You're accessing the <strong>backend server</strong>, but you need the <strong>frontend</strong> for the Rider Portal.</p>
+
+              <h3>For the Rider System:</h3>
+              <ul>
+                <li><strong>Frontend URL:</strong> <a href="http://localhost:10000${req.path}">http://localhost:10000${req.path}</a></li>
+                <li><strong>Current URL:</strong> ${req.protocol}://${req.get('host')}${req.path} (Backend API server)</li>
+              </ul>
+
+              <div style="background: #e3f2fd; padding: 15px; border-radius: 4px; margin: 20px 0;">
+                <strong>💡 Solution:</strong> Access the rider portal at the frontend URL above.
+              </div>
+
+              <p><small>This is the backend API server. The React app (rider portal) runs on a separate frontend server.</small></p>
+            </div>
+          </body>
+        </html>
+      `);
+    } else {
+      res.status(404).json({ error: "API endpoint not found" });
+    }
+  });
+  console.log("🔧 Development mode: Providing redirect help for frontend routes");
 }
 
 // Keep-alive mechanism for Render deployment
@@ -594,7 +624,7 @@ const server = app.listen(PORT, () => {
   if (productionConfig.isProduction()) {
     console.log(`🌐 Frontend and API available at: http://localhost:${PORT}`);
   } else {
-    console.log(`📱 API available at: http://localhost:${PORT}/api`);
+    console.log(`�� API available at: http://localhost:${PORT}/api`);
   }
   console.log(`��� Health check: http://localhost:${PORT}/api/health`);
   console.log(`🔒 Security: Helmet enabled`);
