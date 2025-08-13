@@ -8,9 +8,31 @@ import RiderLogin from './RiderLogin';
 
 export default function RiderAuth() {
   const [activeTab, setActiveTab] = useState('login');
+  const [isLoading, setIsLoading] = useState(true);
 
   // Add console log to verify component is loading
   console.log('🔍 RiderAuth component loading...', { activeTab, location: window.location.href });
+
+  useEffect(() => {
+    // Simulate loading and ensure component is ready
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+      console.log('✅ RiderAuth component fully loaded');
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="text-2xl font-bold text-purple-600 mb-4">🚀 Loading Rider Portal...</div>
+          <div className="text-gray-600">Please wait while we load the rider system</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center p-4">
