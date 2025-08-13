@@ -11,15 +11,33 @@ import { toast } from 'sonner';
 const getRiderApiUrl = (endpoint: string): string => {
   const isDev = import.meta.env.DEV;
   const hostname = window.location.hostname;
+  const isLocalhost = hostname.includes("localhost") || hostname.includes("127.0.0.1");
+  const isRenderCom = hostname.includes("onrender.com");
+  const isLaundrifyDomain = hostname.includes("laundrify.online");
 
-  console.log('🔍 API URL Detection:', {
+  console.log('🔍 Rider API URL Detection:', {
     isDev,
     hostname,
+    isLocalhost,
+    isRenderCom,
+    isLaundrifyDomain,
     mode: import.meta.env.MODE,
     origin: window.location.origin
   });
 
-  // Force relative path in all cases to use vite proxy
+  // Force correct backend URL based on environment
+  if (isLocalhost && isDev) {
+    // Local development - use proxy
+    console.log('🏠 Using local proxy for rider API');
+    return `/api/riders${endpoint}`;
+  } else if (isRenderCom || isLaundrifyDomain || !isLocalhost) {
+    // Any hosted environment - use backend server
+    const backendUrl = 'https://backend-vaxf.onrender.com/api/riders' + endpoint;
+    console.log('🌐 Using backend server for rider API:', backendUrl);
+    return backendUrl;
+  }
+
+  // Fallback
   return `/api/riders${endpoint}`;
 };
 
