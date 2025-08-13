@@ -64,6 +64,7 @@ export const getApiUrl = (): string => {
     isLocalhost,
     isFlyDev,
     isBuilderCodes,
+    isRenderCom,
     isProductionDomain,
     envApiUrl,
     developmentUrl: DEVELOPMENT_API_URL,
