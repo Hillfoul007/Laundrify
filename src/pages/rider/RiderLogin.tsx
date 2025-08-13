@@ -110,6 +110,27 @@ export default function RiderLogin() {
         apiClientInfo: window.apiClient?.getConnectionStatus?.() || 'API client not available'
       });
 
+      // First test if rider routes are available
+      try {
+        const testResponse = await fetch(getRiderApiUrl('/test'), {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!testResponse.ok) {
+          toast.error('Rider routes not available on this backend. Please check deployment.');
+          setIsLoading(false);
+          return;
+        }
+
+        console.log('✅ Rider routes available');
+      } catch (testError) {
+        console.error('❌ Rider routes test failed:', testError);
+        toast.error('Cannot connect to rider API. Please check backend deployment.');
+        setIsLoading(false);
+        return;
+      }
+
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
