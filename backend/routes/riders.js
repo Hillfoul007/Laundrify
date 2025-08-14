@@ -180,38 +180,44 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // For development/demo mode when no database is connected
-    if (!mongoose.connection.readyState) {
+    // Always try demo mode first to ensure it works
+    console.log('🔧 Checking database connection...', {
+      readyState: mongoose.connection.readyState,
+      dbState: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+    });
+
+    // Create different demo riders based on phone number
+    const demoRiders = {
+      '9876543210': { name: 'Demo Rider A', status: 'approved', isActive: false },
+      '9876543211': { name: 'Demo Rider B', status: 'approved', isActive: true },
+      '9876543212': { name: 'Demo Rider C', status: 'pending', isActive: false },
+      'default': { name: 'Demo Rider', status: 'approved', isActive: false }
+    };
+
+    const riderData = demoRiders[phone] || demoRiders['default'];
+    const demoRider = {
+      _id: 'demo_rider_' + phone.slice(-4),
+      name: riderData.name,
+      phone: phone,
+      status: riderData.status,
+      isActive: riderData.isActive,
+    };
+
+    const token = jwt.sign(
+      { riderId: demoRider._id, phone: demoRider.phone },
+      process.env.JWT_SECRET || 'fallback_secret_for_demo',
+      { expiresIn: '7d' }
+    );
+
+    // For development/demo mode when no database is connected OR as fallback
+    if (!mongoose.connection.readyState || process.env.FORCE_DEMO_MODE === 'true') {
       console.log('🔧 Demo mode: Creating test rider login for phone:', phone);
-
-      // Create different demo riders based on phone number
-      const demoRiders = {
-        '9876543210': { name: 'Demo Rider A', status: 'approved', isActive: false },
-        '9876543211': { name: 'Demo Rider B', status: 'approved', isActive: true },
-        '9876543212': { name: 'Demo Rider C', status: 'pending', isActive: false },
-        'default': { name: 'Demo Rider', status: 'approved', isActive: false }
-      };
-
-      const riderData = demoRiders[phone] || demoRiders['default'];
-      const demoRider = {
-        _id: 'demo_rider_' + phone.slice(-4),
-        name: riderData.name,
-        phone: phone,
-        status: riderData.status,
-        isActive: riderData.isActive,
-      };
-
-      const token = jwt.sign(
-        { riderId: demoRider._id, phone: demoRider.phone },
-        process.env.JWT_SECRET || 'fallback_secret',
-        { expiresIn: '7d' }
-      );
-
       console.log('✅ Demo rider login successful:', demoRider.name);
       return res.json({
         token,
         rider: demoRider,
-        message: 'Demo mode: Login successful (no database required)'
+        message: 'Demo mode: Login successful (no database required)',
+        mode: 'demo'
       });
     }
 
