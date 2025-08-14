@@ -149,47 +149,44 @@ export default function RiderLogin() {
         const result = await response.json();
         console.log('✅ Login successful:', result);
 
-        if (result.rider.status === 'approved') {
-          localStorage.setItem('riderAuth', JSON.stringify(result.rider));
-          localStorage.setItem('riderToken', result.token);
+        // Store authentication data
+        localStorage.setItem('riderAuth', JSON.stringify(result.rider));
+        localStorage.setItem('riderToken', result.token);
 
-          // Show success message with demo mode info if applicable
-          if (result.message?.includes('demo mode')) {
-            toast.success('Demo login successful! (Demo mode active)');
-          } else {
-            toast.success('Login successful!');
-          }
-
-          navigate('/rider/dashboard');
-        } else if (result.rider.status === 'pending') {
-          toast.error('Your account is still pending approval from admin');
-        } else if (result.rider.status === 'rejected') {
-          toast.error('Your account has been rejected. Please contact admin.');
+        // Show success message with mode info if applicable
+        if (result.mode === 'demo') {
+          toast.success('Demo login successful! (Demo mode active)');
+        } else {
+          toast.success('Login successful!');
         }
+
+        navigate('/rider/dashboard');
       } else {
-        if (response.status === 404) {
-          toast.error('Rider system is not available on this server. Please use local development: http://localhost:10000/rider');
-          return;
-        } else if (response.status === 400) {
-          // Check if this is because rider routes don't exist on production backend
-          try {
-            const error = await response.json();
-            console.log('🔍 400 Error details:', error);
-            if (error.message?.includes('not found') || error.error?.includes('not found')) {
-              toast.error('Rider system is not deployed on this backend. Use local development: http://localhost:10000/rider');
-            } else {
-              toast.error(error.message || error.error || 'Login failed - Invalid credentials');
-            }
-          } catch (e) {
-            toast.error('Rider system is not available on this backend. Use local development: http://localhost:10000/rider');
-          }
-          return;
-        }
         try {
           const error = await response.json();
-          toast.error(error.message || 'Login failed');
+          console.log('❌ Login error details:', error);
+
+          if (response.status === 400) {
+            toast.error(error.message || 'Invalid phone number or password');
+          } else if (response.status === 403) {
+            if (error.status === 'pending') {
+              toast.error('Your account is still pending approval from admin');
+            } else if (error.status === 'rejected') {
+              toast.error('Your account has been rejected. Please contact admin.');
+            } else {
+              toast.error(error.message || 'Account not approved');
+            }
+          } else if (response.status === 404) {
+            toast.error('Rider system is not available on this server. Please use local development.');
+          } else {
+            toast.error(error.message || 'Login failed - Server error');
+          }
         } catch (e) {
-          toast.error('Login failed - Server error');
+          if (response.status === 404) {
+            toast.error('Rider system is not available on this backend.');
+          } else {
+            toast.error('Login failed - Network error');
+          }
         }
       }
     } catch (error) {
@@ -235,7 +232,7 @@ export default function RiderLogin() {
         </div>
 
         <div className="bg-blue-50 p-3 rounded-lg">
-          <p className="text-blue-900 text-sm font-medium mb-2">🚀 Rider System - Deployed & Ready!</p>
+          <p className="text-blue-900 text-sm font-medium mb-2">🚀 Rider System</p>
           <p className="text-blue-700 text-xs mb-2">
             <strong>Environment:</strong> {window.location.hostname}
           </p>
@@ -250,22 +247,22 @@ export default function RiderLogin() {
             <div className="bg-green-50 p-2 rounded mt-2 border border-green-200">
               <p className="text-green-800 text-xs font-medium">✅ Production Backend</p>
               <p className="text-green-700 text-xs">
-                Rider routes deployed and ready for testing!
+                Use your registered phone number and password to login.
               </p>
-              <p className="text-green-700 text-xs">
-                <strong>Demo credentials:</strong> Phone: 9876543210, Password: password123
+              <p className="text-red-700 text-xs">
+                <strong>Note:</strong> Only approved riders can login. Check with admin if you can't access your account.
               </p>
             </div>
           ) : import.meta.env.DEV ? (
             <div className="bg-green-50 p-2 rounded mt-2 border border-green-200">
               <p className="text-green-800 text-xs font-medium">✅ Development Mode</p>
               <p className="text-green-700 text-xs">
-                Full database functionality. Use demo credentials: 9876543210 / password123
+                Full database functionality with registered rider accounts.
               </p>
             </div>
           ) : (
             <p className="text-orange-700 text-xs">
-              ⚠️ Production mode. Testing rider system...
+              ⚠️ Production mode. Use registered credentials.
             </p>
           )}
         </div>
