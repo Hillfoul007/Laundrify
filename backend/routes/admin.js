@@ -403,7 +403,20 @@ router.delete("/bookings/:bookingId", verifyAdminAccess, async (req, res) => {
 // Get all riders for admin
 router.get("/riders", verifyAdminAccess, async (req, res) => {
   try {
-    // For development/mock mode, return sample riders
+    console.log('📋 Fetching riders from database...');
+
+    // Always try to get real riders from database first
+    const riders = await Rider.find().sort({ createdAt: -1 });
+
+    console.log(`✅ Found ${riders.length} riders in database`);
+
+    if (riders.length > 0) {
+      console.log('🎯 Returning real riders from database');
+      return res.json(riders);
+    }
+
+    // Only use sample data if no riders exist
+    console.log('⚠️ No riders found in database, using sample data');
     const sampleRiders = [
       {
         _id: '507f191e810c19729de860ea',
@@ -427,10 +440,9 @@ router.get("/riders", verifyAdminAccess, async (req, res) => {
       }
     ];
 
-    const riders = await Rider.find().sort({ createdAt: -1 }) || sampleRiders;
-    res.json(riders.length > 0 ? riders : sampleRiders);
+    res.json(sampleRiders);
   } catch (error) {
-    console.error('Get riders error:', error);
+    console.error('❌ Get riders error:', error);
     res.status(500).json({ message: 'Failed to fetch riders', error: error.message });
   }
 });
@@ -438,7 +450,22 @@ router.get("/riders", verifyAdminAccess, async (req, res) => {
 // Get active riders
 router.get("/riders/active", verifyAdminAccess, async (req, res) => {
   try {
-    // For development/mock mode, return sample active riders
+    console.log('📋 Fetching active riders from database...');
+
+    const activeRiders = await Rider.find({
+      isActive: true,
+      status: 'approved'
+    }).populate('assignedOrders');
+
+    console.log(`✅ Found ${activeRiders.length} active riders in database`);
+
+    if (activeRiders.length > 0) {
+      console.log('🎯 Returning real active riders from database');
+      return res.json(activeRiders);
+    }
+
+    // Only use sample data if no active riders exist
+    console.log('⚠️ No active riders found in database, using sample data');
     const sampleActiveRiders = [
       {
         _id: '507f191e810c19729de860eb',
@@ -451,14 +478,9 @@ router.get("/riders/active", verifyAdminAccess, async (req, res) => {
       }
     ];
 
-    const activeRiders = await Rider.find({
-      isActive: true,
-      status: 'approved'
-    }).populate('assignedOrders') || sampleActiveRiders;
-
-    res.json(activeRiders.length > 0 ? activeRiders : sampleActiveRiders);
+    res.json(sampleActiveRiders);
   } catch (error) {
-    console.error('Get active riders error:', error);
+    console.error('❌ Get active riders error:', error);
     res.status(500).json({ message: 'Failed to fetch active riders', error: error.message });
   }
 });
@@ -469,18 +491,24 @@ router.post("/riders/:riderId/verify", verifyAdminAccess, async (req, res) => {
     const { riderId } = req.params;
     const { status, rejectionReason } = req.body;
 
-    // For development/mock mode, just return success
+    console.log(`🔍 Verifying rider ${riderId} with status: ${status}`);
+
+    // For demo/invalid ObjectIds, return success but log
     if (!mongoose.Types.ObjectId.isValid(riderId)) {
+      console.log('⚠️ Invalid ObjectId, returning demo response');
       return res.json({
-        message: `Rider ${status} successfully (demo mode)`,
+        message: `Rider ${status} successfully (demo mode - invalid ID)`,
         rider: { _id: riderId, status, verifiedAt: new Date() }
       });
     }
 
     const rider = await Rider.findById(riderId);
     if (!rider) {
+      console.log(`❌ Rider ${riderId} not found in database`);
       return res.status(404).json({ message: 'Rider not found' });
     }
+
+    console.log(`📝 Updating rider ${rider.name} (${rider.phone}) status from ${rider.status} to ${status}`);
 
     rider.status = status;
     rider.verifiedAt = new Date();
@@ -492,12 +520,14 @@ router.post("/riders/:riderId/verify", verifyAdminAccess, async (req, res) => {
 
     await rider.save();
 
+    console.log(`✅ Rider ${rider.name} status updated successfully`);
+
     res.json({
       message: `Rider ${status} successfully`,
       rider
     });
   } catch (error) {
-    console.error('Rider verification error:', error);
+    console.error('❌ Rider verification error:', error);
     res.status(500).json({ message: 'Failed to verify rider', error: error.message });
   }
 });
