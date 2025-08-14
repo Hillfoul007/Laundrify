@@ -188,43 +188,42 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Always try demo mode first to ensure it works
     console.log('🔧 Checking database connection...', {
       readyState: mongoose.connection.readyState,
       dbState: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
     });
 
-    // Create different demo riders based on phone number
-    const demoRiders = {
-      '9876543210': { name: 'Demo Rider A', status: 'approved', isActive: false },
-      '9876543211': { name: 'Demo Rider B', status: 'approved', isActive: true },
-      '9876543212': { name: 'Demo Rider C', status: 'pending', isActive: false },
-      'default': { name: 'Demo Rider', status: 'approved', isActive: false }
-    };
+    // Only use demo mode if database is not connected AND not in production
+    if (!mongoose.connection.readyState && process.env.NODE_ENV !== 'production') {
+      console.log('🔧 Demo mode: Database not connected, using demo rider for:', phone);
 
-    const riderData = demoRiders[phone] || demoRiders['default'];
-    const demoRider = {
-      _id: 'demo_rider_' + phone.slice(-4),
-      name: riderData.name,
-      phone: phone,
-      status: riderData.status,
-      isActive: riderData.isActive,
-    };
+      const demoRiders = {
+        '9876543210': { name: 'Demo Rider A', status: 'approved', isActive: false },
+        '9876543211': { name: 'Demo Rider B', status: 'approved', isActive: true },
+        '9876543212': { name: 'Demo Rider C', status: 'pending', isActive: false },
+        'default': { name: 'Demo Rider', status: 'approved', isActive: false }
+      };
 
-    const token = jwt.sign(
-      { riderId: demoRider._id, phone: demoRider.phone },
-      process.env.JWT_SECRET || 'fallback_secret_for_demo',
-      { expiresIn: '7d' }
-    );
+      const riderData = demoRiders[phone] || demoRiders['default'];
+      const demoRider = {
+        _id: 'demo_rider_' + phone.slice(-4),
+        name: riderData.name,
+        phone: phone,
+        status: riderData.status,
+        isActive: riderData.isActive,
+      };
 
-    // For development/demo mode when no database is connected OR as fallback
-    if (!mongoose.connection.readyState || process.env.FORCE_DEMO_MODE === 'true') {
-      console.log('🔧 Demo mode: Creating test rider login for phone:', phone);
+      const token = jwt.sign(
+        { riderId: demoRider._id, phone: demoRider.phone },
+        process.env.JWT_SECRET || 'fallback_secret_for_demo',
+        { expiresIn: '7d' }
+      );
+
       console.log('✅ Demo rider login successful:', demoRider.name);
       return res.json({
         token,
         rider: demoRider,
-        message: 'Demo mode: Login successful (no database required)',
+        message: 'Demo mode: Login successful (no database connection)',
         mode: 'demo'
       });
     }
@@ -232,27 +231,36 @@ router.post('/login', async (req, res) => {
     try {
       // Find rider by phone
       const rider = await Rider.findOne({ phone });
+
       if (!rider) {
-        console.log('❌ Rider not found in database, falling back to demo mode');
-        console.log('✅ Demo fallback login successful:', demoRider.name);
-        return res.json({
-          token,
-          rider: demoRider,
-          message: 'Demo mode: Login successful (rider not found in database)',
-          mode: 'demo_fallback'
+        console.log(`❌ Rider not found in database for phone: ${phone}`);
+        return res.status(400).json({
+          message: 'Invalid phone number or password',
+          error: 'Authentication failed'
         });
       }
+
+      console.log(`🔍 Found rider: ${rider.name} (Status: ${rider.status}, Active: ${rider.isActive})`);
 
       // Check password
       const isMatch = await bcrypt.compare(password, rider.password);
       if (!isMatch) {
-        console.log('❌ Invalid password for rider, falling back to demo mode');
-        console.log('✅ Demo fallback login successful:', demoRider.name);
-        return res.json({
-          token,
-          rider: demoRider,
-          message: 'Demo mode: Login successful (password mismatch, using demo)',
-          mode: 'demo_fallback'
+        console.log(`❌ Invalid password for rider: ${rider.name}`);
+        return res.status(400).json({
+          message: 'Invalid phone number or password',
+          error: 'Authentication failed'
+        });
+      }
+
+      // Check if rider is approved (status check)
+      if (rider.status !== 'approved') {
+        console.log(`⚠️ Rider ${rider.name} status is ${rider.status}, login denied`);
+        return res.status(403).json({
+          message: rider.status === 'pending'
+            ? 'Your account is pending approval from admin'
+            : 'Your account has been rejected. Please contact admin.',
+          error: 'Account not approved',
+          status: rider.status
         });
       }
 
@@ -263,7 +271,7 @@ router.post('/login', async (req, res) => {
         { expiresIn: '7d' }
       );
 
-      console.log('✅ Real rider login successful:', rider.name);
+      console.log(`✅ Real rider login successful: ${rider.name}`);
       res.json({
         token: realToken,
         rider: {
@@ -273,45 +281,21 @@ router.post('/login', async (req, res) => {
           status: rider.status,
           isActive: rider.isActive,
         },
+        message: 'Login successful',
         mode: 'database'
       });
     } catch (dbError) {
-      console.log('❌ Database operation failed, using demo mode:', dbError.message);
-      console.log('✅ Demo fallback login successful:', demoRider.name);
-      return res.json({
-        token,
-        rider: demoRider,
-        message: 'Demo mode: Login successful (database error)',
-        mode: 'demo_error_fallback'
+      console.error('❌ Database operation failed:', dbError);
+      return res.status(500).json({
+        message: 'Database error occurred. Please try again.',
+        error: 'Internal server error'
       });
     }
   } catch (error) {
     console.error('❌ Rider login error:', error);
-
-    // Final fallback: always provide demo mode if everything else fails
-    console.log('🔧 Final fallback: Using demo mode due to error');
-
-    const fallbackDemoRider = {
-      _id: 'demo_rider_emergency',
-      name: 'Emergency Demo Rider',
-      phone: phone || '0000000000',
-      status: 'approved',
-      isActive: false,
-    };
-
-    const fallbackToken = jwt.sign(
-      { riderId: fallbackDemoRider._id, phone: fallbackDemoRider.phone },
-      'emergency_fallback_secret',
-      { expiresIn: '7d' }
-    );
-
-    console.log('✅ Emergency demo login successful');
-    res.json({
-      token: fallbackToken,
-      rider: fallbackDemoRider,
-      message: 'Demo mode: Emergency fallback login (system error occurred)',
-      mode: 'emergency_demo',
-      originalError: error.message
+    res.status(500).json({
+      message: 'Login failed due to server error. Please try again.',
+      error: 'Internal server error'
     });
   }
 });
