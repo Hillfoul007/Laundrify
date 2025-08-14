@@ -162,14 +162,22 @@ router.post('/login', async (req, res) => {
     console.log('🔍 Rider login attempt:', {
       hasPhone: !!req.body.phone,
       hasPassword: !!req.body.password,
-      bodyKeys: Object.keys(req.body)
+      bodyKeys: Object.keys(req.body),
+      body: req.body,
+      headers: req.headers,
+      url: req.url,
+      method: req.method
     });
 
     const { phone, password } = req.body;
 
     if (!phone || !password) {
-      console.log('❌ Missing credentials');
-      return res.status(400).json({ message: 'Phone and password are required' });
+      console.log('❌ Missing credentials in request body');
+      return res.status(400).json({
+        message: 'Phone and password are required',
+        received: { phone: !!phone, password: !!password },
+        bodyKeys: Object.keys(req.body)
+      });
     }
 
     // For development/demo mode when no database is connected
