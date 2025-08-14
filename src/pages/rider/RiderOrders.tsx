@@ -103,7 +103,10 @@ export default function RiderOrders() {
   const saveOrderChanges = async () => {
     try {
       const token = localStorage.getItem('riderToken');
-      const response = await fetch(`/api/riders/orders/${orderId}/update`, {
+      const apiUrl = getRiderApiUrl(`/orders/${orderId}/update`);
+      console.log('🔍 Updating order:', apiUrl);
+
+      const response = await fetch(apiUrl, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
