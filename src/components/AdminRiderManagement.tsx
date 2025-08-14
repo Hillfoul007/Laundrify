@@ -94,15 +94,23 @@ export default function AdminRiderManagement() {
       const response = await fetch(getAdminApiUrl('/riders'));
       if (response.ok) {
         const data = await response.json();
+        console.log('📋 Riders fetched from API:', data.length, 'riders');
         setRiders(data);
+
+        if (data.length > 0) {
+          toast.success(`Loaded ${data.length} riders from database`);
+        }
       } else {
         console.error('Failed to fetch riders:', response.status);
         if (response.status === 404) {
           toast.error('Admin rider API not available. Please ensure you are using the local development environment.');
+        } else {
+          toast.error(`Failed to load riders: ${response.status}`);
         }
       }
     } catch (error) {
       console.error('Failed to fetch riders:', error);
+      toast.error('Network error loading riders');
     }
   };
 
@@ -328,23 +336,37 @@ export default function AdminRiderManagement() {
                                     <div className="grid grid-cols-2 gap-4">
                                       <div>
                                         <Label className="font-medium">Aadhar Card</Label>
-                                        {selectedRider.aadharImageUrl && (
-                                          <img 
-                                            src={selectedRider.aadharImageUrl} 
+                                        {selectedRider.aadharImageUrl ? (
+                                          <img
+                                            src={selectedRider.aadharImageUrl.startsWith('http') ? selectedRider.aadharImageUrl : `https://backend-vaxf.onrender.com${selectedRider.aadharImageUrl}`}
                                             alt="Aadhar Card"
                                             className="mt-2 w-full h-32 object-cover border rounded"
+                                            onError={(e) => {
+                                              e.currentTarget.style.display = 'none';
+                                              e.currentTarget.nextElementSibling.style.display = 'block';
+                                            }}
                                           />
-                                        )}
+                                        ) : null}
+                                        <div style={{display: 'none'}} className="mt-2 p-4 border rounded bg-gray-50 text-center text-gray-500">
+                                          Image not available
+                                        </div>
                                       </div>
                                       <div>
                                         <Label className="font-medium">Selfie</Label>
-                                        {selectedRider.selfieImageUrl && (
-                                          <img 
-                                            src={selectedRider.selfieImageUrl} 
+                                        {selectedRider.selfieImageUrl ? (
+                                          <img
+                                            src={selectedRider.selfieImageUrl.startsWith('http') ? selectedRider.selfieImageUrl : `https://backend-vaxf.onrender.com${selectedRider.selfieImageUrl}`}
                                             alt="Selfie"
                                             className="mt-2 w-full h-32 object-cover border rounded"
+                                            onError={(e) => {
+                                              e.currentTarget.style.display = 'none';
+                                              e.currentTarget.nextElementSibling.style.display = 'block';
+                                            }}
                                           />
-                                        )}
+                                        ) : null}
+                                        <div style={{display: 'none'}} className="mt-2 p-4 border rounded bg-gray-50 text-center text-gray-500">
+                                          Image not available
+                                        </div>
                                       </div>
                                     </div>
                                     
