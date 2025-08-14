@@ -164,7 +164,10 @@ export default function RiderDashboard() {
 
     try {
       const token = localStorage.getItem('riderToken');
-      const response = await fetch('/api/riders/toggle-status', {
+      const apiUrl = getRiderApiUrl('/toggle-status');
+      console.log('🔍 Toggling status:', apiUrl);
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
