@@ -567,6 +567,39 @@ router.post("/", async (req, res) => {
     );
     console.log("🆔 Generated custom order ID:", booking.custom_order_id);
 
+    // Check if this customer is using a referral discount
+    try {
+      console.log("🔍 Checking for referral discounts...");
+
+      const Referral = require("../models/Referral");
+
+      // Check if this user has a pending referral (they were referred)
+      const userReferral = await Referral.findOne({
+        referee_id: customer._id,
+        status: "pending"
+      }).populate('referrer_id', 'name phone');
+
+      if (userReferral) {
+        console.log(`🎁 Found pending referral for customer ${customer.name}! Referrer: ${userReferral.referrer_id.name}`);
+
+        // Check if a referral discount was applied via FIRST30 or similar
+        // For referral users, FIRST30 becomes a 30% discount courtesy of their referrer
+        if (coupon_code === "FIRST30" || (discount_amount > 0 && total_price > 0)) {
+          console.log("🎉 Referral discount applied through booking coupon system");
+
+          // This will be handled when the booking is completed, not here
+          // We just log that the referral system is working
+        } else {
+          console.log("ℹ️ Referral user but no discount applied in this booking");
+        }
+      } else {
+        console.log("ℹ️ No pending referral found for this customer");
+      }
+    } catch (referralError) {
+      console.error("❌ Error checking referral discounts:", referralError);
+      // Don't fail the booking if referral checking fails
+    }
+
     // Save booking address to addresses table for future use
     try {
       console.log("💾 Saving booking address to addresses table...");
