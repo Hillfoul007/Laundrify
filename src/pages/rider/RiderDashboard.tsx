@@ -198,7 +198,10 @@ export default function RiderDashboard() {
   const fetchAssignedOrders = async () => {
     try {
       const token = localStorage.getItem('riderToken');
-      const response = await fetch('/api/riders/orders', {
+      const apiUrl = getRiderApiUrl('/orders');
+      console.log('🔍 Fetching orders:', apiUrl);
+
+      const response = await fetch(apiUrl, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
