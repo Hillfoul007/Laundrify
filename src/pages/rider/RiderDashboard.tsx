@@ -219,7 +219,10 @@ export default function RiderDashboard() {
   const handleOrderAction = async (orderId: string, action: 'accept' | 'start' | 'complete') => {
     try {
       const token = localStorage.getItem('riderToken');
-      const response = await fetch('/api/riders/order-action', {
+      const apiUrl = getRiderApiUrl('/order-action');
+      console.log('🔍 Order action:', action, apiUrl);
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
