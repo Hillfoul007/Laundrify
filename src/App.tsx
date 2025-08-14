@@ -5,10 +5,12 @@ import { NotificationProvider } from "@/contexts/NotificationContext";
 import LaundryIndex from "@/pages/LaundryIndex";
 import LocationConfigPage from "@/pages/LocationConfigPage";
 import AdminPortal from "@/pages/AdminPortal";
+import RiderAuth from "@/pages/rider/RiderAuth";
+import RiderDashboard from "@/pages/rider/RiderDashboard";
+import RiderOrders from "@/pages/rider/RiderOrders";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import InstallPrompt from "@/components/InstallPrompt";
 import PWAUpdateNotification from "@/components/PWAUpdateNotification";
-import AddressSearchDemo from "@/components/AddressSearchDemo";
 import MapsPerformanceIndicator from "@/components/MapsPerformanceIndicator";
 
 import {
@@ -53,11 +55,17 @@ function App() {
             <Routes>
               <Route path="/" element={<LaundryIndex />} />
               <Route path="/admin" element={<AdminPortal />} />
-              <Route path="/address-demo" element={<AddressSearchDemo />} />
               <Route
                 path="/admin/location-config"
                 element={<LocationConfigPage />}
               />
+              <Route path="/rider" element={<RiderAuth />} />
+              <Route path="/rider/register" element={<RiderAuth />} />
+              <Route path="/rider/login" element={<RiderAuth />} />
+              <Route path="/rider/dashboard" element={<RiderDashboard />} />
+              <Route path="/rider/orders" element={<RiderDashboard />} />
+              <Route path="/rider/orders/:orderId" element={<RiderOrders />} />
+              <Route path="/rider/profile" element={<RiderDashboard />} />
               <Route path="*" element={<LaundryIndex />} />
             </Routes>
             <Toaster />

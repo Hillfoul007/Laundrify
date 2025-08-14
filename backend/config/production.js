@@ -91,7 +91,8 @@ const config = {
     EMAIL_VERIFICATION: false, // Not implemented yet
     PUSH_NOTIFICATIONS: true,
     GEOLOCATION_TRACKING: true,
-    ADMIN_PANEL: false, // Future feature
+    RIDER_MANAGEMENT: true, // Rider system enabled
+    ADMIN_PANEL: true, // Admin features for rider management
     ANALYTICS: false, // Future feature
   },
 };

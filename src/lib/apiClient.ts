@@ -585,17 +585,24 @@ class EnhancedApiClient {
 }
 
 // Create and export the enhanced API client instance
-// Force production backend for hosted environments
 const getCorrectApiUrl = () => {
   const hostname = window.location.hostname;
   const isLocalhost = hostname.includes("localhost") || hostname.includes("127.0.0.1");
+  const isDevelopment = import.meta.env.DEV;
+  const isRenderCom = hostname.includes("onrender.com");
 
-  if (isLocalhost) {
-    return "http://localhost:3001/api";
+  // In development mode with localhost, use relative paths for vite proxy
+  if (isDevelopment && isLocalhost) {
+    return "/api";
   }
 
-  // For all hosted environments, force backend URL
-  return "https://backend-vaxf.onrender.com/api";
+  // For any hosted environment (including render.com), use full backend URL
+  if (isRenderCom || !isLocalhost) {
+    return "https://backend-vaxf.onrender.com/api";
+  }
+
+  // Fallback for localhost
+  return "/api";
 };
 
 const CORRECT_API_URL = getCorrectApiUrl();

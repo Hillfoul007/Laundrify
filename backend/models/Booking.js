@@ -32,6 +32,36 @@ const bookingSchema = new mongoose.Schema(
       ref: "User",
       default: null,
     },
+    assignedRider: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Rider",
+      default: null,
+    },
+    riderStatus: {
+      type: String,
+      enum: ["unassigned", "assigned", "accepted", "picked_up", "delivered", "completed"],
+      default: "unassigned",
+    },
+    assignedAt: {
+      type: Date,
+      default: null,
+    },
+    acceptedAt: {
+      type: Date,
+      default: null,
+    },
+    pickedUpAt: {
+      type: Date,
+      default: null,
+    },
+    deliveredAt: {
+      type: Date,
+      default: null,
+    },
+    completedAt: {
+      type: Date,
+      default: null,
+    },
     service: {
       type: String,
       required: [true, "Service is required"],
