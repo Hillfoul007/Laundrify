@@ -124,7 +124,10 @@ export default function RiderDashboard() {
   const updateLocationOnServer = async (location: {lat: number, lng: number}) => {
     try {
       const token = localStorage.getItem('riderToken');
-      await fetch('/api/riders/location', {
+      const apiUrl = getRiderApiUrl('/location');
+      console.log('🔍 Updating location:', apiUrl);
+
+      await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
