@@ -15,23 +15,31 @@ router.get('/test', (req, res) => {
   console.log('🔍 Rider routes test endpoint hit');
   res.json({
     success: true,
-    message: 'Rider routes are working!',
+    message: 'Rider routes are working! ✅',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
     dbConnected: !!mongoose.connection.readyState,
+    dbState: mongoose.connection.readyState,
     features: {
       registration: true,
       login: true,
       adminManagement: true,
       orderAssignment: true,
       locationTracking: true,
-      demoMode: !mongoose.connection.readyState
+      demoMode: true, // Always available
+      demoFallback: true
     },
-    demoCredentials: !mongoose.connection.readyState ? {
+    demoCredentials: {
       phone: '9876543210',
-      password: 'any_password',
-      note: 'Demo mode accepts any credentials'
-    } : null
+      password: 'password123',
+      alternatives: ['9876543211', '9876543212', 'any_number'],
+      note: 'Demo mode always works as fallback'
+    },
+    endpoints: {
+      login: '/api/riders/login',
+      register: '/api/riders/register',
+      test: '/api/riders/test'
+    }
   });
 });
 
