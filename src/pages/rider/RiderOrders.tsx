@@ -56,7 +56,10 @@ export default function RiderOrders() {
   const fetchOrderDetails = async (id: string) => {
     try {
       const token = localStorage.getItem('riderToken');
-      const response = await fetch(`/api/riders/orders/${id}`, {
+      const apiUrl = getRiderApiUrl(`/orders/${id}`);
+      console.log('🔍 Fetching order details:', apiUrl);
+
+      const response = await fetch(apiUrl, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
