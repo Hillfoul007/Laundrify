@@ -383,7 +383,7 @@ export default function RiderRegistration() {
 
   return (
     <div className="space-y-6">
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleFormSubmit} className="space-y-4">
         {/* Basic Information */}
         <div className="space-y-2">
           <Label htmlFor="name" className="flex items-center space-x-2">
