@@ -366,6 +366,16 @@ try {
   console.error("❌ Full rider routes error:", error);
 }
 
+// Notification routes
+try {
+  const notificationRoutes = require("./routes/notifications");
+  app.use("/api/notifications", notificationRoutes);
+  console.log("🔗 Notification routes registered at /api/notifications");
+} catch (error) {
+  console.error("❌ Failed to load Notification routes:", error.message);
+  console.error("❌ Full notification routes error:", error);
+}
+
 // Google Sheets integration removed
 
 // Push notification endpoints
