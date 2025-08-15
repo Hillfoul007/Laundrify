@@ -223,19 +223,36 @@ export default function RiderDashboard() {
   };
 
   const handleOrderAction = async (orderId: string, action: 'accept' | 'start' | 'complete') => {
+    console.log('🚀 handleOrderAction called', {
+      orderId,
+      action,
+      rider: rider ? { id: rider._id, status: rider.status, name: rider.name } : null,
+      isActive,
+      timestamp: new Date().toISOString()
+    });
+
     try {
       // Validate rider status first
       if (!rider) {
+        console.error('❌ No rider data found');
         toast.error('Rider information not found. Please login again.');
         return;
       }
 
+      console.log('✅ Rider validation:', {
+        status: rider.status,
+        isActive,
+        action
+      });
+
       if (rider.status !== 'approved') {
+        console.error('❌ Rider not approved:', rider.status);
         toast.error('Only approved riders can accept orders. Your status: ' + rider.status);
         return;
       }
 
       if (!isActive && action === 'accept') {
+        console.error('❌ Rider not active');
         toast.error('Please go active to accept orders.');
         return;
       }
@@ -465,12 +482,21 @@ export default function RiderDashboard() {
                         {order.riderStatus === 'assigned' && (
                           <Button
                             size="sm"
-                            onClick={() => handleOrderAction(order._id, 'accept')}
+                            onClick={() => {
+                              console.log('🔘 Accept button clicked!', {
+                                orderId: order._id,
+                                orderData: order,
+                                riderActive: isActive,
+                                riderStatus: rider?.status,
+                                buttonDisabled: !isActive || rider?.status !== 'approved'
+                              });
+                              handleOrderAction(order._id, 'accept');
+                            }}
                             className="flex-1 bg-green-600 hover:bg-green-700 text-white"
                             disabled={!isActive || rider?.status !== 'approved'}
                           >
                             <CheckCircle className="h-4 w-4 mr-1" />
-                            Accept Order
+                            {(!isActive || rider?.status !== 'approved') ? 'Cannot Accept' : 'Accept Order'}
                           </Button>
                         )}
                         {order.riderStatus === 'accepted' && (
