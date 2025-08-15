@@ -703,6 +703,154 @@ export default function AdminRiderManagement() {
           </Card>
         </TabsContent>
 
+        {/* Quick Pickup Tab */}
+        <TabsContent value="quick-pickups" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Package className="h-5 w-5" />
+                <span>Quick Pickup Orders</span>
+              </CardTitle>
+              <CardDescription>
+                Manage quick pickup orders and assign to riders
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4">
+                {orders.filter(order => order.type === 'Quick Pickup' && !order.assignedRider && !order.rider_id).map((order) => (
+                  <Card key={order._id} className="border-l-4 border-l-orange-600">
+                    <CardContent className="pt-4">
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-2">
+                          <h4 className="font-semibold">Quick Pickup #{order.bookingId}</h4>
+                          <div className="text-sm text-gray-600 space-y-1">
+                            <div className="flex items-center space-x-2">
+                              <User className="h-3 w-3" />
+                              <span>{order.customerName}</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Phone className="h-3 w-3" />
+                              <span>{order.customerPhone}</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <MapPin className="h-3 w-3" />
+                              <span>{order.address}</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Clock className="h-3 w-3" />
+                              <span>{order.pickupTime}</span>
+                            </div>
+                            {order.specialInstructions && (
+                              <div className="flex items-start space-x-2">
+                                <FileText className="h-3 w-3 mt-0.5" />
+                                <span className="text-xs bg-blue-50 p-1 rounded">{order.specialInstructions}</span>
+                              </div>
+                            )}
+                            {order.estimatedCost > 0 && (
+                              <div className="flex items-center space-x-2">
+                                <span className="text-xs font-medium bg-green-50 px-2 py-1 rounded">
+                                  Est. Cost: ₹{order.estimatedCost}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          <Badge variant="default" className="bg-orange-500 hover:bg-orange-600">
+                            Quick Pickup
+                          </Badge>
+                        </div>
+
+                        <Dialog
+                          open={assignModalOpen && selectedOrder?._id === order._id}
+                          onOpenChange={(open) => {
+                            setAssignModalOpen(open);
+                            if (open) setSelectedOrder(order);
+                          }}
+                        >
+                          <DialogTrigger asChild>
+                            <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
+                              <Navigation className="h-4 w-4 mr-2" />
+                              Assign Rider
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Assign Quick Pickup to Rider</DialogTitle>
+                              <DialogDescription>
+                                Select a rider to assign this quick pickup to
+                              </DialogDescription>
+                            </DialogHeader>
+
+                            <div className="space-y-4">
+                              <div>
+                                <Label className="font-medium">Quick Pickup Details</Label>
+                                <p className="text-sm text-gray-600">
+                                  #{selectedOrder?.bookingId} - {selectedOrder?.customerName}
+                                </p>
+                                {selectedOrder?.specialInstructions && (
+                                  <p className="text-xs text-blue-600 bg-blue-50 p-2 rounded mt-1">
+                                    <strong>Instructions:</strong> {selectedOrder.specialInstructions}
+                                  </p>
+                                )}
+                              </div>
+
+                              <div>
+                                <Label className="font-medium">Available Riders</Label>
+                                <div className="mt-2 space-y-2 max-h-60 overflow-y-auto">
+                                  {activeRiders.map((rider) => (
+                                    <div
+                                      key={rider._id}
+                                      className={`p-3 border rounded cursor-pointer transition-colors ${
+                                        selectedRider?._id === rider._id ? 'border-orange-500 bg-orange-50' : 'hover:bg-gray-50'
+                                      }`}
+                                      onClick={() => setSelectedRider(rider)}
+                                    >
+                                      <div className="flex justify-between items-center">
+                                        <div>
+                                          <p className="font-medium">{rider.name}</p>
+                                          <p className="text-sm text-gray-600">{rider.phone}</p>
+                                        </div>
+                                        <Badge variant="outline" className="bg-orange-50">
+                                          Available
+                                        </Badge>
+                                      </div>
+                                    </div>
+                                  ))}
+
+                                  {activeRiders.length === 0 && (
+                                    <p className="text-center text-gray-500 py-4">
+                                      No active riders available
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+
+                              <Button
+                                onClick={assignOrderToRider}
+                                disabled={!selectedRider}
+                                className="w-full bg-orange-500 hover:bg-orange-600"
+                              >
+                                Assign Quick Pickup
+                              </Button>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+
+                {orders.filter(order => order.type === 'Quick Pickup' && !order.assignedRider && !order.rider_id).length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    <Package className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <p>No unassigned quick pickups</p>
+                    <p className="text-sm">New quick pickup orders will appear here for assignment</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         {/* Live Tracking Tab */}
         <TabsContent value="tracking" className="space-y-4">
           <Card>
