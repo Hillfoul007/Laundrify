@@ -58,14 +58,28 @@ const ReferralModal: React.FC<ReferralModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // Generate a demo referral code based on user data
-  const generateDemoReferralCode = () => {
+  // Generate a persistent referral code based on user data
+  const generatePersistentReferralCode = () => {
     if (!currentUser?.phone && !currentUser?._id) return "DEMO123ABC";
-    
+
+    const userId = currentUser._id || currentUser.phone || "demo";
+    const storageKey = `referral_code_${userId}`;
+
+    // Check if we already have a stored code for this user
+    const existingCode = localStorage.getItem(storageKey);
+    if (existingCode) {
+      return existingCode;
+    }
+
+    // Generate new persistent code
     const phoneOrId = currentUser.phone || currentUser._id?.toString() || "demo";
     const lastFour = phoneOrId.slice(-4).padStart(4, '0');
     const randomPart = Math.random().toString(36).substr(2, 3).toUpperCase();
-    return `REF${lastFour}${randomPart}`;
+    const newCode = `REF${lastFour}${randomPart}`;
+
+    // Store it persistently
+    localStorage.setItem(storageKey, newCode);
+    return newCode;
   };
 
   useEffect(() => {
@@ -98,8 +112,8 @@ const ReferralModal: React.FC<ReferralModalProps> = ({
     } catch (error) {
       console.warn("API failed, using demo data:", error);
       
-      // Fallback to demo data
-      const demoCode = generateDemoReferralCode();
+      // Fallback to persistent local code
+      const demoCode = generatePersistentReferralCode();
       setReferralCode(demoCode);
       
       // Set demo stats
@@ -159,9 +173,11 @@ const ReferralModal: React.FC<ReferralModalProps> = ({
     }
 
     const userName = currentUser?.name || currentUser?.full_name || "Friend";
+    const referralLink = `${window.location.origin}?ref=${referralCode}`;
+
     const message = `🧺 *Laundrify - Professional Laundry Service*
 
-Hi! I've been using Laundrify for my laundry needs and I absolutely love their service! 
+Hi! I've been using Laundrify for my laundry needs and I absolutely love their service!
 
 🎁 *Special Offer for You:*
 Use my referral code: *${referralCode}*
@@ -173,14 +189,17 @@ Get *30% OFF* your first order!
 • Same-day service available
 • Trusted by thousands
 
-Download the app: ${window.location.origin}
+🔗 *Click here to get started:*
+${referralLink}
+
+(Your referral code will be automatically applied!)
 
 Happy cleaning! 🌟
 - ${userName}`;
 
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, "_blank");
-    
+
     toast.success("WhatsApp share opened!");
   };
 
@@ -190,8 +209,9 @@ Happy cleaning! 🌟
       return;
     }
 
-    const message = `Hey! Use my Laundrify referral code ${referralCode} and get 30% OFF your first laundry order! Download: ${window.location.origin}`;
-    
+    const referralLink = `${window.location.origin}?ref=${referralCode}`;
+    const message = `Hey! Use my Laundrify referral code ${referralCode} and get 30% OFF your first laundry order! Click here: ${referralLink} (Code auto-applied!)`;
+
     try {
       const smsUrl = `sms:?body=${encodeURIComponent(message)}`;
       window.open(smsUrl);
@@ -208,10 +228,11 @@ Happy cleaning! 🌟
       return;
     }
 
+    const referralLink = `${window.location.origin}?ref=${referralCode}`;
     const shareData = {
       title: "Laundrify Referral - 30% OFF",
       text: `Use my referral code ${referralCode} and get 30% OFF your first laundry order with Laundrify!`,
-      url: window.location.origin,
+      url: referralLink,
     };
 
     try {
@@ -222,7 +243,7 @@ Happy cleaning! 🌟
         // Fallback - copy to clipboard
         const shareText = `${shareData.text} ${shareData.url}`;
         await navigator.clipboard.writeText(shareText);
-        toast.success("Share link copied to clipboard!");
+        toast.success("Referral link copied to clipboard!");
       }
     } catch (error) {
       if (error.name !== 'AbortError') {
