@@ -76,6 +76,26 @@ export default function RiderDashboard() {
     
     // Load assigned orders
     fetchAssignedOrders();
+
+    // Network status listeners
+    const handleOnline = () => {
+      setIsOnline(true);
+      setLastFetchError(null);
+      // Retry fetching data when coming back online
+      fetchAssignedOrders();
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, []);
 
   useEffect(() => {
