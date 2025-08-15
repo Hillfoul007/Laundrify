@@ -130,8 +130,14 @@ class EnhancedApiClient {
     try {
       const result = await requestPromise;
       return result;
+    } catch (error) {
+      // Log the error for debugging
+      console.error(`🔥 Request failed for ${requestKey}:`, error);
+
+      // Re-throw the error so it's handled by the caller
+      throw error;
     } finally {
-      // Clean up from queue
+      // Always clean up from queue
       this.requestQueue.delete(requestKey);
     }
   }
