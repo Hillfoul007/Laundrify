@@ -200,7 +200,7 @@ export default function RiderDashboard() {
     try {
       const token = localStorage.getItem('riderToken');
       const apiUrl = getRiderApiUrl('/orders');
-      console.log('🔍 Fetching assigned orders:', apiUrl);
+      console.log('🔍 Fetching assigned orders:', apiUrl, 'Token exists:', !!token);
 
       const response = await fetch(apiUrl, {
         headers: {
@@ -210,10 +210,10 @@ export default function RiderDashboard() {
 
       if (response.ok) {
         const orders = await response.json();
-        console.log(`📋 Fetched ${orders.length} assigned orders for rider`);
+        console.log(`📋 Fetched ${orders.length} assigned orders for rider:`, orders);
         setAssignedOrders(orders);
       } else {
-        console.error('Failed to fetch assigned orders:', response.status);
+        console.error('Failed to fetch assigned orders:', response.status, response.statusText);
         setAssignedOrders([]);
       }
     } catch (error) {
