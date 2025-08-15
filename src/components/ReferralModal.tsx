@@ -153,22 +153,29 @@ const ReferralModal: React.FC<ReferralModalProps> = ({
       console.warn("🔄 API failed, using local fallback:", error?.message || error);
 
       // Fallback to persistent local code
-      const demoCode = generatePersistentReferralCode();
-      console.log('💾 Using local persistent code:', demoCode);
-      setReferralCode(demoCode);
+      const localCode = generatePersistentReferralCode();
+      if (localCode) {
+        console.log('💾 Using local persistent code:', localCode);
+        setReferralCode(localCode);
 
-      // Set demo stats
-      setStats({
-        asReferrer: {
-          totalReferrals: 2,
-          completedReferrals: 1,
-          pendingRewards: 0,
-          totalRewardsEarned: 1,
-        },
-        asReferee: {
-          hasUsedReferral: false,
-        },
-      });
+        // Set empty stats for local code
+        setStats({
+          asReferrer: {
+            totalReferrals: 0,
+            completedReferrals: 0,
+            pendingRewards: 0,
+            totalRewardsEarned: 0,
+          },
+          asReferee: {
+            hasUsedReferral: false,
+          },
+        });
+      } else {
+        // No user ID available, can't generate code
+        console.warn('Cannot generate referral code - no user identification');
+        setReferralCode("");
+        setStats(null);
+      }
 
       toast.success("Referral code ready!");
     } finally {
