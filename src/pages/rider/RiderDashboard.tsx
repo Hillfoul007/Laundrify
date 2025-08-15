@@ -28,31 +28,22 @@ const getRiderApiUrl = (endpoint: string): string => {
   const isRenderCom = hostname.includes("onrender.com");
   const isLaundrifyDomain = hostname.includes("laundrify.online");
 
-  console.log('🔍 Rider API URL Detection:', {
-    isDev,
-    hostname,
-    isLocalhost,
-    isRenderCom,
-    isLaundrifyDomain,
-    mode: import.meta.env.MODE,
-    origin: window.location.origin,
-    endpoint
-  });
+  let apiUrl: string;
 
   // Force correct backend URL based on environment
   if (isLocalhost && isDev) {
-    // Local development - use proxy
-    console.log('🏠 Using local proxy for rider API');
-    return `/api/riders${endpoint}`;
+    // Local development - try proxy first, fallback to production
+    apiUrl = `/api/riders${endpoint}`;
   } else if (isRenderCom || isLaundrifyDomain || !isLocalhost) {
     // Any hosted environment - use backend server
-    const backendUrl = 'https://backend-vaxf.onrender.com/api/riders' + endpoint;
-    console.log('🌐 Using backend server for rider API:', backendUrl);
-    return backendUrl;
+    apiUrl = 'https://backend-vaxf.onrender.com/api/riders' + endpoint;
+  } else {
+    // Fallback to production backend
+    apiUrl = 'https://backend-vaxf.onrender.com/api/riders' + endpoint;
   }
 
-  // Fallback
-  return `/api/riders${endpoint}`;
+  console.log('🔗 API URL for', endpoint, '→', apiUrl);
+  return apiUrl;
 };
 
 export default function RiderDashboard() {
