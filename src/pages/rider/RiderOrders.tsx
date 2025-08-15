@@ -435,32 +435,89 @@ export default function RiderOrders() {
               ))}
 
               {isEditing && (
-                <Card className="border-dashed">
+                <Card className="border-dashed border-green-300 bg-green-50">
                   <CardContent className="pt-4">
-                    <h4 className="font-medium mb-3">Add New Item</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-                      <Input
-                        placeholder="Item name"
-                        value={newItem.name}
-                        onChange={(e) => setNewItem({...newItem, name: e.target.value})}
-                      />
-                      <Input
-                        type="number"
-                        placeholder="Quantity"
-                        value={newItem.quantity}
-                        onChange={(e) => setNewItem({...newItem, quantity: parseInt(e.target.value) || 1})}
-                      />
-                      <Input
-                        type="number"
-                        placeholder="Price"
-                        value={newItem.price}
-                        onChange={(e) => setNewItem({...newItem, price: parseFloat(e.target.value) || 0})}
-                      />
-                      <Button onClick={addNewItem}>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add
-                      </Button>
+                    <h4 className="font-medium mb-3 text-green-800">Add Service to Order</h4>
+                    <p className="text-sm text-green-700 mb-4">
+                      {isQuickPickup ?
+                        "This is a quick pickup order. Add services based on items collected from customer." :
+                        "Select additional services from our available options."
+                      }
+                    </p>
+
+                    <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-4">
+                      <TabsList className="grid grid-cols-3 md:grid-cols-6 gap-1">
+                        {serviceCategories.map((category) => (
+                          <TabsTrigger
+                            key={category.id}
+                            value={category.id}
+                            className="text-xs"
+                          >
+                            {category.icon}
+                          </TabsTrigger>
+                        ))}
+                      </TabsList>
+                    </Tabs>
+
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                      <div className="md:col-span-2">
+                        <Label className="text-sm font-medium">Service</Label>
+                        <Select
+                          value={selectedService?.id || ""}
+                          onValueChange={(serviceId) => {
+                            const service = laundryServices.find(s => s.id === serviceId);
+                            setSelectedService(service || null);
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a service" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {getAvailableServices().map((service) => (
+                              <SelectItem key={service.id} value={service.id}>
+                                <div className="flex flex-col">
+                                  <span className="font-medium">{service.name}</span>
+                                  <span className="text-sm text-gray-500">
+                                    ₹{service.price}/{service.unit}
+                                  </span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <Label className="text-sm font-medium">Quantity</Label>
+                        <Input
+                          type="number"
+                          min="1"
+                          value={serviceQuantity}
+                          onChange={(e) => setServiceQuantity(parseInt(e.target.value) || 1)}
+                        />
+                      </div>
+
+                      <div className="flex flex-col justify-end">
+                        <Button
+                          onClick={addSelectedService}
+                          disabled={!selectedService}
+                          className="w-full"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Service
+                        </Button>
+                      </div>
                     </div>
+
+                    {selectedService && (
+                      <div className="mt-3 p-3 bg-white rounded-lg border">
+                        <p className="text-sm font-medium">{selectedService.name}</p>
+                        <p className="text-xs text-gray-600">{selectedService.description}</p>
+                        <p className="text-sm font-semibold text-green-600 mt-1">
+                          Total: ₹{selectedService.price * serviceQuantity}
+                        </p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               )}
