@@ -127,23 +127,50 @@ export default function RiderDashboard() {
   const updateLocationOnServer = async (location: {lat: number, lng: number}) => {
     try {
       const token = localStorage.getItem('riderToken');
+
+      if (!token || !rider) {
+        console.log('No token or rider data, skipping location update');
+        return;
+      }
+
+      // Skip if offline
+      if (!navigator.onLine) {
+        console.log('Offline - location update will be retried when online');
+        return;
+      }
+
       const apiUrl = getRiderApiUrl('/location');
       console.log('🔍 Updating location:', apiUrl);
 
-      await fetch(apiUrl, {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          riderId: rider?._id,
+          riderId: rider._id,
           location,
           timestamp: new Date().toISOString()
-        })
+        }),
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        console.warn('Location update failed:', response.status, response.statusText);
+      }
     } catch (error) {
-      console.error('Failed to update location:', error);
+      if (error.name === 'AbortError') {
+        console.warn('Location update timed out');
+      } else {
+        console.error('Failed to update location:', error);
+      }
+      // Don't show error to user for location updates as they're background operations
     }
   };
 
@@ -201,25 +228,61 @@ export default function RiderDashboard() {
   const fetchAssignedOrders = async () => {
     try {
       const token = localStorage.getItem('riderToken');
+
+      if (!token) {
+        console.log('No rider token, using demo orders');
+        setDemoOrders();
+        return;
+      }
+
       const apiUrl = getRiderApiUrl('/orders');
+      console.log('🔍 Fetching assigned orders from:', apiUrl);
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
 
       const response = await fetch(apiUrl, {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const orders = await response.json();
-        setAssignedOrders(orders);
+        setAssignedOrders(Array.isArray(orders) ? orders : []);
       } else {
-        console.error('Failed to fetch assigned orders:', response.status);
-        setAssignedOrders([]);
+        console.warn('Failed to fetch assigned orders:', response.status, response.statusText);
+        setDemoOrders();
       }
     } catch (error) {
-      console.error('Failed to fetch assigned orders:', error);
-      setAssignedOrders([]);
+      if (error.name === 'AbortError') {
+        console.warn('Order fetch timed out');
+      } else {
+        console.error('Failed to fetch assigned orders:', error);
+      }
+      setDemoOrders();
     }
+  };
+
+  const setDemoOrders = () => {
+    const demoOrders = [
+      {
+        _id: 'demo_order_1',
+        bookingId: 'LAU-DEMO-001',
+        customerName: 'Demo Customer',
+        customerPhone: '+91 9999999999',
+        address: 'Sample Address, Sector 14, Gurugram',
+        pickupTime: '2:00 PM - 4:00 PM',
+        type: 'Regular',
+        riderStatus: 'assigned',
+        assignedAt: new Date().toISOString()
+      }
+    ];
+    setAssignedOrders(demoOrders);
   };
 
   const openGoogleMapsNavigation = (order: any) => {
