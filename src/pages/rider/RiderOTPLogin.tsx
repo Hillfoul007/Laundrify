@@ -53,11 +53,13 @@ export default function RiderOTPLogin() {
         body: JSON.stringify({ phone: phone.trim() }),
       });
 
+      // Read response once to avoid "body stream already read" error
+      const responseData = await response.json().catch(() => ({}));
+
       if (response.ok) {
-        const result = await response.json();
         toast.success('OTP sent to your phone number');
         setStep('otp');
-        
+
         // Start countdown timer
         setCountdown(60);
         const timer = setInterval(() => {
@@ -70,13 +72,12 @@ export default function RiderOTPLogin() {
           });
         }, 1000);
       } else {
-        const error = await response.json();
         if (response.status === 404) {
           toast.error('Rider not found. Please register first.');
         } else if (response.status === 403) {
-          toast.error(error.message || 'Account not approved by admin');
+          toast.error(responseData.message || 'Account not approved by admin');
         } else {
-          toast.error(error.message || 'Failed to send OTP');
+          toast.error(responseData.message || 'Failed to send OTP');
         }
       }
     } catch (error) {
