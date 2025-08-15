@@ -41,7 +41,7 @@ const getRiderApiUrl = (endpoint: string): string => {
   // Force correct backend URL based on environment
   if (isLocalhost && isDev) {
     // Local development - use proxy
-    console.log('�� Using local proxy for rider API');
+    console.log('🏠 Using local proxy for rider API');
     return `/api/riders${endpoint}`;
   } else if (isRenderCom || isLaundrifyDomain || !isLocalhost) {
     // Any hosted environment - use backend server
@@ -200,20 +200,25 @@ export default function RiderDashboard() {
     try {
       const token = localStorage.getItem('riderToken');
       const apiUrl = getRiderApiUrl('/orders');
-      console.log('🔍 Fetching orders:', apiUrl);
+      console.log('🔍 Fetching assigned orders:', apiUrl);
 
       const response = await fetch(apiUrl, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-      
+
       if (response.ok) {
         const orders = await response.json();
+        console.log(`📋 Fetched ${orders.length} assigned orders for rider`);
         setAssignedOrders(orders);
+      } else {
+        console.error('Failed to fetch assigned orders:', response.status);
+        setAssignedOrders([]);
       }
     } catch (error) {
-      console.error('Failed to fetch orders:', error);
+      console.error('Failed to fetch assigned orders:', error);
+      setAssignedOrders([]);
     }
   };
 
