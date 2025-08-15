@@ -719,7 +719,8 @@ router.post("/orders/assign", verifyAdminAccess, async (req, res) => {
       return res.json({
         message: 'Order assigned successfully (demo mode)',
         order: { _id: orderId, assignedRider: riderId, status: 'assigned' },
-        rider: 'Demo Rider'
+        rider: 'Demo Rider',
+        notification_sent: true
       });
     }
 
@@ -734,6 +735,7 @@ router.post("/orders/assign", verifyAdminAccess, async (req, res) => {
 
     let order;
     let assignmentResult;
+    let notificationSent = false;
 
     // Determine if this is a quick pickup or regular booking
     if (orderType === 'Quick Pickup') {
@@ -746,13 +748,28 @@ router.post("/orders/assign", verifyAdminAccess, async (req, res) => {
       order.rider_id = riderId;
       order.rider_name = rider.name;
       order.status = 'assigned';
+      order.assignedAt = new Date();
       await order.save();
+
+      // Send notification to rider
+      try {
+        await riderNotificationService.createOrderAssignmentNotification(
+          riderId,
+          order,
+          'Quick Pickup'
+        );
+        notificationSent = true;
+        console.log(`📢 Notification sent to rider ${rider.name} for quick pickup assignment`);
+      } catch (notificationError) {
+        console.error('❌ Failed to send notification to rider:', notificationError);
+      }
 
       assignmentResult = {
         message: 'Quick pickup assigned successfully',
         order,
         rider: rider.name,
-        type: 'quick_pickup'
+        type: 'quick_pickup',
+        notification_sent: notificationSent
       };
     } else {
       // Handle regular Booking assignment
@@ -772,15 +789,29 @@ router.post("/orders/assign", verifyAdminAccess, async (req, res) => {
 
       await Promise.all([order.save(), rider.save()]);
 
+      // Send notification to rider
+      try {
+        await riderNotificationService.createOrderAssignmentNotification(
+          riderId,
+          order,
+          'Regular'
+        );
+        notificationSent = true;
+        console.log(`📢 Notification sent to rider ${rider.name} for order assignment`);
+      } catch (notificationError) {
+        console.error('❌ Failed to send notification to rider:', notificationError);
+      }
+
       assignmentResult = {
         message: 'Order assigned successfully',
         order,
         rider: rider.name,
-        type: 'booking'
+        type: 'booking',
+        notification_sent: notificationSent
       };
     }
 
-    console.log(`✅ Order assigned to ${rider.name} (${orderType})`);
+    console.log(`✅ Order assigned to ${rider.name} (${orderType}) - Notification sent: ${notificationSent}`);
     res.json(assignmentResult);
   } catch (error) {
     console.error('Order assignment error:', error);
