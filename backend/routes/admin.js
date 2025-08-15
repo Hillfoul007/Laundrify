@@ -580,8 +580,40 @@ router.get("/orders", verifyAdminAccess, async (req, res) => {
       }
     ];
 
-    const orders = await Booking.find(query).sort({ createdAt: -1 }) || sampleOrders;
-    res.json(orders.length > 0 ? orders : sampleOrders);
+    // Fetch both regular bookings and quick pickups
+    const [bookings, quickPickups] = await Promise.all([
+      Booking.find(query).sort({ createdAt: -1 }),
+      QuickPickup.find(query).sort({ createdAt: -1 })
+    ]);
+
+    // Transform quick pickups to match booking format for frontend
+    const transformedQuickPickups = quickPickups.map(qp => ({
+      _id: qp._id,
+      bookingId: `QP-${qp._id.toString().slice(-6).toUpperCase()}`,
+      customerName: qp.customer_name,
+      customerPhone: qp.customer_phone,
+      address: qp.address,
+      pickupTime: `${qp.pickup_date} ${qp.pickup_time}`,
+      type: 'Quick Pickup',
+      status: qp.status,
+      assignedRider: qp.rider_id,
+      specialInstructions: qp.special_instructions,
+      estimatedCost: qp.estimated_cost,
+      actualCost: qp.actual_cost,
+      itemsCollected: qp.items_collected,
+      notes: qp.notes,
+      createdAt: qp.createdAt,
+      updatedAt: qp.updatedAt
+    }));
+
+    // Combine and sort all orders by creation date
+    const allOrders = [...bookings, ...transformedQuickPickups].sort((a, b) =>
+      new Date(b.createdAt) - new Date(a.createdAt)
+    );
+
+    console.log(`✅ Found ${bookings.length} regular bookings and ${quickPickups.length} quick pickups`);
+
+    res.json(allOrders.length > 0 ? allOrders : sampleOrders);
   } catch (error) {
     console.error('Get orders error:', error);
     res.status(500).json({ message: 'Failed to fetch orders', error: error.message });
