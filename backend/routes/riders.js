@@ -704,25 +704,72 @@ router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
   try {
     const { orderId } = req.params;
     const { items, notes } = req.body;
-    
+
     const order = await Booking.findOne({
       _id: orderId,
       assignedRider: req.rider.riderId
-    });
-    
+    }).populate('customer_id', 'name phone email');
+
     if (!order) {
       return res.status(404).json({ message: 'Order not found or not assigned to you' });
     }
+
+    // Get rider information
+    const rider = await Rider.findById(req.rider.riderId);
+    if (!rider) {
+      return res.status(404).json({ message: 'Rider not found' });
+    }
+
+    // Store original items for comparison
+    const originalItems = order.items || [];
+
+    // Calculate price changes
+    const priceComparison = notificationService.calculatePriceChanges(originalItems, items);
+    const itemChanges = notificationService.compareItems(originalItems, items);
 
     // Update order items
     order.items = items;
     order.notes = notes || order.notes;
     order.updatedBy = 'rider';
     order.lastModified = new Date();
-    
+
     await order.save();
-    
-    res.json({ message: 'Order updated successfully', order });
+
+    // Send notification to user if there are significant changes
+    if (priceComparison.price_change !== 0 || itemChanges.added.length > 0 ||
+        itemChanges.removed.length > 0 || itemChanges.modified.length > 0) {
+
+      try {
+        const changes = {
+          old_items: originalItems,
+          new_items: items,
+          price_change: priceComparison.price_change,
+          old_total: priceComparison.old_total,
+          new_total: priceComparison.new_total,
+          item_changes: itemChanges,
+          notes: notes
+        };
+
+        await notificationService.createOrderUpdateNotification(
+          order.customer_id._id || order.customer_id,
+          order,
+          rider,
+          changes
+        );
+
+        console.log(`✅ Notification sent to user for order ${order.bookingId || orderId}`);
+      } catch (notificationError) {
+        console.error('❌ Failed to send notification:', notificationError);
+        // Don't fail the order update if notification fails
+      }
+    }
+
+    res.json({
+      message: 'Order updated successfully',
+      order,
+      price_change: priceComparison.price_change,
+      notification_sent: true
+    });
   } catch (error) {
     console.error('Order update error:', error);
     res.status(500).json({ message: 'Failed to update order', error: error.message });
