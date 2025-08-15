@@ -60,9 +60,9 @@ const ReferralModal: React.FC<ReferralModalProps> = ({
 
   // Generate a persistent referral code based on user data
   const generatePersistentReferralCode = () => {
-    if (!currentUser?.phone && !currentUser?._id) return "DEMO123ABC";
+    if (!currentUser?.phone && !currentUser?._id) return null; // Don't generate for anonymous users
 
-    const userId = currentUser._id || currentUser.phone || "demo";
+    const userId = currentUser._id || currentUser.phone;
     const storageKey = `referral_code_${userId}`;
 
     // Check if we already have a stored code for this user
@@ -72,7 +72,7 @@ const ReferralModal: React.FC<ReferralModalProps> = ({
     }
 
     // Generate new persistent code
-    const phoneOrId = currentUser.phone || currentUser._id?.toString() || "demo";
+    const phoneOrId = currentUser.phone || currentUser._id?.toString();
     const lastFour = phoneOrId.slice(-4).padStart(4, '0');
     const randomPart = Math.random().toString(36).substr(2, 3).toUpperCase();
     const newCode = `REF${lastFour}${randomPart}`;
