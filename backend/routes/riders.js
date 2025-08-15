@@ -150,11 +150,21 @@ router.post('/register', upload.fields([
       fileKeys: req.files ? Object.keys(req.files) : []
     });
 
-    const { name, phone, aadharNumber } = req.body;
+    const { name, phone, aadharNumber, otp } = req.body;
 
-    if (!name || !phone || !aadharNumber) {
+    if (!name || !phone || !aadharNumber || !otp) {
       return res.status(400).json({
-        message: 'Name, phone, and Aadhar number are required'
+        message: 'Name, phone, Aadhar number, and OTP are required'
+      });
+    }
+
+    // Verify OTP first
+    const verification = otpService.verifyOTP(phone, otp, 'registration');
+
+    if (!verification.success) {
+      return res.status(400).json({
+        message: verification.error,
+        attemptsRemaining: verification.attemptsRemaining
       });
     }
 
@@ -450,7 +460,7 @@ router.post('/login', async (req, res) => {
 
       // Check if rider is approved (status check)
       if (rider.status !== 'approved') {
-        console.log(`��️ Rider ${rider.name} status is ${rider.status}, login denied`);
+        console.log(`⚠️ Rider ${rider.name} status is ${rider.status}, login denied`);
         return res.status(403).json({
           message: rider.status === 'pending'
             ? 'Your account is pending approval from admin'
