@@ -39,6 +39,18 @@ export default function RiderOTPLogin({ onSwitchToRegister }: RiderOTPLoginProps
   const [countdown, setCountdown] = useState(0);
   const navigate = useNavigate();
 
+  const handleSwitchToRegister = () => {
+    if (onSwitchToRegister) {
+      onSwitchToRegister();
+    } else {
+      // Fallback method
+      const registerTab = document.querySelector('[value="register"]') as HTMLElement;
+      if (registerTab) {
+        registerTab.click();
+      }
+    }
+  };
+
   const handleRequestOTP = async (e: React.FormEvent) => {
     e.preventDefault();
 
