@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import RiderRegistration from './RiderRegistration';
 import RiderOTPLogin from './RiderOTPLogin';
-import RiderDebug from '@/components/RiderDebug';
 
 export default function RiderAuth() {
   const [activeTab, setActiveTab] = useState('login');
