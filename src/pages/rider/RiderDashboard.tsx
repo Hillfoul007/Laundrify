@@ -305,12 +305,12 @@ export default function RiderDashboard() {
       if (response.ok) {
         toast.success(`Order ${action}ed successfully!`);
 
-        // If accepting an order, open Google Maps navigation
-        if (action === 'accept') {
-          const acceptedOrder = assignedOrders.find(order => order._id === orderId);
-          if (acceptedOrder) {
+        // If accepting or starting an order, open Google Maps navigation
+        if (action === 'accept' || action === 'start') {
+          const currentOrder = assignedOrders.find(order => order._id === orderId);
+          if (currentOrder) {
             setTimeout(() => {
-              openGoogleMapsNavigation(acceptedOrder);
+              openGoogleMapsNavigation(currentOrder);
             }, 1000); // Small delay to allow success message to show
           }
         }
