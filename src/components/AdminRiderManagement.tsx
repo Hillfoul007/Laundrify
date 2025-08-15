@@ -323,10 +323,11 @@ export default function AdminRiderManagement() {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="verification" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="verification">Verification</TabsTrigger>
           <TabsTrigger value="active">Active Riders</TabsTrigger>
-          <TabsTrigger value="orders">Order Assignment</TabsTrigger>
+          <TabsTrigger value="orders">Orders</TabsTrigger>
+          <TabsTrigger value="quick-pickups">Quick Pickups</TabsTrigger>
           <TabsTrigger value="tracking">Live Tracking</TabsTrigger>
         </TabsList>
 
