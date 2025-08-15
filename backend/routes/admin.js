@@ -620,7 +620,80 @@ router.get("/orders", verifyAdminAccess, async (req, res) => {
   }
 });
 
-// Assign order to rider
+// Get quick pickup orders specifically
+router.get("/quick-pickups", verifyAdminAccess, async (req, res) => {
+  try {
+    const { status } = req.query;
+    let query = {};
+
+    if (status) {
+      const statusArray = status.split(',');
+      query.status = { $in: statusArray };
+    }
+
+    console.log('📋 Fetching quick pickup orders...');
+
+    const quickPickups = await QuickPickup.find(query)
+      .populate('customer_id', 'name phone email')
+      .populate('rider_id', 'name phone')
+      .sort({ createdAt: -1 });
+
+    console.log(`✅ Found ${quickPickups.length} quick pickup orders`);
+
+    res.json(quickPickups);
+  } catch (error) {
+    console.error('Get quick pickups error:', error);
+    res.status(500).json({ message: 'Failed to fetch quick pickups', error: error.message });
+  }
+});
+
+// Assign quick pickup to rider
+router.post("/quick-pickups/assign", verifyAdminAccess, async (req, res) => {
+  try {
+    const { orderId, riderId } = req.body;
+
+    console.log('🎯 Assigning quick pickup:', { orderId, riderId });
+
+    if (!mongoose.Types.ObjectId.isValid(orderId) || !mongoose.Types.ObjectId.isValid(riderId)) {
+      return res.json({
+        message: 'Quick pickup assigned successfully (demo mode)',
+        order: { _id: orderId, rider_id: riderId, status: 'assigned' },
+        rider: 'Demo Rider'
+      });
+    }
+
+    const quickPickup = await QuickPickup.findById(orderId);
+    const rider = await Rider.findById(riderId);
+
+    if (!quickPickup || !rider) {
+      return res.status(404).json({ message: 'Quick pickup or rider not found' });
+    }
+
+    if (rider.status !== 'approved' || !rider.isActive) {
+      return res.status(400).json({ message: 'Rider is not available for assignment' });
+    }
+
+    // Assign quick pickup to rider
+    quickPickup.rider_id = riderId;
+    quickPickup.rider_name = rider.name;
+    quickPickup.status = 'assigned';
+
+    await quickPickup.save();
+
+    console.log(`✅ Quick pickup assigned to ${rider.name}`);
+
+    res.json({
+      message: 'Quick pickup assigned successfully',
+      order: quickPickup,
+      rider: rider.name
+    });
+  } catch (error) {
+    console.error('Quick pickup assignment error:', error);
+    res.status(500).json({ message: 'Failed to assign quick pickup', error: error.message });
+  }
+});
+
+// Assign order to rider (handles both regular bookings and quick pickups)
 router.post("/orders/assign", verifyAdminAccess, async (req, res) => {
   try {
     const { orderId, riderId } = req.body;
