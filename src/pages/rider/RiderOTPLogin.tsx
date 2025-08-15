@@ -167,13 +167,7 @@ export default function RiderOTPLogin({ onSwitchToRegister }: RiderOTPLoginProps
             duration: 5000,
             action: {
               label: 'Register Now',
-              onClick: () => {
-                // Switch to register tab
-                const registerTab = document.querySelector('[value="register"]') as HTMLElement;
-                if (registerTab) {
-                  registerTab.click();
-                }
-              }
+              onClick: handleSwitchToRegister
             }
           });
           setStep('phone');
