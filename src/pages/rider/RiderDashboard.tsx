@@ -260,6 +260,9 @@ export default function RiderDashboard() {
   return (
     <RiderLayout>
       <div className="space-y-6">
+        {/* Notifications Card */}
+        <RiderNotifications compact={true} />
+
         {/* Status Card */}
         <Card>
           <CardHeader>
