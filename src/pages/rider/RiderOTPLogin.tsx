@@ -15,14 +15,16 @@ const getRiderApiUrl = (endpoint: string): string => {
   const isRenderCom = hostname.includes("onrender.com");
   const isLaundrifyDomain = hostname.includes("laundrify.online");
 
+  // Always use production backend for rider OTP endpoints due to local server issues
   if (isLocalhost && isDev) {
-    return `/api/riders${endpoint}`;
+    console.log('🔄 Using production backend for rider OTP endpoints');
+    return `https://backend-vaxf.onrender.com/api/riders${endpoint}`;
   } else if (isRenderCom || isLaundrifyDomain || !isLocalhost) {
     const backendUrl = 'https://backend-vaxf.onrender.com/api/riders' + endpoint;
     return backendUrl;
   }
 
-  return `/api/riders${endpoint}`;
+  return `https://backend-vaxf.onrender.com/api/riders${endpoint}`;
 };
 
 export default function RiderOTPLogin() {
