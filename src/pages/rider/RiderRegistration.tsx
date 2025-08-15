@@ -42,14 +42,17 @@ const getRiderApiUrl = (endpoint: string): string => {
 };
 
 export default function RiderRegistration() {
+  const [step, setStep] = useState<'form' | 'otp' | 'success'>('form');
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
     aadharNumber: ''
   });
+  const [otp, setOTP] = useState('');
   const [aadharImage, setAadharImage] = useState<File | null>(null);
   const [selfieImage, setSelfieImage] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [countdown, setCountdown] = useState(0);
   const [isSuccess, setIsSuccess] = useState(false);
   
   const videoRef = useRef<HTMLVideoElement>(null);
