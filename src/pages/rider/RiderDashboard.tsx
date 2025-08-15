@@ -420,6 +420,44 @@ export default function RiderDashboard() {
   return (
     <RiderLayout>
       <div className="space-y-6">
+        {/* Network Status Indicator */}
+        {!isOnline && (
+          <Card className="border-red-200 bg-red-50">
+            <CardContent className="pt-4">
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                <p className="text-red-800 font-medium">You're offline</p>
+                <p className="text-red-600 text-sm">Some features may not work properly</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Error Status */}
+        {lastFetchError && isOnline && (
+          <Card className="border-orange-200 bg-orange-50">
+            <CardContent className="pt-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                  <p className="text-orange-800 font-medium">Connection Issues</p>
+                  <p className="text-orange-600 text-sm">{lastFetchError}</p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setLastFetchError(null);
+                    fetchAssignedOrders();
+                  }}
+                >
+                  Retry
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Notifications Card */}
         <RiderNotifications compact={true} />
 
