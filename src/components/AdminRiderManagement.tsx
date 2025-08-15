@@ -190,7 +190,11 @@ export default function AdminRiderManagement() {
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch(getAdminApiUrl('/orders?status=pending,confirmed'));
+      const response = await fetch(getAdminApiUrl('/orders?status=pending,confirmed'), {
+        headers: {
+          'admin-token': 'admin-access-granted'
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         setOrders(data);
