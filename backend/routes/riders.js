@@ -246,7 +246,8 @@ router.post('/request-otp', async (req, res) => {
           message: rider.status === 'pending'
             ? 'Your account is pending approval from admin'
             : 'Your account has been rejected. Please contact admin.',
-          status: rider.status
+          status: rider.status,
+          rejectionReason: rider.status === 'rejected' ? rider.rejectionReason : undefined
         });
       }
     }
@@ -337,7 +338,8 @@ router.post('/verify-otp', async (req, res) => {
         message: rider.status === 'pending'
           ? 'Your account is pending approval from admin'
           : 'Your account has been rejected. Please contact admin.',
-        status: rider.status
+        status: rider.status,
+        rejectionReason: rider.status === 'rejected' ? rider.rejectionReason : undefined
       });
     }
 
@@ -357,6 +359,8 @@ router.post('/verify-otp', async (req, res) => {
         phone: rider.phone,
         status: rider.status,
         isActive: rider.isActive,
+        aadharNumber: rider.aadharNumber,
+        rejectionReason: rider.rejectionReason
       },
       message: 'Login successful'
     });
