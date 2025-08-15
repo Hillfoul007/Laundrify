@@ -211,7 +211,11 @@ export default function AdminRiderManagement() {
 
   const fetchActiveRiders = async () => {
     try {
-      const response = await fetch(getAdminApiUrl('/riders/active'));
+      const response = await fetch(getAdminApiUrl('/riders/active'), {
+        headers: {
+          'admin-token': 'admin-access-granted'
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         setActiveRiders(data);
