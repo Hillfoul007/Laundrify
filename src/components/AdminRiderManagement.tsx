@@ -20,13 +20,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { 
-  User, 
-  Phone, 
-  FileText, 
-  Eye, 
-  Check, 
-  X, 
+import {
+  User,
+  Phone,
+  FileText,
+  Eye,
+  Check,
+  X,
   MapPin,
   Navigation,
   Package,
@@ -35,6 +35,7 @@ import {
   Search
 } from 'lucide-react';
 import { toast } from 'sonner';
+import AdminLiveMap from './AdminLiveMap';
 
 // Component to display rider images with proper URL handling
 const RiderImageDisplay: React.FC<{ src: string; alt: string }> = ({ src, alt }) => {
