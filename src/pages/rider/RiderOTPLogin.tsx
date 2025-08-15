@@ -27,7 +27,11 @@ const getRiderApiUrl = (endpoint: string): string => {
   return `https://backend-vaxf.onrender.com/api/riders${endpoint}`;
 };
 
-export default function RiderOTPLogin() {
+interface RiderOTPLoginProps {
+  onSwitchToRegister?: () => void;
+}
+
+export default function RiderOTPLogin({ onSwitchToRegister }: RiderOTPLoginProps) {
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [phone, setPhone] = useState('');
   const [otp, setOTP] = useState('');
