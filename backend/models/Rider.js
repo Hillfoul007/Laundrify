@@ -21,7 +21,7 @@ const riderSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, "Password is required"],
+      required: false, // Password is optional for OTP-based authentication
     },
     aadharImageUrl: {
       type: String,
