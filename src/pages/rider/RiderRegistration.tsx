@@ -191,6 +191,9 @@ export default function RiderRegistration() {
         body: JSON.stringify({ phone: formData.phone.trim() }),
       });
 
+      // Read response once to avoid "body stream already read" error
+      const responseData = await response.json().catch(() => ({}));
+
       if (response.ok) {
         toast.success('OTP sent to your phone number');
         setStep('otp');
@@ -207,11 +210,10 @@ export default function RiderRegistration() {
           });
         }, 1000);
       } else {
-        const error = await response.json();
-        if (response.status === 400 && error.message.includes('already exists')) {
+        if (response.status === 400 && responseData.message?.includes('already exists')) {
           toast.error('A rider with this phone number already exists');
         } else {
-          toast.error(error.message || 'Failed to send OTP');
+          toast.error(responseData.message || 'Failed to send OTP');
         }
       }
     } catch (error) {
