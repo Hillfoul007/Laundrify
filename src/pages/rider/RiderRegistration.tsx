@@ -583,6 +583,20 @@ export default function RiderRegistration({ onSwitchToLogin }: RiderRegistration
         >
           {isSubmitting ? 'Sending OTP...' : 'Send OTP & Continue'}
         </Button>
+
+        <div className="text-center">
+          <p className="text-sm text-gray-600">
+            Already registered?{' '}
+            <Button
+              type="button"
+              variant="link"
+              className="p-0 h-auto text-sm"
+              onClick={onSwitchToLogin}
+            >
+              Login here
+            </Button>
+          </p>
+        </div>
       </form>
     </div>
   );
