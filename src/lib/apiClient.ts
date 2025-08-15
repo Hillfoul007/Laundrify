@@ -727,8 +727,29 @@ class EnhancedApiClient {
 
   // Clear all pending requests (useful for component unmount)
   clearPendingRequests(): void {
+    const pendingCount = this.requestQueue.size;
     this.requestQueue.clear();
-    console.log("🧹 Cleared all pending API requests");
+    console.log(`🧹 Cleared ${pendingCount} pending API requests`);
+  }
+
+  // Debug method to see current request queue
+  getRequestQueueStatus(): { size: number; keys: string[] } {
+    return {
+      size: this.requestQueue.size,
+      keys: Array.from(this.requestQueue.keys())
+    };
+  }
+
+  // Force clear a specific request from queue
+  clearRequest(endpoint: string, method: string = "GET"): void {
+    const keysToDelete = Array.from(this.requestQueue.keys()).filter(key =>
+      key.includes(endpoint) && key.startsWith(method)
+    );
+
+    keysToDelete.forEach(key => {
+      this.requestQueue.delete(key);
+      console.log(`🗑️ Cleared request: ${key}`);
+    });
   }
 
   // Get API connection status
