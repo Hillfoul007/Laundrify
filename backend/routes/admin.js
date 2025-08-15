@@ -672,7 +672,8 @@ router.post("/quick-pickups/assign", verifyAdminAccess, async (req, res) => {
       return res.json({
         message: 'Quick pickup assigned successfully (demo mode)',
         order: { _id: orderId, rider_id: riderId, status: 'assigned' },
-        rider: 'Demo Rider'
+        rider: 'Demo Rider',
+        notification_sent: true
       });
     }
 
@@ -691,15 +692,31 @@ router.post("/quick-pickups/assign", verifyAdminAccess, async (req, res) => {
     quickPickup.rider_id = riderId;
     quickPickup.rider_name = rider.name;
     quickPickup.status = 'assigned';
+    quickPickup.assignedAt = new Date();
 
     await quickPickup.save();
 
-    console.log(`✅ Quick pickup assigned to ${rider.name}`);
+    // Send notification to rider
+    let notificationSent = false;
+    try {
+      await riderNotificationService.createOrderAssignmentNotification(
+        riderId,
+        quickPickup,
+        'Quick Pickup'
+      );
+      notificationSent = true;
+      console.log(`📢 Notification sent to rider ${rider.name} for quick pickup assignment`);
+    } catch (notificationError) {
+      console.error('❌ Failed to send notification to rider:', notificationError);
+    }
+
+    console.log(`✅ Quick pickup assigned to ${rider.name} - Notification sent: ${notificationSent}`);
 
     res.json({
       message: 'Quick pickup assigned successfully',
       order: quickPickup,
-      rider: rider.name
+      rider: rider.name,
+      notification_sent: notificationSent
     });
   } catch (error) {
     console.error('Quick pickup assignment error:', error);
