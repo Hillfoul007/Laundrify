@@ -94,16 +94,37 @@ const ReferralModal: React.FC<ReferralModalProps> = ({
     setLoading(true);
 
     try {
+      // Generate fallback code immediately if no user ID
+      if (!currentUser._id && !currentUser.phone) {
+        console.log('⚠️ No user ID or phone, using local fallback');
+        const demoCode = generatePersistentReferralCode();
+        setReferralCode(demoCode);
+        setStats({
+          asReferrer: {
+            totalReferrals: 0,
+            completedReferrals: 0,
+            pendingRewards: 0,
+            totalRewardsEarned: 0,
+          },
+          asReferee: {
+            hasUsedReferral: false,
+          },
+        });
+        setLoading(false);
+        return;
+      }
+
       // Clear any potential stuck requests
       apiClient.clearRequest('/referrals/user/', 'GET');
 
-      console.log('🔍 Fetching referral data for user:', currentUser._id);
+      const userId = currentUser._id || currentUser.phone;
+      console.log('🔍 Fetching referral data for user:', userId);
 
       // Try to fetch real data from API with timeout
       const response = await Promise.race([
-        apiClient.getUserReferralInfo(currentUser._id),
+        apiClient.getUserReferralInfo(userId),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('API timeout after 10s')), 10000)
+          setTimeout(() => reject(new Error('API timeout after 5s')), 5000)
         )
       ]);
 
