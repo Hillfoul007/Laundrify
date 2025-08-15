@@ -92,30 +92,50 @@ const ReferralModal: React.FC<ReferralModalProps> = ({
     if (!currentUser) return;
 
     setLoading(true);
-    
+
     try {
-      // Try to fetch real data from API
-      const response = await apiClient.getUserReferralInfo(currentUser._id);
-      
-      if (response.data?.myReferralCode) {
+      // Clear any potential stuck requests
+      apiClient.clearRequest('/referrals/user/', 'GET');
+
+      console.log('🔍 Fetching referral data for user:', currentUser._id);
+
+      // Try to fetch real data from API with timeout
+      const response = await Promise.race([
+        apiClient.getUserReferralInfo(currentUser._id),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('API timeout after 10s')), 10000)
+        )
+      ]);
+
+      if (response?.data?.myReferralCode) {
+        console.log('✅ Got referral code from API:', response.data.myReferralCode);
         setReferralCode(response.data.myReferralCode);
         setStats(response.data.stats || null);
       } else {
+        console.log('⚠️ No referral code in response, generating one...');
         // If API fails or no code exists, generate one
-        const generateResponse = await apiClient.generateReferralCode(currentUser._id);
-        if (generateResponse.data?.referralCode) {
+        const generateResponse = await Promise.race([
+          apiClient.generateReferralCode(currentUser._id),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Generate timeout after 5s')), 5000)
+          )
+        ]);
+
+        if (generateResponse?.data?.referralCode) {
+          console.log('✅ Generated new referral code:', generateResponse.data.referralCode);
           setReferralCode(generateResponse.data.referralCode);
         } else {
-          throw new Error("Failed to generate code");
+          throw new Error("Failed to generate code from API");
         }
       }
     } catch (error) {
-      console.warn("API failed, using demo data:", error);
-      
+      console.warn("🔄 API failed, using local fallback:", error?.message || error);
+
       // Fallback to persistent local code
       const demoCode = generatePersistentReferralCode();
+      console.log('💾 Using local persistent code:', demoCode);
       setReferralCode(demoCode);
-      
+
       // Set demo stats
       setStats({
         asReferrer: {
@@ -128,7 +148,7 @@ const ReferralModal: React.FC<ReferralModalProps> = ({
           hasUsedReferral: false,
         },
       });
-      
+
       toast.success("Referral code ready!");
     } finally {
       setLoading(false);
