@@ -8,7 +8,7 @@ export const isDevelopment = () => import.meta.env.DEV;
 export const isProduction = () => import.meta.env.PROD;
 
 // URL Configuration
-const DEVELOPMENT_API_URL = "http://localhost:3001/api";
+const DEVELOPMENT_API_URL = "/api"; // Use relative path for vite proxy
 const PRODUCTION_API_URL = "https://backend-vaxf.onrender.com/api";
 
 // Frontend URLs for CORS configuration
@@ -56,6 +56,7 @@ export const getApiUrl = (): string => {
   const isLocalhost = hostname.includes("localhost") || hostname.includes("127.0.0.1");
   const isFlyDev = hostname.includes("fly.dev");
   const isBuilderCodes = hostname.includes("builder.codes");
+  const isRenderCom = hostname.includes("onrender.com"); // Add render.com detection
   const isProductionDomain = hostname === "www.laundrify.online" || hostname === "laundrify.online";
 
   console.log(`🔍 API URL Detection:`, {
@@ -63,6 +64,7 @@ export const getApiUrl = (): string => {
     isLocalhost,
     isFlyDev,
     isBuilderCodes,
+    isRenderCom,
     isProductionDomain,
     envApiUrl,
     developmentUrl: DEVELOPMENT_API_URL,
@@ -75,8 +77,15 @@ export const getApiUrl = (): string => {
     return DEVELOPMENT_API_URL;
   }
 
-  // For all hosted environments (fly.dev, builder.codes, production), use production backend
-  if (isFlyDev || isBuilderCodes || isProductionDomain) {
+  // Check if we're in development mode (vite dev server)
+  const isDevelopment = import.meta.env.DEV;
+  if (isDevelopment) {
+    console.log(`🔧 Development mode detected, using local API via proxy: ${DEVELOPMENT_API_URL}`);
+    return DEVELOPMENT_API_URL;
+  }
+
+  // For production environments only
+  if (isFlyDev || isBuilderCodes || isRenderCom || isProductionDomain) {
     console.log(`🌐 Using production backend API: ${PRODUCTION_API_URL}`);
     return PRODUCTION_API_URL;
   }

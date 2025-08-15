@@ -97,7 +97,7 @@ router.post("/", async (req, res) => {
     if (missingFields.length > 0) {
       console.log("❌ ERROR: Missing required fields detected!");
       console.log("❌ Missing fields:", missingFields);
-      console.log("📦 All received fields:", Object.keys(req.body));
+      console.log("�� All received fields:", Object.keys(req.body));
 
       console.log(
         "📊 Field values:",
@@ -339,7 +339,7 @@ router.post("/", async (req, res) => {
               });
 
               await customer.save();
-              console.log(`✅ Created new User: ${customer._id}`);
+              console.log(`�� Created new User: ${customer._id}`);
             } catch (createError) {
               if (createError.code === 11000 && createError.keyValue?.phone) {
                 // Race condition
@@ -566,6 +566,39 @@ router.post("/", async (req, res) => {
       booking._id,
     );
     console.log("🆔 Generated custom order ID:", booking.custom_order_id);
+
+    // Check if this customer is using a referral discount
+    try {
+      console.log("🔍 Checking for referral discounts...");
+
+      const Referral = require("../models/Referral");
+
+      // Check if this user has a pending referral (they were referred)
+      const userReferral = await Referral.findOne({
+        referee_id: customer._id,
+        status: "pending"
+      }).populate('referrer_id', 'name phone');
+
+      if (userReferral) {
+        console.log(`🎁 Found pending referral for customer ${customer.name}! Referrer: ${userReferral.referrer_id.name}`);
+
+        // Check if a referral discount was applied via FIRST30 or similar
+        // For referral users, FIRST30 becomes a 30% discount courtesy of their referrer
+        if (coupon_code === "FIRST30" || (discount_amount > 0 && total_price > 0)) {
+          console.log("🎉 Referral discount applied through booking coupon system");
+
+          // This will be handled when the booking is completed, not here
+          // We just log that the referral system is working
+        } else {
+          console.log("ℹ️ Referral user but no discount applied in this booking");
+        }
+      } else {
+        console.log("ℹ️ No pending referral found for this customer");
+      }
+    } catch (referralError) {
+      console.error("❌ Error checking referral discounts:", referralError);
+      // Don't fail the booking if referral checking fails
+    }
 
     // Save booking address to addresses table for future use
     try {
@@ -1143,6 +1176,66 @@ router.put("/:bookingId/status", async (req, res) => {
     }
 
     console.log("✅ Booking status updated successfully:", booking._id);
+
+    // Process referral rewards if booking is completed
+    if (status === "completed") {
+      try {
+        console.log("🎁 Processing referral rewards for completed booking:", booking._id);
+
+        // Import Referral model
+        const Referral = require("../models/Referral");
+
+        // Check if this customer used a referral code
+        const customerReferral = await Referral.findOne({
+          referee_id: booking.customer_id._id,
+          status: "pending"
+        }).populate('referrer_id', 'name phone email');
+
+        if (customerReferral) {
+          console.log(`🎉 Found referral for customer ${booking.customer_id.full_name}! Referrer: ${customerReferral.referrer_id.name}`);
+
+          // Mark first order as completed
+          await customerReferral.markFirstOrderCompleted(
+            booking._id,
+            booking.discount_amount || 0
+          );
+
+          // Generate reward coupon for the referrer
+          const rewardCouponCode = Referral.generateRewardCouponCode(customerReferral.referrer_id._id);
+
+          // Mark referrer as rewarded
+          await customerReferral.markReferrerRewarded(rewardCouponCode);
+
+          // Add the reward coupon to the referrer's available coupons
+          await User.findByIdAndUpdate(customerReferral.referrer_id._id, {
+            $push: {
+              available_coupons: {
+                code: rewardCouponCode,
+                type: "referral_reward",
+                discount_percentage: customerReferral.referrer_reward_percentage,
+                max_discount_amount: 500,
+                expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
+              }
+            },
+            $inc: {
+              "referral_stats.successful_referrals": 1,
+              "referral_stats.total_rewards_earned": 1
+            }
+          });
+
+          console.log(`✅ Referral reward processed! Referrer ${customerReferral.referrer_id.name} earned coupon: ${rewardCouponCode}`);
+
+          // You could trigger a notification here
+          // await sendReferralRewardNotification(customerReferral.referrer_id, rewardCouponCode);
+
+        } else {
+          console.log("ℹ️ No pending referral found for this customer");
+        }
+      } catch (referralError) {
+        console.error("❌ Error processing referral rewards:", referralError);
+        // Don't fail the booking update if referral processing fails
+      }
+    }
 
     res.json({
       message: "Booking status updated successfully",
