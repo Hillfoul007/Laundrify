@@ -519,7 +519,7 @@ export default function RiderDashboard() {
                             className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
                           >
                             <Navigation className="h-4 w-4 mr-1" />
-                            Start Pickup
+                            Start & Navigate
                           </Button>
                         )}
                         {order.riderStatus === 'picked_up' && (
