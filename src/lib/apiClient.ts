@@ -154,20 +154,34 @@ class EnhancedApiClient {
 
         const response = await this.fetchWithTimeout(url, options);
 
+        // Clone the response to avoid "body stream already read" errors
+        const responseClone = response.clone();
+
         // Handle different response types
         const contentType = response.headers.get("content-type");
         let data: any;
 
-        if (contentType?.includes("application/json")) {
-          try {
+        try {
+          if (contentType?.includes("application/json")) {
             data = await response.json();
-          } catch (jsonError) {
-            console.warn("Failed to parse JSON response:", jsonError);
+          } else {
+            const text = await response.text();
+            data = text ? { message: text } : null;
+          }
+        } catch (bodyReadError) {
+          console.warn("Failed to read response body, trying clone:", bodyReadError);
+          try {
+            // Try to read from the cloned response
+            if (contentType?.includes("application/json")) {
+              data = await responseClone.json();
+            } else {
+              const text = await responseClone.text();
+              data = text ? { message: text } : null;
+            }
+          } catch (cloneError) {
+            console.warn("Failed to read response from clone:", cloneError);
             data = null;
           }
-        } else {
-          const text = await response.text();
-          data = text ? { message: text } : null;
         }
 
         if (!response.ok) {
@@ -196,9 +210,9 @@ class EnhancedApiClient {
           }
 
           if (response.status >= 500 && attempt < retries) {
-            console.warn(`Server error ${response.status}, retrying...`);
+            console.warn(`Server error ${response.status}, retrying in ${retryDelay * Math.pow(2, attempt)}ms...`);
             await this.sleep(retryDelay * Math.pow(2, attempt)); // Exponential backoff
-            continue;
+            continue; // This will make a completely new request
           }
 
           return {
