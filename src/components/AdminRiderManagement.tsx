@@ -337,36 +337,28 @@ export default function AdminRiderManagement() {
                                       <div>
                                         <Label className="font-medium">Aadhar Card</Label>
                                         {selectedRider.aadharImageUrl ? (
-                                          <img
-                                            src={selectedRider.aadharImageUrl.startsWith('http') ? selectedRider.aadharImageUrl : `https://backend-vaxf.onrender.com${selectedRider.aadharImageUrl}`}
+                                          <RiderImageDisplay
+                                            src={selectedRider.aadharImageUrl}
                                             alt="Aadhar Card"
-                                            className="mt-2 w-full h-32 object-cover border rounded"
-                                            onError={(e) => {
-                                              e.currentTarget.style.display = 'none';
-                                              e.currentTarget.nextElementSibling.style.display = 'block';
-                                            }}
                                           />
-                                        ) : null}
-                                        <div style={{display: 'none'}} className="mt-2 p-4 border rounded bg-gray-50 text-center text-gray-500">
-                                          Image not available
-                                        </div>
+                                        ) : (
+                                          <div className="mt-2 p-4 border rounded bg-gray-50 text-center text-gray-500">
+                                            No image uploaded
+                                          </div>
+                                        )}
                                       </div>
                                       <div>
                                         <Label className="font-medium">Selfie</Label>
                                         {selectedRider.selfieImageUrl ? (
-                                          <img
-                                            src={selectedRider.selfieImageUrl.startsWith('http') ? selectedRider.selfieImageUrl : `https://backend-vaxf.onrender.com${selectedRider.selfieImageUrl}`}
+                                          <RiderImageDisplay
+                                            src={selectedRider.selfieImageUrl}
                                             alt="Selfie"
-                                            className="mt-2 w-full h-32 object-cover border rounded"
-                                            onError={(e) => {
-                                              e.currentTarget.style.display = 'none';
-                                              e.currentTarget.nextElementSibling.style.display = 'block';
-                                            }}
                                           />
-                                        ) : null}
-                                        <div style={{display: 'none'}} className="mt-2 p-4 border rounded bg-gray-50 text-center text-gray-500">
-                                          Image not available
-                                        </div>
+                                        ) : (
+                                          <div className="mt-2 p-4 border rounded bg-gray-50 text-center text-gray-500">
+                                            No image uploaded
+                                          </div>
+                                        )}
                                       </div>
                                     </div>
                                     
