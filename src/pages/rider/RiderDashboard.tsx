@@ -62,6 +62,8 @@ export default function RiderDashboard() {
   const [currentLocation, setCurrentLocation] = useState<{lat: number, lng: number} | null>(null);
   const [assignedOrders, setAssignedOrders] = useState<any[]>([]);
   const [locationWatcher, setLocationWatcher] = useState<number | null>(null);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [lastFetchError, setLastFetchError] = useState<string | null>(null);
 
   useEffect(() => {
     // Load rider data
