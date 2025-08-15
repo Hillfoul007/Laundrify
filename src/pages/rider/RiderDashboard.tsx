@@ -325,6 +325,39 @@ export default function RiderDashboard() {
                 <p><strong>Token:</strong> {localStorage.getItem('riderToken') ? 'Present' : 'Missing'}</p>
                 <p><strong>Location:</strong> {currentLocation ? `${currentLocation.lat.toFixed(4)}, ${currentLocation.lng.toFixed(4)}` : 'Not available'}</p>
               </div>
+              <div className="mt-3 space-x-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={fetchAssignedOrders}
+                  className="text-xs"
+                >
+                  🔄 Refresh Orders
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    console.log('🧪 Creating test order...');
+                    const testOrder = {
+                      _id: 'test_' + Date.now(),
+                      bookingId: 'TEST-' + Math.floor(Math.random() * 1000),
+                      customerName: 'Test Customer',
+                      customerPhone: '+91 9999999999',
+                      address: 'Test Address, Sector 14, Gurugram',
+                      pickupTime: '2:00 PM - 4:00 PM',
+                      type: 'Test',
+                      riderStatus: 'assigned',
+                      assignedAt: new Date().toISOString()
+                    };
+                    setAssignedOrders(prev => [testOrder, ...prev]);
+                    toast.success('Test order added for debugging');
+                  }}
+                  className="text-xs"
+                >
+                  🧪 Add Test Order
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}
