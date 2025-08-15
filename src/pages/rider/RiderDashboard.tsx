@@ -533,9 +533,9 @@ export default function RiderDashboard() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => window.open(`/rider/orders/${order._id}`, '_blank')}
+                          onClick={() => navigate(`/rider/orders/${order._id}`)}
                         >
-                          View Details
+                          📝 Edit Order
                         </Button>
                       </div>
                     </CardContent>
