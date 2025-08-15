@@ -36,6 +36,76 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
+// Component to display rider images with proper URL handling
+const RiderImageDisplay: React.FC<{ src: string; alt: string }> = ({ src, alt }) => {
+  const [hasError, setHasError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Get the correct image URL based on environment
+  const getImageUrl = (imagePath: string) => {
+    if (!imagePath) return '';
+
+    // If already a full URL, use as-is
+    if (imagePath.startsWith('http')) {
+      return imagePath;
+    }
+
+    const isDev = import.meta.env.DEV;
+    const hostname = window.location.hostname;
+    const isLocalhost = hostname.includes("localhost") || hostname.includes("127.0.0.1");
+
+    if (isLocalhost && isDev) {
+      // In local development, proxy to backend
+      return `/api${imagePath}`;
+    } else {
+      // In production/hosted, use direct backend URL
+      return `https://backend-vaxf.onrender.com${imagePath}`;
+    }
+  };
+
+  const handleImageLoad = () => {
+    setIsLoading(false);
+    setHasError(false);
+  };
+
+  const handleImageError = () => {
+    setIsLoading(false);
+    setHasError(true);
+  };
+
+  const imageUrl = getImageUrl(src);
+
+  if (hasError || !imageUrl) {
+    return (
+      <div className="mt-2 p-4 border rounded bg-gray-50 text-center text-gray-500">
+        <div className="space-y-2">
+          <p>Image not available</p>
+          <p className="text-xs">Path: {src}</p>
+          <p className="text-xs">URL: {imageUrl}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-2 relative">
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded">
+          <div className="text-sm text-gray-500">Loading...</div>
+        </div>
+      )}
+      <img
+        src={imageUrl}
+        alt={alt}
+        className="w-full h-32 object-cover border rounded"
+        onLoad={handleImageLoad}
+        onError={handleImageError}
+        style={{ display: isLoading ? 'none' : 'block' }}
+      />
+    </div>
+  );
+};
+
 // Helper function to get the correct API URL for admin rider endpoints
 const getAdminApiUrl = (endpoint: string): string => {
   const isDev = import.meta.env.DEV;
