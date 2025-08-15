@@ -136,7 +136,7 @@ const ReferralModal: React.FC<ReferralModalProps> = ({
         console.log('⚠️ No referral code in response, generating one...');
         // If API fails or no code exists, generate one
         const generateResponse = await Promise.race([
-          apiClient.generateReferralCode(currentUser._id),
+          apiClient.generateReferralCode(userId),
           new Promise((_, reject) =>
             setTimeout(() => reject(new Error('Generate timeout after 5s')), 5000)
           )
