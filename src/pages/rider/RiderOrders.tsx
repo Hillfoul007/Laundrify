@@ -697,8 +697,15 @@ export default function RiderOrders() {
                     <div className="flex items-start space-x-2">
                       <Bell className="h-4 w-4 text-blue-600 mt-0.5" />
                       <div className="text-sm text-blue-800">
-                        <p className="font-medium">Customer Notification</p>
-                        <p>The customer will be automatically notified of these changes and asked to verify the updated order before proceeding.</p>
+                        <p className="font-medium">Two-Way Verification Process</p>
+                        <p>1. Customer will be notified of these changes via in-app notification</p>
+                        <p>2. Customer must approve/reject the changes</p>
+                        <p>3. You can only save the order after customer approval</p>
+                        {isQuickPickup && (
+                          <p className="font-medium text-orange-700 mt-2">
+                            ⚠️ Quick Pickup: Creating order from scratch based on collected items
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -712,11 +719,16 @@ export default function RiderOrders() {
                       Cancel
                     </Button>
                     <Button
-                      onClick={saveOrderChanges}
+                      onClick={() => {
+                        setCustomerVerificationRequired(true);
+                        setVerificationStatus('pending');
+                        setShowConfirmDialog(false);
+                        toast.info('Customer has been notified. Waiting for verification...');
+                      }}
                       disabled={isSaving}
                       className="flex-1"
                     >
-                      {isSaving ? 'Saving...' : 'Confirm & Notify'}
+                      {isSaving ? 'Notifying...' : 'Send for Verification'}
                     </Button>
                   </div>
                 </div>
