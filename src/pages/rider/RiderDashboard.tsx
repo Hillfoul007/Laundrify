@@ -276,15 +276,19 @@ export default function RiderDashboard() {
       if (response.ok) {
         const orders = await response.json();
         setAssignedOrders(Array.isArray(orders) ? orders : []);
+        setLastFetchError(null); // Clear any previous errors
       } else {
         console.warn('Failed to fetch assigned orders:', response.status, response.statusText);
+        setLastFetchError(`Server error: ${response.status}`);
         setDemoOrders();
       }
     } catch (error) {
       if (error.name === 'AbortError') {
         console.warn('Order fetch timed out');
+        setLastFetchError('Request timed out - please check your connection');
       } else {
         console.error('Failed to fetch assigned orders:', error);
+        setLastFetchError('Unable to connect to server');
       }
       setDemoOrders();
     }
