@@ -67,23 +67,23 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
           loading: false,
         });
       } else {
-        // Fallback to sample data if API not available
+        // No fallback data - keep zeros if API returns no data
         setStats({
-          totalBookings: 247,
-          pendingBookings: 12,
-          activeUsers: 156,
-          totalRevenue: "₹45,680",
+          totalBookings: 0,
+          pendingBookings: 0,
+          activeUsers: 0,
+          totalRevenue: "₹0",
           loading: false,
         });
       }
     } catch (error) {
       console.error("Error fetching stats:", error);
-      // Use fallback data
+      // Keep loading state or show error - no fake data
       setStats({
-        totalBookings: 247,
-        pendingBookings: 12,
-        activeUsers: 156,
-        totalRevenue: "₹45,680",
+        totalBookings: 0,
+        pendingBookings: 0,
+        activeUsers: 0,
+        totalRevenue: "₹0",
         loading: false,
       });
     }
