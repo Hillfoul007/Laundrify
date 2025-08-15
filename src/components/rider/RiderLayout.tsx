@@ -68,7 +68,16 @@ export default function RiderLayout({ children }: RiderLayoutProps) {
                   <Package className="h-4 w-4" />
                   <span>Orders</span>
                 </Button>
-                
+
+                <Button
+                  variant={isActive === '/rider/notifications' ? 'default' : 'ghost'}
+                  onClick={() => navigate('/rider/notifications')}
+                  className="flex items-center space-x-2"
+                >
+                  <Bell className="h-4 w-4" />
+                  <span>Notifications</span>
+                </Button>
+
                 <Button
                   variant={isActive === '/rider/profile' ? 'default' : 'ghost'}
                   onClick={() => navigate('/rider/profile')}
