@@ -171,15 +171,26 @@ export default function RiderNotifications({ compact = false }: RiderNotificatio
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
-        }
+        },
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json();
-        setUnreadCount(data.count);
+        setUnreadCount(data.count || 0);
+      } else {
+        console.warn('Failed to fetch unread count:', response.status, response.statusText);
+        setUnreadCount(0);
       }
     } catch (error) {
-      console.error('Failed to fetch unread count:', error);
+      if (error.name === 'AbortError') {
+        console.warn('Unread count fetch timed out');
+      } else {
+        console.error('Failed to fetch unread count:', error);
+      }
+      setUnreadCount(0);
     }
   };
 
