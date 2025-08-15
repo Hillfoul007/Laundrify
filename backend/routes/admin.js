@@ -537,12 +537,20 @@ router.post("/riders/:riderId/verify", verifyAdminAccess, async (req, res) => {
 // Get orders for assignment
 router.get("/orders", verifyAdminAccess, async (req, res) => {
   try {
-    const { status } = req.query;
+    const { status, includeAssigned } = req.query;
     let query = {};
 
     if (status) {
       const statusArray = status.split(',');
       query.status = { $in: statusArray };
+    }
+
+    // By default, exclude assigned orders unless specifically requested
+    if (!includeAssigned || includeAssigned === 'false') {
+      query.$and = [
+        { $or: [{ assignedRider: null }, { assignedRider: { $exists: false } }] },
+        { $or: [{ rider_id: null }, { rider_id: { $exists: false } }] }
+      ];
     }
 
     // For development/mock mode, return sample orders
@@ -581,10 +589,14 @@ router.get("/orders", verifyAdminAccess, async (req, res) => {
       }
     ];
 
-    // Fetch both regular bookings and quick pickups
+    // Fetch both regular bookings and quick pickups with assignment filter
     const [bookings, quickPickups] = await Promise.all([
-      Booking.find(query).sort({ createdAt: -1 }),
-      QuickPickup.find(query).sort({ createdAt: -1 })
+      Booking.find(query)
+        .populate('assignedRider', 'name phone')
+        .sort({ createdAt: -1 }),
+      QuickPickup.find(query)
+        .populate('rider_id', 'name phone')
+        .sort({ createdAt: -1 })
     ]);
 
     // Transform quick pickups to match booking format for frontend
@@ -598,6 +610,7 @@ router.get("/orders", verifyAdminAccess, async (req, res) => {
       type: 'Quick Pickup',
       status: qp.status,
       assignedRider: qp.rider_id,
+      riderStatus: qp.rider_id ? 'assigned' : 'unassigned',
       specialInstructions: qp.special_instructions,
       estimatedCost: qp.estimated_cost,
       actualCost: qp.actual_cost,
@@ -612,7 +625,7 @@ router.get("/orders", verifyAdminAccess, async (req, res) => {
       new Date(b.createdAt) - new Date(a.createdAt)
     );
 
-    console.log(`✅ Found ${bookings.length} regular bookings and ${quickPickups.length} quick pickups`);
+    console.log(`✅ Found ${bookings.length} regular bookings and ${quickPickups.length} quick pickups (includeAssigned: ${includeAssigned})`);
 
     res.json(allOrders.length > 0 ? allOrders : sampleOrders);
   } catch (error) {
