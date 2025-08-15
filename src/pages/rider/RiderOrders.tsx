@@ -453,6 +453,69 @@ export default function RiderOrders() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Confirmation Dialog */}
+        {showConfirmDialog && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <Card className="w-full max-w-md">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <AlertTriangle className="h-5 w-5 text-orange-600" />
+                  <span>Confirm Order Changes</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <p className="text-gray-700">
+                    You've made changes to the order that will affect the total price:
+                  </p>
+
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <div className="flex justify-between items-center">
+                      <span>Original Total:</span>
+                      <span>₹{originalTotal}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span>New Total:</span>
+                      <span>₹{totalAmount}</span>
+                    </div>
+                    <div className={`flex justify-between items-center font-semibold ${totalAmount > originalTotal ? 'text-red-600' : 'text-green-600'}`}>
+                      <span>Difference:</span>
+                      <span>{totalAmount > originalTotal ? '+' : ''}₹{totalAmount - originalTotal}</span>
+                    </div>
+                  </div>
+
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <div className="flex items-start space-x-2">
+                      <Bell className="h-4 w-4 text-blue-600 mt-0.5" />
+                      <div className="text-sm text-blue-800">
+                        <p className="font-medium">Customer Notification</p>
+                        <p>The customer will be automatically notified of these changes and asked to verify the updated order before proceeding.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex space-x-3">
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowConfirmDialog(false)}
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={saveOrderChanges}
+                      disabled={isSaving}
+                      className="flex-1"
+                    >
+                      {isSaving ? 'Saving...' : 'Confirm & Notify'}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </RiderLayout>
   );
