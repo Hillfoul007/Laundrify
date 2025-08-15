@@ -231,6 +231,7 @@ class EnhancedApiClient {
 
         console.warn(`❌ API Request failed [Attempt ${attempt + 1}]:`, {
           error: lastError.message,
+          errorType: lastError.name,
           willRetry: attempt < retries,
         });
 
@@ -239,11 +240,26 @@ class EnhancedApiClient {
           lastError.message.includes("Failed to fetch") &&
           lastError.message.includes("CORS")
         ) {
+          console.warn("🚫 CORS error detected, not retrying");
           break; // Don't retry CORS errors
         }
 
+        // Don't retry on body stream errors
+        if (lastError.message.includes("body stream already read")) {
+          console.warn("🚫 Body stream error detected, not retrying");
+          break;
+        }
+
+        // Don't retry on timeout errors in some cases
+        if (lastError.message.includes("timeout") && attempt >= 1) {
+          console.warn("🚫 Multiple timeout errors, not retrying further");
+          break;
+        }
+
         if (attempt < retries) {
-          await this.sleep(retryDelay * Math.pow(2, attempt));
+          const delay = retryDelay * Math.pow(2, attempt);
+          console.log(`⏰ Waiting ${delay}ms before retry...`);
+          await this.sleep(delay);
         }
       }
     }
