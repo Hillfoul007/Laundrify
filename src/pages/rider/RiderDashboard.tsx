@@ -231,13 +231,23 @@ export default function RiderDashboard() {
     const destination = encodeURIComponent(order.address);
     const origin = `${currentLocation.lat},${currentLocation.lng}`;
 
-    // Create Google Maps URL for navigation
+    // Create Google Maps URL for navigation with driving directions
     const mapsUrl = `https://www.google.com/maps/dir/${origin}/${destination}/@${currentLocation.lat},${currentLocation.lng},15z/data=!3m1!4b1!4m2!4m1!3e0`;
+
+    // Show loading toast
+    toast.loading('Opening navigation...', { id: 'navigation' });
 
     // Open in new tab/window
     window.open(mapsUrl, '_blank');
 
-    toast.success('Navigation opened in Google Maps');
+    // Success feedback
+    setTimeout(() => {
+      toast.dismiss('navigation');
+      toast.success(`🗺️ Navigation opened to ${order.customerName}'s location`, {
+        description: order.address,
+        duration: 4000
+      });
+    }, 500);
   };
 
   const handleOrderAction = async (orderId: string, action: 'accept' | 'start' | 'complete') => {
