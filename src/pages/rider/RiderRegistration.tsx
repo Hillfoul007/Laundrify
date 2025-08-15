@@ -574,7 +574,7 @@ export default function RiderRegistration() {
           className="w-full"
           disabled={isSubmitting}
         >
-          {isSubmitting ? 'Submitting...' : 'Submit Registration'}
+          {isSubmitting ? 'Sending OTP...' : 'Send OTP & Continue'}
         </Button>
       </form>
     </div>
