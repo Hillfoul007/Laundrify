@@ -56,6 +56,7 @@ const getRiderApiUrl = (endpoint: string): string => {
 };
 
 export default function RiderDashboard() {
+  const navigate = useNavigate();
   const [rider, setRider] = useState<any>(null);
   const [isActive, setIsActive] = useState(false);
   const [currentLocation, setCurrentLocation] = useState<{lat: number, lng: number} | null>(null);
