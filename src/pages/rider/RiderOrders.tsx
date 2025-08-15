@@ -554,6 +554,77 @@ export default function RiderOrders() {
           </CardContent>
         </Card>
 
+        {/* Customer Verification Status */}
+        {customerVerificationRequired && (
+          <Card className={`border-2 ${
+            verificationStatus === 'approved' ? 'border-green-500 bg-green-50' :
+            verificationStatus === 'rejected' ? 'border-red-500 bg-red-50' :
+            'border-orange-500 bg-orange-50'
+          }`}>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Bell className={`h-5 w-5 ${
+                  verificationStatus === 'approved' ? 'text-green-600' :
+                  verificationStatus === 'rejected' ? 'text-red-600' :
+                  'text-orange-600'
+                }`} />
+                <span>Customer Verification</span>
+                <Badge variant={
+                  verificationStatus === 'approved' ? 'default' :
+                  verificationStatus === 'rejected' ? 'destructive' :
+                  'secondary'
+                }>
+                  {verificationStatus === 'approved' ? 'Approved' :
+                   verificationStatus === 'rejected' ? 'Rejected' :
+                   'Pending'}
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {verificationStatus === 'pending' && (
+                <div className="space-y-4">
+                  <p className="text-orange-800">
+                    Customer has been notified of the changes and needs to verify them before you can save the order.
+                  </p>
+                  <div className="bg-white p-4 rounded-lg border">
+                    <h4 className="font-medium mb-2">Demo: Simulate Customer Response</h4>
+                    <div className="flex space-x-2">
+                      <Button
+                        size="sm"
+                        onClick={() => simulateCustomerVerification(true)}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        Approve Changes
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => simulateCustomerVerification(false)}
+                      >
+                        Reject Changes
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {verificationStatus === 'approved' && (
+                <div className="text-green-800">
+                  <p className="font-medium">✅ Customer has approved the changes!</p>
+                  <p className="text-sm">You can now save the updated order.</p>
+                </div>
+              )}
+
+              {verificationStatus === 'rejected' && (
+                <div className="text-red-800">
+                  <p className="font-medium">❌ Customer rejected the changes</p>
+                  <p className="text-sm">Please modify the order according to customer requirements.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         {/* Delivery Information */}
         <Card>
           <CardHeader>
