@@ -9,6 +9,7 @@ const Rider = require("../models/Rider");
 const Booking = require("../models/Booking");
 const otpService = require("../services/otpService");
 const notificationService = require("../services/notificationService");
+const riderNotificationService = require("../services/riderNotificationService");
 
 const router = express.Router();
 
