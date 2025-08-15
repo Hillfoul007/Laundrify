@@ -222,37 +222,38 @@ export default function RiderDashboard() {
     }
   };
 
-  const handleOrderAction = async (orderId: string, action: 'accept' | 'start' | 'complete') => {
-    console.log('🚀 handleOrderAction called', {
-      orderId,
-      action,
-      rider: rider ? { id: rider._id, status: rider.status, name: rider.name } : null,
-      isActive,
-      timestamp: new Date().toISOString()
-    });
+  const openGoogleMapsNavigation = (order: any) => {
+    if (!currentLocation) {
+      toast.error('Current location not available. Please enable location services.');
+      return;
+    }
 
+    const destination = encodeURIComponent(order.address);
+    const origin = `${currentLocation.lat},${currentLocation.lng}`;
+
+    // Create Google Maps URL for navigation
+    const mapsUrl = `https://www.google.com/maps/dir/${origin}/${destination}/@${currentLocation.lat},${currentLocation.lng},15z/data=!3m1!4b1!4m2!4m1!3e0`;
+
+    // Open in new tab/window
+    window.open(mapsUrl, '_blank');
+
+    toast.success('Navigation opened in Google Maps');
+  };
+
+  const handleOrderAction = async (orderId: string, action: 'accept' | 'start' | 'complete') => {
     try {
       // Validate rider status first
       if (!rider) {
-        console.error('❌ No rider data found');
         toast.error('Rider information not found. Please login again.');
         return;
       }
 
-      console.log('✅ Rider validation:', {
-        status: rider.status,
-        isActive,
-        action
-      });
-
       if (rider.status !== 'approved') {
-        console.error('❌ Rider not approved:', rider.status);
         toast.error('Only approved riders can accept orders. Your status: ' + rider.status);
         return;
       }
 
       if (!isActive && action === 'accept') {
-        console.error('❌ Rider not active');
         toast.error('Please go active to accept orders.');
         return;
       }
@@ -293,6 +294,17 @@ export default function RiderDashboard() {
 
       if (response.ok) {
         toast.success(`Order ${action}ed successfully!`);
+
+        // If accepting an order, open Google Maps navigation
+        if (action === 'accept') {
+          const acceptedOrder = assignedOrders.find(order => order._id === orderId);
+          if (acceptedOrder) {
+            setTimeout(() => {
+              openGoogleMapsNavigation(acceptedOrder);
+            }, 1000); // Small delay to allow success message to show
+          }
+        }
+
         // Refresh orders immediately
         await fetchAssignedOrders();
       } else {
