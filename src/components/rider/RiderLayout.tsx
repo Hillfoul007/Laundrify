@@ -35,8 +35,17 @@ export default function RiderLayout({ children }: RiderLayoutProps) {
 
   React.useEffect(() => {
     if (rider) {
-      // Fetch unread count every 30 seconds
-      const interval = setInterval(fetchUnreadCount, 30000);
+      // Initial fetch
+      fetchUnreadCount();
+
+      // Set up periodic fetch with error handling
+      const interval = setInterval(() => {
+        // Only fetch if we're still authenticated and online
+        if (localStorage.getItem('riderToken') && navigator.onLine) {
+          fetchUnreadCount();
+        }
+      }, 30000);
+
       return () => clearInterval(interval);
     }
   }, [rider]);
@@ -60,21 +69,43 @@ export default function RiderLayout({ children }: RiderLayoutProps) {
   const fetchUnreadCount = async () => {
     try {
       const token = localStorage.getItem('riderToken');
-      if (!token) return;
+      if (!token) {
+        console.log('No rider token found, skipping unread count fetch');
+        return;
+      }
 
       const apiUrl = getRiderApiUrl('/notifications/unread-count');
+      console.log('Fetching unread count from:', apiUrl);
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       const response = await fetch(apiUrl, {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json();
-        setUnreadCount(data.count);
+        setUnreadCount(data.count || 0);
+      } else {
+        console.warn('Failed to fetch unread count:', response.status, response.statusText);
+        // Fallback to 0 on error
+        setUnreadCount(0);
       }
     } catch (error) {
-      console.error('Failed to fetch unread count:', error);
+      if (error.name === 'AbortError') {
+        console.warn('Unread count fetch timed out');
+      } else {
+        console.error('Failed to fetch unread count:', error);
+      }
+      // Set fallback value
+      setUnreadCount(0);
     }
   };
 
