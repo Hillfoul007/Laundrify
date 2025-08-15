@@ -50,6 +50,7 @@ import VoiceSearch from "./VoiceSearch";
 import AdminServicesManager from "./AdminServicesManager";
 import LocationUnavailableModal from "./LocationUnavailableModal";
 import ReferralModal from "./ReferralModal";
+import NotificationBell from "./NotificationBell";
 import QuickPickupModal from "./QuickPickupModal";
 import { DVHostingSmsService } from "@/services/dvhostingSmsService";
 import { LocationDetectionService } from "@/services/locationDetectionService";
