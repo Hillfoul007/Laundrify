@@ -696,45 +696,78 @@ router.post("/quick-pickups/assign", verifyAdminAccess, async (req, res) => {
 // Assign order to rider (handles both regular bookings and quick pickups)
 router.post("/orders/assign", verifyAdminAccess, async (req, res) => {
   try {
-    const { orderId, riderId } = req.body;
+    const { orderId, riderId, orderType } = req.body;
+
+    console.log('🎯 Assigning order:', { orderId, riderId, orderType });
 
     // For development/mock mode, just return success
     if (!mongoose.Types.ObjectId.isValid(orderId) || !mongoose.Types.ObjectId.isValid(riderId)) {
       return res.json({
         message: 'Order assigned successfully (demo mode)',
-        order: { _id: orderId, assignedRider: riderId, riderStatus: 'assigned' },
+        order: { _id: orderId, assignedRider: riderId, status: 'assigned' },
         rider: 'Demo Rider'
       });
     }
 
-    const order = await Booking.findById(orderId);
     const rider = await Rider.findById(riderId);
-
-    if (!order || !rider) {
-      return res.status(404).json({ message: 'Order or rider not found' });
+    if (!rider) {
+      return res.status(404).json({ message: 'Rider not found' });
     }
 
     if (rider.status !== 'approved' || !rider.isActive) {
       return res.status(400).json({ message: 'Rider is not available for assignment' });
     }
 
-    // Assign order to rider
-    order.assignedRider = riderId;
-    order.riderStatus = 'assigned';
-    order.assignedAt = new Date();
+    let order;
+    let assignmentResult;
 
-    // Add to rider's assigned orders
-    if (!rider.assignedOrders.includes(orderId)) {
-      rider.assignedOrders.push(orderId);
+    // Determine if this is a quick pickup or regular booking
+    if (orderType === 'Quick Pickup') {
+      // Handle Quick Pickup assignment
+      order = await QuickPickup.findById(orderId);
+      if (!order) {
+        return res.status(404).json({ message: 'Quick pickup not found' });
+      }
+
+      order.rider_id = riderId;
+      order.rider_name = rider.name;
+      order.status = 'assigned';
+      await order.save();
+
+      assignmentResult = {
+        message: 'Quick pickup assigned successfully',
+        order,
+        rider: rider.name,
+        type: 'quick_pickup'
+      };
+    } else {
+      // Handle regular Booking assignment
+      order = await Booking.findById(orderId);
+      if (!order) {
+        return res.status(404).json({ message: 'Booking not found' });
+      }
+
+      order.assignedRider = riderId;
+      order.riderStatus = 'assigned';
+      order.assignedAt = new Date();
+
+      // Add to rider's assigned orders
+      if (!rider.assignedOrders.includes(orderId)) {
+        rider.assignedOrders.push(orderId);
+      }
+
+      await Promise.all([order.save(), rider.save()]);
+
+      assignmentResult = {
+        message: 'Order assigned successfully',
+        order,
+        rider: rider.name,
+        type: 'booking'
+      };
     }
 
-    await Promise.all([order.save(), rider.save()]);
-
-    res.json({
-      message: 'Order assigned successfully',
-      order,
-      rider: rider.name
-    });
+    console.log(`✅ Order assigned to ${rider.name} (${orderType})`);
+    res.json(assignmentResult);
   } catch (error) {
     console.error('Order assignment error:', error);
     res.status(500).json({ message: 'Failed to assign order', error: error.message });
