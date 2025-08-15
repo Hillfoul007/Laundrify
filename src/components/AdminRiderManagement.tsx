@@ -854,67 +854,7 @@ export default function AdminRiderManagement() {
 
         {/* Live Tracking Tab */}
         <TabsContent value="tracking" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <MapPin className="h-5 w-5" />
-                <span>Live Rider Tracking</span>
-              </CardTitle>
-              <CardDescription>
-                Real-time location tracking of active riders
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <p className="text-blue-900 text-sm">
-                    📍 Live tracking shows real-time locations of active riders.
-                    Locations are updated every 30 seconds when riders are active.
-                  </p>
-                </div>
-                
-                {activeRiders.map((rider) => (
-                  <Card key={rider._id} className="border-l-4 border-l-blue-500">
-                    <CardContent className="pt-4">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <h4 className="font-semibold">{rider.name}</h4>
-                          <div className="text-sm text-gray-600 space-y-1">
-                            <p>📱 {rider.phone}</p>
-                            {rider.location && (
-                              <>
-                                <p>📍 {rider.location.lat.toFixed(6)}, {rider.location.lng.toFixed(6)}</p>
-                                <p>🕒 Last update: {new Date(rider.lastLocationUpdate).toLocaleString()}</p>
-                              </>
-                            )}
-                          </div>
-                          {rider.assignedOrders && rider.assignedOrders.length > 0 && (
-                            <Badge variant="default" className="mt-2">
-                              {rider.assignedOrders.length} assigned order(s)
-                            </Badge>
-                          )}
-                        </div>
-                        
-                        {rider.location && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              const url = `https://www.google.com/maps/@${rider.location.lat},${rider.location.lng},15z`;
-                              window.open(url, '_blank');
-                            }}
-                          >
-                            <MapPin className="h-4 w-4 mr-2" />
-                            View on Map
-                          </Button>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <AdminLiveMap />
         </TabsContent>
       </Tabs>
     </div>
