@@ -624,14 +624,14 @@ router.post('/toggle-status', verifyRiderToken, async (req, res) => {
 // Get rider's assigned orders
 router.get('/orders', verifyRiderToken, async (req, res) => {
   try {
-    console.log('🔍 Get orders request:', {
+    console.log('🔍 Get rider assigned orders request:', {
       hasRiderId: !!req.rider?.riderId,
       riderId: req.rider?.riderId
     });
 
     // For demo mode, return sample orders
     if (!mongoose.connection.readyState) {
-      console.log('🔧 Demo mode: Returning sample orders');
+      console.log('🔧 Demo mode: Returning sample assigned orders');
       const sampleOrders = [
         {
           _id: '507f1f77bcf86cd799439011',
@@ -642,6 +642,7 @@ router.get('/orders', verifyRiderToken, async (req, res) => {
           pickupTime: '2:00 PM - 4:00 PM',
           type: 'Regular',
           riderStatus: 'assigned',
+          assignedAt: new Date().toISOString(),
           items: [
             { name: 'Shirt', quantity: 2, price: 50 },
             { name: 'Trouser', quantity: 1, price: 80 }
@@ -656,6 +657,7 @@ router.get('/orders', verifyRiderToken, async (req, res) => {
           pickupTime: '4:00 PM - 6:00 PM',
           type: 'Express',
           riderStatus: 'accepted',
+          assignedAt: new Date().toISOString(),
           items: [
             { name: 'Dress', quantity: 1, price: 120 }
           ]
@@ -665,15 +667,70 @@ router.get('/orders', verifyRiderToken, async (req, res) => {
       return res.json(sampleOrders);
     }
 
-    const rider = await Rider.findById(req.rider.riderId).populate('assignedOrders');
-    if (!rider) {
-      console.log('❌ Rider not found, returning sample orders');
-      return res.json([]);
-    }
+    // Get all orders assigned to this rider from both Booking and QuickPickup collections
+    const riderId = req.rider.riderId;
 
-    res.json(rider.assignedOrders || []);
+    const [regularOrders, quickPickups] = await Promise.all([
+      // Regular bookings assigned to this rider
+      Booking.find({
+        assignedRider: riderId,
+        riderStatus: { $in: ['assigned', 'accepted', 'picked_up'] } // Exclude completed orders
+      })
+      .populate('customer_id', 'name phone')
+      .sort({ assignedAt: -1 }),
+
+      // Quick pickups assigned to this rider
+      require('../models/QuickPickup').find({
+        rider_id: riderId,
+        status: { $in: ['assigned', 'accepted', 'picked_up'] } // Exclude completed orders
+      })
+      .populate('customer_id', 'name phone')
+      .sort({ createdAt: -1 })
+    ]);
+
+    // Transform regular orders to consistent format
+    const transformedRegularOrders = regularOrders.map(order => ({
+      _id: order._id,
+      bookingId: order.custom_order_id || order._id,
+      customerName: order.name || order.customer_id?.name,
+      customerPhone: order.phone || order.customer_id?.phone,
+      address: order.address,
+      pickupTime: `${order.scheduled_date} ${order.scheduled_time}`,
+      type: 'Regular',
+      riderStatus: order.riderStatus,
+      assignedAt: order.assignedAt,
+      items: order.item_prices || [],
+      finalAmount: order.final_amount,
+      specialInstructions: order.special_instructions
+    }));
+
+    // Transform quick pickups to consistent format
+    const transformedQuickPickups = quickPickups.map(qp => ({
+      _id: qp._id,
+      bookingId: `QP-${qp._id.toString().slice(-6).toUpperCase()}`,
+      customerName: qp.customer_name || qp.customer_id?.name,
+      customerPhone: qp.customer_phone || qp.customer_id?.phone,
+      address: qp.address,
+      pickupTime: `${qp.pickup_date} ${qp.pickup_time}`,
+      type: 'Quick Pickup',
+      riderStatus: qp.status === 'assigned' ? 'assigned' : qp.status,
+      assignedAt: qp.createdAt,
+      estimatedCost: qp.estimated_cost,
+      actualCost: qp.actual_cost,
+      specialInstructions: qp.special_instructions,
+      itemsCollected: qp.items_collected,
+      notes: qp.notes
+    }));
+
+    // Combine and sort by assignment date
+    const allAssignedOrders = [...transformedRegularOrders, ...transformedQuickPickups]
+      .sort((a, b) => new Date(b.assignedAt).getTime() - new Date(a.assignedAt).getTime());
+
+    console.log(`📋 Found ${regularOrders.length} regular orders and ${quickPickups.length} quick pickups assigned to rider ${riderId}`);
+
+    res.json(allAssignedOrders);
   } catch (error) {
-    console.error('❌ Get orders error:', error);
+    console.error('❌ Get rider assigned orders error:', error);
     // Return empty array on error
     res.json([]);
   }
