@@ -153,12 +153,7 @@ export default function RiderLogin() {
         localStorage.setItem('riderAuth', JSON.stringify(result.rider));
         localStorage.setItem('riderToken', result.token);
 
-        // Show success message with mode info if applicable
-        if (result.mode === 'demo') {
-          toast.success('Demo login successful! (Demo mode active)');
-        } else {
-          toast.success('Login successful!');
-        }
+        toast.success('Login successful!');
 
         navigate('/rider/dashboard');
       } else {
