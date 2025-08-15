@@ -494,21 +494,12 @@ export default function RiderDashboard() {
                         {order.riderStatus === 'assigned' && (
                           <Button
                             size="sm"
-                            onClick={() => {
-                              console.log('🔘 Accept button clicked!', {
-                                orderId: order._id,
-                                orderData: order,
-                                riderActive: isActive,
-                                riderStatus: rider?.status,
-                                buttonDisabled: !isActive || rider?.status !== 'approved'
-                              });
-                              handleOrderAction(order._id, 'accept');
-                            }}
+                            onClick={() => handleOrderAction(order._id, 'accept')}
                             className="flex-1 bg-green-600 hover:bg-green-700 text-white"
                             disabled={!isActive || rider?.status !== 'approved'}
                           >
                             <CheckCircle className="h-4 w-4 mr-1" />
-                            {(!isActive || rider?.status !== 'approved') ? 'Cannot Accept' : 'Accept Order'}
+                            {(!isActive || rider?.status !== 'approved') ? 'Cannot Accept' : 'Accept & Navigate'}
                           </Button>
                         )}
                         {order.riderStatus === 'accepted' && (
