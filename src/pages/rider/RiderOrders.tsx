@@ -388,8 +388,30 @@ export default function RiderOrders() {
               <div className="border-t pt-4">
                 <div className="flex justify-between items-center text-lg font-semibold">
                   <span>Total Amount:</span>
-                  <span>₹{totalAmount}</span>
+                  <div className="text-right">
+                    <span>₹{totalAmount}</span>
+                    {isEditing && totalAmount !== originalTotal && (
+                      <div className="text-sm font-normal">
+                        <span className={`${totalAmount > originalTotal ? 'text-red-600' : 'text-green-600'}`}>
+                          {totalAmount > originalTotal ? '+' : ''}₹{totalAmount - originalTotal}
+                        </span>
+                        <span className="text-gray-500 ml-1">(from ₹{originalTotal})</span>
+                      </div>
+                    )}\n                  </div>
                 </div>
+                {isEditing && totalAmount !== originalTotal && (
+                  <div className={`mt-2 p-3 rounded-lg ${totalAmount > originalTotal ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'} border`}>
+                    <div className="flex items-center space-x-2">
+                      <AlertTriangle className={`h-4 w-4 ${totalAmount > originalTotal ? 'text-red-600' : 'text-green-600'}`} />
+                      <p className={`text-sm ${totalAmount > originalTotal ? 'text-red-800' : 'text-green-800'}`}>
+                        {totalAmount > originalTotal
+                          ? 'Price increase detected. Customer will be notified to approve the changes.'
+                          : 'Price decrease detected. Customer will be notified of the savings.'
+                        }
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
