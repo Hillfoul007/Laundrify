@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Camera, Upload, User, Phone, FileText, CheckCircle } from 'lucide-react';
+import { Camera, Upload, User, Phone, FileText, CheckCircle, Lock, Timer } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Helper function to get the correct API URL for rider endpoints
