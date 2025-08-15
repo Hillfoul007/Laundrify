@@ -27,10 +27,56 @@ export default function RiderLayout({ children }: RiderLayoutProps) {
     const riderData = localStorage.getItem('riderAuth');
     if (riderData) {
       setRider(JSON.parse(riderData));
+      fetchUnreadCount();
     } else if (location.pathname !== '/rider/register' && location.pathname !== '/rider/login') {
       navigate('/rider/login');
     }
   }, [navigate, location.pathname]);
+
+  React.useEffect(() => {
+    if (rider) {
+      // Fetch unread count every 30 seconds
+      const interval = setInterval(fetchUnreadCount, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [rider]);
+
+  const getRiderApiUrl = (endpoint: string): string => {
+    const isDev = import.meta.env.DEV;
+    const hostname = window.location.hostname;
+    const isLocalhost = hostname.includes("localhost") || hostname.includes("127.0.0.1");
+    const isRenderCom = hostname.includes("onrender.com");
+    const isLaundrifyDomain = hostname.includes("laundrify.online");
+
+    if (isLocalhost && isDev) {
+      return `/api/riders${endpoint}`;
+    } else if (isRenderCom || isLaundrifyDomain || !isLocalhost) {
+      return `https://backend-vaxf.onrender.com/api/riders${endpoint}`;
+    }
+
+    return `/api/riders${endpoint}`;
+  };
+
+  const fetchUnreadCount = async () => {
+    try {
+      const token = localStorage.getItem('riderToken');
+      if (!token) return;
+
+      const apiUrl = getRiderApiUrl('/notifications/unread-count');
+      const response = await fetch(apiUrl, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUnreadCount(data.count);
+      }
+    } catch (error) {
+      console.error('Failed to fetch unread count:', error);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('riderAuth');
