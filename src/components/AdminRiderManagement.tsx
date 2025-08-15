@@ -234,7 +234,10 @@ export default function AdminRiderManagement() {
     try {
       const response = await fetch(getAdminApiUrl(`/riders/${riderId}/verify`), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'admin-token': 'admin-access-granted'
+        },
         body: JSON.stringify({ status })
       });
 
