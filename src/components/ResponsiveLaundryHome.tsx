@@ -1148,7 +1148,11 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
                 </Button>
               )}
 
-              {currentUser && <NotificationPanel />}
+              {currentUser && (
+                <NotificationBell
+                  userId={currentUser._id || currentUser.phone}
+                />
+              )}
 
               {currentUser ? (
                 <UserMenuDropdown
