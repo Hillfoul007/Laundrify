@@ -110,14 +110,37 @@ export default function RiderOrders() {
     setEditedItems(updatedItems);
   };
 
-  const addNewItem = () => {
-    if (!newItem.name.trim()) {
-      toast.error('Please enter item name');
+  const addSelectedService = () => {
+    if (!selectedService) {
+      toast.error('Please select a service');
       return;
     }
-    
-    setEditedItems([...editedItems, { ...newItem, id: Date.now() }]);
-    setNewItem({ name: '', quantity: 1, price: 0 });
+
+    if (serviceQuantity <= 0) {
+      toast.error('Please enter a valid quantity');
+      return;
+    }
+
+    const newItem = {
+      id: Date.now(),
+      serviceId: selectedService.id,
+      name: selectedService.name,
+      description: selectedService.description,
+      price: selectedService.price,
+      unit: selectedService.unit,
+      category: selectedService.category,
+      quantity: serviceQuantity,
+      total: selectedService.price * serviceQuantity
+    };
+
+    setEditedItems([...editedItems, newItem]);
+    setSelectedService(null);
+    setServiceQuantity(1);
+    toast.success(`Added ${selectedService.name} to order`);
+  };
+
+  const getAvailableServices = () => {
+    return getServicesByCategory(selectedCategory);
   };
 
   const saveOrderChanges = async () => {
