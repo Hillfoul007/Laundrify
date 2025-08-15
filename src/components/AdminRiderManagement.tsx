@@ -259,7 +259,10 @@ export default function AdminRiderManagement() {
     try {
       const response = await fetch(getAdminApiUrl('/orders/assign'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'admin-token': 'admin-access-granted'
+        },
         body: JSON.stringify({
           orderId: selectedOrder._id,
           riderId: selectedRider._id
