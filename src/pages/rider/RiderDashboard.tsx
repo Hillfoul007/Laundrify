@@ -224,9 +224,35 @@ export default function RiderDashboard() {
 
   const handleOrderAction = async (orderId: string, action: 'accept' | 'start' | 'complete') => {
     try {
+      // Validate rider status first
+      if (!rider) {
+        toast.error('Rider information not found. Please login again.');
+        return;
+      }
+
+      if (rider.status !== 'approved') {
+        toast.error('Only approved riders can accept orders. Your status: ' + rider.status);
+        return;
+      }
+
+      if (!isActive && action === 'accept') {
+        toast.error('Please go active to accept orders.');
+        return;
+      }
+
       const token = localStorage.getItem('riderToken');
+      if (!token) {
+        toast.error('Authentication token not found. Please login again.');
+        return;
+      }
+
       const apiUrl = getRiderApiUrl('/order-action');
-      console.log('🔍 Order action:', action, apiUrl);
+      console.log('🔍 Order action:', action, 'for order:', orderId, 'API URL:', apiUrl);
+
+      // Show loading state
+      toast.loading(`${action.charAt(0).toUpperCase() + action.slice(1)}ing order...`, {
+        id: `order-action-${orderId}`
+      });
 
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -238,18 +264,28 @@ export default function RiderDashboard() {
           orderId,
           action,
           riderId: rider?._id,
-          location: currentLocation
+          location: currentLocation,
+          timestamp: new Date().toISOString()
         })
       });
 
+      const responseData = await response.json().catch(() => ({}));
+
+      // Dismiss loading toast
+      toast.dismiss(`order-action-${orderId}`);
+
       if (response.ok) {
-        toast.success(`Order ${action}ed successfully`);
-        fetchAssignedOrders();
+        toast.success(`Order ${action}ed successfully!`);
+        // Refresh orders immediately
+        await fetchAssignedOrders();
       } else {
-        toast.error(`Failed to ${action} order`);
+        console.error('Order action failed:', response.status, responseData);
+        toast.error(responseData.message || `Failed to ${action} order. Please try again.`);
       }
     } catch (error) {
-      toast.error('Network error. Please try again.');
+      console.error('Order action error:', error);
+      toast.dismiss(`order-action-${orderId}`);
+      toast.error('Network error. Please check your connection and try again.');
     }
   };
 
@@ -391,17 +427,18 @@ export default function RiderDashboard() {
                           <Button
                             size="sm"
                             onClick={() => handleOrderAction(order._id, 'accept')}
-                            className="flex-1"
+                            className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                            disabled={!isActive || rider?.status !== 'approved'}
                           >
                             <CheckCircle className="h-4 w-4 mr-1" />
-                            Accept
+                            Accept Order
                           </Button>
                         )}
                         {order.riderStatus === 'accepted' && (
                           <Button
                             size="sm"
                             onClick={() => handleOrderAction(order._id, 'start')}
-                            className="flex-1"
+                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
                           >
                             <Navigation className="h-4 w-4 mr-1" />
                             Start Pickup
@@ -411,10 +448,10 @@ export default function RiderDashboard() {
                           <Button
                             size="sm"
                             onClick={() => handleOrderAction(order._id, 'complete')}
-                            className="flex-1"
+                            className="flex-1 bg-laundrify-purple hover:bg-purple-700 text-white"
                           >
                             <CheckCircle className="h-4 w-4 mr-1" />
-                            Complete
+                            Complete Delivery
                           </Button>
                         )}
                         <Button
