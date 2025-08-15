@@ -162,21 +162,72 @@ export default function RiderRegistration() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name || !formData.phone || !formData.aadharNumber) {
       toast.error('Please fill all required fields');
       return;
     }
-    
+
     if (!aadharImage) {
       toast.error('Please upload Aadhar card image');
       return;
     }
-    
+
     if (!selfieImage) {
       toast.error('Please capture your selfie');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Request OTP for registration
+      const response = await fetch(getRiderApiUrl('/register/request-otp'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ phone: formData.phone.trim() }),
+      });
+
+      if (response.ok) {
+        toast.success('OTP sent to your phone number');
+        setStep('otp');
+
+        // Start countdown timer
+        setCountdown(60);
+        const timer = setInterval(() => {
+          setCountdown((prev) => {
+            if (prev <= 1) {
+              clearInterval(timer);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      } else {
+        const error = await response.json();
+        if (response.status === 400 && error.message.includes('already exists')) {
+          toast.error('A rider with this phone number already exists');
+        } else {
+          toast.error(error.message || 'Failed to send OTP');
+        }
+      }
+    } catch (error) {
+      console.error('OTP request error:', error);
+      toast.error('Network error. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleOTPSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!otp.trim()) {
+      toast.error('Please enter the OTP');
       return;
     }
 
@@ -187,8 +238,9 @@ export default function RiderRegistration() {
       formDataToSend.append('name', formData.name);
       formDataToSend.append('phone', formData.phone);
       formDataToSend.append('aadharNumber', formData.aadharNumber);
-      formDataToSend.append('aadharImage', aadharImage);
-      formDataToSend.append('selfieImage', selfieImage);
+      formDataToSend.append('otp', otp.trim());
+      formDataToSend.append('aadharImage', aadharImage!);
+      formDataToSend.append('selfieImage', selfieImage!);
 
       const response = await fetch(getRiderApiUrl('/register'), {
         method: 'POST',
@@ -196,25 +248,32 @@ export default function RiderRegistration() {
       });
 
       if (response.ok) {
-        setIsSuccess(true);
+        setStep('success');
         toast.success('Registration submitted successfully!');
       } else {
-        if (response.status === 404) {
-          toast.error('Rider system is not available on this server. Please use local development environment.');
-          return;
-        }
-        try {
-          const error = await response.json();
+        const error = await response.json();
+        if (response.status === 400) {
+          toast.error(error.message || 'Invalid OTP');
+          if (error.attemptsRemaining) {
+            toast.info(`${error.attemptsRemaining} attempts remaining`);
+          }
+        } else {
           toast.error(error.message || 'Registration failed');
-        } catch (e) {
-          toast.error('Registration failed - Server error');
         }
       }
     } catch (error) {
+      console.error('Registration error:', error);
       toast.error('Network error. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleResendOTP = async () => {
+    if (countdown > 0) return;
+
+    setOTP('');
+    await handleFormSubmit({ preventDefault: () => {} } as React.FormEvent);
   };
 
   if (isSuccess) {
