@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import RiderLayout from '@/components/rider/RiderLayout';
+import RiderNotifications from '@/components/rider/RiderNotifications';
 
 // Helper function to get the correct API URL for rider endpoints
 const getRiderApiUrl = (endpoint: string): string => {
@@ -40,7 +41,7 @@ const getRiderApiUrl = (endpoint: string): string => {
   // Force correct backend URL based on environment
   if (isLocalhost && isDev) {
     // Local development - use proxy
-    console.log('🏠 Using local proxy for rider API');
+    console.log('�� Using local proxy for rider API');
     return `/api/riders${endpoint}`;
   } else if (isRenderCom || isLaundrifyDomain || !isLocalhost) {
     // Any hosted environment - use backend server
