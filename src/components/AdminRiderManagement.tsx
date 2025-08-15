@@ -161,7 +161,11 @@ export default function AdminRiderManagement() {
 
   const fetchRiders = async () => {
     try {
-      const response = await fetch(getAdminApiUrl('/riders'));
+      const response = await fetch(getAdminApiUrl('/riders'), {
+        headers: {
+          'admin-token': 'admin-access-granted' // Simple admin token for demo
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         console.log('📋 Riders fetched from API:', data.length, 'riders');
