@@ -111,29 +111,29 @@ export default function RiderOTPLogin() {
         }),
       });
 
+      // Read response once to avoid "body stream already read" error
+      const responseData = await response.json().catch(() => ({}));
+
       if (response.ok) {
-        const result = await response.json();
-        
         // Store authentication data
-        localStorage.setItem('riderAuth', JSON.stringify(result.rider));
-        localStorage.setItem('riderToken', result.token);
+        localStorage.setItem('riderAuth', JSON.stringify(responseData.rider));
+        localStorage.setItem('riderToken', responseData.token);
 
         toast.success('Login successful!');
         navigate('/rider/dashboard');
       } else {
-        const error = await response.json();
         if (response.status === 400) {
-          toast.error(error.message || 'Invalid OTP');
-          if (error.attemptsRemaining) {
-            toast.info(`${error.attemptsRemaining} attempts remaining`);
+          toast.error(responseData.message || 'Invalid OTP');
+          if (responseData.attemptsRemaining) {
+            toast.info(`${responseData.attemptsRemaining} attempts remaining`);
           }
         } else if (response.status === 404) {
           toast.error('Rider not found. Please register first.');
           setStep('phone');
         } else if (response.status === 403) {
-          toast.error(error.message || 'Account not approved');
+          toast.error(responseData.message || 'Account not approved');
         } else {
-          toast.error(error.message || 'Verification failed');
+          toast.error(responseData.message || 'Verification failed');
         }
       }
     } catch (error) {
