@@ -118,11 +118,19 @@ export default function RiderLayout({ children }: RiderLayoutProps) {
 
                 <Button
                   variant={isActive === '/rider/notifications' ? 'default' : 'ghost'}
-                  onClick={() => navigate('/rider/notifications')}
-                  className="flex items-center space-x-2"
+                  onClick={() => {
+                    navigate('/rider/notifications');
+                    setUnreadCount(0); // Reset count when navigating to notifications
+                  }}
+                  className="flex items-center space-x-2 relative"
                 >
                   <Bell className="h-4 w-4" />
                   <span>Notifications</span>
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
                 </Button>
 
                 <Button
