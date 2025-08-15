@@ -681,7 +681,7 @@ router.get('/orders', verifyRiderToken, async (req, res) => {
       .sort({ assignedAt: -1 }),
 
       // Quick pickups assigned to this rider
-      require('../models/QuickPickup').find({
+      QuickPickup.find({
         rider_id: riderId,
         status: { $in: ['assigned', 'accepted', 'picked_up'] } // Exclude completed orders
       })
