@@ -66,6 +66,7 @@ function App() {
               <Route path="/rider/dashboard" element={<RiderDashboard />} />
               <Route path="/rider/orders" element={<RiderDashboard />} />
               <Route path="/rider/orders/:orderId" element={<RiderOrders />} />
+              <Route path="/rider/notifications" element={<RiderNotificationsPage />} />
               <Route path="/rider/profile" element={<RiderDashboard />} />
               <Route path="*" element={<LaundryIndex />} />
             </Routes>
