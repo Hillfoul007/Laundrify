@@ -220,28 +220,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-sm">New booking #LAU-1247 received</span>
-              </div>
-              <span className="text-xs text-gray-500">2 min ago</span>
-            </div>
-            
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span className="text-sm">Booking #LAU-1246 completed</span>
-              </div>
-              <span className="text-xs text-gray-500">15 min ago</span>
-            </div>
-            
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                <span className="text-sm">User registered: John Doe</span>
-              </div>
-              <span className="text-xs text-gray-500">1 hour ago</span>
+            <div className="text-center py-8">
+              <p className="text-gray-500">Recent activity will appear here when data is available</p>
             </div>
           </div>
         </CardContent>
