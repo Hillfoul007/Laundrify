@@ -126,6 +126,65 @@ class OTPService {
     }
   }
 
+  // Send SMS notification (not OTP) via DVHosting SMS API
+  async sendSMS(phone, message, purpose = 'notification') {
+    try {
+      const apiKey = process.env.DVHOSTING_API_KEY;
+
+      // In development or if no API key, just log the message
+      if (!apiKey || process.env.NODE_ENV !== 'production') {
+        console.log(`📱 [DEV] SMS to ${phone}: ${message}`);
+        return { success: true, message: 'SMS sent successfully (dev mode)' };
+      }
+
+      // Clean phone number (remove any non-digits)
+      const cleanPhone = phone.replace(/\D/g, '');
+
+      // Encode the message for URL
+      const encodedMessage = encodeURIComponent(message);
+
+      // DVHosting v4 API endpoint for regular SMS
+      const url = `https://dvhosting.in/api-sms-v4.php?authorization=${apiKey}&route=q&numbers=${cleanPhone}&message=${encodedMessage}`;
+
+      console.log(`📱 Sending ${purpose} SMS to ${cleanPhone} via DVHosting: ${message.substring(0, 50)}...`);
+
+      const response = await fetch(url);
+      const responseText = await response.text();
+
+      if (!responseText || responseText.trim() === "") {
+        console.error('❌ Empty response from DVHosting API');
+        return { success: false, error: "Empty response from DVHosting" };
+      }
+
+      try {
+        const jsonResponse = JSON.parse(responseText);
+        const isSuccess = jsonResponse.return || jsonResponse.success;
+
+        if (isSuccess) {
+          console.log(`✅ ${purpose} SMS sent successfully to ${cleanPhone}`);
+          return { success: true, message: 'SMS sent successfully via DVHosting' };
+        } else {
+          console.error('❌ DVHosting API returned error:', jsonResponse.message);
+          return { success: false, error: jsonResponse.message || 'DVHosting API error' };
+        }
+      } catch (parseError) {
+        // If JSON parsing fails, check if response contains "success"
+        const isSuccess = /success/i.test(responseText);
+
+        if (isSuccess) {
+          console.log(`✅ ${purpose} SMS sent successfully to ${cleanPhone} (text response)`);
+          return { success: true, message: 'SMS sent successfully via DVHosting' };
+        } else {
+          console.error('❌ DVHosting API response not parseable:', responseText.substring(0, 100));
+          return { success: false, error: 'Invalid response from DVHosting API' };
+        }
+      }
+    } catch (error) {
+      console.error(`❌ Failed to send ${purpose} SMS to ${phone}:`, error);
+      return { success: false, error: 'Failed to send SMS via DVHosting' };
+    }
+  }
+
   // Clear all OTPs for a phone number
   clearOTPs(phone) {
     const keys = Array.from(otpStore.keys()).filter(key => key.startsWith(phone));
