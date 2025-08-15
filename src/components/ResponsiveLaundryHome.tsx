@@ -628,7 +628,12 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Notification button removed as per user requirements */}
+              {currentUser && (
+                <NotificationBell
+                  userId={currentUser._id || currentUser.phone}
+                  className="text-white hover:bg-white/20"
+                />
+              )}
 
               {currentUser ? (
                 <UserMenuDropdown
