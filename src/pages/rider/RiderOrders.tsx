@@ -144,6 +144,12 @@ export default function RiderOrders() {
   };
 
   const saveOrderChanges = async () => {
+    // If verification is required and not approved, show error
+    if (customerVerificationRequired && verificationStatus !== 'approved') {
+      toast.error('Customer verification required before saving changes');
+      return;
+    }
+
     setIsSaving(true);
     try {
       const token = localStorage.getItem('riderToken');
@@ -158,20 +164,32 @@ export default function RiderOrders() {
         body: JSON.stringify({
           items: editedItems,
           updatedBy: 'rider',
-          notes: `Order updated by rider ${new Date().toLocaleString()}. Customer will be notified to verify changes.`
+          notes: `Order updated by rider ${new Date().toLocaleString()}. ${customerVerificationRequired ? 'Customer approved changes.' : 'Customer will be notified to verify changes.'}`,
+          requiresVerification: !customerVerificationRequired,
+          verificationStatus: customerVerificationRequired ? 'approved' : 'pending'
         })
       });
 
       const result = await response.json();
 
       if (response.ok) {
-        toast.success('Order updated and customer notified!', {
-          description: result.price_change !== 0
-            ? `Price changed by ₹${Math.abs(result.price_change)} ${result.price_change > 0 ? 'increase' : 'decrease'}`
-            : 'Items updated successfully',
-          duration: 4000,
-          icon: <Bell className="h-4 w-4" />
-        });
+        if (customerVerificationRequired) {
+          toast.success('Order saved successfully!', {
+            description: 'Customer has approved the changes',
+            duration: 4000,
+            icon: <Bell className="h-4 w-4" />
+          });
+        } else {
+          toast.success('Order updated and customer notified!', {
+            description: result.price_change !== 0
+              ? `Price changed by ₹${Math.abs(result.price_change)} ${result.price_change > 0 ? 'increase' : 'decrease'}`
+              : 'Items updated successfully',
+            duration: 4000,
+            icon: <Bell className="h-4 w-4" />
+          });
+          setCustomerVerificationRequired(true);
+          setVerificationStatus('pending');
+        }
         setIsEditing(false);
         setShowConfirmDialog(false);
         fetchOrderDetails(orderId!);
@@ -185,12 +203,29 @@ export default function RiderOrders() {
     }
   };
 
+  const simulateCustomerVerification = (approved: boolean) => {
+    setVerificationStatus(approved ? 'approved' : 'rejected');
+    if (approved) {
+      toast.success('Customer approved the changes! You can now save the order.');
+    } else {
+      toast.error('Customer rejected the changes. Please modify the order.');
+      setCustomerVerificationRequired(false);
+    }
+  };
+
   const handleSaveClick = () => {
     const newTotal = totalAmount;
     const priceDifference = newTotal - originalTotal;
 
-    if (Math.abs(priceDifference) > 0) {
-      setShowConfirmDialog(true);
+    // For quick pickups or significant changes, always require customer verification first
+    if ((isQuickPickup && editedItems.length > 0) || Math.abs(priceDifference) > 0) {
+      if (!customerVerificationRequired) {
+        setShowConfirmDialog(true);
+      } else if (verificationStatus === 'approved') {
+        saveOrderChanges();
+      } else {
+        toast.error('Please wait for customer verification');
+      }
     } else {
       saveOrderChanges();
     }
