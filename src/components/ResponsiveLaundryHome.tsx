@@ -1435,8 +1435,26 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
           }}
         />
 
-        {/* WhatsApp Floating Action Button */}
-        <div className="fixed bottom-20 right-6 z-50">
+        {/* Floating Action Buttons */}
+        <div className="fixed bottom-20 right-6 z-50 flex flex-col gap-3">
+          {/* Referral Button - Only show if user is logged in */}
+          {currentUser && (
+            <Button
+              onClick={() => setShowReferralModal(true)}
+              className="bg-gradient-to-r from-laundrify-purple to-laundrify-pink hover:from-laundrify-purple/90 hover:to-laundrify-pink/90 text-white rounded-full w-14 h-14 p-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 relative overflow-hidden group"
+              title="Refer friends and earn rewards!"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-400 opacity-20 animate-pulse group-hover:opacity-30"></div>
+              <div className="relative flex flex-col items-center">
+                <Gift className="h-5 w-5" />
+                <span className="text-xs font-bold leading-none">50%</span>
+              </div>
+              {/* Sparkle animation */}
+              <div className="absolute top-1 right-1 w-2 h-2 bg-yellow-300 rounded-full opacity-80 animate-ping"></div>
+            </Button>
+          )}
+
+          {/* WhatsApp Button */}
           <Button
             onClick={() => {
               const phoneNumber = "917011585587"; // Replace with your WhatsApp business number
