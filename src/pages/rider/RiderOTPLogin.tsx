@@ -75,9 +75,32 @@ export default function RiderOTPLogin() {
         }, 1000);
       } else {
         if (response.status === 404) {
-          toast.error('Rider not found. Please register first.');
+          toast.error('Rider not found. Please register first.', {
+            duration: 5000,
+            action: {
+              label: 'Register Now',
+              onClick: () => {
+                // Switch to register tab
+                const registerTab = document.querySelector('[value="register"]') as HTMLElement;
+                if (registerTab) {
+                  registerTab.click();
+                }
+              }
+            }
+          });
         } else if (response.status === 403) {
-          toast.error(responseData.message || 'Account not approved by admin');
+          const status = responseData.status;
+          if (status === 'pending') {
+            toast.error('Your account is pending approval from admin. Please wait for verification.', {
+              duration: 6000
+            });
+          } else if (status === 'rejected') {
+            toast.error(`Your account has been rejected. ${responseData.rejectionReason ? 'Reason: ' + responseData.rejectionReason : 'Please contact admin for more details.'}`, {
+              duration: 8000
+            });
+          } else {
+            toast.error(responseData.message || 'Account not approved by admin');
+          }
         } else {
           toast.error(responseData.message || 'Failed to send OTP');
         }
@@ -130,10 +153,33 @@ export default function RiderOTPLogin() {
             toast.info(`${responseData.attemptsRemaining} attempts remaining`);
           }
         } else if (response.status === 404) {
-          toast.error('Rider not found. Please register first.');
+          toast.error('Rider not found. Please register first.', {
+            duration: 5000,
+            action: {
+              label: 'Register Now',
+              onClick: () => {
+                // Switch to register tab
+                const registerTab = document.querySelector('[value="register"]') as HTMLElement;
+                if (registerTab) {
+                  registerTab.click();
+                }
+              }
+            }
+          });
           setStep('phone');
         } else if (response.status === 403) {
-          toast.error(responseData.message || 'Account not approved');
+          const status = responseData.status;
+          if (status === 'pending') {
+            toast.error('Your account is pending approval from admin. Please wait for verification.', {
+              duration: 6000
+            });
+          } else if (status === 'rejected') {
+            toast.error(`Your account has been rejected. ${responseData.rejectionReason ? 'Reason: ' + responseData.rejectionReason : 'Please contact admin for more details.'}`, {
+              duration: 8000
+            });
+          } else {
+            toast.error(responseData.message || 'Account not approved');
+          }
         } else {
           toast.error(responseData.message || 'Verification failed');
         }
@@ -290,8 +336,12 @@ export default function RiderOTPLogin() {
       
       <Alert>
         <AlertDescription>
-          New to our platform? Register above to join our delivery team.
-          Your account will be verified by our admin before you can start working.
+          <strong>New Rider?</strong> Use the Register tab above to join our delivery team.
+          <br />
+          <strong>Account Status Info:</strong>
+          <br />• <span className="text-blue-600">Pending</span>: Account awaiting admin approval
+          <br />• <span className="text-red-600">Rejected</span>: Contact admin for resubmission
+          <br />• <span className="text-green-600">Approved</span>: Ready to receive orders
         </AlertDescription>
       </Alert>
     </div>
