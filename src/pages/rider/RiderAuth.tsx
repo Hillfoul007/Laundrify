@@ -10,6 +10,17 @@ export default function RiderAuth() {
   const [activeTab, setActiveTab] = useState('login');
   const [isLoading, setIsLoading] = useState(true);
 
+  // Make setActiveTab available globally for tab switching from child components
+  useEffect(() => {
+    (window as any).switchToRegisterTab = () => setActiveTab('register');
+    (window as any).switchToLoginTab = () => setActiveTab('login');
+
+    return () => {
+      delete (window as any).switchToRegisterTab;
+      delete (window as any).switchToLoginTab;
+    };
+  }, []);
+
   // Add console log to verify component is loading
   console.log('🔍 RiderAuth component loading...', { activeTab, location: window.location.href });
 
@@ -53,11 +64,11 @@ export default function RiderAuth() {
             </TabsList>
 
             <TabsContent value="login">
-              <RiderOTPLogin />
+              <RiderOTPLogin onSwitchToRegister={() => setActiveTab('register')} />
             </TabsContent>
 
             <TabsContent value="register">
-              <RiderRegistration />
+              <RiderRegistration onSwitchToLogin={() => setActiveTab('login')} />
             </TabsContent>
           </Tabs>
         </CardContent>
