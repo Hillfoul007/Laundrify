@@ -593,8 +593,24 @@ export default function AdminRiderManagement() {
                               <Clock className="h-3 w-3" />
                               <span>{order.pickupTime}</span>
                             </div>
+                            {order.type === 'Quick Pickup' && order.specialInstructions && (
+                              <div className="flex items-start space-x-2">
+                                <FileText className="h-3 w-3 mt-0.5" />
+                                <span className="text-xs">{order.specialInstructions}</span>
+                              </div>
+                            )}
+                            {order.type === 'Quick Pickup' && order.estimatedCost > 0 && (
+                              <div className="flex items-center space-x-2">
+                                <span className="text-xs font-medium">Est. Cost: ₹{order.estimatedCost}</span>
+                              </div>
+                            )}
                           </div>
-                          <Badge variant="secondary">{order.type} Order</Badge>
+                          <Badge
+                            variant={order.type === 'Quick Pickup' ? 'default' : 'secondary'}
+                            className={order.type === 'Quick Pickup' ? 'bg-orange-500 hover:bg-orange-600' : ''}
+                          >
+                            {order.type} Order
+                          </Badge>
                         </div>
                         
                         <Dialog 
