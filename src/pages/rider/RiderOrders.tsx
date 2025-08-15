@@ -5,6 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { laundryServices, serviceCategories, getServicesByCategory, LaundryService } from '@/data/laundryServices';
 import {
   Package,
   MapPin,
@@ -49,7 +52,12 @@ export default function RiderOrders() {
   const [order, setOrder] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedItems, setEditedItems] = useState<any[]>([]);
-  const [newItem, setNewItem] = useState({ name: '', quantity: 1, price: 0 });
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedService, setSelectedService] = useState<LaundryService | null>(null);
+  const [serviceQuantity, setServiceQuantity] = useState(1);
+  const [isQuickPickup, setIsQuickPickup] = useState(false);
+  const [customerVerificationRequired, setCustomerVerificationRequired] = useState(false);
+  const [verificationStatus, setVerificationStatus] = useState<'pending' | 'approved' | 'rejected' | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [originalTotal, setOriginalTotal] = useState(0);
@@ -78,6 +86,9 @@ export default function RiderOrders() {
         const items = orderData.items || [];
         setEditedItems([...items]);
         setOriginalTotal(items.reduce((sum: number, item: any) => sum + (item.quantity * item.price), 0));
+
+        // Check if this is a quick pickup (no initial items)
+        setIsQuickPickup(items.length === 0 || orderData.type === 'Quick Pickup');
       } else {
         toast.error('Failed to fetch order details');
         navigate('/rider/dashboard');
