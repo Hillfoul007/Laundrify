@@ -368,10 +368,13 @@ export default function RiderOrders() {
                       variant="default"
                       size="sm"
                       onClick={handleSaveClick}
-                      disabled={isSaving}
+                      disabled={isSaving || (customerVerificationRequired && verificationStatus !== 'approved')}
                     >
                       <Save className="h-4 w-4 mr-2" />
-                      {isSaving ? 'Saving...' : 'Save & Notify Customer'}
+                      {isSaving ? 'Saving...' :
+                       customerVerificationRequired && verificationStatus === 'approved' ? 'Save Order' :
+                       customerVerificationRequired ? 'Waiting for Customer' :
+                       'Send for Verification'}
                     </Button>
                   </>
                 ) : (
