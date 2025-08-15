@@ -299,6 +299,39 @@ export default function RiderDashboard() {
         {/* Notifications Card */}
         <RiderNotifications compact={true} />
 
+        {/* Rider Status Alert */}
+        {rider?.status !== 'approved' && (
+          <Card className="border-orange-200 bg-orange-50">
+            <CardContent className="pt-4">
+              <div className="flex items-center space-x-3">
+                <div className="flex-shrink-0">
+                  {rider?.status === 'pending' ? (
+                    <Clock className="h-5 w-5 text-orange-500" />
+                  ) : (
+                    <XCircle className="h-5 w-5 text-red-500" />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-sm font-medium text-orange-800">
+                    {rider?.status === 'pending' ? 'Account Pending Approval' : 'Account Rejected'}
+                  </h3>
+                  <p className="text-sm text-orange-700 mt-1">
+                    {rider?.status === 'pending'
+                      ? 'Your account is currently under review by our admin team. You will be notified once approved.'
+                      : `Your account has been rejected. ${rider?.rejectionReason ? 'Reason: ' + rider.rejectionReason : 'Please contact admin for more details.'}`
+                    }
+                  </p>
+                  {rider?.status === 'rejected' && (
+                    <p className="text-sm text-orange-700 mt-2">
+                      <strong>Next Steps:</strong> Contact our support team to resubmit your application.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Status Card */}
         <Card>
           <CardHeader>
@@ -330,7 +363,13 @@ export default function RiderDashboard() {
                 id="active-toggle"
                 checked={isActive}
                 onCheckedChange={toggleActiveStatus}
+                disabled={rider?.status !== 'approved'}
               />
+              {rider?.status !== 'approved' && (
+                <p className="text-xs text-gray-500 mt-2">
+                  Only approved riders can go active
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
