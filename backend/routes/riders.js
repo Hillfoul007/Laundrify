@@ -489,6 +489,8 @@ router.post('/login', async (req, res) => {
           phone: rider.phone,
           status: rider.status,
           isActive: rider.isActive,
+          aadharNumber: rider.aadharNumber,
+          rejectionReason: rider.rejectionReason
         },
         message: 'Login successful',
         mode: 'database'
