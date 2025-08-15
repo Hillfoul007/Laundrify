@@ -226,6 +226,7 @@ const LaundryIndex = () => {
     checkAuthState();
     getUserLocation();
     checkFirst30Notification();
+    checkReferralCodeInUrl();
 
     // Listen for auth events from other tabs or auth persistence
     const handleAuthLogin = (event: CustomEvent) => {
