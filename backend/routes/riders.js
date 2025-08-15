@@ -90,7 +90,53 @@ const verifyRiderToken = (req, res, next) => {
   }
 };
 
-// Register new rider
+// Request OTP for rider registration
+router.post('/register/request-otp', async (req, res) => {
+  try {
+    const { phone } = req.body;
+
+    if (!phone) {
+      return res.status(400).json({
+        message: 'Phone number is required'
+      });
+    }
+
+    // Check if rider already exists
+    if (mongoose.connection.readyState) {
+      const existingRider = await Rider.findOne({ phone });
+      if (existingRider) {
+        return res.status(400).json({
+          message: 'A rider with this phone number already exists'
+        });
+      }
+    }
+
+    // Generate and send OTP
+    const otp = otpService.generateOTP();
+    otpService.storeOTP(phone, otp, 'registration');
+
+    const smsResult = await otpService.sendOTP(phone, otp, 'registration');
+
+    if (!smsResult.success) {
+      return res.status(500).json({
+        message: 'Failed to send OTP. Please try again.'
+      });
+    }
+
+    res.json({
+      message: 'OTP sent successfully to your phone number',
+      expiresIn: '10 minutes'
+    });
+  } catch (error) {
+    console.error('❌ Registration OTP request error:', error);
+    res.status(500).json({
+      message: 'Failed to send OTP. Please try again.',
+      error: 'Internal server error'
+    });
+  }
+});
+
+// Register new rider (with OTP verification)
 router.post('/register', upload.fields([
   { name: 'aadharImage', maxCount: 1 },
   { name: 'selfieImage', maxCount: 1 }
@@ -404,7 +450,7 @@ router.post('/login', async (req, res) => {
 
       // Check if rider is approved (status check)
       if (rider.status !== 'approved') {
-        console.log(`⚠️ Rider ${rider.name} status is ${rider.status}, login denied`);
+        console.log(`��️ Rider ${rider.name} status is ${rider.status}, login denied`);
         return res.status(403).json({
           message: rider.status === 'pending'
             ? 'Your account is pending approval from admin'
