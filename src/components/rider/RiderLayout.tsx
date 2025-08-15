@@ -2,13 +2,14 @@ import React from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { 
-  User, 
-  MapPin, 
-  Package, 
+import {
+  User,
+  MapPin,
+  Package,
   LogOut,
   Shield,
-  Activity
+  Activity,
+  Bell
 } from 'lucide-react';
 
 interface RiderLayoutProps {
