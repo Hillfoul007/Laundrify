@@ -7,6 +7,7 @@ const path = require("path");
 const fs = require("fs");
 const Rider = require("../models/Rider");
 const Booking = require("../models/Booking");
+const QuickPickup = require("../models/QuickPickup");
 const otpService = require("../services/otpService");
 const notificationService = require("../services/notificationService");
 const riderNotificationService = require("../services/riderNotificationService");
