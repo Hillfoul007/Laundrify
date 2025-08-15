@@ -248,18 +248,20 @@ export default function RiderRegistration() {
         body: formDataToSend,
       });
 
+      // Read response once to avoid "body stream already read" error
+      const responseData = await response.json().catch(() => ({}));
+
       if (response.ok) {
         setStep('success');
         toast.success('Registration submitted successfully!');
       } else {
-        const error = await response.json();
         if (response.status === 400) {
-          toast.error(error.message || 'Invalid OTP');
-          if (error.attemptsRemaining) {
-            toast.info(`${error.attemptsRemaining} attempts remaining`);
+          toast.error(responseData.message || 'Invalid OTP');
+          if (responseData.attemptsRemaining) {
+            toast.info(`${responseData.attemptsRemaining} attempts remaining`);
           }
         } else {
-          toast.error(error.message || 'Registration failed');
+          toast.error(responseData.message || 'Registration failed');
         }
       }
     } catch (error) {
