@@ -20,6 +20,7 @@ export default function RiderLayout({ children }: RiderLayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const [rider, setRider] = React.useState<any>(null);
+  const [unreadCount, setUnreadCount] = React.useState<number>(0);
 
   React.useEffect(() => {
     // Check if rider is logged in
