@@ -165,7 +165,156 @@ router.post('/register', upload.fields([
   }
 });
 
-// Login rider
+// Request OTP for rider login
+router.post('/request-otp', async (req, res) => {
+  try {
+    const { phone } = req.body;
+
+    if (!phone) {
+      return res.status(400).json({
+        message: 'Phone number is required'
+      });
+    }
+
+    // Check if rider exists and is approved
+    if (mongoose.connection.readyState) {
+      const rider = await Rider.findOne({ phone });
+
+      if (!rider) {
+        return res.status(404).json({
+          message: 'Rider not found. Please register first.'
+        });
+      }
+
+      if (rider.status !== 'approved') {
+        return res.status(403).json({
+          message: rider.status === 'pending'
+            ? 'Your account is pending approval from admin'
+            : 'Your account has been rejected. Please contact admin.',
+          status: rider.status
+        });
+      }
+    }
+
+    // Generate and send OTP
+    const otp = otpService.generateOTP();
+    otpService.storeOTP(phone, otp, 'login');
+
+    const smsResult = await otpService.sendOTP(phone, otp, 'login');
+
+    if (!smsResult.success) {
+      return res.status(500).json({
+        message: 'Failed to send OTP. Please try again.'
+      });
+    }
+
+    res.json({
+      message: 'OTP sent successfully to your phone number',
+      expiresIn: '10 minutes'
+    });
+  } catch (error) {
+    console.error('❌ OTP request error:', error);
+    res.status(500).json({
+      message: 'Failed to send OTP. Please try again.',
+      error: 'Internal server error'
+    });
+  }
+});
+
+// Verify OTP and login rider
+router.post('/verify-otp', async (req, res) => {
+  try {
+    const { phone, otp } = req.body;
+
+    if (!phone || !otp) {
+      return res.status(400).json({
+        message: 'Phone number and OTP are required'
+      });
+    }
+
+    // Verify OTP
+    const verification = otpService.verifyOTP(phone, otp, 'login');
+
+    if (!verification.success) {
+      return res.status(400).json({
+        message: verification.error,
+        attemptsRemaining: verification.attemptsRemaining
+      });
+    }
+
+    // Demo mode when database is not connected
+    if (!mongoose.connection.readyState) {
+      console.log('🔧 Demo mode: OTP verified, logging in demo rider');
+
+      const demoRider = {
+        _id: 'demo_rider_' + phone.slice(-4),
+        name: 'Demo Rider',
+        phone: phone,
+        status: 'approved',
+        isActive: false,
+      };
+
+      const token = jwt.sign(
+        { riderId: demoRider._id, phone: demoRider.phone },
+        process.env.JWT_SECRET || 'fallback_secret_for_demo',
+        { expiresIn: '7d' }
+      );
+
+      return res.json({
+        token,
+        rider: demoRider,
+        message: 'Login successful (demo mode)',
+        mode: 'demo'
+      });
+    }
+
+    // Find rider in database
+    const rider = await Rider.findOne({ phone });
+
+    if (!rider) {
+      return res.status(404).json({
+        message: 'Rider not found. Please register first.'
+      });
+    }
+
+    if (rider.status !== 'approved') {
+      return res.status(403).json({
+        message: rider.status === 'pending'
+          ? 'Your account is pending approval from admin'
+          : 'Your account has been rejected. Please contact admin.',
+        status: rider.status
+      });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { riderId: rider._id, phone: rider.phone },
+      process.env.JWT_SECRET || 'fallback_secret',
+      { expiresIn: '7d' }
+    );
+
+    console.log(`✅ Rider OTP login successful: ${rider.name}`);
+    res.json({
+      token,
+      rider: {
+        _id: rider._id,
+        name: rider.name,
+        phone: rider.phone,
+        status: rider.status,
+        isActive: rider.isActive,
+      },
+      message: 'Login successful'
+    });
+  } catch (error) {
+    console.error('❌ OTP verification error:', error);
+    res.status(500).json({
+      message: 'Login failed. Please try again.',
+      error: 'Internal server error'
+    });
+  }
+});
+
+// Legacy password-based login (deprecated - keeping for backward compatibility)
 router.post('/login', async (req, res) => {
   try {
     console.log('🔍 Rider login attempt:', {
