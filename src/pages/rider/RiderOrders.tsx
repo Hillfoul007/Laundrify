@@ -279,38 +279,43 @@ export default function RiderOrders() {
         </div>
 
         {/* Customer Information */}
-        <Card>
+        <Card className="border-blue-200 bg-blue-50">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <User className="h-5 w-5" />
-              <span>Customer Information</span>
+              <User className="h-5 w-5 text-blue-600" />
+              <span className="text-blue-900">Customer Information</span>
             </CardTitle>
+            <CardDescription className="text-blue-700">
+              Contact details and pickup information for this order
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Name</Label>
-                <p className="text-gray-900">{order.customerName}</p>
+                <Label className="text-sm font-semibold text-blue-800">Customer Name</Label>
+                <p className="text-lg font-medium text-blue-900">{order.customerName}</p>
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Phone</Label>
+                <Label className="text-sm font-semibold text-blue-800">Phone Number</Label>
                 <div className="flex items-center space-x-2">
-                  <Phone className="h-4 w-4 text-gray-400" />
-                  <a href={`tel:${order.customerPhone}`} className="text-laundrify-purple hover:underline">
+                  <Phone className="h-4 w-4 text-blue-600" />
+                  <a
+                    href={`tel:${order.customerPhone}`}
+                    className="text-lg font-medium text-blue-900 hover:text-blue-700 hover:underline"
+                  >
                     {order.customerPhone}
                   </a>
                 </div>
               </div>
               <div className="space-y-2 md:col-span-2">
-                <Label className="text-sm font-medium">Address</Label>
-                <div className="flex items-start space-x-2">
-                  <MapPin className="h-4 w-4 text-gray-400 mt-1" />
+                <Label className="text-sm font-semibold text-blue-800">Pickup Address</Label>
+                <div className="flex items-start space-x-3">
+                  <MapPin className="h-5 w-5 text-blue-600 mt-1" />
                   <div className="flex-1">
-                    <p className="text-gray-900">{order.address}</p>
+                    <p className="text-blue-900 font-medium leading-relaxed">{order.address}</p>
                     <Button
                       size="sm"
-                      variant="outline"
-                      className="mt-2"
+                      className="mt-3 bg-blue-600 hover:bg-blue-700"
                       onClick={() => openMapsNavigation(order.address, 'pickup')}
                     >
                       <Navigation className="h-4 w-4 mr-2" />
@@ -320,11 +325,17 @@ export default function RiderOrders() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Pickup Time</Label>
+                <Label className="text-sm font-semibold text-blue-800">Pickup Time</Label>
                 <div className="flex items-center space-x-2">
-                  <Clock className="h-4 w-4 text-gray-400" />
-                  <p className="text-gray-900">{order.pickupTime}</p>
+                  <Clock className="h-4 w-4 text-blue-600" />
+                  <p className="text-blue-900 font-medium">{order.pickupTime}</p>
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-blue-800">Order Type</Label>
+                <Badge variant={isQuickPickup ? "secondary" : "default"} className="text-sm">
+                  {isQuickPickup ? "Quick Pickup" : "Regular Order"}
+                </Badge>
               </div>
             </div>
           </CardContent>
