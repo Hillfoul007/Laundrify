@@ -265,7 +265,8 @@ export default function AdminRiderManagement() {
         },
         body: JSON.stringify({
           orderId: selectedOrder._id,
-          riderId: selectedRider._id
+          riderId: selectedRider._id,
+          orderType: selectedOrder.type
         })
       });
 
