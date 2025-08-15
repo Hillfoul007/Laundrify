@@ -860,6 +860,136 @@ router.post('/order-action', verifyRiderToken, async (req, res) => {
   }
 });
 
+// Get rider notifications
+router.get('/notifications', verifyRiderToken, async (req, res) => {
+  try {
+    console.log('🔍 Get notifications request:', {
+      hasRiderId: !!req.rider?.riderId,
+      riderId: req.rider?.riderId
+    });
+
+    const { includeRead } = req.query;
+
+    // For demo mode, return sample notifications
+    if (!mongoose.connection.readyState) {
+      console.log('🔧 Demo mode: Returning sample notifications');
+      const sampleNotifications = [
+        {
+          _id: '507f1f77bcf86cd799439021',
+          title: 'New Order Assigned',
+          message: 'You have been assigned a new regular order #LAU-001 from John Doe. Please check the details and accept the order.',
+          type: 'order_assigned',
+          read: false,
+          createdAt: new Date(Date.now() - 10 * 60 * 1000), // 10 minutes ago
+          data: {
+            order_id: '507f1f77bcf86cd799439011',
+            booking_id: 'LAU-001',
+            customer_name: 'John Doe',
+            customer_phone: '+91 9876543210'
+          }
+        },
+        {
+          _id: '507f1f77bcf86cd799439022',
+          title: 'Location Update Required',
+          message: 'Please update your current location to continue receiving order assignments.',
+          type: 'location_request',
+          read: false,
+          createdAt: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
+          data: {}
+        }
+      ];
+
+      return res.json(sampleNotifications);
+    }
+
+    const notifications = await riderNotificationService.getRiderNotifications(
+      req.rider.riderId,
+      includeRead === 'true'
+    );
+
+    res.json(notifications);
+  } catch (error) {
+    console.error('❌ Get notifications error:', error);
+    // Return empty array on error
+    res.json([]);
+  }
+});
+
+// Mark notification as read
+router.post('/notifications/:notificationId/read', verifyRiderToken, async (req, res) => {
+  try {
+    const { notificationId } = req.params;
+
+    // For demo mode, just return success
+    if (!mongoose.connection.readyState) {
+      console.log('🔧 Demo mode: Notification marked as read');
+      return res.json({
+        message: 'Notification marked as read (demo mode)',
+        notification: { _id: notificationId, read: true }
+      });
+    }
+
+    const notification = await riderNotificationService.markAsRead(
+      notificationId,
+      req.rider.riderId
+    );
+
+    if (!notification) {
+      return res.status(404).json({ message: 'Notification not found' });
+    }
+
+    res.json({
+      message: 'Notification marked as read',
+      notification
+    });
+  } catch (error) {
+    console.error('❌ Mark notification as read error:', error);
+    res.status(500).json({ message: 'Failed to mark notification as read', error: error.message });
+  }
+});
+
+// Mark all notifications as read
+router.post('/notifications/mark-all-read', verifyRiderToken, async (req, res) => {
+  try {
+    // For demo mode, just return success
+    if (!mongoose.connection.readyState) {
+      console.log('🔧 Demo mode: All notifications marked as read');
+      return res.json({
+        message: 'All notifications marked as read (demo mode)',
+        markedCount: 2
+      });
+    }
+
+    const result = await riderNotificationService.markAllAsRead(req.rider.riderId);
+
+    res.json({
+      message: 'All notifications marked as read',
+      markedCount: result.modifiedCount
+    });
+  } catch (error) {
+    console.error('❌ Mark all notifications as read error:', error);
+    res.status(500).json({ message: 'Failed to mark all notifications as read', error: error.message });
+  }
+});
+
+// Get unread notification count
+router.get('/notifications/unread-count', verifyRiderToken, async (req, res) => {
+  try {
+    // For demo mode, return sample count
+    if (!mongoose.connection.readyState) {
+      console.log('🔧 Demo mode: Returning sample unread count');
+      return res.json({ count: 2 });
+    }
+
+    const count = await riderNotificationService.getUnreadCount(req.rider.riderId);
+
+    res.json({ count });
+  } catch (error) {
+    console.error('❌ Get unread count error:', error);
+    res.json({ count: 0 });
+  }
+});
+
 // Admin routes for rider management
 router.get('/admin/riders', async (req, res) => {
   try {
