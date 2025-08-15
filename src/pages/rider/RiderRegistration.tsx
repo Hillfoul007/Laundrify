@@ -40,7 +40,11 @@ const getRiderApiUrl = (endpoint: string): string => {
   return `https://backend-vaxf.onrender.com/api/riders${endpoint}`;
 };
 
-export default function RiderRegistration() {
+interface RiderRegistrationProps {
+  onSwitchToLogin?: () => void;
+}
+
+export default function RiderRegistration({ onSwitchToLogin }: RiderRegistrationProps) {
   const [step, setStep] = useState<'form' | 'otp' | 'success'>('form');
   const [formData, setFormData] = useState({
     name: '',
