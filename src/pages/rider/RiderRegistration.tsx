@@ -276,7 +276,7 @@ export default function RiderRegistration() {
     await handleFormSubmit({ preventDefault: () => {} } as React.FormEvent);
   };
 
-  if (isSuccess) {
+  if (step === 'success') {
     return (
       <div className="text-center p-6">
         <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
@@ -288,11 +288,95 @@ export default function RiderRegistration() {
           You'll receive a notification once your account is approved.
         </p>
         <Button
-          onClick={() => setIsSuccess(false)}
+          onClick={() => {
+            setStep('form');
+            setFormData({ name: '', phone: '', aadharNumber: '' });
+            setOTP('');
+            setAadharImage(null);
+            setSelfieImage(null);
+          }}
           variant="outline"
         >
           Register Another Rider
         </Button>
+      </div>
+    );
+  }
+
+  if (step === 'otp') {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Verify Phone Number</CardTitle>
+            <CardDescription>
+              Enter the OTP sent to {formData.phone}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleOTPSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="otp" className="flex items-center space-x-2">
+                  <Lock className="h-4 w-4" />
+                  <span>Enter OTP</span>
+                </Label>
+                <Input
+                  id="otp"
+                  name="otp"
+                  type="text"
+                  placeholder="Enter 6-digit OTP"
+                  value={otp}
+                  onChange={(e) => setOTP(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  maxLength={6}
+                  required
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  'Submitting Registration...'
+                ) : (
+                  <>
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Complete Registration
+                  </>
+                )}
+              </Button>
+
+              <div className="flex items-center justify-between text-sm">
+                <Button
+                  type="button"
+                  variant="link"
+                  className="p-0 h-auto"
+                  onClick={() => setStep('form')}
+                >
+                  Back to form
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="link"
+                  className="p-0 h-auto"
+                  onClick={handleResendOTP}
+                  disabled={countdown > 0}
+                >
+                  {countdown > 0 ? (
+                    <span className="flex items-center gap-1">
+                      <Timer className="h-3 w-3" />
+                      Resend in {countdown}s
+                    </span>
+                  ) : (
+                    'Resend OTP'
+                  )}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     );
   }
