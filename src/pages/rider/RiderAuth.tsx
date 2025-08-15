@@ -55,7 +55,7 @@ export default function RiderAuth() {
             </TabsList>
 
             <TabsContent value="login">
-              <RiderLogin />
+              <RiderOTPLogin />
             </TabsContent>
 
             <TabsContent value="register">
