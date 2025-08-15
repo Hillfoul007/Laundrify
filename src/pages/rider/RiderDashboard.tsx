@@ -313,55 +313,6 @@ export default function RiderDashboard() {
   return (
     <RiderLayout>
       <div className="space-y-6">
-        {/* Debug Panel - Remove in production */}
-        {import.meta.env.DEV && (
-          <Card className="border-blue-200 bg-blue-50">
-            <CardContent className="pt-4">
-              <h3 className="font-medium text-blue-800 mb-2">🐛 Debug Info</h3>
-              <div className="text-xs text-blue-700 space-y-1">
-                <p><strong>Rider:</strong> {rider ? `${rider.name} (${rider.status})` : 'Not loaded'}</p>
-                <p><strong>Active Status:</strong> {isActive ? 'Active' : 'Inactive'}</p>
-                <p><strong>Orders Count:</strong> {assignedOrders.length}</p>
-                <p><strong>Token:</strong> {localStorage.getItem('riderToken') ? 'Present' : 'Missing'}</p>
-                <p><strong>Location:</strong> {currentLocation ? `${currentLocation.lat.toFixed(4)}, ${currentLocation.lng.toFixed(4)}` : 'Not available'}</p>
-              </div>
-              <div className="mt-3 space-x-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={fetchAssignedOrders}
-                  className="text-xs"
-                >
-                  🔄 Refresh Orders
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    console.log('🧪 Creating test order...');
-                    const testOrder = {
-                      _id: 'test_' + Date.now(),
-                      bookingId: 'TEST-' + Math.floor(Math.random() * 1000),
-                      customerName: 'Test Customer',
-                      customerPhone: '+91 9999999999',
-                      address: 'Test Address, Sector 14, Gurugram',
-                      pickupTime: '2:00 PM - 4:00 PM',
-                      type: 'Test',
-                      riderStatus: 'assigned',
-                      assignedAt: new Date().toISOString()
-                    };
-                    setAssignedOrders(prev => [testOrder, ...prev]);
-                    toast.success('Test order added for debugging');
-                  }}
-                  className="text-xs"
-                >
-                  🧪 Add Test Order
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
         {/* Notifications Card */}
         <RiderNotifications compact={true} />
 
