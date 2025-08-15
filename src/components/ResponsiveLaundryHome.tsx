@@ -618,9 +618,6 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
                     >
                       <Package className="h-5 w-5" />
                     </Button>
-                    <div className="text-white">
-                      <NotificationPanel />
-                    </div>
                   </>
                 )}
               </div>
