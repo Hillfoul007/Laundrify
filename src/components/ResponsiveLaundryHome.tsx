@@ -21,6 +21,7 @@ import {
   Monitor,
   Bell,
   MessageCircle,
+  Gift,
 } from "lucide-react";
 import {
   laundryServices,
