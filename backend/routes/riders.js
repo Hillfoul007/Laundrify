@@ -195,15 +195,11 @@ router.post('/register', upload.fields([
       });
     }
 
-    // Generate default password (phone number for now)
-    const hashedPassword = await bcrypt.hash(phone, 10);
-
-    // Create new rider
+    // Create new rider (no password needed for OTP-based auth)
     const rider = new Rider({
       name,
       phone,
       aadharNumber,
-      password: hashedPassword,
       aadharImageUrl: `/uploads/riders/${req.files.aadharImage[0].filename}`,
       selfieImageUrl: `/uploads/riders/${req.files.selfieImage[0].filename}`,
     });
