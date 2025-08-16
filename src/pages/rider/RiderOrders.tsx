@@ -585,12 +585,38 @@ export default function RiderOrders() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {!isQuickPickup && editedItems.length > 0 && (
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="h-4 w-4 text-blue-600" />
+                  <p className="text-sm font-medium text-blue-800">
+                    Customer's Pre-Selected Services
+                  </p>
+                </div>
+                <p className="text-xs text-blue-600 mt-1">
+                  These are the services the customer originally ordered. You can modify quantities or add/remove items as needed.
+                </p>
+              </div>
+            )}
+
             <div className="space-y-4">
               {editedItems.map((item, index) => (
-                <div key={item.id || index} className="flex items-center justify-between p-3 border rounded-lg">
+                <div key={item.id || index} className={`flex items-center justify-between p-3 border rounded-lg ${
+                  !isQuickPickup ? 'border-blue-200 bg-blue-50' : 'border-gray-200'
+                }`}>
                   <div className="flex-1">
-                    <h4 className="font-medium">{item.name}</h4>
+                    <div className="flex items-center space-x-2">
+                      <h4 className="font-medium">{item.name}</h4>
+                      {!isQuickPickup && (
+                        <Badge variant="outline" className="text-xs bg-blue-100 text-blue-700 border-blue-300">
+                          Pre-selected
+                        </Badge>
+                      )}
+                    </div>
                     <p className="text-sm text-gray-600">₹{item.price} each</p>
+                    {item.description && (
+                      <p className="text-xs text-gray-500 mt-1">{item.description}</p>
+                    )}
                   </div>
                   
                   {isEditing ? (
