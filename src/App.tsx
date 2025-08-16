@@ -71,6 +71,7 @@ function App() {
               <Route path="/rider/notifications" element={<RiderNotificationsPage />} />
               <Route path="/rider/profile" element={<RiderDashboard />} />
               <Route path="/verify-order" element={<OrderVerificationDemo />} />
+              <Route path="/customer-notifications" element={<CustomerNotificationDemo />} />
               <Route path="*" element={<LaundryIndex />} />
             </Routes>
             <Toaster />
