@@ -289,12 +289,23 @@ export default function RiderDashboard() {
     const demoOrders = [
       {
         _id: 'demo_order_1',
-        bookingId: 'LAU-DEMO-001',
-        customerName: 'Demo Customer',
-        customerPhone: '+91 9999999999',
-        address: 'Sample Address, Sector 14, Gurugram',
+        bookingId: 'LAU-001',
+        customerName: 'John Doe',
+        customerPhone: '+91 9876543210',
+        address: 'D62, Extension, Chhawla, New Delhi, Delhi, 122101',
         pickupTime: '2:00 PM - 4:00 PM',
         type: 'Regular',
+        riderStatus: 'assigned',
+        assignedAt: new Date().toISOString()
+      },
+      {
+        _id: 'quick_pickup_demo',
+        bookingId: 'QP-002',
+        customerName: 'Sarah Johnson',
+        customerPhone: '+91 9876543211',
+        address: 'A-45, Sector 12, Noida, Uttar Pradesh, 201301',
+        pickupTime: '3:00 PM - 5:00 PM',
+        type: 'Quick Pickup',
         riderStatus: 'assigned',
         assignedAt: new Date().toISOString()
       }
