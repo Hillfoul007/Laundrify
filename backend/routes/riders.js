@@ -836,7 +836,20 @@ function getMockOrderData(orderId) {
 router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
   try {
     const { orderId } = req.params;
-    const { items, notes } = req.body;
+    const { items, notes, requiresVerification, verificationStatus } = req.body;
+
+    console.log(`🔄 Updating order: ${orderId}, items: ${items?.length || 0}`);
+
+    // For demo mode when database is not connected
+    if (!mongoose.connection.readyState) {
+      console.log('🔧 Demo mode: Order update accepted');
+      return res.json({
+        message: 'Order updated successfully (demo mode)',
+        order: { _id: orderId, items: items || [] },
+        price_change: calculatePriceChange(items || []),
+        notification_sent: true
+      });
+    }
 
     const order = await Booking.findOne({
       _id: orderId,
