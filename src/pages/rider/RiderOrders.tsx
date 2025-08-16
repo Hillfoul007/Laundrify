@@ -242,13 +242,32 @@ export default function RiderOrders() {
       if (response.ok) {
         const orderData = await response.json();
         console.log('✅ Order data received:', orderData);
-        setOrder(orderData);
-        const items = orderData.items || [];
+
+        // Process and normalize order data
+        const processedOrder = {
+          ...orderData,
+          // Ensure items array is properly structured
+          items: orderData.items || orderData.item_prices?.map((item: any, index: number) => ({
+            id: index + 1,
+            serviceId: item.service_name?.toLowerCase().replace(/[^a-z0-9]/g, '-') || `service-${index}`,
+            name: item.service_name,
+            description: `Professional ${item.service_name.toLowerCase()}`,
+            price: item.unit_price,
+            unit: 'PC',
+            category: item.service_name.toLowerCase().includes('dry') ? 'dry-clean' :
+                     item.service_name.toLowerCase().includes('wash') ? 'wash-fold' : 'general',
+            quantity: item.quantity,
+            total: item.total_price
+          })) || []
+        };
+
+        setOrder(processedOrder);
+        const items = processedOrder.items || [];
         setEditedItems([...items]);
         setOriginalTotal(items.reduce((sum: number, item: any) => sum + (item.quantity * item.price), 0));
 
         // Check if this is a quick pickup (no initial items)
-        setIsQuickPickup(items.length === 0 || orderData.type === 'Quick Pickup');
+        setIsQuickPickup(items.length === 0 || processedOrder.type === 'Quick Pickup');
       } else {
         console.warn('⚠️ API failed, using mock data:', response.status);
         const mockData = getMockOrderData(id);
