@@ -69,6 +69,25 @@ export default function RiderOrders() {
   }, [orderId]);
 
   const getMockOrderData = (id: string) => {
+    // Simulate different order types based on ID
+    const isQuickPickupDemo = id.includes('quick') || id.includes('QP');
+
+    if (isQuickPickupDemo) {
+      return {
+        _id: id,
+        bookingId: 'QP-002',
+        customerName: 'Sarah Johnson',
+        customerPhone: '+91 9876543211',
+        address: 'A-45, Sector 12, Noida, Uttar Pradesh, 201301',
+        pickupTime: '3:00 PM - 5:00 PM',
+        type: 'Quick Pickup',
+        riderStatus: 'accepted',
+        assignedAt: new Date().toISOString(),
+        items: [], // No predefined items for quick pickup
+        specialInstructions: 'Quick pickup - rider will assess items on location and create order'
+      };
+    }
+
     return {
       _id: id,
       bookingId: 'LAU-001',
