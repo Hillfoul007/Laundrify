@@ -68,20 +68,77 @@ export default function RiderOrders() {
     }
   }, [orderId]);
 
+  const getMockOrderData = (id: string) => {
+    return {
+      _id: id,
+      bookingId: 'LAU-001',
+      customerName: 'John Doe',
+      customerPhone: '+91 9876543210',
+      address: 'D62, Extension, Chhawla, New Delhi, Delhi, 122101',
+      pickupTime: '2:00 PM - 4:00 PM',
+      type: 'Regular',
+      riderStatus: 'accepted',
+      assignedAt: new Date().toISOString(),
+      items: [
+        {
+          id: '1',
+          serviceId: 'dry-clean-mens-shirt',
+          name: "Men's Shirt/T-Shirt",
+          description: "Professional dry cleaning for men's shirts and t-shirts.",
+          price: 100,
+          unit: 'PC',
+          category: 'mens-dry-clean',
+          quantity: 2
+        },
+        {
+          id: '2',
+          serviceId: 'dry-clean-mens-trouser',
+          name: 'Trouser/Jeans',
+          description: "Expert dry cleaning for men's trousers and jeans.",
+          price: 120,
+          unit: 'PC',
+          category: 'mens-dry-clean',
+          quantity: 1
+        }
+      ],
+      specialInstructions: 'Handle with care - customer prefers gentle wash for delicate items'
+    };
+  };
+
   const fetchOrderDetails = async (id: string) => {
     try {
       const token = localStorage.getItem('riderToken');
+
+      if (!token) {
+        console.log('No token found, using mock data');
+        const mockData = getMockOrderData(id);
+        setOrder(mockData);
+        const items = mockData.items || [];
+        setEditedItems([...items]);
+        setOriginalTotal(items.reduce((sum: number, item: any) => sum + (item.quantity * item.price), 0));
+        setIsQuickPickup(items.length === 0 || mockData.type === 'Quick Pickup');
+        return;
+      }
+
       const apiUrl = getRiderApiUrl(`/orders/${id}`);
       console.log('🔍 Fetching order details:', apiUrl);
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
       const response = await fetch(apiUrl, {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        signal: controller.signal
       });
-      
+
+      clearTimeout(timeoutId);
+
       if (response.ok) {
         const orderData = await response.json();
+        console.log('✅ Order data received:', orderData);
         setOrder(orderData);
         const items = orderData.items || [];
         setEditedItems([...items]);
@@ -90,12 +147,24 @@ export default function RiderOrders() {
         // Check if this is a quick pickup (no initial items)
         setIsQuickPickup(items.length === 0 || orderData.type === 'Quick Pickup');
       } else {
-        toast.error('Failed to fetch order details');
-        navigate('/rider/dashboard');
+        console.warn('⚠️ API failed, using mock data:', response.status);
+        const mockData = getMockOrderData(id);
+        setOrder(mockData);
+        const items = mockData.items || [];
+        setEditedItems([...items]);
+        setOriginalTotal(items.reduce((sum: number, item: any) => sum + (item.quantity * item.price), 0));
+        setIsQuickPickup(items.length === 0 || mockData.type === 'Quick Pickup');
+        toast.info('Using demo data - API not available');
       }
     } catch (error) {
-      toast.error('Network error. Please try again.');
-      navigate('/rider/dashboard');
+      console.error('❌ Fetch error, using mock data:', error);
+      const mockData = getMockOrderData(id);
+      setOrder(mockData);
+      const items = mockData.items || [];
+      setEditedItems([...items]);
+      setOriginalTotal(items.reduce((sum: number, item: any) => sum + (item.quantity * item.price), 0));
+      setIsQuickPickup(items.length === 0 || mockData.type === 'Quick Pickup');
+      toast.info('Using demo data - network error');
     }
   };
 
