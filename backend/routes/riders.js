@@ -776,6 +776,13 @@ router.get('/orders/:orderId', verifyRiderToken, async (req, res) => {
   }
 });
 
+// Helper function to calculate price change
+function calculatePriceChange(items) {
+  const total = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+  const originalTotal = 320; // Mock original total
+  return total - originalTotal;
+}
+
 // Helper function to generate mock order data
 function getMockOrderData(orderId) {
   const isQuickPickup = orderId.includes('quick') || orderId.includes('QP');
