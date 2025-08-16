@@ -549,7 +549,8 @@ export default function RiderOrders() {
                       onClick={() => {
                         setIsEditing(false);
                         setEditedItems([...order.items]);
-                        setNewItem({ name: '', quantity: 1, price: 0 });
+                        setSelectedService(null);
+                        setServiceQuantity(1);
                       }}
                     >
                       <X className="h-4 w-4 mr-2" />
