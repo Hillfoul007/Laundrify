@@ -533,7 +533,7 @@ export default function RiderOrders() {
             order.riderStatus === 'assigned' ? 'secondary' :
             order.riderStatus === 'picked_up' ? 'default' : 'default'
           }>
-            {order.riderStatus}
+            {typeof order.riderStatus === 'string' ? order.riderStatus : 'Unknown'}
           </Badge>
         </div>
 
