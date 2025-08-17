@@ -576,7 +576,7 @@ router.post('/toggle-status', verifyRiderToken, async (req, res) => {
 
     // For demo mode, just return success
     if (!mongoose.connection.readyState) {
-      console.log('🔧 Demo mode: Status toggle accepted');
+      console.log('���� Demo mode: Status toggle accepted');
       return res.json({
         message: `Status updated to ${isActive ? 'active' : 'inactive'} (demo mode)`,
         isActive,
@@ -1067,7 +1067,7 @@ router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
 
         console.log('✅ Customer notification created successfully:', notification._id);
       } catch (notificationError) {
-        console.warn('⚠️ Failed to send customer notification:', notificationError);
+        console.error('❌ Failed to create customer notification:', notificationError);
       }
     }
 
