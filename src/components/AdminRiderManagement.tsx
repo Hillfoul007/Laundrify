@@ -1030,7 +1030,19 @@ export default function AdminRiderManagement() {
             </CardHeader>
             <CardContent>
               <div className="grid gap-4">
-                {orders.filter(order => order.type === 'Quick Pickup' && !order.assignedRider && !order.rider_id).map((order) => (
+                {orders.filter(order => {
+                  const isQuickPickup = order.type === 'Quick Pickup';
+                  const isUnassigned = !order.assignedRider && !order.rider_id &&
+                                      (!order.riderStatus || order.riderStatus === 'unassigned');
+                  console.log('🔍 Quick Pickup filter check:', {
+                    orderId: order._id,
+                    type: order.type,
+                    isQuickPickup,
+                    isUnassigned,
+                    shouldShow: isQuickPickup && isUnassigned
+                  });
+                  return isQuickPickup && isUnassigned;
+                }).map((order) => (
                   <Card key={order._id} className="border-l-4 border-l-orange-600">
                     <CardContent className="pt-4">
                       <div className="flex justify-between items-start">
