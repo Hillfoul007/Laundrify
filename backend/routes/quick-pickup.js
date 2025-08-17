@@ -234,6 +234,37 @@ router.get("/", async (req, res) => {
   }
 });
 
+// Get single quick pickup by ID (for riders/admin)
+router.get("/:quickPickupId", async (req, res) => {
+  try {
+    const { quickPickupId } = req.params;
+
+    console.log(`📋 Fetching quick pickup by ID: ${quickPickupId}`);
+
+    // Validate quickPickupId
+    if (!mongoose.Types.ObjectId.isValid(quickPickupId)) {
+      return res.status(400).json({ error: "Invalid quick pickup ID" });
+    }
+
+    const quickPickup = await QuickPickup.findById(quickPickupId)
+      .populate("customer_id", "name full_name phone email")
+      .populate("rider_id", "name phone");
+
+    if (!quickPickup) {
+      return res.status(404).json({ error: "Quick pickup not found" });
+    }
+
+    console.log("✅ Quick pickup found:", quickPickup._id);
+    res.json({
+      message: "Quick pickup retrieved successfully",
+      quickPickup,
+    });
+  } catch (error) {
+    console.error("❌ Error fetching quick pickup:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // Update quick pickup status (for riders/admin)
 router.put("/:quickPickupId", async (req, res) => {
   try {
