@@ -526,23 +526,45 @@ export default function RiderOrders() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold text-blue-800">Customer Name</Label>
-                <p className="text-lg font-medium text-blue-900">{order.customerName}</p>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold text-blue-800">Phone Number</Label>
-                <div className="flex items-center space-x-2">
-                  <Phone className="h-4 w-4 text-blue-600" />
-                  <a
-                    href={`tel:${order.customerPhone}`}
-                    className="text-lg font-medium text-blue-900 hover:text-blue-700 hover:underline"
-                  >
-                    {order.customerPhone}
-                  </a>
+            {/* Primary Customer Info - More Prominent */}
+            <div className="bg-white rounded-lg p-4 mb-4 border border-blue-300">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-blue-800">Customer Name</Label>
+                  <p className="text-xl font-bold text-blue-900">{order.customerName || order.name}</p>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-blue-800">Phone Number</Label>
+                  <div className="flex items-center space-x-2">
+                    <Phone className="h-5 w-5 text-blue-600" />
+                    <a
+                      href={`tel:${order.customerPhone || order.phone}`}
+                      className="text-xl font-bold text-blue-900 hover:text-blue-700 hover:underline"
+                    >
+                      {order.customerPhone || order.phone}
+                    </a>
+                  </div>
                 </div>
               </div>
+
+              {/* Customer ID and Service Type */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-blue-200">
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-blue-800">Customer ID</Label>
+                  <p className="text-sm font-mono text-blue-700 bg-blue-100 px-2 py-1 rounded">
+                    {order.customer_id || 'N/A'}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-blue-800">Service Type</Label>
+                  <Badge variant="secondary" className="text-blue-700 bg-blue-200">
+                    {order.service_type || 'Standard'}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2 md:col-span-2">
                 <Label className="text-sm font-semibold text-blue-800">Pickup Address</Label>
                 <div className="flex items-start space-x-3">
