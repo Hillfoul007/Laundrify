@@ -583,7 +583,7 @@ export default function RiderOrders() {
                 <div className="space-y-2">
                   <Label className="text-sm font-semibold text-blue-800">Service Type</Label>
                   <Badge variant="secondary" className="text-blue-700 bg-blue-200">
-                    {order.service_type || 'Standard'}
+                    {typeof order.service_type === 'string' ? order.service_type : 'Standard'}
                   </Badge>
                 </div>
               </div>
