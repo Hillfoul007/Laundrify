@@ -193,7 +193,8 @@ export default function AdminRiderManagement() {
     console.log('📋 Fetching orders from API...');
 
     try {
-      const response = await fetch(getAdminApiUrl('/bookings?status=pending,confirmed&limit=50'), {
+      // Use the admin orders endpoint instead of regular bookings endpoint
+      const response = await fetch(getAdminApiUrl('/orders?status=pending,confirmed&includeAssigned=false'), {
         headers: {
           'admin-token': 'admin-access-granted'
         }
@@ -203,35 +204,35 @@ export default function AdminRiderManagement() {
         const data = await response.json();
         console.log('📋 Admin orders fetched from API:', data);
 
-        // Extract bookings from the response structure
-        const apiBookings = data.bookings || data || [];
+        // Handle both direct array and object with bookings property
+        const apiOrders = Array.isArray(data) ? data : (data.bookings || data.orders || []);
 
-        if (apiBookings.length > 0) {
-          // Process bookings to ensure consistent data format with populated customer data
-          const processedBookings = apiBookings.map((booking: any) => {
+        if (apiOrders.length > 0) {
+          // Process orders to ensure consistent data format with populated customer data
+          const processedOrders = apiOrders.map((order: any) => {
             // Handle populated customer_id object vs direct fields
-            const customer = booking.customer_id || {};
-            const customerName = booking.customerName ||
-                                booking.name ||
+            const customer = order.customer_id || {};
+            const customerName = order.customerName ||
+                                order.name ||
                                 customer.full_name ||
                                 customer.name ||
                                 'Unknown Customer';
-            const customerPhone = booking.customerPhone ||
-                                 booking.phone ||
+            const customerPhone = order.customerPhone ||
+                                 order.phone ||
                                  customer.phone ||
                                  'No phone';
-            const customerEmail = booking.customerEmail ||
-                                 booking.email ||
+            const customerEmail = order.customerEmail ||
+                                 order.email ||
                                  customer.email ||
                                  'No email';
 
             // Handle populated rider_id object
-            const rider = booking.rider_id || booking.assignedRider || {};
+            const rider = order.rider_id || order.assignedRider || {};
             const riderName = rider.full_name || rider.name || null;
             const riderPhone = rider.phone || null;
 
             return {
-              ...booking,
+              ...order,
               // Customer information from populated data
               customerName,
               customerPhone,
@@ -242,39 +243,45 @@ export default function AdminRiderManagement() {
               // Rider information from populated data
               riderName,
               riderPhone,
-              assignedRider: booking.assignedRider || booking.rider_id,
+              assignedRider: order.assignedRider || order.rider_id,
 
               // Normalize order ID fields
-              bookingId: booking.bookingId || booking.custom_order_id || booking._id,
+              bookingId: order.bookingId || order.custom_order_id || order._id,
 
               // Ensure status and other required fields
-              status: booking.status || 'pending',
+              status: order.status || 'pending',
 
               // Normalize service info
-              service: booking.service || (Array.isArray(booking.services) ? booking.services[0] : 'Laundry Service'),
-              services: Array.isArray(booking.services) ? booking.services : [booking.service || 'Laundry Service'],
+              service: order.service || (Array.isArray(order.services) ? order.services[0] : 'Laundry Service'),
+              services: Array.isArray(order.services) ? order.services : [order.service || 'Laundry Service'],
 
               // Normalize pricing
-              final_amount: booking.final_amount || booking.total_price || 0,
-              total_price: booking.total_price || booking.final_amount || 0,
+              final_amount: order.final_amount || order.total_price || order.estimatedCost || 0,
+              total_price: order.total_price || order.final_amount || order.estimatedCost || 0,
 
               // Normalize time fields
-              pickupTime: booking.pickupTime || `${booking.scheduled_time || '09:00'} - ${booking.delivery_time || '17:00'}`,
+              pickupTime: order.pickupTime || `${order.scheduled_time || '09:00'} - ${order.delivery_time || '17:00'}`,
 
-              // Default type
-              type: booking.type || 'Regular',
+              // Default type - check for Quick Pickup
+              type: order.type || (order.estimatedCost ? 'Quick Pickup' : 'Regular'),
 
               // Include items and other detailed info
-              items: booking.items || [],
-              item_prices: booking.item_prices || [],
-              special_instructions: booking.special_instructions || booking.notes || '',
-              address: booking.address || 'No address provided'
+              items: order.items || [],
+              item_prices: order.item_prices || [],
+              special_instructions: order.special_instructions || order.specialInstructions || order.notes || '',
+              address: order.address || 'No address provided',
+
+              // Quick pickup specific fields
+              estimatedCost: order.estimatedCost || 0,
+              actualCost: order.actualCost || 0,
+              itemsCollected: order.itemsCollected || [],
+              riderStatus: order.riderStatus || 'unassigned'
             };
           });
 
-          console.log('✅ Using real API data:', processedBookings.length, 'orders');
-          setOrders(processedBookings);
-          toast.success(`Loaded ${processedBookings.length} real orders from database`);
+          console.log('✅ Using real API data:', processedOrders.length, 'orders');
+          setOrders(processedOrders);
+          toast.success(`Loaded ${processedOrders.length} real orders from database`);
           return;
         } else {
           console.log('ℹ️ API returned empty results');
@@ -283,7 +290,8 @@ export default function AdminRiderManagement() {
           return;
         }
       } else {
-        console.warn('⚠️ API failed with status:', response.status);
+        const errorText = await response.text();
+        console.warn('⚠️ API failed with status:', response.status, errorText);
         if (response.status === 404) {
           toast.error('Orders API not available. Please check backend connection.');
         } else {
@@ -295,32 +303,85 @@ export default function AdminRiderManagement() {
       toast.error('Failed to connect to backend API');
     }
 
-    // Fallback to mock data only if API is completely unavailable
+    // Fallback to comprehensive mock data that includes different order types
     const mockOrders = [
       {
         _id: 'demo-order-1',
-        custom_order_id: 'DEMO-001',
-        bookingId: 'DEMO-001',
-        customerName: 'Demo Customer',
-        customerPhone: '+91 9999999999',
+        custom_order_id: 'LAU-001',
+        bookingId: 'LAU-001',
+        customerName: 'John Doe',
+        customerPhone: '+91 9876543210',
         customer_id: 'demo-customer-1',
-        address: 'Demo Address for Testing',
-        service: 'Demo Service',
-        services: ['Demo Service'],
+        address: '123 MG Road, Sector 14, Gurugram',
+        service: 'Wash & Fold',
+        services: ['Wash & Fold', 'Premium Care'],
         scheduled_date: new Date().toISOString().split('T')[0],
-        scheduled_time: '10:00',
-        pickupTime: '10:00 AM - 12:00 PM',
+        scheduled_time: '14:00',
+        pickupTime: '2:00 PM - 4:00 PM',
         status: 'pending',
-        type: 'Demo',
-        final_amount: 100,
-        total_price: 100,
-        special_instructions: 'This is demo data. Connect to backend for real orders.',
+        type: 'Regular',
+        final_amount: 350,
+        total_price: 350,
+        special_instructions: 'Handle with care',
         assignedRider: null,
-        rider_id: null
+        rider_id: null,
+        items: [
+          { name: 'Shirt', quantity: 2, price: 50 },
+          { name: 'Trouser', quantity: 1, price: 80 }
+        ]
+      },
+      {
+        _id: 'demo-order-2',
+        custom_order_id: 'LAU-002',
+        bookingId: 'LAU-002',
+        customerName: 'Jane Smith',
+        customerPhone: '+91 9876543211',
+        customer_id: 'demo-customer-2',
+        address: '456 Cyber City, Sector 25, Gurugram',
+        service: 'Dry Cleaning',
+        services: ['Dry Cleaning'],
+        scheduled_date: new Date().toISOString().split('T')[0],
+        scheduled_time: '16:00',
+        pickupTime: '4:00 PM - 6:00 PM',
+        status: 'confirmed',
+        type: 'Express',
+        final_amount: 500,
+        total_price: 500,
+        special_instructions: 'Urgent delivery needed',
+        assignedRider: null,
+        rider_id: null,
+        items: [
+          { name: 'Dress', quantity: 1, price: 120 },
+          { name: 'Jacket', quantity: 1, price: 200 }
+        ]
+      },
+      {
+        _id: 'demo-quick-pickup-1',
+        custom_order_id: 'QP-001',
+        bookingId: 'QP-001',
+        customerName: 'Mike Johnson',
+        customerPhone: '+91 9876543212',
+        customer_id: 'demo-customer-3',
+        address: '789 Golf Course Road, Sector 56, Gurugram',
+        service: 'Quick Pickup Service',
+        services: [],
+        scheduled_date: new Date().toISOString().split('T')[0],
+        scheduled_time: '11:00',
+        pickupTime: '11:00 AM - 1:00 PM',
+        status: 'pending',
+        type: 'Quick Pickup',
+        final_amount: 0,
+        total_price: 0,
+        estimatedCost: 250,
+        special_instructions: 'Check items before pickup',
+        specialInstructions: 'Check items before pickup',
+        assignedRider: null,
+        rider_id: null,
+        items: []
       }
     ];
 
-    console.log('🔧 Using fallback demo data');
+    console.log('🔧 Using fallback demo data with', mockOrders.length, 'orders');
     setOrders(mockOrders);
     toast.warning('Using demo data - backend unavailable');
   };
