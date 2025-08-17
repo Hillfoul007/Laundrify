@@ -176,6 +176,8 @@ router.get("/bookings", verifyAdminAccess, async (req, res) => {
     } = req.query;
 
     console.log("📋 Admin bookings request:", req.query);
+    console.log("🔍 Mongoose connection state:", mongoose.connection.readyState);
+    console.log("🔍 Connection states: 0=disconnected, 1=connected, 2=connecting, 3=disconnecting");
 
     // Check if database is connected (readyState 1 = connected)
     if (mongoose.connection.readyState !== 1) {
