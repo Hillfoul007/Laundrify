@@ -1004,7 +1004,11 @@ export default function AdminRiderManagement() {
                   </Card>
                 ))}
                 
-                {orders.filter(order => !order.assignedRider).length === 0 && (
+                {orders.filter(order => {
+                  const isUnassigned = !order.assignedRider && !order.rider_id &&
+                                      (!order.riderStatus || order.riderStatus === 'unassigned');
+                  return isUnassigned;
+                }).length === 0 && (
                   <div className="text-center py-8 text-gray-500">
                     <Package className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                     <p>No unassigned orders</p>
