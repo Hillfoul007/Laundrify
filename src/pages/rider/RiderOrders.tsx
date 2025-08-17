@@ -297,7 +297,6 @@ export default function RiderOrders() {
       console.log('🔍 Fetching order details:', apiUrl);
 
       // Check if we're in development and the backend might not be available
-      const isDev = import.meta.env.DEV;
       const hostname = window.location.hostname;
       const isLocalhost = hostname.includes("localhost") || hostname.includes("127.0.0.1");
 
