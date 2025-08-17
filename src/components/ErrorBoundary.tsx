@@ -25,6 +25,29 @@ class ErrorBoundary extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error("Error caught by boundary:", error, errorInfo);
+
+    // Check for URL corruption issues
+    const currentURL = window.location.href;
+    const hasCorruptedURL = /[a-f0-9]{32}-[a-f0-9]{20}\.fly\.dev[a-zA-Z0-9]+/.test(currentURL);
+
+    if (hasCorruptedURL || error.message.includes('Failed to fetch') || error.message.includes('server IP address')) {
+      console.log('🚨 URL corruption or network error detected, clearing cache...');
+      try {
+        localStorage.clear();
+        sessionStorage.clear();
+        if ('caches' in window) {
+          caches.keys().then(names => names.forEach(name => caches.delete(name)));
+        }
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(registrations => {
+            registrations.forEach(registration => registration.unregister());
+          });
+        }
+      } catch (e) {
+        console.warn('Could not clear cache:', e);
+      }
+    }
+
     this.setState({
       error,
       errorInfo,
