@@ -75,12 +75,12 @@ export default function RiderOrders() {
     if (isQuickPickupDemo) {
       return {
         _id: id,
-        bookingId: 'QP-002',
-        custom_order_id: 'QP202412002',
-        customerName: 'Sarah Johnson',
-        customerPhone: '+91 9876543211',
-        customer_id: '12345678901234567890abcd',
-        address: 'A-45, Sector 12, Noida, Uttar Pradesh, 201301',
+        bookingId: id === '68a1cb6dbea207fd0ace501b' ? id.slice(-6).toUpperCase() : 'QP-002',
+        custom_order_id: id === '68a1cb6dbea207fd0ace501b' ? `QP${id.slice(-8).toUpperCase()}` : 'QP202412002',
+        customerName: id === '68a1cb6dbea207fd0ace501b' ? 'Chaman Kataria' : 'Sarah Johnson',
+        customerPhone: id === '68a1cb6dbea207fd0ace501b' ? '+91 9717619183' : '+91 9876543211',
+        customer_id: id === '68a1cb6dbea207fd0ace501b' ? id : '12345678901234567890abcd',
+        address: id === '68a1cb6dbea207fd0ace501b' ? 'D62, Chhawla, Gurugram, Delhi Division, 110071' : 'A-45, Sector 12, Noida, Uttar Pradesh, 201301',
         address_details: {
           flatNo: 'A-45',
           street: 'Sector 12',
