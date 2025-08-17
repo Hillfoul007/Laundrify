@@ -607,211 +607,246 @@ export default function AdminRiderManagement() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4">
+              <div className="space-y-6">
                 {orders.filter(order => !order.assignedRider).map((order) => (
-                  <Card key={order._id} className="border-l-4 border-l-orange-500">
-                    <CardContent className="pt-4">
-                      <div className="flex justify-between items-start">
-                        <div className="space-y-3">
-                          {/* Order Header */}
-                          <div className="flex items-center space-x-3">
-                            <h4 className="font-bold text-lg">Order #{order.custom_order_id || order.bookingId || order._id}</h4>
-                            <Badge
-                              variant={order.type === 'Quick Pickup' ? 'default' : 'secondary'}
-                              className={order.type === 'Quick Pickup' ? 'bg-orange-500 hover:bg-orange-600' : ''}
-                            >
-                              {order.type || 'Regular'} Order
-                            </Badge>
-                            <Badge variant="outline" className="text-xs">
-                              {order.status || 'pending'}
-                            </Badge>
+                  <Card key={order._id} className="border-l-4 border-l-orange-500 shadow-sm">
+                    <CardContent className="pt-6">
+                      <div className="space-y-4">
+                        {/* Order Header - Full width */}
+                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4 border-b">
+                          <div className="flex flex-col lg:flex-row lg:items-center gap-3">
+                            <h4 className="font-bold text-xl text-gray-900">
+                              Order #{order.custom_order_id || order.bookingId || order._id}
+                            </h4>
+                            <div className="flex gap-2">
+                              <Badge
+                                variant={order.type === 'Quick Pickup' ? 'default' : 'secondary'}
+                                className={order.type === 'Quick Pickup' ? 'bg-orange-500 hover:bg-orange-600 text-white' : ''}
+                              >
+                                {order.type || 'Regular'} Order
+                              </Badge>
+                              <Badge variant="outline" className="text-xs capitalize">
+                                {order.status || 'pending'}
+                              </Badge>
+                            </div>
                           </div>
 
-                          {/* Customer Information */}
-                          <div className="bg-blue-50 p-3 rounded-lg">
-                            <h5 className="font-semibold text-blue-900 mb-2">Customer Details</h5>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                              <div className="flex items-center space-x-2">
-                                <User className="h-4 w-4 text-blue-600" />
-                                <span className="font-medium">{order.name || order.customerName || 'N/A'}</span>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <Phone className="h-4 w-4 text-blue-600" />
-                                <span>{order.phone || order.customerPhone || 'N/A'}</span>
-                              </div>
-                              {order.customer_id && (
-                                <div className="flex items-center space-x-2 md:col-span-2">
-                                  <FileText className="h-4 w-4 text-blue-600" />
-                                  <span className="text-xs font-mono bg-blue-100 px-2 py-1 rounded">
-                                    ID: {order.customer_id}
-                                  </span>
+                          <Dialog
+                            open={assignModalOpen && selectedOrder?._id === order._id}
+                            onOpenChange={(open) => {
+                              setAssignModalOpen(open);
+                              if (open) setSelectedOrder(order);
+                            }}
+                          >
+                            <DialogTrigger asChild>
+                              <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white">
+                                <Navigation className="h-4 w-4 mr-2" />
+                                Assign Rider
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Assign Order to Rider</DialogTitle>
+                                <DialogDescription>
+                                  Select a rider to assign this order to
+                                </DialogDescription>
+                              </DialogHeader>
+
+                              <div className="space-y-4">
+                                <div>
+                                  <Label className="font-medium">Order Details</Label>
+                                  <p className="text-sm text-gray-600">
+                                    #{selectedOrder?.custom_order_id || selectedOrder?.bookingId} - {selectedOrder?.name || selectedOrder?.customerName}
+                                  </p>
                                 </div>
-                              )}
-                            </div>
-                          </div>
 
-                          {/* Service Information */}
-                          {order.service && (
-                            <div className="bg-green-50 p-3 rounded-lg">
-                              <h5 className="font-semibold text-green-900 mb-2">Service Details</h5>
-                              <div className="text-sm space-y-1">
-                                <div className="flex items-center space-x-2">
-                                  <Package className="h-4 w-4 text-green-600" />
-                                  <span className="font-medium">{order.service}</span>
-                                </div>
-                                {order.services && order.services.length > 0 && (
-                                  <div className="flex flex-wrap gap-1 mt-2">
-                                    {order.services.map((service, index) => (
-                                      <Badge key={index} variant="outline" className="text-xs bg-green-100">
-                                        {service}
-                                      </Badge>
-                                    ))}
-                                  </div>
-                                )}
-                                {order.final_amount && (
-                                  <div className="flex items-center space-x-2 mt-2">
-                                    <span className="text-green-700 font-semibold">₹{order.final_amount}</span>
-                                    {order.total_price && order.final_amount !== order.total_price && (
-                                      <span className="text-xs text-gray-500 line-through">₹{order.total_price}</span>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Address & Timing */}
-                          <div className="bg-gray-50 p-3 rounded-lg">
-                            <h5 className="font-semibold text-gray-900 mb-2">Pickup Information</h5>
-                            <div className="text-sm space-y-2">
-                              <div className="flex items-start space-x-2">
-                                <MapPin className="h-4 w-4 text-gray-600 mt-0.5" />
-                                <span>{order.address || 'Address not available'}</span>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <Clock className="h-4 w-4 text-gray-600" />
-                                <span>
-                                  {order.scheduled_date && order.scheduled_time ?
-                                    `${order.scheduled_date} at ${order.scheduled_time}` :
-                                    order.pickupTime || 'Time not specified'
-                                  }
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Special Instructions */}
-                          {(order.special_instructions || order.specialInstructions || order.additional_details) && (
-                            <div className="bg-yellow-50 p-3 rounded-lg">
-                              <h5 className="font-semibold text-yellow-900 mb-2">Special Instructions</h5>
-                              <div className="text-sm space-y-1">
-                                {order.special_instructions && (
-                                  <div className="flex items-start space-x-2">
-                                    <FileText className="h-4 w-4 text-yellow-600 mt-0.5" />
-                                    <span>{order.special_instructions}</span>
-                                  </div>
-                                )}
-                                {order.specialInstructions && order.specialInstructions !== order.special_instructions && (
-                                  <div className="flex items-start space-x-2">
-                                    <FileText className="h-4 w-4 text-yellow-600 mt-0.5" />
-                                    <span>{order.specialInstructions}</span>
-                                  </div>
-                                )}
-                                {order.additional_details && (
-                                  <div className="flex items-start space-x-2">
-                                    <FileText className="h-4 w-4 text-yellow-600 mt-0.5" />
-                                    <span className="text-xs text-yellow-700">{order.additional_details}</span>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Quick Pickup Specific */}
-                          {order.type === 'Quick Pickup' && order.estimatedCost > 0 && (
-                            <div className="bg-orange-50 p-3 rounded-lg">
-                              <h5 className="font-semibold text-orange-900 mb-2">Quick Pickup Details</h5>
-                              <div className="flex items-center space-x-2">
-                                <span className="text-sm font-medium text-orange-700">
-                                  Estimated Cost: ₹{order.estimatedCost}
-                                </span>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                        
-                        <Dialog 
-                          open={assignModalOpen && selectedOrder?._id === order._id}
-                          onOpenChange={(open) => {
-                            setAssignModalOpen(open);
-                            if (open) setSelectedOrder(order);
-                          }}
-                        >
-                          <DialogTrigger asChild>
-                            <Button size="sm">
-                              <Navigation className="h-4 w-4 mr-2" />
-                              Assign Rider
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Assign Order to Rider</DialogTitle>
-                              <DialogDescription>
-                                Select a rider to assign this order to
-                              </DialogDescription>
-                            </DialogHeader>
-                            
-                            <div className="space-y-4">
-                              <div>
-                                <Label className="font-medium">Order Details</Label>
-                                <p className="text-sm text-gray-600">
-                                  #{selectedOrder?.bookingId} - {selectedOrder?.customerName}
-                                </p>
-                              </div>
-                              
-                              <div>
-                                <Label className="font-medium">Available Riders (Nearest First)</Label>
-                                <div className="mt-2 space-y-2 max-h-60 overflow-y-auto">
-                                  {selectedOrder && getNearestRiders(selectedOrder.location || {lat: 0, lng: 0}).map((rider) => (
-                                    <div
-                                      key={rider._id}
-                                      className={`p-3 border rounded cursor-pointer transition-colors ${
-                                        selectedRider?._id === rider._id ? 'border-laundrify-purple bg-purple-50' : 'hover:bg-gray-50'
-                                      }`}
-                                      onClick={() => setSelectedRider(rider)}
-                                    >
-                                      <div className="flex justify-between items-center">
-                                        <div>
-                                          <p className="font-medium">{rider.name}</p>
-                                          <p className="text-sm text-gray-600">{rider.phone}</p>
-                                        </div>
-                                        <div className="text-right">
-                                          <Badge variant="outline">
-                                            {rider.distance} km away
-                                          </Badge>
+                                <div>
+                                  <Label className="font-medium">Available Riders (Nearest First)</Label>
+                                  <div className="mt-2 space-y-2 max-h-60 overflow-y-auto">
+                                    {selectedOrder && getNearestRiders(selectedOrder.location || {lat: 0, lng: 0}).map((rider) => (
+                                      <div
+                                        key={rider._id}
+                                        className={`p-3 border rounded cursor-pointer transition-colors ${
+                                          selectedRider?._id === rider._id ? 'border-laundrify-purple bg-purple-50' : 'hover:bg-gray-50'
+                                        }`}
+                                        onClick={() => setSelectedRider(rider)}
+                                      >
+                                        <div className="flex justify-between items-center">
+                                          <div>
+                                            <p className="font-medium">{rider.name}</p>
+                                            <p className="text-sm text-gray-600">{rider.phone}</p>
+                                          </div>
+                                          <div className="text-right">
+                                            <Badge variant="outline">
+                                              {rider.distance} km away
+                                            </Badge>
+                                          </div>
                                         </div>
                                       </div>
+                                    ))}
+
+                                    {activeRiders.length === 0 && (
+                                      <p className="text-center text-gray-500 py-4">
+                                        No active riders available
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <Button
+                                  onClick={assignOrderToRider}
+                                  disabled={!selectedRider}
+                                  className="w-full"
+                                >
+                                  Assign Order
+                                </Button>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
+
+                        {/* Main Content Grid */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          {/* Left Column */}
+                          <div className="space-y-4">
+                            {/* Customer Information */}
+                            <div className="bg-blue-50 p-4 rounded-lg">
+                              <h5 className="font-semibold text-blue-900 mb-3 flex items-center">
+                                <User className="h-4 w-4 mr-2" />
+                                Customer Details
+                              </h5>
+                              <div className="space-y-2 text-sm">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-blue-700 font-medium">Name:</span>
+                                  <span className="font-semibold">{order.name || order.customerName || 'N/A'}</span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-blue-700 font-medium">Phone:</span>
+                                  <span className="font-semibold">{order.phone || order.customerPhone || 'N/A'}</span>
+                                </div>
+                                {order.customer_id && (
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-blue-700 font-medium">Customer ID:</span>
+                                    <span className="text-xs font-mono bg-blue-100 px-2 py-1 rounded">
+                                      {order.customer_id}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Service Information */}
+                            {order.service && (
+                              <div className="bg-green-50 p-4 rounded-lg">
+                                <h5 className="font-semibold text-green-900 mb-3 flex items-center">
+                                  <Package className="h-4 w-4 mr-2" />
+                                  Service Details
+                                </h5>
+                                <div className="space-y-2 text-sm">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-green-700 font-medium">Service:</span>
+                                    <span className="font-semibold">{order.service}</span>
+                                  </div>
+                                  {order.services && order.services.length > 0 && (
+                                    <div>
+                                      <span className="text-green-700 font-medium block mb-2">Additional Services:</span>
+                                      <div className="flex flex-wrap gap-1">
+                                        {order.services.map((service, index) => (
+                                          <Badge key={index} variant="outline" className="text-xs bg-green-100">
+                                            {service}
+                                          </Badge>
+                                        ))}
+                                      </div>
                                     </div>
-                                  ))}
-                                  
-                                  {activeRiders.length === 0 && (
-                                    <p className="text-center text-gray-500 py-4">
-                                      No active riders available
-                                    </p>
+                                  )}
+                                  {order.final_amount && (
+                                    <div className="flex items-center justify-between border-t border-green-200 pt-2 mt-2">
+                                      <span className="text-green-700 font-medium">Amount:</span>
+                                      <div className="text-right">
+                                        <span className="text-green-700 font-bold text-lg">₹{order.final_amount}</span>
+                                        {order.total_price && order.final_amount !== order.total_price && (
+                                          <div className="text-xs text-gray-500 line-through">₹{order.total_price}</div>
+                                        )}
+                                      </div>
+                                    </div>
                                   )}
                                 </div>
                               </div>
-                              
-                              <Button
-                                onClick={assignOrderToRider}
-                                disabled={!selectedRider}
-                                className="w-full"
-                              >
-                                Assign Order
-                              </Button>
+                            )}
+
+                            {/* Quick Pickup Specific */}
+                            {order.type === 'Quick Pickup' && order.estimatedCost > 0 && (
+                              <div className="bg-orange-50 p-4 rounded-lg">
+                                <h5 className="font-semibold text-orange-900 mb-3">Quick Pickup Details</h5>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-orange-700 font-medium">Estimated Cost:</span>
+                                  <span className="text-orange-700 font-bold text-lg">₹{order.estimatedCost}</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Right Column */}
+                          <div className="space-y-4">
+                            {/* Address & Timing */}
+                            <div className="bg-gray-50 p-4 rounded-lg">
+                              <h5 className="font-semibold text-gray-900 mb-3 flex items-center">
+                                <MapPin className="h-4 w-4 mr-2" />
+                                Pickup Information
+                              </h5>
+                              <div className="space-y-3 text-sm">
+                                <div>
+                                  <span className="text-gray-700 font-medium block mb-1">Address:</span>
+                                  <p className="text-gray-900 bg-white p-2 rounded border">
+                                    {order.address || 'Address not available'}
+                                  </p>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-gray-700 font-medium flex items-center">
+                                    <Clock className="h-4 w-4 mr-1" />
+                                    Pickup Time:
+                                  </span>
+                                  <span className="font-semibold">
+                                    {order.scheduled_date && order.scheduled_time ?
+                                      `${order.scheduled_date} at ${order.scheduled_time}` :
+                                      order.pickupTime || 'Time not specified'
+                                    }
+                                  </span>
+                                </div>
+                              </div>
                             </div>
-                          </DialogContent>
-                        </Dialog>
+
+                            {/* Special Instructions */}
+                            {(order.special_instructions || order.specialInstructions || order.additional_details) && (
+                              <div className="bg-yellow-50 p-4 rounded-lg">
+                                <h5 className="font-semibold text-yellow-900 mb-3 flex items-center">
+                                  <FileText className="h-4 w-4 mr-2" />
+                                  Special Instructions
+                                </h5>
+                                <div className="space-y-2 text-sm">
+                                  {order.special_instructions && (
+                                    <div className="bg-white p-3 rounded border">
+                                      <span className="font-medium text-yellow-800">Instructions:</span>
+                                      <p className="text-gray-900 mt-1">{order.special_instructions}</p>
+                                    </div>
+                                  )}
+                                  {order.specialInstructions && order.specialInstructions !== order.special_instructions && (
+                                    <div className="bg-white p-3 rounded border">
+                                      <span className="font-medium text-yellow-800">Special Instructions:</span>
+                                      <p className="text-gray-900 mt-1">{order.specialInstructions}</p>
+                                    </div>
+                                  )}
+                                  {order.additional_details && (
+                                    <div className="bg-white p-3 rounded border">
+                                      <span className="font-medium text-yellow-800">Additional Details:</span>
+                                      <p className="text-gray-700 text-xs mt-1">{order.additional_details}</p>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
