@@ -234,6 +234,41 @@ router.get("/", async (req, res) => {
   }
 });
 
+// Test endpoint to check if quick pickup exists (no auth required)
+router.get("/test/:quickPickupId", async (req, res) => {
+  try {
+    const { quickPickupId } = req.params;
+
+    console.log(`📋 [TEST] Checking quick pickup by ID: ${quickPickupId}`);
+
+    // Validate quickPickupId
+    if (!mongoose.Types.ObjectId.isValid(quickPickupId)) {
+      return res.status(400).json({ error: "Invalid quick pickup ID" });
+    }
+
+    const quickPickup = await QuickPickup.findById(quickPickupId)
+      .populate("customer_id", "name full_name phone email");
+
+    if (!quickPickup) {
+      return res.status(404).json({
+        error: "Quick pickup not found",
+        searched_id: quickPickupId,
+        is_valid_id: mongoose.Types.ObjectId.isValid(quickPickupId)
+      });
+    }
+
+    console.log("✅ [TEST] Quick pickup found:", quickPickup._id);
+    res.json({
+      message: "Quick pickup found",
+      quickPickup,
+      test_mode: true
+    });
+  } catch (error) {
+    console.error("❌ [TEST] Error fetching quick pickup:", error);
+    res.status(500).json({ error: "Internal server error", details: error.message });
+  }
+});
+
 // Get single quick pickup by ID (for riders/admin)
 router.get("/:quickPickupId", async (req, res) => {
   try {
