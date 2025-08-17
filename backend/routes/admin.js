@@ -803,7 +803,7 @@ router.post("/quick-pickups/assign", verifyAdminAccess, async (req, res) => {
   try {
     const { orderId, riderId } = req.body;
 
-    console.log('🎯 Assigning quick pickup:', { orderId, riderId });
+    console.log('��� Assigning quick pickup:', { orderId, riderId });
 
     if (!mongoose.Types.ObjectId.isValid(orderId) || !mongoose.Types.ObjectId.isValid(riderId)) {
       return res.json({
@@ -970,6 +970,148 @@ router.post("/orders/assign", verifyAdminAccess, async (req, res) => {
   } catch (error) {
     console.error('Order assignment error:', error);
     res.status(500).json({ message: 'Failed to assign order', error: error.message });
+  }
+});
+
+// ==========================================
+// CUSTOMER VERIFICATION ROUTES
+// ==========================================
+
+// Get pending verifications for a customer
+router.get("/customer-verifications/:customerId", verifyAdminAccess, async (req, res) => {
+  try {
+    const { customerId } = req.params;
+    console.log('📋 Fetching pending verifications for customer:', customerId);
+
+    // For demo purposes, return mock verifications
+    // In production, this would query a CustomerVerification collection
+    const mockVerifications = [
+      {
+        id: `verification_${Date.now()}_demo`,
+        orderId: 'demo-order-123',
+        orderData: {
+          bookingId: 'LAU-001',
+          customerName: 'Demo Customer',
+          customerPhone: '+91 9999999999',
+          address: 'Demo Address, Sector 123, Demo City',
+          pickupTime: '2:00 PM - 4:00 PM',
+          riderName: 'Demo Rider',
+          updatedAt: new Date().toISOString(),
+          status: 'pending',
+          originalItems: [
+            { id: '1', name: 'Shirt', price: 50, quantity: 2, total: 100, unit: 'PC' },
+            { id: '2', name: 'Trouser', price: 80, quantity: 1, total: 80, unit: 'PC' }
+          ],
+          updatedItems: [
+            { id: '1', name: 'Shirt', price: 50, quantity: 3, total: 150, unit: 'PC' },
+            { id: '2', name: 'Trouser', price: 80, quantity: 1, total: 80, unit: 'PC' },
+            { id: '3', name: 'Jacket', price: 120, quantity: 1, total: 120, unit: 'PC' }
+          ],
+          originalTotal: 180,
+          updatedTotal: 350,
+          priceChange: 170,
+          riderNotes: 'Found additional items that need cleaning.',
+          isQuickPickup: false
+        },
+        type: 'items_change',
+        priority: 'high',
+        createdAt: new Date(Date.now() - 10 * 60 * 1000).toISOString(), // 10 minutes ago
+        expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString() // 2 hours from now
+      }
+    ];
+
+    // Only return mock data if customer ID matches demo pattern
+    if (customerId.includes('user_9999999999') || customerId.includes('demo')) {
+      console.log('✅ Returning mock verifications for demo customer');
+      return res.json({ verifications: mockVerifications });
+    }
+
+    // For real customers, return empty array (no verifications pending)
+    console.log('✅ No verifications found for customer:', customerId);
+    res.json({ verifications: [] });
+  } catch (error) {
+    console.error('❌ Error fetching customer verifications:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Process verification response (approve/reject)
+router.post("/customer-verifications/:verificationId/respond", verifyAdminAccess, async (req, res) => {
+  try {
+    const { verificationId } = req.params;
+    const { approved, reason, orderId } = req.body;
+
+    console.log('🔄 Processing verification response:', {
+      verificationId,
+      approved,
+      reason,
+      orderId
+    });
+
+    // In production, this would:
+    // 1. Update the verification status in database
+    // 2. Notify the rider about customer's decision
+    // 3. Update the order if approved, or request changes if rejected
+
+    // Mock response for demo
+    const response = {
+      success: true,
+      message: approved
+        ? 'Customer approved the changes. Rider has been notified to proceed.'
+        : 'Customer rejected the changes. Rider has been notified to modify the order.',
+      verificationId,
+      approved,
+      processedAt: new Date().toISOString()
+    };
+
+    console.log('✅ Verification response processed:', response);
+    res.json(response);
+  } catch (error) {
+    console.error('❌ Error processing verification response:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Create a new verification (used by riders)
+router.post("/customer-verifications", verifyAdminAccess, async (req, res) => {
+  try {
+    const { customerId, orderId, orderData, type, priority } = req.body;
+
+    console.log('📝 Creating new customer verification:', {
+      customerId,
+      orderId,
+      type,
+      priority
+    });
+
+    // In production, this would:
+    // 1. Save verification to database
+    // 2. Send push notification to customer
+    // 3. Return verification ID
+
+    const verificationId = `verification_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    const verification = {
+      id: verificationId,
+      customerId,
+      orderId,
+      orderData,
+      type,
+      priority: priority || 'medium',
+      createdAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
+      status: 'pending'
+    };
+
+    console.log('✅ Verification created:', verificationId);
+    res.status(201).json({
+      success: true,
+      message: 'Verification created successfully',
+      verification
+    });
+  } catch (error) {
+    console.error('❌ Error creating verification:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
