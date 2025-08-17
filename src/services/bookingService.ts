@@ -2,6 +2,7 @@ import MongoDBService from "./mongodbService";
 import { DVHostingSmsService } from "./dvhostingSmsService";
 import { AddressService } from "./addressService";
 import { config } from "../config/env";
+import { getISTTimestamp, getISTUnixTimestamp } from "../utils/timeUtils";
 
 export interface AddressDetails {
   fullAddress?: string;
@@ -243,7 +244,7 @@ export class BookingService {
 
       try {
         // Generate booking ID
-        const bookingId = `booking_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const bookingId = `booking_${getISTUnixTimestamp()}_${Math.random().toString(36).substr(2, 9)}`;
 
         const booking: BookingDetails = {
           ...bookingData,
@@ -391,7 +392,7 @@ export class BookingService {
 
     // Get existing local bookings first to preserve recent additions
     const localBookings = this.getBookingsFromLocalStorage(userId);
-    console.log("📱 Found local bookings:", localBookings.length);
+    console.log("�� Found local bookings:", localBookings.length);
     console.log(
       "📊 Local bookings sample:",
       localBookings.slice(0, 2).map((b) => ({
@@ -1302,7 +1303,7 @@ export class BookingService {
                   if (retryResponse.ok) {
                     const retryData = await retryResponse.json();
                     console.log(
-                      "✅ Booking cancellation successful after user refresh",
+                      "�� Booking cancellation successful after user refresh",
                     );
                     return {
                       success: true,
