@@ -446,7 +446,7 @@ export class AddressService {
 
       // Add timestamps
       if (!addressData.createdAt) {
-        addressData.createdAt = new Date().toISOString();
+        addressData.createdAt = getISTTimestamp();
       }
 
       // Update existing address or add new one
