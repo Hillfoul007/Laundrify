@@ -769,7 +769,7 @@ router.get('/orders/:orderId', verifyRiderToken, async (req, res) => {
       );
 
     if (!order) {
-      console.log(`��️ Order ${orderId} not found, returning mock data`);
+      console.log(`⚠️ Order ${orderId} not found, returning mock data`);
       return res.json(getMockOrderData(orderId));
     }
 
@@ -955,7 +955,12 @@ function getMockOrderData(orderId) {
 router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
   try {
     const { orderId } = req.params;
-    const { items, notes, requiresVerification, verificationStatus } = req.body;
+    const { items, notes, requiresVerification, verificationStatus, notificationData } = req.body;
+
+    // Get Indian timezone date
+    const getIndianTime = () => {
+      return new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
+    };
 
     console.log(`🔄 Updating order: ${orderId}, items: ${items?.length || 0}`);
 
