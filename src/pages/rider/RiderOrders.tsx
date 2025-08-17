@@ -370,8 +370,14 @@ export default function RiderOrders() {
         setEditedItems([...items]);
         setOriginalTotal(items.reduce((sum: number, item: any) => sum + (item.quantity * item.price), 0));
 
-        // Check if this is a quick pickup (no initial items)
-        setIsQuickPickup(items.length === 0 || processedOrder.type === 'Quick Pickup');
+        // Check if this is a quick pickup - use multiple indicators
+        const isQuickPickupOrder = orderData.isQuickPickup ||
+                                  orderData.type === 'Quick Pickup' ||
+                                  orderData.service === 'Quick Pickup Service' ||
+                                  (items.length === 0 && orderData.service_type === 'express');
+
+        setIsQuickPickup(isQuickPickupOrder);
+        console.log('📦 Order type detected:', isQuickPickupOrder ? 'Quick Pickup' : 'Regular Order');
 
         // Show success message only in development
         if (isDev) {
