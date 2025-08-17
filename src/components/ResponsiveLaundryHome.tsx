@@ -1503,6 +1503,34 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
           onClose={() => setShowReferralModal(false)}
           currentUser={currentUser}
         />
+
+        {/* Customer Verification Popup */}
+        <CustomerVerificationPopup
+          isOpen={isVerificationPopupOpen}
+          onClose={hideVerificationPopup}
+          verification={currentVerification}
+          onVerificationComplete={handleVerificationComplete}
+        />
+
+        {/* Demo Verification Button - Development Only */}
+        {import.meta.env.DEV && currentUser && (
+          <div className="fixed bottom-4 left-4 z-50">
+            <Button
+              onClick={createDemoVerification}
+              size="sm"
+              variant="outline"
+              className="bg-yellow-400 hover:bg-yellow-500 text-black border-yellow-600"
+            >
+              <Bell className="h-4 w-4 mr-2" />
+              Demo Verification
+              {pendingCount > 0 && (
+                <Badge className="ml-2 bg-red-500 text-white text-xs">
+                  {pendingCount}
+                </Badge>
+              )}
+            </Button>
+          </div>
+        )}
     </div>
       </div>
   );
