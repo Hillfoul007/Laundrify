@@ -595,7 +595,9 @@ export default function RiderOrders() {
                 <div className="flex items-start space-x-3">
                   <MapPin className="h-5 w-5 text-blue-600 mt-1" />
                   <div className="flex-1">
-                    <p className="text-blue-900 font-medium leading-relaxed">{order.address}</p>
+                    <p className="text-blue-900 font-medium leading-relaxed">
+                      {typeof order.address === 'string' ? order.address : 'Address not available'}
+                    </p>
                     <Button
                       size="sm"
                       className="mt-3 bg-blue-600 hover:bg-blue-700"
