@@ -1,48 +1,62 @@
-// Cache busting utility to help with CSS/JS loading issues
+// Cache buster script to clear PWA cache and fix URL corruption
 (function() {
-  'use strict';
+  console.log('🧹 Cache Buster: Starting cleanup...');
   
-  // Force reload stylesheets if they fail to load
-  function fixStylesheetLoading() {
-    const stylesheets = document.querySelectorAll('link[rel="stylesheet"]');
-    
-    stylesheets.forEach((link, index) => {
-      // Check if stylesheet failed to load
-      if (!link.sheet || link.sheet.cssRules.length === 0) {
-        console.warn('🔧 Reloading failed stylesheet:', link.href);
-        
-        // Create new link element
-        const newLink = document.createElement('link');
-        newLink.rel = 'stylesheet';
-        newLink.type = 'text/css';
-        newLink.href = link.href + (link.href.includes('?') ? '&' : '?') + 'cb=' + Date.now();
-        
-        // Replace old link
-        link.parentNode.insertBefore(newLink, link);
-        link.remove();
-        
-        // Add error handler to new link
-        newLink.onerror = function() {
-          console.error('❌ Still failed to load stylesheet:', newLink.href);
-        };
-        
-        newLink.onload = function() {
-          console.log('✅ Successfully reloaded stylesheet:', newLink.href);
-        };
+  // Clear localStorage
+  try {
+    localStorage.clear();
+    console.log('✅ localStorage cleared');
+  } catch (e) {
+    console.warn('⚠️ Could not clear localStorage:', e);
+  }
+  
+  // Clear sessionStorage
+  try {
+    sessionStorage.clear();
+    console.log('✅ sessionStorage cleared');
+  } catch (e) {
+    console.warn('⚠️ Could not clear sessionStorage:', e);
+  }
+  
+  // Clear IndexedDB
+  if ('indexedDB' in window) {
+    try {
+      indexedDB.databases().then(databases => {
+        databases.forEach(db => {
+          indexedDB.deleteDatabase(db.name);
+        });
+      });
+      console.log('✅ IndexedDB cleared');
+    } catch (e) {
+      console.warn('⚠️ Could not clear IndexedDB:', e);
+    }
+  }
+  
+  // Unregister service workers
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+      for(let registration of registrations) {
+        registration.unregister().then(function() {
+          console.log('✅ Service Worker unregistered:', registration);
+        });
       }
     });
   }
   
-  // Run immediately and after DOM is loaded
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', fixStylesheetLoading);
-  } else {
-    setTimeout(fixStylesheetLoading, 100);
+  // Clear cache storage
+  if ('caches' in window) {
+    caches.keys().then(names => {
+      names.forEach(name => {
+        caches.delete(name);
+      });
+      console.log('✅ Cache storage cleared');
+    });
   }
   
-  // Also run on window load as fallback
-  window.addEventListener('load', function() {
-    setTimeout(fixStylesheetLoading, 500);
-  });
+  console.log('🧹 Cache Buster: Cleanup complete! Please refresh the page.');
   
+  // Auto refresh after 2 seconds
+  setTimeout(() => {
+    window.location.reload(true);
+  }, 2000);
 })();
