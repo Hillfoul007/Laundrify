@@ -96,14 +96,30 @@ export default function RiderOrders() {
         type: 'Quick Pickup',
         service: 'Quick Pickup Service',
         service_type: 'express',
+        services: ['Quick Pickup', 'On-Location Assessment'],
         riderStatus: 'accepted',
         assignedAt: new Date().toISOString(),
+        status: 'confirmed',
+        payment_status: 'pending',
         items: [], // No predefined items for quick pickup
         item_prices: [], // Will be populated when rider adds services
-        specialInstructions: 'Quick pickup - rider will assess items on location and create order',
-        status: 'confirmed',
+        charges_breakdown: {
+          base_price: 0,
+          tax_amount: 0,
+          service_fee: 0,
+          delivery_fee: 0,
+          handling_fee: 0,
+          discount: 0
+        },
         total_price: 0,
-        final_amount: 0
+        discount_amount: 0,
+        final_amount: 0,
+        specialInstructions: 'Quick pickup service - rider will assess items on location and create order based on customer needs',
+        additional_details: 'Customer requested quick pickup service. No pre-selected items.',
+        provider_name: 'Laundrify Express Services',
+        estimated_duration: 0,
+        created_at: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+        updated_at: new Date().toISOString()
       };
     }
 
