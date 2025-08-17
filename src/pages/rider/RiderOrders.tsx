@@ -64,9 +64,17 @@ export default function RiderOrders() {
 
   useEffect(() => {
     if (orderId) {
+      console.log('🔍 useEffect: Fetching order details for ID:', orderId);
       fetchOrderDetails(orderId);
     }
   }, [orderId]);
+
+  // Debug order state changes
+  useEffect(() => {
+    console.log('📋 Order state changed:', order);
+    console.log('📋 isQuickPickup state:', isQuickPickup);
+    console.log('📋 editedItems state:', editedItems);
+  }, [order, isQuickPickup, editedItems]);
 
   const getMockOrderData = (id: string) => {
     // Simulate different order types based on ID
