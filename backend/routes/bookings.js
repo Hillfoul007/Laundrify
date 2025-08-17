@@ -1109,7 +1109,7 @@ router.put("/:bookingId/status", async (req, res) => {
     const { bookingId } = req.params;
     const { status, rider_id, user_id, user_type } = req.body;
 
-    console.log("�� Booking status update request:", {
+    console.log("��� Booking status update request:", {
       bookingId,
       status,
       rider_id,
@@ -1768,7 +1768,8 @@ router.put("/:bookingId/cancel", async (req, res) => {
 
     // Update booking status to cancelled
     booking.status = "cancelled";
-    booking.updated_at = new Date();
+    const indianTime = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
+    booking.updated_at = new Date(indianTime);
     await booking.save();
 
     console.log("✅ Booking cancelled successfully:", bookingId);
@@ -1868,7 +1869,8 @@ router.delete("/:bookingId", async (req, res) => {
 
     // Update booking status to cancelled
     booking.status = "cancelled";
-    booking.updated_at = new Date();
+    const indianTime = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
+    booking.updated_at = new Date(indianTime);
     await booking.save();
 
     res.json({
