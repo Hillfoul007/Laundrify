@@ -377,6 +377,14 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
     localStorage.setItem("laundry_cart", JSON.stringify(cart));
   }, [cart]);
 
+  // Check for pending customer verifications on app startup
+  useEffect(() => {
+    if (currentUser) {
+      // Only check when user is authenticated
+      checkOnStartup();
+    }
+  }, [currentUser, checkOnStartup]);
+
   const handleSearch = (query: string) => {
     setSearchQuery(query);
   };
