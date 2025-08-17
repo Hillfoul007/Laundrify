@@ -70,7 +70,7 @@ export default function RiderOrders() {
 
   const getMockOrderData = (id: string) => {
     // Simulate different order types based on ID
-    const isQuickPickupDemo = id.includes('quick') || id.includes('QP');
+    const isQuickPickupDemo = id.includes('quick') || id.includes('QP') || id === '68a1cb6dbea207fd0ace501b';
 
     if (isQuickPickupDemo) {
       return {
