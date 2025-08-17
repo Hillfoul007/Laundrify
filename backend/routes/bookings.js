@@ -1142,14 +1142,18 @@ router.put("/:bookingId/status", async (req, res) => {
       query.rider_id = rider_id;
     }
 
+    // Use Indian time for timestamps
+    const indianTime = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
+    const indianDate = new Date(indianTime);
+
     let updateData = {
       status,
-      updated_at: new Date(),
+      updated_at: indianDate,
     };
 
     // Add completion timestamp if completing
     if (status === "completed") {
-      updateData.completed_at = new Date();
+      updateData.completed_at = indianDate;
     }
 
     console.log("🔍 Looking for booking with query:", query);
@@ -1167,7 +1171,7 @@ router.put("/:bookingId/status", async (req, res) => {
       // Check if booking exists at all
       const existingBooking = await Booking.findById(bookingId);
       if (!existingBooking) {
-        console.error("❌ Booking does not exist in database");
+        console.error("��� Booking does not exist in database");
       } else {
         console.error("❌ Booking exists but query failed. Current booking:", {
           id: existingBooking._id,
