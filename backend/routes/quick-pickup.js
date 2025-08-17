@@ -33,17 +33,15 @@ router.post("/", async (req, res) => {
 
     console.log("✅ Step 3: Validation passed");
 
-    // Enhanced address validation for Quick Pickup
+    // Enhanced address validation for Quick Pickup - now serving all Gurugram/Gurgaon
     const addressLower = address.toLowerCase();
-    const validKeywords = ["tulip", "sector 69 gurugram", "sector 69 gurgaon"];
-    const hasValidKeyword = validKeywords.some(keyword => addressLower.includes(keyword));
-    const pincodeMatch = address.match(/\b122101\b/);
-    const hasValidPincode = !!pincodeMatch;
+    const validCities = ["gurgaon", "gurugram"];
+    const isValidLocation = validCities.some(city => addressLower.includes(city));
 
-    if (!hasValidKeyword && !hasValidPincode) {
+    if (!isValidLocation) {
       console.log("❌ Address validation failed: Service not available in this area");
       return res.status(400).json({
-        error: "Service not available in your area. We currently serve areas with 'tulip', 'sector 69 gurugram', or pincode 122101.",
+        error: "Service currently available only in Gurugram/Gurgaon area.",
       });
     }
 
