@@ -190,79 +190,7 @@ export default function AdminRiderManagement() {
   };
 
   const fetchOrders = async () => {
-    // For demo purposes, always start with mock data
-    const mockOrders = [
-      {
-        _id: 'demo-order-1',
-        custom_order_id: 'A20250800050',
-        bookingId: 'A20250800050',
-        name: 'John Doe',
-        customerName: 'John Doe',
-        phone: '+91 9876543210',
-        customerPhone: '+91 9876543210',
-        customer_id: '67890123456789abcdef0123',
-        address: 'D62, Extension, Chhawla, New Delhi, Delhi, 122101',
-        service: 'Dry Cleaning Service',
-        services: ['Dry Cleaning', 'Premium Care'],
-        scheduled_date: new Date().toISOString().split('T')[0],
-        scheduled_time: '14:00',
-        pickupTime: '2:00 PM - 4:00 PM',
-        status: 'confirmed',
-        type: 'Regular',
-        final_amount: 796.40,
-        total_price: 796.40,
-        special_instructions: 'Handle with care - customer prefers gentle wash for delicate items.',
-        assignedRider: null,
-        rider_id: null
-      },
-      {
-        _id: 'demo-order-2',
-        custom_order_id: 'A20250800051',
-        bookingId: 'A20250800051',
-        name: 'Jane Smith',
-        customerName: 'Jane Smith',
-        phone: '+91 9876543211',
-        customerPhone: '+91 9876543211',
-        customer_id: '67890123456789abcdef0124',
-        address: 'B-12, Sector 18, Gurugram, Haryana, 122015',
-        service: 'Wash & Fold',
-        services: ['Wash & Fold', 'Fabric Softener'],
-        scheduled_date: new Date().toISOString().split('T')[0],
-        scheduled_time: '10:00',
-        pickupTime: '10:00 AM - 12:00 PM',
-        status: 'pending',
-        type: 'Regular',
-        final_amount: 450.00,
-        total_price: 450.00,
-        special_instructions: 'Please separate whites and colors. Customer will provide sorting.',
-        assignedRider: null,
-        rider_id: null
-      },
-      {
-        _id: 'demo-order-3',
-        custom_order_id: 'QP20250800001',
-        bookingId: 'QP20250800001',
-        name: 'Raj Kumar',
-        customerName: 'Raj Kumar',
-        phone: '+91 9876543212',
-        customerPhone: '+91 9876543212',
-        customer_id: '67890123456789abcdef0125',
-        address: 'C-45, Phase 2, DLF City, Gurugram, Haryana, 122002',
-        service: 'Quick Pickup Service',
-        services: [],
-        scheduled_date: new Date().toISOString().split('T')[0],
-        scheduled_time: '16:00',
-        pickupTime: '4:00 PM - 6:00 PM',
-        status: 'confirmed',
-        type: 'Quick Pickup',
-        final_amount: 0,
-        total_price: 0,
-        estimatedCost: 300,
-        special_instructions: 'Quick pickup - rider will assess and quote for 3 shirts and 2 pants.',
-        assignedRider: null,
-        rider_id: null
-      }
-    ];
+    console.log('📋 Fetching orders from API...');
 
     try {
       const response = await fetch(getAdminApiUrl('/bookings?status=pending,confirmed&limit=50'), {
@@ -270,29 +198,88 @@ export default function AdminRiderManagement() {
           'admin-token': 'admin-access-granted'
         }
       });
+
       if (response.ok) {
         const data = await response.json();
         console.log('📋 Admin orders fetched from API:', data);
+
         // Extract bookings from the response structure
         const apiBookings = data.bookings || data || [];
 
         if (apiBookings.length > 0) {
-          console.log('✅ Using API data:', apiBookings.length, 'orders');
-          setOrders(apiBookings);
-          toast.success(`Loaded ${apiBookings.length} orders from API`);
+          // Process bookings to ensure consistent data format
+          const processedBookings = apiBookings.map((booking: any) => ({
+            ...booking,
+            // Normalize customer info fields
+            customerName: booking.customerName || booking.name || booking.customer_id?.full_name || booking.customer_id?.name,
+            customerPhone: booking.customerPhone || booking.phone || booking.customer_id?.phone,
+            // Normalize order ID fields
+            bookingId: booking.bookingId || booking.custom_order_id || booking._id,
+            // Ensure status and other required fields
+            status: booking.status || 'pending',
+            // Normalize service info
+            service: booking.service || (Array.isArray(booking.services) ? booking.services[0] : 'Laundry Service'),
+            services: Array.isArray(booking.services) ? booking.services : [booking.service || 'Laundry Service'],
+            // Normalize pricing
+            final_amount: booking.final_amount || booking.total_price || 0,
+            total_price: booking.total_price || booking.final_amount || 0,
+            // Normalize time fields
+            pickupTime: booking.pickupTime || `${booking.scheduled_time || '09:00'} - ${booking.delivery_time || '17:00'}`,
+            // Default type
+            type: booking.type || 'Regular'
+          }));
+
+          console.log('✅ Using real API data:', processedBookings.length, 'orders');
+          setOrders(processedBookings);
+          toast.success(`Loaded ${processedBookings.length} real orders from database`);
+          return;
+        } else {
+          console.log('ℹ️ API returned empty results');
+          toast.info('No orders found in database');
+          setOrders([]);
           return;
         }
       } else {
         console.warn('⚠️ API failed with status:', response.status);
+        if (response.status === 404) {
+          toast.error('Orders API not available. Please check backend connection.');
+        } else {
+          toast.error(`API error: ${response.status}`);
+        }
       }
     } catch (error) {
-      console.warn('⚠️ API error:', error);
+      console.error('❌ API error:', error);
+      toast.error('Failed to connect to backend API');
     }
 
-    // Use mock data as fallback or if API returns no data
-    console.log('🔧 Using mock orders for demo');
+    // Fallback to mock data only if API is completely unavailable
+    const mockOrders = [
+      {
+        _id: 'demo-order-1',
+        custom_order_id: 'DEMO-001',
+        bookingId: 'DEMO-001',
+        customerName: 'Demo Customer',
+        customerPhone: '+91 9999999999',
+        customer_id: 'demo-customer-1',
+        address: 'Demo Address for Testing',
+        service: 'Demo Service',
+        services: ['Demo Service'],
+        scheduled_date: new Date().toISOString().split('T')[0],
+        scheduled_time: '10:00',
+        pickupTime: '10:00 AM - 12:00 PM',
+        status: 'pending',
+        type: 'Demo',
+        final_amount: 100,
+        total_price: 100,
+        special_instructions: 'This is demo data. Connect to backend for real orders.',
+        assignedRider: null,
+        rider_id: null
+      }
+    ];
+
+    console.log('🔧 Using fallback demo data');
     setOrders(mockOrders);
-    toast.info(`Loaded ${mockOrders.length} demo orders for assignment`);
+    toast.warning('Using demo data - backend unavailable');
   };
 
   const fetchActiveRiders = async () => {
