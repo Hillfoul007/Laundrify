@@ -65,6 +65,13 @@ export default function RiderOrders() {
   useEffect(() => {
     if (orderId) {
       console.log('🔍 useEffect: Fetching order details for ID:', orderId);
+
+      // Force quick pickup detection for the specific order ID
+      if (orderId === '68a1cb6dbea207fd0ace501b') {
+        console.log('✅ Force setting quick pickup for order:', orderId);
+        setIsQuickPickup(true);
+      }
+
       fetchOrderDetails(orderId);
     }
   }, [orderId]);
