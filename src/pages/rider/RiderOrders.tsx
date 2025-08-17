@@ -125,40 +125,62 @@ export default function RiderOrders() {
       status: 'confirmed',
       payment_status: 'pending',
 
-      // Previously selected services (what the customer ordered)
+      // Previously selected services (what the customer ordered) - using actual service data
       items: [
         {
           id: '1',
+          serviceId: 'steam-press-suit',
+          name: "Men's Suit / Lehenga / Heavy Dresses",
+          description: "Professional steam pressing for men's suits, lehengas, and heavy dresses.",
+          price: 150,
+          unit: 'SET',
+          category: 'iron',
+          quantity: 1,
+          total: 150
+        },
+        {
+          id: '2',
+          serviceId: 'steam-press-ladies-suit',
+          name: 'Ladies Suit / Kurta & Pyjama / Saree',
+          description: "Expert steam pressing for ladies suits, kurta sets, and sarees.",
+          price: 100,
+          unit: 'SET',
+          category: 'iron',
+          quantity: 1,
+          total: 100
+        },
+        {
+          id: '3',
+          serviceId: 'laundry-iron',
+          name: 'Laundry and Iron',
+          description: 'Complete washing and ironing service for fresh, crisp clothes.',
+          price: 120,
+          unit: 'KG',
+          category: 'laundry',
+          quantity: 1,
+          total: 120
+        },
+        {
+          id: '4',
           serviceId: 'dry-clean-mens-shirt',
           name: "Men's Shirt/T-Shirt",
           description: "Professional dry cleaning for men's shirts and t-shirts.",
           price: 100,
           unit: 'PC',
           category: 'mens-dry-clean',
-          quantity: 2,
-          total: 200
+          quantity: 1,
+          total: 100
         },
         {
-          id: '2',
-          serviceId: 'dry-clean-mens-trouser',
-          name: 'Trouser/Jeans',
-          description: "Expert dry cleaning for men's trousers and jeans.",
-          price: 120,
-          unit: 'PC',
+          id: '5',
+          serviceId: 'dry-clean-kurta-pyjama',
+          name: 'Kurta Pyjama (2 PC)',
+          description: "Traditional dry cleaning for kurta pyjama sets.",
+          price: 220,
+          unit: 'SET',
           category: 'mens-dry-clean',
           quantity: 1,
-          total: 120
-        },
-        {
-          id: '3',
-          serviceId: 'wash-fold-cotton-shirt',
-          name: 'Cotton Shirt - Wash & Fold',
-          description: 'Gentle wash and professional folding for cotton shirts.',
-          price: 50,
-          unit: 'PC',
-          category: 'wash-fold',
-          quantity: 3,
-          total: 150
+          total: 220
         }
       ],
 
@@ -921,7 +943,7 @@ export default function RiderOrders() {
                     </div>
                     <div className={`flex justify-between items-center font-semibold ${totalAmount > originalTotal ? 'text-red-600' : 'text-green-600'}`}>
                       <span>Difference:</span>
-                      <span>{totalAmount > originalTotal ? '+' : ''}₹{totalAmount - originalTotal}</span>
+                      <span>{totalAmount > originalTotal ? '+' : ''}���{totalAmount - originalTotal}</span>
                     </div>
                   </div>
 
