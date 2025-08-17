@@ -1185,6 +1185,11 @@ export default function AdminRiderManagement() {
                     <Package className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                     <p>No unassigned quick pickups</p>
                     <p className="text-sm">New quick pickup orders will appear here for assignment</p>
+                    <div className="mt-4 text-xs bg-orange-50 p-3 rounded-lg border">
+                      <p className="font-medium text-orange-800">Debug Info:</p>
+                      <p className="text-orange-700">Total Quick Pickups: {orders.filter(o => o.type === 'Quick Pickup').length}</p>
+                      <p className="text-orange-700">Assigned Quick Pickups: {orders.filter(o => o.type === 'Quick Pickup' && (o.assignedRider || o.rider_id)).length}</p>
+                    </div>
                   </div>
                 )}
               </div>
