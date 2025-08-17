@@ -820,7 +820,7 @@ function getMockOrderData(orderId) {
       service_type: 'express',
       services: ['Quick Assessment', 'Express Service'],
       riderStatus: 'accepted',
-      assignedAt: new Date().toISOString(),
+      assignedAt: new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"}),
       status: 'confirmed',
       payment_status: 'pending',
       items: [],
@@ -832,8 +832,8 @@ function getMockOrderData(orderId) {
       additional_details: 'Customer will have items ready for assessment',
       provider_name: 'Laundrify Express',
       estimated_duration: 60,
-      created_at: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
-      updated_at: new Date().toISOString()
+      created_at: new Date(Date.now() - 60 * 60 * 1000).toLocaleString("en-US", {timeZone: "Asia/Kolkata"}),
+      updated_at: new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"})
     };
   }
 
@@ -863,7 +863,7 @@ function getMockOrderData(orderId) {
     service_type: 'premium',
     services: ['Dry Cleaning', 'Premium Care', 'Express Delivery'],
     riderStatus: 'accepted',
-    assignedAt: new Date().toISOString(),
+    assignedAt: new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"}),
     status: 'confirmed',
     payment_status: 'pending',
 
@@ -1050,7 +1050,7 @@ router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
           priority: 'high'
         };
 
-        console.log('✅ Customer notification prepared:', notification);
+        console.log('��� Customer notification prepared:', notification);
       } catch (notificationError) {
         console.warn('⚠️ Failed to send customer notification:', notificationError);
       }
