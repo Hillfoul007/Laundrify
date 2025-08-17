@@ -1013,6 +1013,13 @@ export default function AdminRiderManagement() {
                     <Package className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                     <p>No unassigned orders</p>
                     <p className="text-sm">New orders will appear here for assignment</p>
+                    <div className="mt-4 text-xs bg-blue-50 p-3 rounded-lg border">
+                      <p className="font-medium text-blue-800">Debug Info:</p>
+                      <p className="text-blue-700">Total orders loaded: {orders.length}</p>
+                      <p className="text-blue-700">Orders with assignment: {orders.filter(o => o.assignedRider || o.rider_id).length}</p>
+                      <p className="text-blue-700">Quick pickups: {orders.filter(o => o.type === 'Quick Pickup').length}</p>
+                      <p className="text-blue-700">Regular orders: {orders.filter(o => o.type !== 'Quick Pickup').length}</p>
+                    </div>
                   </div>
                 )}
               </div>
