@@ -561,10 +561,10 @@ export default function RiderOrders() {
                   <div className="flex items-center space-x-2">
                     <Phone className="h-5 w-5 text-blue-600" />
                     <a
-                      href={`tel:${order.customerPhone || order.phone}`}
+                      href={`tel:${typeof (order.customerPhone || order.phone) === 'string' ? (order.customerPhone || order.phone) : 'N/A'}`}
                       className="text-xl font-bold text-blue-900 hover:text-blue-700 hover:underline"
                     >
-                      {order.customerPhone || order.phone}
+                      {typeof (order.customerPhone || order.phone) === 'string' ? (order.customerPhone || order.phone) : 'N/A'}
                     </a>
                   </div>
                 </div>
