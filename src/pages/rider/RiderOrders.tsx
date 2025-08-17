@@ -613,7 +613,9 @@ export default function RiderOrders() {
                 <Label className="text-sm font-semibold text-blue-800">Pickup Time</Label>
                 <div className="flex items-center space-x-2">
                   <Clock className="h-4 w-4 text-blue-600" />
-                  <p className="text-blue-900 font-medium">{order.pickupTime}</p>
+                  <p className="text-blue-900 font-medium">
+                    {typeof order.pickupTime === 'string' ? order.pickupTime : 'Time not specified'}
+                  </p>
                 </div>
               </div>
               <div className="space-y-2">
