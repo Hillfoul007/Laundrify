@@ -577,7 +577,7 @@ export default function RiderOrders() {
                 <div className="space-y-2">
                   <Label className="text-sm font-semibold text-blue-800">Customer ID</Label>
                   <p className="text-sm font-mono text-blue-700 bg-blue-100 px-2 py-1 rounded">
-                    {order.customer_id || 'N/A'}
+                    {typeof order.customer_id === 'string' ? order.customer_id : 'N/A'}
                   </p>
                 </div>
                 <div className="space-y-2">
