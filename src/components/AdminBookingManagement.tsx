@@ -76,14 +76,56 @@ const AdminBookingManagement: React.FC = () => {
       const response = await apiClient.adminRequest<{bookings: Booking[]}>("/admin/bookings?limit=100");
 
       if (response.data) {
-        setBookings(response.data.bookings || []);
+        // Process bookings to handle populated customer data
+        const processedBookings = (response.data.bookings || []).map((booking: any) => {
+          // Handle populated customer_id object vs direct fields
+          const customer = booking.customer_id || {};
+          const customerName = booking.customerName ||
+                              booking.name ||
+                              customer.full_name ||
+                              customer.name ||
+                              'Unknown Customer';
+          const customerPhone = booking.customerPhone ||
+                               booking.phone ||
+                               customer.phone ||
+                               'No phone';
+
+          return {
+            ...booking,
+            // Customer information from populated data
+            name: customerName, // Ensure name is available
+            phone: customerPhone, // Ensure phone is available
+          };
+        });
+
+        setBookings(processedBookings);
       } else if (response.error) {
         // Fallback to regular bookings endpoint
         console.log("Admin endpoint failed, trying regular bookings...");
         const fallbackResponse = await apiClient.request<{bookings: Booking[]}>("/bookings?limit=100");
 
         if (fallbackResponse.data) {
-          setBookings(fallbackResponse.data.bookings || []);
+          // Process fallback bookings as well
+          const processedFallbackBookings = (fallbackResponse.data.bookings || []).map((booking: any) => {
+            const customer = booking.customer_id || {};
+            const customerName = booking.customerName ||
+                                booking.name ||
+                                customer.full_name ||
+                                customer.name ||
+                                'Unknown Customer';
+            const customerPhone = booking.customerPhone ||
+                                 booking.phone ||
+                                 customer.phone ||
+                                 'No phone';
+
+            return {
+              ...booking,
+              name: customerName,
+              phone: customerPhone,
+            };
+          });
+
+          setBookings(processedFallbackBookings);
           toast.info("Using regular bookings API (admin endpoint not available)");
         } else {
           toast.error(response.error);
