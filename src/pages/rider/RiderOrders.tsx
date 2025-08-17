@@ -70,16 +70,17 @@ export default function RiderOrders() {
 
   const getMockOrderData = (id: string) => {
     // Simulate different order types based on ID
-    const isQuickPickupDemo = id.includes('quick') || id.includes('QP');
+    const isQuickPickupDemo = id.includes('quick') || id.includes('QP') || id === 'LAU-001';
 
     if (isQuickPickupDemo) {
       return {
         _id: id,
-        bookingId: 'QP-002',
-        custom_order_id: 'QP202412002',
-        customerName: 'Sarah Johnson',
-        customerPhone: '+91 9876543211',
-        address: 'A-45, Sector 12, Noida, Uttar Pradesh, 201301',
+        bookingId: id === 'LAU-001' ? 'LAU-001' : 'QP-002',
+        custom_order_id: id === 'LAU-001' ? 'A202412001' : 'QP202412002',
+        customerName: id === 'LAU-001' ? 'Rajesh Kumar' : 'Sarah Johnson',
+        customerPhone: id === 'LAU-001' ? '+91 9876543210' : '+91 9876543211',
+        customer_id: id === 'LAU-001' ? '67890123456789abcdef0123' : '12345678901234567890abcd',
+        address: id === 'LAU-001' ? 'B-45, Sector 28, Gurugram, Haryana 122002' : 'A-45, Sector 12, Noida, Uttar Pradesh, 201301',
         pickupTime: '3:00 PM - 5:00 PM',
         type: 'Quick Pickup',
         service: 'Quick Pickup Service',
