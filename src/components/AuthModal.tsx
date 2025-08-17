@@ -53,6 +53,22 @@ const AuthModal: React.FC<AuthModalProps> = ({
     setShowConfirmPassword(false);
   };
 
+  // Auto-fill referral code from URL parameter
+  React.useEffect(() => {
+    if (isOpen) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const refCode = urlParams.get('ref');
+
+      if (refCode && refCode.trim()) {
+        console.log('🎁 Auto-filling referral code from URL:', refCode);
+        setFormData(prev => ({
+          ...prev,
+          referralCode: refCode.trim().toUpperCase()
+        }));
+      }
+    }
+  }, [isOpen]);
+
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);

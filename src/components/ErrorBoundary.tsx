@@ -25,6 +25,29 @@ class ErrorBoundary extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error("Error caught by boundary:", error, errorInfo);
+
+    // Check for URL corruption issues
+    const currentURL = window.location.href;
+    const hasCorruptedURL = /[a-f0-9]{32}-[a-f0-9]{20}\.fly\.dev[a-zA-Z0-9]+/.test(currentURL);
+
+    if (hasCorruptedURL || error.message.includes('Failed to fetch') || error.message.includes('server IP address')) {
+      console.log('🚨 URL corruption or network error detected, clearing cache...');
+      try {
+        localStorage.clear();
+        sessionStorage.clear();
+        if ('caches' in window) {
+          caches.keys().then(names => names.forEach(name => caches.delete(name)));
+        }
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(registrations => {
+            registrations.forEach(registration => registration.unregister());
+          });
+        }
+      } catch (e) {
+        console.warn('Could not clear cache:', e);
+      }
+    }
+
     this.setState({
       error,
       errorInfo,
@@ -36,7 +59,38 @@ class ErrorBoundary extends Component<Props, State> {
   };
 
   private handleReload = () => {
-    window.location.reload();
+    // Check for URL corruption before reloading
+    const currentURL = window.location.href;
+    const hasCorruptedURL = /[a-f0-9]{32}-[a-f0-9]{20}\.fly\.dev[a-zA-Z0-9]+/.test(currentURL);
+
+    if (hasCorruptedURL) {
+      // Try to redirect to clean URL
+      const cleanURL = currentURL.replace(/[a-zA-Z0-9]+$/, '');
+      console.log('🔧 Attempting to redirect to clean URL:', cleanURL);
+      window.location.href = cleanURL;
+    } else {
+      window.location.reload();
+    }
+  };
+
+  private handleClearCache = () => {
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+      if ('caches' in window) {
+        caches.keys().then(names => names.forEach(name => caches.delete(name)));
+      }
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          registrations.forEach(registration => registration.unregister());
+        });
+      }
+      // Force reload after clearing
+      setTimeout(() => window.location.reload(), 1000);
+    } catch (e) {
+      console.warn('Could not clear cache:', e);
+      window.location.reload();
+    }
   };
 
   public render() {
@@ -62,6 +116,26 @@ class ErrorBoundary extends Component<Props, State> {
                 again.
               </p>
 
+              {(() => {
+                const currentURL = window.location.href;
+                const hasCorruptedURL = /[a-f0-9]{32}-[a-f0-9]{20}\.fly\.dev[a-zA-Z0-9]+/.test(currentURL);
+
+                if (hasCorruptedURL) {
+                  return (
+                    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                      <p className="text-xs text-yellow-800 font-medium mb-2">
+                        URL Corruption Detected:
+                      </p>
+                      <p className="text-xs text-yellow-700">
+                        The URL appears to be corrupted. This may be caused by cache issues or service worker problems.
+                      </p>
+                    </div>
+                  );
+                }
+
+                return null;
+              })()}
+
               {process.env.NODE_ENV === "development" && this.state.error && (
                 <div className="p-3 bg-red-50 border border-red-200 rounded-md">
                   <p className="text-xs text-red-800 font-medium mb-2">
@@ -73,21 +147,45 @@ class ErrorBoundary extends Component<Props, State> {
                 </div>
               )}
 
-              <div className="flex gap-2">
-                <Button
-                  onClick={this.handleRetry}
-                  variant="outline"
-                  className="flex-1"
-                >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Try Again
-                </Button>
-                <Button
-                  onClick={this.handleReload}
-                  className="flex-1 bg-green-600 hover:bg-green-700"
-                >
-                  Reload Page
-                </Button>
+              <div className="flex flex-col gap-2">
+                <div className="flex gap-2">
+                  <Button
+                    onClick={this.handleRetry}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Try Again
+                  </Button>
+                  <Button
+                    onClick={this.handleReload}
+                    className="flex-1 bg-green-600 hover:bg-green-700"
+                  >
+                    Reload Page
+                  </Button>
+                </div>
+
+                {(() => {
+                  const currentURL = window.location.href;
+                  const hasCorruptedURL = /[a-f0-9]{32}-[a-f0-9]{20}\.fly\.dev[a-zA-Z0-9]+/.test(currentURL);
+                  const hasNetworkError = this.state.error?.message.includes('Failed to fetch') ||
+                                         this.state.error?.message.includes('server IP address');
+
+                  if (hasCorruptedURL || hasNetworkError) {
+                    return (
+                      <Button
+                        onClick={this.handleClearCache}
+                        variant="destructive"
+                        size="sm"
+                        className="w-full"
+                      >
+                        Clear Cache & Fix URL
+                      </Button>
+                    );
+                  }
+
+                  return null;
+                })()}
               </div>
             </CardContent>
           </Card>
