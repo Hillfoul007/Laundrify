@@ -110,10 +110,12 @@ export default function CustomerNotificationDemo() {
   };
 
   const handleVerification = (approved: boolean) => {
+    const currentTime = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
+
     toast.success(
-      approved 
-        ? 'Order changes approved! Rider has been notified.' 
-        : 'Order changes rejected. Rider will modify the order.'
+      approved
+        ? `Order changes approved at ${currentTime} (IST)! Rider has been notified.`
+        : `Order changes rejected at ${currentTime} (IST). Rider will modify the order.`
     );
     setNotificationView('list');
     setSelectedNotification(null);
