@@ -404,7 +404,7 @@ router.post('/login', async (req, res) => {
 
     // Only use demo mode if database is not connected AND not in production
     if (!mongoose.connection.readyState && process.env.NODE_ENV !== 'production') {
-      console.log('🔧 Demo mode: Database not connected, using demo rider for:', phone);
+      console.log('�� Demo mode: Database not connected, using demo rider for:', phone);
 
       const demoRiders = {
         '9876543210': { name: 'Demo Rider A', status: 'approved', isActive: false },
@@ -997,17 +997,71 @@ router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
     const priceComparison = notificationService.calculatePriceChanges(originalItems, items);
     const itemChanges = notificationService.compareItems(originalItems, items);
 
-    // Update order items
+    // Update order with Indian timezone
+    const indianTime = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
+
+    // Update order items with Indian time
     order.items = items;
     order.notes = notes || order.notes;
     order.updatedBy = 'rider';
-    order.lastModified = new Date();
+    order.lastModified = new Date(indianTime);
+    order.updated_at = new Date(indianTime);
+    order.special_instructions = order.special_instructions || notes;
+
+    // Update item_prices array to match new items
+    if (items && items.length > 0) {
+      order.item_prices = items.map(item => ({
+        service_name: item.name,
+        quantity: item.quantity,
+        unit_price: item.price,
+        total_price: item.quantity * item.price
+      }));
+
+      // Recalculate totals
+      const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+      order.total_price = subtotal;
+      order.final_amount = subtotal; // Simplified - should include taxes/fees
+    }
 
     await order.save();
 
+    console.log(`✅ Order ${orderId} updated with Indian time: ${indianTime}`);
+
+    // Send notification to customer if verification is required
+    if (requiresVerification && notificationData) {
+      try {
+        // In a real implementation, this would send to FCM, SMS, or email
+        console.log('📱 Sending verification notification to customer:', {
+          phone: order.customer_id?.phone || notificationData.customerPhone,
+          orderId: order.custom_order_id,
+          changes: notificationData.riderChanges
+        });
+
+        // Store notification in database or send via notification service
+        const notification = {
+          customer_id: order.customer_id._id,
+          order_id: order._id,
+          type: 'order_verification_required',
+          title: notificationData.title,
+          message: notificationData.message,
+          data: notificationData.riderChanges,
+          created_at: new Date(indianTime),
+          read: false,
+          priority: 'high'
+        };
+
+        console.log('✅ Customer notification prepared:', notification);
+      } catch (notificationError) {
+        console.warn('⚠️ Failed to send customer notification:', notificationError);
+      }
+    }
+
     // Send notification to user if there are significant changes
-    if (priceComparison.price_change !== 0 || itemChanges.added.length > 0 ||
-        itemChanges.removed.length > 0 || itemChanges.modified.length > 0) {
+    const priceChange = items ?
+      items.reduce((sum, item) => sum + (item.quantity * item.price), 0) -
+      (originalItems?.reduce((sum, item) => sum + (item.quantity * item.price), 0) || 0) : 0;
+
+    if (Math.abs(priceChange) > 0) {
 
       try {
         const changes = {
