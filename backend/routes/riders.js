@@ -756,7 +756,8 @@ router.get('/orders/:orderId', verifyRiderToken, async (req, res) => {
       return res.json(getMockOrderData(orderId));
     }
 
-    const order = await Booking.findOne({
+    // First try to find as a regular booking
+    let order = await Booking.findOne({
       _id: orderId,
       assignedRider: req.rider.riderId
     }).populate('customer_id', 'name phone email')
@@ -768,8 +769,65 @@ router.get('/orders/:orderId', verifyRiderToken, async (req, res) => {
         'provider_name estimated_duration assignedAt created_at updated_at completed_at'
       );
 
+    // If not found as booking, try to find as quick pickup
     if (!order) {
-      console.log(`⚠️ Order ${orderId} not found, returning mock data`);
+      console.log(`🔍 Order ${orderId} not found in bookings, checking quick pickups...`);
+
+      const quickPickup = await QuickPickup.findOne({
+        _id: orderId,
+        rider_id: req.rider.riderId
+      }).populate('customer_id', 'name phone email');
+
+      if (quickPickup) {
+        console.log(`✅ Quick pickup found: ${quickPickup._id}`);
+
+        // Transform quick pickup data to match expected order format
+        order = {
+          _id: quickPickup._id,
+          bookingId: quickPickup._id.toString().slice(-6).toUpperCase(),
+          custom_order_id: `QP${quickPickup._id.toString().slice(-8).toUpperCase()}`,
+          customerName: quickPickup.customer_name || quickPickup.customer_id?.name || 'Quick Pickup Customer',
+          customerPhone: quickPickup.customer_phone || quickPickup.customer_id?.phone || '',
+          customer_id: quickPickup.customer_id?._id || quickPickup.customer_id,
+          address: quickPickup.address,
+          address_details: {
+            flatNo: quickPickup.house_number || '',
+            street: '',
+            city: 'Gurugram',
+            pincode: '',
+            type: 'home'
+          },
+          pickupTime: quickPickup.pickup_time || 'TBD',
+          scheduled_date: quickPickup.pickup_date,
+          scheduled_time: quickPickup.pickup_time?.split(' ')[0] || 'TBD',
+          delivery_date: quickPickup.pickup_date, // Same day for quick pickup
+          delivery_time: '18:00', // Default evening delivery
+          type: 'Quick Pickup',
+          service: 'Quick Pickup Service',
+          service_type: 'express',
+          services: ['Quick Assessment', 'Express Service'],
+          status: quickPickup.status,
+          riderStatus: quickPickup.status === 'pending' ? 'assigned' : 'accepted',
+          payment_status: 'pending',
+          items: [], // Quick pickups start with no items
+          item_prices: [],
+          total_price: 0,
+          discount_amount: 0,
+          final_amount: 0,
+          special_instructions: quickPickup.special_instructions || '',
+          additional_details: 'Quick pickup service - assess items on location',
+          provider_name: 'Laundrify Express',
+          estimated_duration: 60,
+          assignedAt: quickPickup.createdAt,
+          created_at: quickPickup.createdAt,
+          updated_at: quickPickup.updatedAt,
+          isQuickPickup: true
+        };
+      }
+    }
+
+    if (!order) {
+      console.log(`⚠️ Order ${orderId} not found in bookings or quick pickups, returning mock data`);
       return res.json(getMockOrderData(orderId));
     }
 
