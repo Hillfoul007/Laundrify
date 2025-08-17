@@ -151,14 +151,25 @@ export default function AdminRiderManagement() {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
+    console.log('🚀 AdminRiderManagement component mounted, fetching data...');
     fetchRiders();
     fetchOrders();
     fetchActiveRiders();
-    
+
     // Poll for active riders every 30 seconds
     const interval = setInterval(fetchActiveRiders, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  // Debug effect to monitor orders state changes
+  useEffect(() => {
+    console.log('📊 Orders state updated:', {
+      totalOrders: orders.length,
+      orderTypes: orders.map(o => ({ id: o._id, type: o.type, assigned: !!(o.assignedRider || o.rider_id) })),
+      unassignedCount: orders.filter(o => !o.assignedRider && !o.rider_id).length,
+      quickPickupCount: orders.filter(o => o.type === 'Quick Pickup').length
+    });
+  }, [orders]);
 
   const fetchRiders = async () => {
     try {
