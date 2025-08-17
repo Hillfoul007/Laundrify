@@ -219,17 +219,17 @@ export default function RiderOrders() {
       ],
 
       charges_breakdown: {
-        base_price: 470,
-        tax_amount: 28.20,
-        service_fee: 15,
-        delivery_fee: 25,
-        handling_fee: 10,
+        base_price: 690,
+        tax_amount: 41.40,
+        service_fee: 20,
+        delivery_fee: 30,
+        handling_fee: 15,
         discount: 0
       },
 
-      total_price: 548.20,
+      total_price: 796.40,
       discount_amount: 0,
-      final_amount: 548.20,
+      final_amount: 796.40,
 
       specialInstructions: 'Handle with care - customer prefers gentle wash for delicate items. Please ensure shirts are properly pressed.',
       additional_details: 'Customer will be available after 2 PM. Ring doorbell twice.',
