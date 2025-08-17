@@ -528,7 +528,7 @@ export default function RiderOrders() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
           </Button>
-          <h1 className="text-2xl font-bold">Order #{order.bookingId}</h1>
+          <h1 className="text-2xl font-bold">Order #{typeof order.bookingId === 'string' ? order.bookingId : order._id || 'Unknown'}</h1>
           <Badge variant={
             order.riderStatus === 'assigned' ? 'secondary' :
             order.riderStatus === 'picked_up' ? 'default' : 'default'
