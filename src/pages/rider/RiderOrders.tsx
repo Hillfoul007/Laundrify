@@ -246,19 +246,30 @@ export default function RiderOrders() {
         // Process and normalize order data
         const processedOrder = {
           ...orderData,
-          // Ensure items array is properly structured
-          items: orderData.items || orderData.item_prices?.map((item: any, index: number) => ({
-            id: index + 1,
-            serviceId: item.service_name?.toLowerCase().replace(/[^a-z0-9]/g, '-') || `service-${index}`,
-            name: item.service_name,
-            description: `Professional ${item.service_name.toLowerCase()}`,
-            price: item.unit_price,
-            unit: 'PC',
-            category: item.service_name.toLowerCase().includes('dry') ? 'dry-clean' :
-                     item.service_name.toLowerCase().includes('wash') ? 'wash-fold' : 'general',
-            quantity: item.quantity,
-            total: item.total_price
-          })) || []
+          // Ensure items array is properly structured with real service prices
+          items: orderData.items || orderData.item_prices?.map((item: any, index: number) => {
+            // Try to find the actual service from laundryServices
+            const actualService = laundryServices.find(service =>
+              service.name.toLowerCase() === item.service_name?.toLowerCase() ||
+              item.service_name?.toLowerCase().includes(service.name.toLowerCase())
+            );
+
+            return {
+              id: index + 1,
+              serviceId: actualService?.id || item.service_name?.toLowerCase().replace(/[^a-z0-9]/g, '-') || `service-${index}`,
+              name: item.service_name,
+              description: actualService?.description || `Professional ${item.service_name.toLowerCase()}`,
+              price: actualService?.price || item.unit_price,
+              unit: actualService?.unit || 'PC',
+              category: actualService?.category || (
+                item.service_name.toLowerCase().includes('dry') ? 'dry-clean' :
+                item.service_name.toLowerCase().includes('wash') ? 'wash-fold' :
+                item.service_name.toLowerCase().includes('iron') ? 'iron' : 'general'
+              ),
+              quantity: item.quantity,
+              total: (actualService?.price || item.unit_price) * item.quantity
+            };
+          }) || []
         };
 
         setOrder(processedOrder);
