@@ -71,11 +71,11 @@ const userSchema = new mongoose.Schema(
     },
     created_at: {
       type: Date,
-      default: Date.now,
+      default: () => new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"})),
     },
     updated_at: {
       type: Date,
-      default: Date.now,
+      default: () => new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"})),
     },
     // Coupon tracking fields
     used_coupons: [{
@@ -162,7 +162,7 @@ const userSchema = new mongoose.Schema(
       },
       created_at: {
         type: Date,
-        default: Date.now,
+        default: () => new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"})),
       },
       expires_at: {
         type: Date,
@@ -190,7 +190,7 @@ const userSchema = new mongoose.Schema(
 
 // Update the updated_at field before saving
 userSchema.pre("save", function (next) {
-  this.updated_at = new Date();
+  this.updated_at = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"}));
   next();
 });
 
