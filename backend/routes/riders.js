@@ -759,10 +759,17 @@ router.get('/orders/:orderId', verifyRiderToken, async (req, res) => {
     const order = await Booking.findOne({
       _id: orderId,
       assignedRider: req.rider.riderId
-    }).populate('customer_id', 'name phone email');
+    }).populate('customer_id', 'name phone email')
+      .select(
+        '_id custom_order_id name phone customer_id service service_type services ' +
+        'scheduled_date scheduled_time delivery_date delivery_time address address_details ' +
+        'status riderStatus payment_status total_price discount_amount coupon_code final_amount ' +
+        'item_prices charges_breakdown special_instructions additional_details ' +
+        'provider_name estimated_duration assignedAt created_at updated_at completed_at'
+      );
 
     if (!order) {
-      console.log(`⚠️ Order ${orderId} not found, returning mock data`);
+      console.log(`��️ Order ${orderId} not found, returning mock data`);
       return res.json(getMockOrderData(orderId));
     }
 
