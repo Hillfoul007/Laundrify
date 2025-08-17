@@ -426,6 +426,13 @@ export default function RiderOrders() {
     setIsSaving(true);
     try {
       const token = localStorage.getItem('riderToken');
+
+      if (!token) {
+        toast.error('Authentication required. Please login again.');
+        setIsSaving(false);
+        return;
+      }
+
       const apiUrl = getRiderApiUrl(`/orders/${orderId}/update`);
 
       // Create notification data for customer
@@ -450,6 +457,12 @@ export default function RiderOrders() {
         timestamp: new Date().toISOString()
       };
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        controller.abort();
+        console.log('⏰ Save request timeout');
+      }, 15000); // 15 second timeout for save operations
+
       const response = await fetch(apiUrl, {
         method: 'PUT',
         headers: {
@@ -463,12 +476,15 @@ export default function RiderOrders() {
           requiresVerification: !customerVerificationRequired,
           verificationStatus: customerVerificationRequired ? 'approved' : 'pending',
           notificationData: notificationData
-        })
+        }),
+        signal: controller.signal
       });
 
-      const result = await response.json();
+      clearTimeout(timeoutId);
 
       if (response.ok) {
+        const result = await response.json();
+
         if (customerVerificationRequired) {
           toast.success('Order saved successfully!', {
             description: 'Customer has approved the changes',
@@ -490,10 +506,36 @@ export default function RiderOrders() {
         setShowConfirmDialog(false);
         fetchOrderDetails(orderId!);
       } else {
-        toast.error(result.message || 'Failed to update order');
+        const errorText = await response.text();
+        let errorMessage = 'Failed to update order';
+
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.message || errorMessage;
+        } catch {
+          // If response is not JSON, use status text
+          errorMessage = response.statusText || errorMessage;
+        }
+
+        toast.error(`Save failed: ${errorMessage}`);
       }
-    } catch (error) {
-      toast.error('Network error. Please try again.');
+    } catch (error: any) {
+      console.error('❌ Save error:', error);
+
+      if (error.name === 'AbortError') {
+        toast.error('Save timeout. Please check your connection and try again.');
+      } else if (error.message && error.message.includes('Failed to fetch')) {
+        toast.error('Network error. Please check your connection and try again.');
+
+        // In demo mode, simulate a successful save
+        if (import.meta.env.DEV) {
+          toast.info('Demo mode: Changes saved locally only');
+          setIsEditing(false);
+          setShowConfirmDialog(false);
+        }
+      } else {
+        toast.error('Unexpected error. Please try again.');
+      }
     } finally {
       setIsSaving(false);
     }
