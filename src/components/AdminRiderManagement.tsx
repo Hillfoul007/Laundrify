@@ -576,43 +576,132 @@ export default function AdminRiderManagement() {
                   <Card key={order._id} className="border-l-4 border-l-orange-500">
                     <CardContent className="pt-4">
                       <div className="flex justify-between items-start">
-                        <div className="space-y-2">
-                          <h4 className="font-semibold">Order #{order.bookingId}</h4>
-                          <div className="text-sm text-gray-600 space-y-1">
-                            <div className="flex items-center space-x-2">
-                              <User className="h-3 w-3" />
-                              <span>{order.customerName}</span>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <Phone className="h-3 w-3" />
-                              <span>{order.customerPhone}</span>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <MapPin className="h-3 w-3" />
-                              <span>{order.address}</span>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <Clock className="h-3 w-3" />
-                              <span>{order.pickupTime}</span>
-                            </div>
-                            {order.type === 'Quick Pickup' && order.specialInstructions && (
-                              <div className="flex items-start space-x-2">
-                                <FileText className="h-3 w-3 mt-0.5" />
-                                <span className="text-xs">{order.specialInstructions}</span>
-                              </div>
-                            )}
-                            {order.type === 'Quick Pickup' && order.estimatedCost > 0 && (
-                              <div className="flex items-center space-x-2">
-                                <span className="text-xs font-medium">Est. Cost: ₹{order.estimatedCost}</span>
-                              </div>
-                            )}
+                        <div className="space-y-3">
+                          {/* Order Header */}
+                          <div className="flex items-center space-x-3">
+                            <h4 className="font-bold text-lg">Order #{order.custom_order_id || order.bookingId || order._id}</h4>
+                            <Badge
+                              variant={order.type === 'Quick Pickup' ? 'default' : 'secondary'}
+                              className={order.type === 'Quick Pickup' ? 'bg-orange-500 hover:bg-orange-600' : ''}
+                            >
+                              {order.type || 'Regular'} Order
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              {order.status || 'pending'}
+                            </Badge>
                           </div>
-                          <Badge
-                            variant={order.type === 'Quick Pickup' ? 'default' : 'secondary'}
-                            className={order.type === 'Quick Pickup' ? 'bg-orange-500 hover:bg-orange-600' : ''}
-                          >
-                            {order.type} Order
-                          </Badge>
+
+                          {/* Customer Information */}
+                          <div className="bg-blue-50 p-3 rounded-lg">
+                            <h5 className="font-semibold text-blue-900 mb-2">Customer Details</h5>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                              <div className="flex items-center space-x-2">
+                                <User className="h-4 w-4 text-blue-600" />
+                                <span className="font-medium">{order.name || order.customerName || 'N/A'}</span>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Phone className="h-4 w-4 text-blue-600" />
+                                <span>{order.phone || order.customerPhone || 'N/A'}</span>
+                              </div>
+                              {order.customer_id && (
+                                <div className="flex items-center space-x-2 md:col-span-2">
+                                  <FileText className="h-4 w-4 text-blue-600" />
+                                  <span className="text-xs font-mono bg-blue-100 px-2 py-1 rounded">
+                                    ID: {order.customer_id}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Service Information */}
+                          {order.service && (
+                            <div className="bg-green-50 p-3 rounded-lg">
+                              <h5 className="font-semibold text-green-900 mb-2">Service Details</h5>
+                              <div className="text-sm space-y-1">
+                                <div className="flex items-center space-x-2">
+                                  <Package className="h-4 w-4 text-green-600" />
+                                  <span className="font-medium">{order.service}</span>
+                                </div>
+                                {order.services && order.services.length > 0 && (
+                                  <div className="flex flex-wrap gap-1 mt-2">
+                                    {order.services.map((service, index) => (
+                                      <Badge key={index} variant="outline" className="text-xs bg-green-100">
+                                        {service}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                )}
+                                {order.final_amount && (
+                                  <div className="flex items-center space-x-2 mt-2">
+                                    <span className="text-green-700 font-semibold">₹{order.final_amount}</span>
+                                    {order.total_price && order.final_amount !== order.total_price && (
+                                      <span className="text-xs text-gray-500 line-through">₹{order.total_price}</span>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Address & Timing */}
+                          <div className="bg-gray-50 p-3 rounded-lg">
+                            <h5 className="font-semibold text-gray-900 mb-2">Pickup Information</h5>
+                            <div className="text-sm space-y-2">
+                              <div className="flex items-start space-x-2">
+                                <MapPin className="h-4 w-4 text-gray-600 mt-0.5" />
+                                <span>{order.address || 'Address not available'}</span>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Clock className="h-4 w-4 text-gray-600" />
+                                <span>
+                                  {order.scheduled_date && order.scheduled_time ?
+                                    `${order.scheduled_date} at ${order.scheduled_time}` :
+                                    order.pickupTime || 'Time not specified'
+                                  }
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Special Instructions */}
+                          {(order.special_instructions || order.specialInstructions || order.additional_details) && (
+                            <div className="bg-yellow-50 p-3 rounded-lg">
+                              <h5 className="font-semibold text-yellow-900 mb-2">Special Instructions</h5>
+                              <div className="text-sm space-y-1">
+                                {order.special_instructions && (
+                                  <div className="flex items-start space-x-2">
+                                    <FileText className="h-4 w-4 text-yellow-600 mt-0.5" />
+                                    <span>{order.special_instructions}</span>
+                                  </div>
+                                )}
+                                {order.specialInstructions && order.specialInstructions !== order.special_instructions && (
+                                  <div className="flex items-start space-x-2">
+                                    <FileText className="h-4 w-4 text-yellow-600 mt-0.5" />
+                                    <span>{order.specialInstructions}</span>
+                                  </div>
+                                )}
+                                {order.additional_details && (
+                                  <div className="flex items-start space-x-2">
+                                    <FileText className="h-4 w-4 text-yellow-600 mt-0.5" />
+                                    <span className="text-xs text-yellow-700">{order.additional_details}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Quick Pickup Specific */}
+                          {order.type === 'Quick Pickup' && order.estimatedCost > 0 && (
+                            <div className="bg-orange-50 p-3 rounded-lg">
+                              <h5 className="font-semibold text-orange-900 mb-2">Quick Pickup Details</h5>
+                              <div className="flex items-center space-x-2">
+                                <span className="text-sm font-medium text-orange-700">
+                                  Estimated Cost: ₹{order.estimatedCost}
+                                </span>
+                              </div>
+                            </div>
+                          )}
                         </div>
                         
                         <Dialog 
