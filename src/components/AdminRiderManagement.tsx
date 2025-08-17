@@ -748,7 +748,19 @@ export default function AdminRiderManagement() {
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                {orders.filter(order => !order.assignedRider).map((order) => (
+                {orders.filter(order => {
+                  // Check if order is unassigned (not assigned to any rider)
+                  const isUnassigned = !order.assignedRider && !order.rider_id &&
+                                      (!order.riderStatus || order.riderStatus === 'unassigned');
+                  console.log('🔍 Order filter check:', {
+                    orderId: order._id,
+                    assignedRider: order.assignedRider,
+                    rider_id: order.rider_id,
+                    riderStatus: order.riderStatus,
+                    isUnassigned
+                  });
+                  return isUnassigned;
+                }).map((order) => (
                   <Card key={order._id} className="border-l-4 border-l-orange-500 shadow-sm">
                     <CardContent className="pt-6">
                       <div className="space-y-4">
