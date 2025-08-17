@@ -177,6 +177,141 @@ router.get("/bookings", verifyAdminAccess, async (req, res) => {
 
     console.log("📋 Admin bookings request:", req.query);
 
+    // Check if database is connected
+    if (!mongoose.connection.readyState) {
+      console.log('🔧 Demo mode: Returning mock bookings for admin');
+
+      // Mock bookings data for admin testing
+      const mockBookings = [
+        {
+          _id: 'demo-admin-booking-1',
+          custom_order_id: 'A20250800100',
+          name: 'Alice Johnson',
+          phone: '+91 9876543200',
+          customer_id: {
+            _id: 'demo-customer-1',
+            full_name: 'Alice Johnson',
+            phone: '+91 9876543200',
+            email: 'alice@example.com'
+          },
+          service: 'Dry Cleaning Service',
+          services: ['Dry Cleaning', 'Premium Care'],
+          scheduled_date: new Date().toISOString().split('T')[0],
+          scheduled_time: '14:00',
+          delivery_date: new Date(Date.now() + 24*60*60*1000).toISOString().split('T')[0],
+          delivery_time: '16:00',
+          address: 'D62, Extension, Chhawla, New Delhi, Delhi, 122101',
+          status: 'pending',
+          total_price: 750,
+          final_amount: 650,
+          assignedRider: null,
+          rider_id: null,
+          created_at: new Date(),
+          updated_at: new Date(),
+          item_prices: [
+            {
+              service_name: 'Dry Cleaning',
+              quantity: 2,
+              unit_price: 300,
+              total_price: 600
+            },
+            {
+              service_name: 'Premium Care',
+              quantity: 1,
+              unit_price: 150,
+              total_price: 150
+            }
+          ]
+        },
+        {
+          _id: 'demo-admin-booking-2',
+          custom_order_id: 'A20250800101',
+          name: 'Bob Smith',
+          phone: '+91 9876543201',
+          customer_id: {
+            _id: 'demo-customer-2',
+            full_name: 'Bob Smith',
+            phone: '+91 9876543201',
+            email: 'bob@example.com'
+          },
+          service: 'Wash & Fold',
+          services: ['Wash & Fold'],
+          scheduled_date: new Date().toISOString().split('T')[0],
+          scheduled_time: '10:00',
+          delivery_date: new Date(Date.now() + 24*60*60*1000).toISOString().split('T')[0],
+          delivery_time: '12:00',
+          address: 'B-12, Sector 18, Gurugram, Haryana, 122015',
+          status: 'confirmed',
+          total_price: 400,
+          final_amount: 400,
+          assignedRider: null,
+          rider_id: null,
+          created_at: new Date(),
+          updated_at: new Date(),
+          item_prices: [
+            {
+              service_name: 'Wash & Fold',
+              quantity: 5,
+              unit_price: 80,
+              total_price: 400
+            }
+          ]
+        },
+        {
+          _id: 'demo-admin-booking-3',
+          custom_order_id: 'QP20250800001',
+          name: 'Charlie Brown',
+          phone: '+91 9876543202',
+          customer_id: {
+            _id: 'demo-customer-3',
+            full_name: 'Charlie Brown',
+            phone: '+91 9876543202',
+            email: 'charlie@example.com'
+          },
+          service: 'Quick Pickup Service',
+          services: [],
+          scheduled_date: new Date().toISOString().split('T')[0],
+          scheduled_time: '16:00',
+          delivery_date: new Date(Date.now() + 24*60*60*1000).toISOString().split('T')[0],
+          delivery_time: '18:00',
+          address: 'C-45, Phase 2, DLF City, Gurugram, Haryana, 122002',
+          status: 'pending',
+          total_price: 0,
+          final_amount: 0,
+          estimatedCost: 350,
+          type: 'Quick Pickup',
+          assignedRider: null,
+          rider_id: null,
+          created_at: new Date(),
+          updated_at: new Date(),
+          item_prices: []
+        }
+      ];
+
+      // Filter mock bookings based on status
+      let filteredBookings = mockBookings;
+      if (status && status !== "all") {
+        if (status.includes(',')) {
+          const statusArray = status.split(',').map(s => s.trim());
+          filteredBookings = mockBookings.filter(booking => statusArray.includes(booking.status));
+        } else {
+          filteredBookings = mockBookings.filter(booking => booking.status === status);
+        }
+      }
+
+      console.log(`🔧 Returning ${filteredBookings.length} mock bookings for admin`);
+
+      return res.json({
+        bookings: filteredBookings,
+        pagination: {
+          total: filteredBookings.length,
+          limit: parseInt(limit),
+          offset: parseInt(offset),
+          pages: Math.ceil(filteredBookings.length / parseInt(limit)),
+        },
+      });
+    }
+
     let query = {};
 
     // Status filter
