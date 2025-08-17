@@ -285,7 +285,9 @@ export default function RiderOrders() {
     try {
       const token = localStorage.getItem('riderToken');
 
-      if (!token) {
+      // For development/testing, try to fetch real data even without token
+      const isDev = import.meta.env.DEV;
+      if (!token && !isDev) {
         useMockData('No authentication token found');
         toast.info('Using demo data - no authentication');
         return;
@@ -528,7 +530,7 @@ export default function RiderOrders() {
         } else {
           toast.success('Order updated and customer notified!', {
             description: result.price_change !== 0
-              ? `Price changed by ₹${Math.abs(result.price_change)} ${result.price_change > 0 ? 'increase' : 'decrease'}`
+              ? `Price changed by ���${Math.abs(result.price_change)} ${result.price_change > 0 ? 'increase' : 'decrease'}`
               : 'Items updated successfully',
             duration: 4000,
             icon: <Bell className="h-4 w-4" />
