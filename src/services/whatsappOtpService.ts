@@ -321,7 +321,7 @@ export class WhatsAppOTPService {
         id: userId,
         name: name.trim(),
         phone: phoneNumber,
-        createdAt: new Date().toISOString(),
+        createdAt: getISTTimestamp(),
         isVerified: true,
       };
 
