@@ -207,27 +207,70 @@ export default function AdminRiderManagement() {
         const apiBookings = data.bookings || data || [];
 
         if (apiBookings.length > 0) {
-          // Process bookings to ensure consistent data format
-          const processedBookings = apiBookings.map((booking: any) => ({
-            ...booking,
-            // Normalize customer info fields
-            customerName: booking.customerName || booking.name || booking.customer_id?.full_name || booking.customer_id?.name,
-            customerPhone: booking.customerPhone || booking.phone || booking.customer_id?.phone,
-            // Normalize order ID fields
-            bookingId: booking.bookingId || booking.custom_order_id || booking._id,
-            // Ensure status and other required fields
-            status: booking.status || 'pending',
-            // Normalize service info
-            service: booking.service || (Array.isArray(booking.services) ? booking.services[0] : 'Laundry Service'),
-            services: Array.isArray(booking.services) ? booking.services : [booking.service || 'Laundry Service'],
-            // Normalize pricing
-            final_amount: booking.final_amount || booking.total_price || 0,
-            total_price: booking.total_price || booking.final_amount || 0,
-            // Normalize time fields
-            pickupTime: booking.pickupTime || `${booking.scheduled_time || '09:00'} - ${booking.delivery_time || '17:00'}`,
-            // Default type
-            type: booking.type || 'Regular'
-          }));
+          // Process bookings to ensure consistent data format with populated customer data
+          const processedBookings = apiBookings.map((booking: any) => {
+            // Handle populated customer_id object vs direct fields
+            const customer = booking.customer_id || {};
+            const customerName = booking.customerName ||
+                                booking.name ||
+                                customer.full_name ||
+                                customer.name ||
+                                'Unknown Customer';
+            const customerPhone = booking.customerPhone ||
+                                 booking.phone ||
+                                 customer.phone ||
+                                 'No phone';
+            const customerEmail = booking.customerEmail ||
+                                 booking.email ||
+                                 customer.email ||
+                                 'No email';
+
+            // Handle populated rider_id object
+            const rider = booking.rider_id || booking.assignedRider || {};
+            const riderName = rider.full_name || rider.name || null;
+            const riderPhone = rider.phone || null;
+
+            return {
+              ...booking,
+              // Customer information from populated data
+              customerName,
+              customerPhone,
+              customerEmail,
+              name: customerName, // Backward compatibility
+              phone: customerPhone, // Backward compatibility
+
+              // Rider information from populated data
+              riderName,
+              riderPhone,
+              assignedRider: booking.assignedRider || booking.rider_id,
+
+              // Normalize order ID fields
+              bookingId: booking.bookingId || booking.custom_order_id || booking._id,
+
+              // Ensure status and other required fields
+              status: booking.status || 'pending',
+
+              // Normalize service info
+              service: booking.service || (Array.isArray(booking.services) ? booking.services[0] : 'Laundry Service'),
+              services: Array.isArray(booking.services) ? booking.services : [booking.service || 'Laundry Service'],
+
+              // Normalize pricing
+              final_amount: booking.final_amount || booking.total_price || 0,
+              total_price: booking.total_price || booking.final_amount || 0,
+
+              // Normalize time fields
+              pickupTime: booking.pickupTime || `${booking.scheduled_time || '09:00'} - ${booking.delivery_time || '17:00'}`,
+
+              // Default type
+              type: booking.type || 'Regular',
+
+              // Include items and other detailed info
+              items: booking.items || [],
+              item_prices: booking.item_prices || [],
+              special_instructions: booking.special_instructions || booking.notes || '',
+              address: booking.address || 'No address provided'
+            };
+          });
 
           console.log('✅ Using real API data:', processedBookings.length, 'orders');
           setOrders(processedBookings);
