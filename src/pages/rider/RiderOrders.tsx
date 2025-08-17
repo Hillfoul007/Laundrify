@@ -391,6 +391,28 @@ export default function RiderOrders() {
       const token = localStorage.getItem('riderToken');
       const apiUrl = getRiderApiUrl(`/orders/${orderId}/update`);
 
+      // Create notification data for customer
+      const notificationData = {
+        type: 'order_verification_required',
+        title: 'Order Changes Need Your Approval',
+        message: `Your order ${order.bookingId || order.custom_order_id} has been updated by the rider and requires your approval.`,
+        orderId: orderId,
+        orderNumber: order.bookingId || order.custom_order_id,
+        customerPhone: order.customerPhone || order.phone,
+        riderChanges: {
+          originalTotal: originalTotal,
+          newTotal: totalAmount,
+          priceChange: totalAmount - originalTotal,
+          itemChanges: editedItems.map(item => ({
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+            total: item.quantity * item.price
+          }))
+        },
+        timestamp: new Date().toISOString()
+      };
+
       const response = await fetch(apiUrl, {
         method: 'PUT',
         headers: {
@@ -402,7 +424,8 @@ export default function RiderOrders() {
           updatedBy: 'rider',
           notes: `Order updated by rider ${new Date().toLocaleString()}. ${customerVerificationRequired ? 'Customer approved changes.' : 'Customer will be notified to verify changes.'}`,
           requiresVerification: !customerVerificationRequired,
-          verificationStatus: customerVerificationRequired ? 'approved' : 'pending'
+          verificationStatus: customerVerificationRequired ? 'approved' : 'pending',
+          notificationData: notificationData
         })
       });
 
