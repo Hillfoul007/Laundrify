@@ -90,6 +90,18 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
   const dvhostingSmsService = DVHostingSmsService.getInstance();
   const locationDetectionService = LocationDetectionService.getInstance();
 
+  // Customer verification system
+  const {
+    isPopupOpen: isVerificationPopupOpen,
+    currentVerification,
+    pendingCount,
+    showVerificationPopup,
+    hideVerificationPopup,
+    checkOnStartup,
+    handleVerificationComplete,
+    createDemoVerification
+  } = useCustomerVerification();
+
   // Function to request location permission and check availability
   const requestLocationPermission = async () => {
     setIsRequestingLocation(true);
