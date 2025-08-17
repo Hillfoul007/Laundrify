@@ -250,8 +250,8 @@ export class BookingService {
           ...bookingData,
           userId: resolvedUserId, // Use resolved user ID
           id: bookingId,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          createdAt: getISTTimestamp(),
+          updatedAt: getISTTimestamp(),
           // Add item prices if provided
           ...(itemPrices && { item_prices: itemPrices }),
         };
@@ -392,7 +392,7 @@ export class BookingService {
 
     // Get existing local bookings first to preserve recent additions
     const localBookings = this.getBookingsFromLocalStorage(userId);
-    console.log("�� Found local bookings:", localBookings.length);
+    console.log("📱 Found local bookings:", localBookings.length);
     console.log(
       "📊 Local bookings sample:",
       localBookings.slice(0, 2).map((b) => ({
@@ -597,11 +597,11 @@ export class BookingService {
       createdAt:
         backendBooking.created_at ||
         backendBooking.createdAt ||
-        new Date().toISOString(),
+        getISTTimestamp(),
       updatedAt:
         backendBooking.updated_at ||
         backendBooking.updatedAt ||
-        new Date().toISOString(),
+        getISTTimestamp(),
     };
   }
 
@@ -609,7 +609,7 @@ export class BookingService {
    * Calculate delivery date from pickup date
    */
   private calculateDeliveryDate(pickupDate: string): string {
-    if (!pickupDate) return new Date().toISOString().split("T")[0];
+    if (!pickupDate) return getISTTimestamp().split("T")[0];
 
     if (pickupDate.includes("-")) {
       const [year, month, day] = pickupDate.split("-");
@@ -747,12 +747,12 @@ export class BookingService {
         service_type: "home-service",
         services: servicesArray,
         scheduled_date:
-          booking.pickupDate || new Date().toISOString().split("T")[0],
+          booking.pickupDate || getISTTimestamp().split("T")[0],
         scheduled_time: booking.pickupTime || "10:00",
         delivery_date:
           booking.deliveryDate ||
           booking.pickupDate ||
-          new Date().toISOString().split("T")[0],
+          getISTTimestamp().split("T")[0],
         delivery_time: booking.deliveryTime || "18:00",
         provider_name: "CleanCare Pro",
         address: addressString,
@@ -937,7 +937,7 @@ export class BookingService {
 
       const updatedData = {
         ...updates,
-        updatedAt: new Date().toISOString(),
+        updatedAt: getISTTimestamp(),
       };
 
       // Try to update in localStorage first
@@ -998,7 +998,7 @@ export class BookingService {
   async cancelBooking(bookingId: string): Promise<BookingResponse> {
     return this.updateBooking(bookingId, {
       status: "cancelled",
-      updatedAt: new Date().toISOString(),
+      updatedAt: getISTTimestamp(),
     });
   }
 
@@ -1303,7 +1303,7 @@ export class BookingService {
                   if (retryResponse.ok) {
                     const retryData = await retryResponse.json();
                     console.log(
-                      "�� Booking cancellation successful after user refresh",
+                      "✅ Booking cancellation successful after user refresh",
                     );
                     return {
                       success: true,
