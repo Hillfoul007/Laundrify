@@ -308,6 +308,36 @@ export class CustomerVerificationService {
   }
 
   /**
+   * Create a custom verification with specific data (for demos)
+   */
+  public createCustomVerification(customData: Partial<PendingVerification>): string {
+    const verificationId = `custom-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
+
+    const verification: PendingVerification = {
+      id: verificationId,
+      orderId: customData.orderData?.bookingId || `order-${Date.now()}`,
+      orderData: customData.orderData || {} as any,
+      type: customData.type || 'items_change',
+      priority: customData.priority || 'medium',
+      createdAt: new Date().toISOString(),
+      expiresAt: customData.expiresAt || new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString()
+    };
+
+    this.pendingVerifications.push(verification);
+    this.savePendingVerifications();
+
+    console.log('🎭 Created custom verification:', verificationId);
+
+    // Dispatch event for listeners
+    const event = new CustomEvent('newVerificationPending', {
+      detail: { verification }
+    });
+    window.dispatchEvent(event);
+
+    return verificationId;
+  }
+
+  /**
    * Create a demo verification (for testing)
    */
   public createDemoVerification(): string {
