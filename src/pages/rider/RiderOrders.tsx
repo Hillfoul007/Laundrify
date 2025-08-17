@@ -554,7 +554,9 @@ export default function RiderOrders() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-sm font-semibold text-blue-800">Customer Name</Label>
-                  <p className="text-xl font-bold text-blue-900">{order.customerName || order.name}</p>
+                  <p className="text-xl font-bold text-blue-900">
+                    {typeof (order.customerName || order.name) === 'string' ? (order.customerName || order.name) : 'N/A'}
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label className="text-sm font-semibold text-blue-800">Phone Number</Label>
