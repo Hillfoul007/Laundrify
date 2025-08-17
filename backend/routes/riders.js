@@ -791,28 +791,76 @@ function getMockOrderData(orderId) {
     return {
       _id: orderId,
       bookingId: 'QP-002',
+      custom_order_id: 'QP202412002',
       customerName: 'Sarah Johnson',
       customerPhone: '+91 9876543211',
+      customer_id: '67890123456789abcdef0124',
       address: 'A-45, Sector 12, Noida, Uttar Pradesh, 201301',
+      address_details: {
+        flatNo: 'A-45',
+        street: 'Sector 12',
+        city: 'Noida',
+        pincode: '201301',
+        type: 'home'
+      },
       pickupTime: '3:00 PM - 5:00 PM',
+      scheduled_date: new Date().toISOString().split('T')[0],
+      scheduled_time: '15:00',
+      delivery_date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      delivery_time: '19:00',
       type: 'Quick Pickup',
+      service: 'Quick Pickup Service',
+      service_type: 'express',
+      services: ['Quick Assessment', 'Express Service'],
       riderStatus: 'accepted',
       assignedAt: new Date().toISOString(),
+      status: 'confirmed',
+      payment_status: 'pending',
       items: [],
-      specialInstructions: 'Quick pickup - rider will assess items on location and create order'
+      item_prices: [],
+      total_price: 0,
+      discount_amount: 0,
+      final_amount: 0,
+      specialInstructions: 'Quick pickup - rider will assess items on location and create order',
+      additional_details: 'Customer will have items ready for assessment',
+      provider_name: 'Laundrify Express',
+      estimated_duration: 60,
+      created_at: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+      updated_at: new Date().toISOString()
     };
   }
 
+  // Comprehensive mock order with complete service data
   return {
     _id: orderId,
     bookingId: 'LAU-001',
+    custom_order_id: 'A202412001',
     customerName: 'John Doe',
     customerPhone: '+91 9876543210',
+    customer_id: '67890123456789abcdef0123',
     address: 'D62, Extension, Chhawla, New Delhi, Delhi, 122101',
+    address_details: {
+      flatNo: 'D62',
+      street: 'Extension, Chhawla',
+      city: 'New Delhi',
+      pincode: '122101',
+      type: 'home'
+    },
     pickupTime: '2:00 PM - 4:00 PM',
+    scheduled_date: new Date().toISOString().split('T')[0],
+    scheduled_time: '14:00',
+    delivery_date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    delivery_time: '18:00',
     type: 'Regular',
+    service: 'Dry Cleaning Service',
+    service_type: 'premium',
+    services: ['Dry Cleaning', 'Premium Care', 'Express Delivery'],
     riderStatus: 'accepted',
     assignedAt: new Date().toISOString(),
+    status: 'confirmed',
+    payment_status: 'pending',
+
+    // Previously selected services (what the customer ordered)
     items: [
       {
         id: '1',
@@ -822,7 +870,8 @@ function getMockOrderData(orderId) {
         price: 100,
         unit: 'PC',
         category: 'mens-dry-clean',
-        quantity: 2
+        quantity: 2,
+        total: 200
       },
       {
         id: '2',
@@ -832,10 +881,66 @@ function getMockOrderData(orderId) {
         price: 120,
         unit: 'PC',
         category: 'mens-dry-clean',
-        quantity: 1
+        quantity: 1,
+        total: 120
+      },
+      {
+        id: '3',
+        serviceId: 'wash-fold-cotton-shirt',
+        name: 'Cotton Shirt - Wash & Fold',
+        description: 'Gentle wash and professional folding for cotton shirts.',
+        price: 50,
+        unit: 'PC',
+        category: 'wash-fold',
+        quantity: 3,
+        total: 150
       }
     ],
-    specialInstructions: 'Handle with care - customer prefers gentle wash for delicate items'
+
+    // Detailed pricing breakdown
+    item_prices: [
+      {
+        service_name: "Men's Shirt/T-Shirt - Dry Clean",
+        quantity: 2,
+        unit_price: 100,
+        total_price: 200
+      },
+      {
+        service_name: "Trouser/Jeans - Dry Clean",
+        quantity: 1,
+        unit_price: 120,
+        total_price: 120
+      },
+      {
+        service_name: "Cotton Shirt - Wash & Fold",
+        quantity: 3,
+        unit_price: 50,
+        total_price: 150
+      }
+    ],
+
+    charges_breakdown: {
+      base_price: 470,
+      tax_amount: 28.20,
+      service_fee: 15,
+      delivery_fee: 25,
+      handling_fee: 10,
+      discount: 0
+    },
+
+    total_price: 548.20,
+    discount_amount: 0,
+    coupon_code: null,
+    final_amount: 548.20,
+
+    specialInstructions: 'Handle with care - customer prefers gentle wash for delicate items. Please ensure shirts are properly pressed.',
+    additional_details: 'Customer will be available after 2 PM. Ring doorbell twice.',
+
+    provider_name: 'Laundrify Premium Services',
+    estimated_duration: 120,
+
+    created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    updated_at: new Date().toISOString()
   };
 }
 
