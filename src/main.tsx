@@ -8,18 +8,31 @@ import PerformanceMonitor from "./utils/performanceMonitor";
 const perfMonitor = PerformanceMonitor.getInstance();
 perfMonitor.init();
 
-createRoot(document.getElementById("root")!).render(<App />);
+// Add URL corruption detection and cleanup
+if (typeof window !== 'undefined') {
+  const currentURL = window.location.href;
+  const hasCorruptedURL = /[a-f0-9]{32}-[a-f0-9]{20}\.fly\.dev[a-zA-Z0-9]+/.test(currentURL);
 
-// Register service worker for caching
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker
-      .register("/sw.js")
-      .then((registration) => {
-        console.log("SW registered: ", registration);
-      })
-      .catch((registrationError) => {
-        console.log("SW registration failed: ", registrationError);
-      });
-  });
+  if (hasCorruptedURL) {
+    console.log('🚨 URL corruption detected in main.tsx, clearing cache...');
+    // Clear all storage
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+      if ('caches' in window) {
+        caches.keys().then(names => names.forEach(name => caches.delete(name)));
+      }
+    } catch (e) {
+      console.warn('Could not clear storage:', e);
+    }
+
+    // Try to redirect to clean URL
+    const cleanURL = currentURL.replace(/[a-zA-Z0-9]+$/, '');
+    if (cleanURL !== currentURL) {
+      window.location.href = cleanURL;
+      return;
+    }
+  }
 }
+
+createRoot(document.getElementById("root")!).render(<App />);
