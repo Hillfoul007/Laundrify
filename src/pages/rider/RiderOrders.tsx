@@ -324,11 +324,16 @@ export default function RiderOrders() {
         console.log('⏰ Request timeout - using mock data');
       }, 8000); // Reduced timeout to 8 seconds
 
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(apiUrl, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
+        headers,
         signal: controller.signal
       });
 
@@ -530,7 +535,7 @@ export default function RiderOrders() {
         } else {
           toast.success('Order updated and customer notified!', {
             description: result.price_change !== 0
-              ? `Price changed by ���${Math.abs(result.price_change)} ${result.price_change > 0 ? 'increase' : 'decrease'}`
+              ? `Price changed by ₹${Math.abs(result.price_change)} ${result.price_change > 0 ? 'increase' : 'decrease'}`
               : 'Items updated successfully',
             duration: 4000,
             icon: <Bell className="h-4 w-4" />
