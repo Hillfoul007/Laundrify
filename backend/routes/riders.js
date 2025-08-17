@@ -449,7 +449,7 @@ router.post('/login', async (req, res) => {
         });
       }
 
-      console.log(`🔍 Found rider: ${rider.name} (Status: ${rider.status}, Active: ${rider.isActive})`);
+      console.log(`��� Found rider: ${rider.name} (Status: ${rider.status}, Active: ${rider.isActive})`);
 
       // Check password
       const isMatch = await bcrypt.compare(password, rider.password);
@@ -1037,18 +1037,33 @@ router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
           changes: notificationData.riderChanges
         });
 
-        // Store notification in database or send via notification service
-        const notification = {
-          customer_id: order.customer_id._id,
-          order_id: order._id,
-          type: 'order_verification_required',
+        // Create actual notification in database for customer
+        const Notification = require('../models/Notification');
+
+        const notification = await Notification.create({
+          user_id: order.customer_id._id,
+          related_order: order._id,
+          related_rider: req.rider.riderId,
+          type: 'order_update',
+          action_type: 'approval_required',
           title: notificationData.title,
           message: notificationData.message,
-          data: notificationData.riderChanges,
-          created_at: new Date(indianTime),
+          action_required: true,
+          priority: 'high',
           read: false,
-          priority: 'high'
-        };
+          data: {
+            changes: notificationData.riderChanges,
+            old_items: originalItems,
+            new_items: items,
+            price_change: notificationData.riderChanges.priceChange,
+            old_total: notificationData.riderChanges.originalTotal,
+            new_total: notificationData.riderChanges.newTotal,
+            rider_name: rider.name,
+            rider_phone: rider.phone,
+            order_id: order.custom_order_id
+          },
+          expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+        });
 
         console.log('��� Customer notification prepared:', notification);
       } catch (notificationError) {
