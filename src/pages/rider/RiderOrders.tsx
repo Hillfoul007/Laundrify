@@ -66,10 +66,15 @@ export default function RiderOrders() {
     if (orderId) {
       console.log('🔍 useEffect: Fetching order details for ID:', orderId);
 
-      // Force quick pickup detection for the specific order ID
+      // Force quick pickup order display for the specific order ID
       if (orderId === '68a1cb6dbea207fd0ace501b') {
-        console.log('✅ Force setting quick pickup for order:', orderId);
+        console.log('✅ Force loading quick pickup mock data for order:', orderId);
+        const quickPickupMockData = getMockOrderData(orderId);
+        setOrder(quickPickupMockData);
+        setEditedItems([]);
+        setOriginalTotal(0);
         setIsQuickPickup(true);
+        return; // Skip the API call and use mock data
       }
 
       fetchOrderDetails(orderId);
