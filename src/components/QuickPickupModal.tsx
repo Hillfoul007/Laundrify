@@ -255,13 +255,12 @@ const QuickPickupModal: React.FC<QuickPickupModalProps> = ({
 
       console.log("🔍 Validating Quick Pickup address:", { address, city, pincode });
 
-      // Enhanced validation with new keywords: tulip, sector 69 gurugram, pincode 122101
-      const keywords = ["tulip", "sector 69 gurugram", "sector 69 gurgaon"];
-      const hasValidKeyword = keywords.some(keyword => addressLower.includes(keyword));
-      const hasValidPincode = pincode === "122101";
+      // Extended validation - service available in all Gurugram/Gurgaon
+      const validCities = ["gurugram", "gurgaon"];
+      const isValidLocation = validCities.some(validCity => addressLower.includes(validCity));
 
-      if (hasValidKeyword || hasValidPincode) {
-        console.log("✅ Address validated with keyword/pincode check");
+      if (isValidLocation) {
+        console.log("✅ Address validated - service available in Gurugram/Gurgaon");
         return true;
       }
 
