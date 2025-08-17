@@ -946,8 +946,8 @@ function getMockOrderData(orderId) {
     provider_name: 'Laundrify Premium Services',
     estimated_duration: 120,
 
-    created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date().toISOString()
+    created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toLocaleString("en-US", {timeZone: "Asia/Kolkata"}),
+    updated_at: new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"})
   };
 }
 
