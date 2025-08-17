@@ -59,7 +59,38 @@ class ErrorBoundary extends Component<Props, State> {
   };
 
   private handleReload = () => {
-    window.location.reload();
+    // Check for URL corruption before reloading
+    const currentURL = window.location.href;
+    const hasCorruptedURL = /[a-f0-9]{32}-[a-f0-9]{20}\.fly\.dev[a-zA-Z0-9]+/.test(currentURL);
+
+    if (hasCorruptedURL) {
+      // Try to redirect to clean URL
+      const cleanURL = currentURL.replace(/[a-zA-Z0-9]+$/, '');
+      console.log('🔧 Attempting to redirect to clean URL:', cleanURL);
+      window.location.href = cleanURL;
+    } else {
+      window.location.reload();
+    }
+  };
+
+  private handleClearCache = () => {
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+      if ('caches' in window) {
+        caches.keys().then(names => names.forEach(name => caches.delete(name)));
+      }
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          registrations.forEach(registration => registration.unregister());
+        });
+      }
+      // Force reload after clearing
+      setTimeout(() => window.location.reload(), 1000);
+    } catch (e) {
+      console.warn('Could not clear cache:', e);
+      window.location.reload();
+    }
   };
 
   public render() {
