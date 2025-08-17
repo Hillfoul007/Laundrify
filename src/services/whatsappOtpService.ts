@@ -316,7 +316,7 @@ export class WhatsAppOTPService {
       console.log("⚠️ Backend unavailable, creating user locally");
 
       // Create user locally
-      const userId = `whatsapp_${phoneNumber}_${Date.now()}`;
+      const userId = `whatsapp_${phoneNumber}_${getISTUnixTimestamp()}`;
       const user: User = {
         id: userId,
         name: name.trim(),
