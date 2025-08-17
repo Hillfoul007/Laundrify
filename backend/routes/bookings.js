@@ -1345,11 +1345,14 @@ router.put("/:bookingId", async (req, res) => {
       return res.status(403).json({ error: "Not authorized to update this booking" });
     }
 
-    // Prepare update data
+    // Prepare update data with Indian time
+    const indianTime = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
+    const indianDate = new Date(indianTime);
+
     const updateData = {
       ...updates,
-      updated_at: new Date(),
-      updatedAt: new Date(),
+      updated_at: indianDate,
+      updatedAt: indianDate,
     };
 
     // Remove the user_id from updateData to avoid conflicts
