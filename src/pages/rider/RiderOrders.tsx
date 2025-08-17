@@ -243,25 +243,56 @@ export default function RiderOrders() {
   };
 
   const fetchOrderDetails = async (id: string) => {
+    // Helper function to use mock data
+    const useMockData = (reason: string) => {
+      console.log(`📋 Using mock data: ${reason}`);
+      const mockData = getMockOrderData(id);
+      setOrder(mockData);
+      const items = mockData.items || [];
+      setEditedItems([...items]);
+      setOriginalTotal(items.reduce((sum: number, item: any) => sum + (item.quantity * item.price), 0));
+      setIsQuickPickup(items.length === 0 || mockData.type === 'Quick Pickup');
+    };
+
     try {
       const token = localStorage.getItem('riderToken');
 
       if (!token) {
-        console.log('No token found, using mock data');
-        const mockData = getMockOrderData(id);
-        setOrder(mockData);
-        const items = mockData.items || [];
-        setEditedItems([...items]);
-        setOriginalTotal(items.reduce((sum: number, item: any) => sum + (item.quantity * item.price), 0));
-        setIsQuickPickup(items.length === 0 || mockData.type === 'Quick Pickup');
+        useMockData('No authentication token found');
+        toast.info('Using demo data - no authentication');
         return;
       }
 
       const apiUrl = getRiderApiUrl(`/orders/${id}`);
       console.log('🔍 Fetching order details:', apiUrl);
 
+      // Check if we're in development and the backend might not be available
+      const isDev = import.meta.env.DEV;
+      const hostname = window.location.hostname;
+      const isLocalhost = hostname.includes("localhost") || hostname.includes("127.0.0.1");
+
+      // For local development, check if backend is likely available
+      if (isDev && isLocalhost) {
+        try {
+          // Quick health check for local backend
+          const healthCheck = await fetch('/api/health', { method: 'HEAD' });
+          if (!healthCheck.ok) {
+            useMockData('Local backend not available');
+            toast.info('Using demo data - backend not running');
+            return;
+          }
+        } catch {
+          useMockData('Local backend health check failed');
+          toast.info('Using demo data - backend not running');
+          return;
+        }
+      }
+
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      const timeoutId = setTimeout(() => {
+        controller.abort();
+        console.log('⏰ Request timeout - using mock data');
+      }, 8000); // Reduced timeout to 8 seconds
 
       const response = await fetch(apiUrl, {
         headers: {
@@ -313,25 +344,31 @@ export default function RiderOrders() {
 
         // Check if this is a quick pickup (no initial items)
         setIsQuickPickup(items.length === 0 || processedOrder.type === 'Quick Pickup');
+
+        // Show success message only in development
+        if (isDev) {
+          toast.success('Order data loaded from API');
+        }
       } else {
-        console.warn('⚠️ API failed, using mock data:', response.status);
-        const mockData = getMockOrderData(id);
-        setOrder(mockData);
-        const items = mockData.items || [];
-        setEditedItems([...items]);
-        setOriginalTotal(items.reduce((sum: number, item: any) => sum + (item.quantity * item.price), 0));
-        setIsQuickPickup(items.length === 0 || mockData.type === 'Quick Pickup');
-        toast.info('Using demo data - API not available');
+        console.warn(`⚠️ API responded with ${response.status}, using mock data`);
+        useMockData(`API error: ${response.status}`);
+        toast.info('Using demo data - API error');
       }
-    } catch (error) {
-      console.error('❌ Fetch error, using mock data:', error);
-      const mockData = getMockOrderData(id);
-      setOrder(mockData);
-      const items = mockData.items || [];
-      setEditedItems([...items]);
-      setOriginalTotal(items.reduce((sum: number, item: any) => sum + (item.quantity * item.price), 0));
-      setIsQuickPickup(items.length === 0 || mockData.type === 'Quick Pickup');
-      toast.info('Using demo data - network error');
+    } catch (error: any) {
+      // Handle different types of errors
+      if (error.name === 'AbortError') {
+        console.warn('⏰ Request timed out, using mock data');
+        useMockData('Request timeout');
+        toast.info('Using demo data - connection timeout');
+      } else if (error.message && error.message.includes('Failed to fetch')) {
+        console.warn('🌐 Network error, using mock data');
+        useMockData('Network error');
+        toast.info('Using demo data - network unavailable');
+      } else {
+        console.error('❌ Unexpected error, using mock data:', error);
+        useMockData('Unexpected error');
+        toast.info('Using demo data - unexpected error');
+      }
     }
   };
 
