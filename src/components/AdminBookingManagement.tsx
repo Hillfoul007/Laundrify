@@ -424,7 +424,11 @@ const AdminBookingManagement: React.FC = () => {
                 </div>
                 <div>
                   <Label>Customer ID</Label>
-                  <p className="text-sm text-gray-600">{viewingBooking.customer_id}</p>
+                  <p className="text-sm text-gray-600">
+                    {typeof viewingBooking.customer_id === 'object' && viewingBooking.customer_id?._id
+                      ? viewingBooking.customer_id._id
+                      : viewingBooking.customer_id}
+                  </p>
                 </div>
                 <div>
                   <Label>Payment Status</Label>
