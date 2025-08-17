@@ -24,10 +24,34 @@ export default function CustomerNotificationDemo() {
   const notifications = [
     {
       id: '1',
+      type: 'order_verification_required',
+      title: 'Order Changes Need Your Approval',
+      message: 'Your order A20250800050 has been updated by the rider and requires your approval.',
+      time: 'Just now',
+      read: false,
+      priority: 'high',
+      orderData: {
+        bookingId: 'A20250800050',
+        customerName: 'John Doe',
+        riderName: 'Rajesh Kumar',
+        originalTotal: 470,
+        updatedTotal: 796.40,
+        priceChange: 326.40,
+        changes: [
+          { type: 'updated', item: "Men's Suit / Lehenga / Heavy Dresses", quantity: 1, price: 150 },
+          { type: 'updated', item: 'Ladies Suit / Kurta & Pyjama / Saree', quantity: 1, price: 100 },
+          { type: 'updated', item: 'Laundry and Iron', quantity: 1, price: 120 },
+          { type: 'updated', item: "Men's Shirt/T-Shirt", quantity: 1, price: 100 },
+          { type: 'updated', item: 'Kurta Pyjama (2 PC)', quantity: 1, price: 220 }
+        ]
+      }
+    },
+    {
+      id: '2',
       type: 'order_update',
       title: 'Order Updated by Rider',
       message: 'Your order LAU-001 has been updated with additional items',
-      time: '2 minutes ago',
+      time: '5 minutes ago',
       read: false,
       priority: 'high',
       orderData: {
