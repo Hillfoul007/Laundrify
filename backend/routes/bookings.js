@@ -97,7 +97,7 @@ router.post("/", async (req, res) => {
     if (missingFields.length > 0) {
       console.log("❌ ERROR: Missing required fields detected!");
       console.log("❌ Missing fields:", missingFields);
-      console.log("�� All received fields:", Object.keys(req.body));
+      console.log("���� All received fields:", Object.keys(req.body));
 
       console.log(
         "📊 Field values:",
@@ -1077,7 +1077,7 @@ router.put("/:bookingId/accept", async (req, res) => {
       {
         rider_id,
         status: "confirmed",
-        updated_at: new Date(),
+        updated_at: new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"})),
       },
       {
         new: true,
