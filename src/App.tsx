@@ -11,6 +11,7 @@ import RiderOrders from "@/pages/rider/RiderOrders";
 import RiderNotificationsPage from "@/pages/rider/RiderNotificationsPage";
 import OrderVerificationDemo from "@/pages/OrderVerificationDemo";
 import CustomerNotificationDemo from "@/pages/CustomerNotificationDemo";
+import CustomerVerificationDemo from "@/pages/CustomerVerificationDemo";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import InstallPrompt from "@/components/InstallPrompt";
 import PWAUpdateNotification from "@/components/PWAUpdateNotification";
