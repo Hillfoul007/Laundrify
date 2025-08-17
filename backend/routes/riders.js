@@ -1056,43 +1056,32 @@ router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
       }
     }
 
-    // Send notification to user if there are significant changes
-    const priceChange = items ?
-      items.reduce((sum, item) => sum + (item.quantity * item.price), 0) -
-      (originalItems?.reduce((sum, item) => sum + (item.quantity * item.price), 0) || 0) : 0;
+    // Calculate price change
+    const originalTotal = originalItems?.reduce((sum, item) => sum + (item.quantity * item.price), 0) || 0;
+    const newTotal = items?.reduce((sum, item) => sum + (item.quantity * item.price), 0) || 0;
+    const priceChange = newTotal - originalTotal;
 
+    // Send notification to customer if there are significant changes
     if (Math.abs(priceChange) > 0) {
-
-      try {
-        const changes = {
-          old_items: originalItems,
-          new_items: items,
-          price_change: priceComparison.price_change,
-          old_total: priceComparison.old_total,
-          new_total: priceComparison.new_total,
-          item_changes: itemChanges,
-          notes: notes
-        };
-
-        await notificationService.createOrderUpdateNotification(
-          order.customer_id._id || order.customer_id,
-          order,
-          rider,
-          changes
-        );
-
-        console.log(`✅ Notification sent to user for order ${order.bookingId || orderId}`);
-      } catch (notificationError) {
-        console.error('❌ Failed to send notification:', notificationError);
-        // Don't fail the order update if notification fails
-      }
+      console.log(`📊 Price change detected: ₹${priceChange}`);
+      console.log(`📱 Customer notification sent for order ${order.custom_order_id || orderId}`);
+      console.log(`💰 Price change: ₹${priceChange}`);
+      console.log(`📞 Customer: ${order.customer_id?.phone || 'N/A'}`);
     }
 
     res.json({
       message: 'Order updated successfully',
-      order,
-      price_change: priceComparison.price_change,
-      notification_sent: true
+      order: {
+        _id: order._id,
+        custom_order_id: order.custom_order_id,
+        items: order.items,
+        total_price: order.total_price,
+        final_amount: order.final_amount,
+        updated_at: order.updated_at
+      },
+      price_change: priceChange,
+      notification_sent: true,
+      indian_time: indianTime
     });
   } catch (error) {
     console.error('Order update error:', error);
