@@ -12,6 +12,7 @@ import RiderNotificationsPage from "@/pages/rider/RiderNotificationsPage";
 import OrderVerificationDemo from "@/pages/OrderVerificationDemo";
 import CustomerNotificationDemo from "@/pages/CustomerNotificationDemo";
 import CustomerVerificationDemo from "@/pages/CustomerVerificationDemo";
+import VerificationPopupDemo from "@/pages/VerificationPopupDemo";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import InstallPrompt from "@/components/InstallPrompt";
 import PWAUpdateNotification from "@/components/PWAUpdateNotification";
@@ -74,6 +75,7 @@ function App() {
               <Route path="/verify-order" element={<OrderVerificationDemo />} />
               <Route path="/customer-notifications" element={<CustomerNotificationDemo />} />
               <Route path="/customer-verification" element={<CustomerVerificationDemo />} />
+              <Route path="/verification-popup-demo" element={<VerificationPopupDemo />} />
               <Route path="*" element={<LaundryIndex />} />
             </Routes>
             <Toaster />
