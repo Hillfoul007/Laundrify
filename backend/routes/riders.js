@@ -1065,7 +1065,7 @@ router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
           expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
         });
 
-        console.log('��� Customer notification prepared:', notification);
+        console.log('✅ Customer notification created successfully:', notification._id);
       } catch (notificationError) {
         console.warn('⚠️ Failed to send customer notification:', notificationError);
       }
