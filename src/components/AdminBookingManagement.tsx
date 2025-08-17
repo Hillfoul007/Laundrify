@@ -76,14 +76,56 @@ const AdminBookingManagement: React.FC = () => {
       const response = await apiClient.adminRequest<{bookings: Booking[]}>("/admin/bookings?limit=100");
 
       if (response.data) {
-        setBookings(response.data.bookings || []);
+        // Process bookings to handle populated customer data
+        const processedBookings = (response.data.bookings || []).map((booking: any) => {
+          // Handle populated customer_id object vs direct fields
+          const customer = booking.customer_id || {};
+          const customerName = booking.customerName ||
+                              booking.name ||
+                              customer.full_name ||
+                              customer.name ||
+                              'Unknown Customer';
+          const customerPhone = booking.customerPhone ||
+                               booking.phone ||
+                               customer.phone ||
+                               'No phone';
+
+          return {
+            ...booking,
+            // Customer information from populated data
+            name: customerName, // Ensure name is available
+            phone: customerPhone, // Ensure phone is available
+          };
+        });
+
+        setBookings(processedBookings);
       } else if (response.error) {
         // Fallback to regular bookings endpoint
         console.log("Admin endpoint failed, trying regular bookings...");
         const fallbackResponse = await apiClient.request<{bookings: Booking[]}>("/bookings?limit=100");
 
         if (fallbackResponse.data) {
-          setBookings(fallbackResponse.data.bookings || []);
+          // Process fallback bookings as well
+          const processedFallbackBookings = (fallbackResponse.data.bookings || []).map((booking: any) => {
+            const customer = booking.customer_id || {};
+            const customerName = booking.customerName ||
+                                booking.name ||
+                                customer.full_name ||
+                                customer.name ||
+                                'Unknown Customer';
+            const customerPhone = booking.customerPhone ||
+                                 booking.phone ||
+                                 customer.phone ||
+                                 'No phone';
+
+            return {
+              ...booking,
+              name: customerName,
+              phone: customerPhone,
+            };
+          });
+
+          setBookings(processedFallbackBookings);
           toast.info("Using regular bookings API (admin endpoint not available)");
         } else {
           toast.error(response.error);
@@ -396,7 +438,8 @@ const AdminBookingManagement: React.FC = () => {
             <DialogTitle>Booking Details</DialogTitle>
           </DialogHeader>
           {viewingBooking && (
-            <div className="space-y-4">
+            <div className="space-y-6">
+              {/* Basic Order Information */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Order ID</Label>
@@ -410,45 +453,229 @@ const AdminBookingManagement: React.FC = () => {
                 </div>
                 <div>
                   <Label>Customer Name</Label>
-                  <p>{viewingBooking.name}</p>
+                  <p className="font-medium">{viewingBooking.name}</p>
                 </div>
                 <div>
                   <Label>Phone</Label>
-                  <p>{viewingBooking.phone}</p>
-                </div>
-                <div>
-                  <Label>Service</Label>
-                  <p>{viewingBooking.service}</p>
-                </div>
-                <div>
-                  <Label>Amount</Label>
-                  <p className="font-medium">₹{viewingBooking.final_amount}</p>
-                </div>
-                <div>
-                  <Label>Pickup Date</Label>
-                  <p>{formatDate(viewingBooking.scheduled_date)}</p>
-                </div>
-                <div>
-                  <Label>Pickup Time</Label>
-                  <p>{viewingBooking.scheduled_time}</p>
-                </div>
-              </div>
-              <div>
-                <Label>Address</Label>
-                <p className="text-sm text-gray-600">{viewingBooking.address}</p>
-              </div>
-              {viewingBooking.services && viewingBooking.services.length > 0 && (
-                <div>
-                  <Label>Services</Label>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {viewingBooking.services.map((service, index) => (
-                      <Badge key={index} variant="outline">
-                        {typeof service === "string" ? service : service}
-                      </Badge>
-                    ))}
+                  <div className="flex items-center space-x-2">
+                    <Phone className="h-4 w-4 text-gray-400" />
+                    <a href={`tel:${viewingBooking.phone}`} className="text-blue-600 hover:underline">
+                      {viewingBooking.phone}
+                    </a>
                   </div>
                 </div>
+                <div>
+                  <Label>Customer ID</Label>
+                  <p className="text-sm text-gray-600">
+                    {typeof viewingBooking.customer_id === 'object' && viewingBooking.customer_id?._id
+                      ? viewingBooking.customer_id._id
+                      : viewingBooking.customer_id}
+                  </p>
+                </div>
+                <div>
+                  <Label>Payment Status</Label>
+                  <Badge variant={viewingBooking.payment_status === 'paid' ? 'default' : 'secondary'}>
+                    {viewingBooking.payment_status || 'pending'}
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Scheduling Information */}
+              <div className="border-t pt-4">
+                <h4 className="font-semibold mb-3 flex items-center">
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Schedule Details
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Pickup Date</Label>
+                    <p className="font-medium">{formatDate(viewingBooking.scheduled_date)}</p>
+                  </div>
+                  <div>
+                    <Label>Pickup Time</Label>
+                    <p className="font-medium">{viewingBooking.scheduled_time}</p>
+                  </div>
+                  {viewingBooking.delivery_date && (
+                    <div>
+                      <Label>Delivery Date</Label>
+                      <p>{formatDate(viewingBooking.delivery_date)}</p>
+                    </div>
+                  )}
+                  {viewingBooking.delivery_time && (
+                    <div>
+                      <Label>Delivery Time</Label>
+                      <p>{viewingBooking.delivery_time}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Address Information */}
+              <div className="border-t pt-4">
+                <h4 className="font-semibold mb-3 flex items-center">
+                  <MapPin className="h-4 w-4 mr-2" />
+                  Address Details
+                </h4>
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <p className="text-gray-900">{viewingBooking.address}</p>
+                  {viewingBooking.address_details && (
+                    <div className="mt-2 text-sm text-gray-600">
+                      {viewingBooking.address_details.flatNo && <span>Flat: {viewingBooking.address_details.flatNo} • </span>}
+                      {viewingBooking.address_details.landmark && <span>Landmark: {viewingBooking.address_details.landmark} • </span>}
+                      {viewingBooking.address_details.type && <span>Type: {viewingBooking.address_details.type}</span>}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Services Information */}
+              <div className="border-t pt-4">
+                <h4 className="font-semibold mb-3 flex items-center">
+                  <Package className="h-4 w-4 mr-2" />
+                  Service Details
+                </h4>
+                <div className="space-y-3">
+                  <div>
+                    <Label>Primary Service</Label>
+                    <p className="font-medium">{viewingBooking.service}</p>
+                    {viewingBooking.service_type && (
+                      <p className="text-sm text-gray-600">Type: {viewingBooking.service_type}</p>
+                    )}
+                  </div>
+
+                  {viewingBooking.services && viewingBooking.services.length > 0 && (
+                    <div>
+                      <Label>Additional Services</Label>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {viewingBooking.services.map((service, index) => (
+                          <Badge key={index} variant="outline">
+                            {typeof service === "string" ? service : service}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Detailed Service Breakdown */}
+                  {viewingBooking.item_prices && viewingBooking.item_prices.length > 0 && (
+                    <div>
+                      <Label>Service Breakdown</Label>
+                      <div className="mt-2 space-y-2">
+                        {viewingBooking.item_prices.map((item, index) => (
+                          <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                            <div>
+                              <p className="font-medium">{item.service_name}</p>
+                              <p className="text-sm text-gray-600">Qty: {item.quantity} × ₹{item.unit_price}</p>
+                            </div>
+                            <p className="font-semibold">₹{item.total_price}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Pricing Information */}
+              <div className="border-t pt-4">
+                <h4 className="font-semibold mb-3 flex items-center">
+                  <DollarSign className="h-4 w-4 mr-2" />
+                  Pricing Details
+                </h4>
+                <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+                  <div className="flex justify-between">
+                    <span>Total Price:</span>
+                    <span className="font-medium">₹{viewingBooking.total_price}</span>
+                  </div>
+                  {viewingBooking.discount_amount > 0 && (
+                    <div className="flex justify-between text-green-600">
+                      <span>Discount:</span>
+                      <span>-₹{viewingBooking.discount_amount}</span>
+                    </div>
+                  )}
+                  {viewingBooking.coupon_code && (
+                    <div className="flex justify-between text-sm text-gray-600">
+                      <span>Coupon Applied:</span>
+                      <span>{viewingBooking.coupon_code}</span>
+                    </div>
+                  )}
+
+                  {/* Charges Breakdown */}
+                  {viewingBooking.charges_breakdown && (
+                    <div className="border-t pt-2 mt-2">
+                      {viewingBooking.charges_breakdown.base_price > 0 && (
+                        <div className="flex justify-between text-sm">
+                          <span>Base Price:</span>
+                          <span>₹{viewingBooking.charges_breakdown.base_price}</span>
+                        </div>
+                      )}
+                      {viewingBooking.charges_breakdown.tax_amount > 0 && (
+                        <div className="flex justify-between text-sm">
+                          <span>Tax:</span>
+                          <span>₹{viewingBooking.charges_breakdown.tax_amount}</span>
+                        </div>
+                      )}
+                      {viewingBooking.charges_breakdown.service_fee > 0 && (
+                        <div className="flex justify-between text-sm">
+                          <span>Service Fee:</span>
+                          <span>₹{viewingBooking.charges_breakdown.service_fee}</span>
+                        </div>
+                      )}
+                      {viewingBooking.charges_breakdown.delivery_fee > 0 && (
+                        <div className="flex justify-between text-sm">
+                          <span>Delivery Fee:</span>
+                          <span>₹{viewingBooking.charges_breakdown.delivery_fee}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="flex justify-between text-lg font-bold border-t pt-2">
+                    <span>Final Amount:</span>
+                    <span>₹{viewingBooking.final_amount}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Additional Information */}
+              {(viewingBooking.special_instructions || viewingBooking.additional_details) && (
+                <div className="border-t pt-4">
+                  <h4 className="font-semibold mb-3">Additional Information</h4>
+                  {viewingBooking.special_instructions && (
+                    <div className="mb-2">
+                      <Label>Special Instructions</Label>
+                      <p className="text-gray-700">{viewingBooking.special_instructions}</p>
+                    </div>
+                  )}
+                  {viewingBooking.additional_details && (
+                    <div>
+                      <Label>Additional Details</Label>
+                      <p className="text-gray-700">{viewingBooking.additional_details}</p>
+                    </div>
+                  )}
+                </div>
               )}
+
+              {/* Timestamps */}
+              <div className="border-t pt-4">
+                <h4 className="font-semibold mb-3">Order Timeline</h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <Label>Created At</Label>
+                    <p>{formatDate(viewingBooking.created_at)}</p>
+                  </div>
+                  <div>
+                    <Label>Updated At</Label>
+                    <p>{formatDate(viewingBooking.updated_at)}</p>
+                  </div>
+                  {viewingBooking.completed_at && (
+                    <div>
+                      <Label>Completed At</Label>
+                      <p>{formatDate(viewingBooking.completed_at)}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           )}
         </DialogContent>

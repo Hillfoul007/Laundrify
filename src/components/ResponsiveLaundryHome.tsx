@@ -21,6 +21,7 @@ import {
   Monitor,
   Bell,
   MessageCircle,
+  Gift,
 } from "lucide-react";
 import {
   laundryServices,
@@ -44,12 +45,15 @@ import OptimizedImage from "./OptimizedImage";
 import DebugPanel from "./DebugPanel";
 import BookingDebugPanel from "./BookingDebugPanel";
 import ConnectionStatus from "./ConnectionStatus";
-import NotificationPanel from "./NotificationPanel";
 import VoiceSearch from "./VoiceSearch";
 import AdminServicesManager from "./AdminServicesManager";
 import LocationUnavailableModal from "./LocationUnavailableModal";
+import ReferralModal from "./ReferralModal";
+import NotificationBell from "./NotificationBell";
 import QuickPickupModal from "./QuickPickupModal";
+import CustomerVerificationPopup from "./CustomerVerificationPopup";
 import { DVHostingSmsService } from "@/services/dvhostingSmsService";
+import { useCustomerVerification } from "@/hooks/useCustomerVerification";
 import { LocationDetectionService } from "@/services/locationDetectionService";
 import { saveCartData, getCartData } from "@/utils/formPersistence";
 import "@/styles/mobile-sticky-search.css";
@@ -82,8 +86,21 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
   const [detectedLocationText, setDetectedLocationText] = useState("");
   const [showQuickPickupModal, setShowQuickPickupModal] = useState(false);
   const [showQuickPickupAfterLogin, setShowQuickPickupAfterLogin] = useState(false);
+  const [showReferralModal, setShowReferralModal] = useState(false);
   const dvhostingSmsService = DVHostingSmsService.getInstance();
   const locationDetectionService = LocationDetectionService.getInstance();
+
+  // Customer verification system
+  const {
+    isPopupOpen: isVerificationPopupOpen,
+    currentVerification,
+    pendingCount,
+    showVerificationPopup,
+    hideVerificationPopup,
+    checkOnStartup,
+    handleVerificationComplete,
+    createDemoVerification
+  } = useCustomerVerification();
 
   // Function to request location permission and check availability
   const requestLocationPermission = async () => {
@@ -360,6 +377,14 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
     localStorage.setItem("laundry_cart", JSON.stringify(cart));
   }, [cart]);
 
+  // Check for pending customer verifications on app startup
+  useEffect(() => {
+    if (currentUser) {
+      // Only check when user is authenticated
+      checkOnStartup();
+    }
+  }, [currentUser, checkOnStartup]);
+
   const handleSearch = (query: string) => {
     setSearchQuery(query);
   };
@@ -615,16 +640,18 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
                     >
                       <Package className="h-5 w-5" />
                     </Button>
-                    <div className="text-white">
-                      <NotificationPanel />
-                    </div>
                   </>
                 )}
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Notification button removed as per user requirements */}
+              {currentUser && (
+                <NotificationBell
+                  userId={currentUser._id || currentUser.phone}
+                  className="text-white hover:bg-white/20"
+                />
+              )}
 
               {currentUser ? (
                 <UserMenuDropdown
@@ -1139,7 +1166,11 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
                 </Button>
               )}
 
-              {currentUser && <NotificationPanel />}
+              {currentUser && (
+                <NotificationBell
+                  userId={currentUser._id || currentUser.phone}
+                />
+              )}
 
               {currentUser ? (
                 <UserMenuDropdown
@@ -1433,8 +1464,26 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
           }}
         />
 
-        {/* WhatsApp Floating Action Button */}
-        <div className="fixed bottom-20 right-6 z-50">
+        {/* Floating Action Buttons */}
+        <div className="fixed bottom-20 right-6 z-50 flex flex-col gap-3">
+          {/* Referral Button - Only show if user is logged in */}
+          {currentUser && (
+            <Button
+              onClick={() => setShowReferralModal(true)}
+              className="bg-gradient-to-r from-laundrify-purple to-laundrify-pink hover:from-laundrify-purple/90 hover:to-laundrify-pink/90 text-white rounded-full w-14 h-14 p-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 relative overflow-hidden group"
+              title="Refer friends and earn rewards!"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-400 opacity-20 animate-pulse group-hover:opacity-30"></div>
+              <div className="relative flex flex-col items-center">
+                <Gift className="h-5 w-5" />
+                <span className="text-xs font-bold leading-none">50%</span>
+              </div>
+              {/* Sparkle animation */}
+              <div className="absolute top-1 right-1 w-2 h-2 bg-yellow-300 rounded-full opacity-80 animate-ping"></div>
+            </Button>
+          )}
+
+          {/* WhatsApp Button */}
           <Button
             onClick={() => {
               const phoneNumber = "917011585587"; // Replace with your WhatsApp business number
@@ -1447,6 +1496,41 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
             <MessageCircle className="h-5 w-5" />
           </Button>
         </div>
+
+        {/* Referral Modal */}
+        <ReferralModal
+          isOpen={showReferralModal}
+          onClose={() => setShowReferralModal(false)}
+          currentUser={currentUser}
+        />
+
+        {/* Customer Verification Popup */}
+        <CustomerVerificationPopup
+          isOpen={isVerificationPopupOpen}
+          onClose={hideVerificationPopup}
+          verification={currentVerification}
+          onVerificationComplete={handleVerificationComplete}
+        />
+
+        {/* Demo Verification Button - Development Only */}
+        {import.meta.env.DEV && currentUser && (
+          <div className="fixed bottom-4 left-4 z-50">
+            <Button
+              onClick={createDemoVerification}
+              size="sm"
+              variant="outline"
+              className="bg-yellow-400 hover:bg-yellow-500 text-black border-yellow-600"
+            >
+              <Bell className="h-4 w-4 mr-2" />
+              Demo Verification
+              {pendingCount > 0 && (
+                <Badge className="ml-2 bg-red-500 text-white text-xs">
+                  {pendingCount}
+                </Badge>
+              )}
+            </Button>
+          </div>
+        )}
     </div>
       </div>
   );

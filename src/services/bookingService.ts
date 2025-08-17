@@ -1387,9 +1387,69 @@ export class BookingService {
         };
       }
 
-      // For other updates, we'd need a general update endpoint
-      // For now, return success to indicate localStorage update is sufficient
-      return { success: false, error: "General update endpoint not available" };
+      // For other updates (like item quantities), use the general update endpoint
+      console.log("🔄 Syncing general booking update to backend:", {
+        bookingId,
+        updates: Object.keys(updates),
+        currentUser: {
+          id: currentUser.id,
+          _id: currentUser._id,
+          phone: currentUser.phone,
+        },
+      });
+
+      // Get proper user ID for backend
+      let userId = null;
+      if (currentUser._id && !currentUser._id.startsWith("user_")) {
+        userId = currentUser._id;
+      } else if (currentUser.id && !currentUser.id.startsWith("user_")) {
+        userId = currentUser.id;
+      } else if (currentUser.phone) {
+        userId = currentUser.phone;
+      } else if (currentUser.id || currentUser._id) {
+        userId = currentUser.id || currentUser._id;
+      }
+
+      const response = await fetch(
+        `${this.apiBaseUrl}/bookings/${bookingId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "user-id": userId || "",
+          },
+          body: JSON.stringify({
+            ...updates,
+            user_id: userId,
+          }),
+        },
+      );
+
+      console.log("📡 Backend response status:", response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("❌ Backend error response:", errorText);
+
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { error: errorText };
+        }
+
+        throw new Error(
+          errorData.error || `HTTP ${response.status}: ${errorText}`,
+        );
+      }
+
+      const data = await response.json();
+      console.log("✅ Backend general update successful:", data);
+
+      return {
+        success: true,
+        booking: data.booking,
+      };
     } catch (error) {
       console.error("Backend sync error:", error);
       return {
