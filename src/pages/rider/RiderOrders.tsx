@@ -133,6 +133,7 @@ export default function RiderOrders() {
     }
 
     // Comprehensive mock order with real service data
+    console.log('⚠️ Returning regular order mock data for ID:', id);
     return {
       _id: id,
       bookingId: 'LAU-001',
