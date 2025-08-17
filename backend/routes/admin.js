@@ -177,8 +177,8 @@ router.get("/bookings", verifyAdminAccess, async (req, res) => {
 
     console.log("📋 Admin bookings request:", req.query);
 
-    // Check if database is connected
-    if (!mongoose.connection.readyState) {
+    // Check if database is connected (readyState 1 = connected)
+    if (mongoose.connection.readyState !== 1) {
       console.log('🔧 Demo mode: Returning mock bookings for admin');
 
       // Mock bookings data for admin testing
