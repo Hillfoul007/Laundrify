@@ -803,6 +803,22 @@ export default function RiderOrders() {
               </div>
             )}
 
+            {/* Quick Pickup Empty State */}
+            {isQuickPickup && editedItems.length === 0 && (
+              <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <Package className="h-5 w-5 text-yellow-600" />
+                  <p className="font-medium text-yellow-800">
+                    Quick Pickup Order - No Pre-Selected Services
+                  </p>
+                </div>
+                <p className="text-sm text-yellow-700 mt-2">
+                  This is a quick pickup order. The customer did not pre-select any services.
+                  You will assess the items on location and add services as needed.
+                </p>
+              </div>
+            )}
+
             <div className="space-y-4">
               {editedItems.map((item, index) => (
                 <div key={item.id || index} className={`flex items-center justify-between p-3 border rounded-lg ${
