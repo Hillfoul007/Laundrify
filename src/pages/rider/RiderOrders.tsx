@@ -187,22 +187,34 @@ export default function RiderOrders() {
       // Detailed pricing breakdown
       item_prices: [
         {
-          service_name: "Men's Shirt/T-Shirt - Dry Clean",
-          quantity: 2,
-          unit_price: 100,
-          total_price: 200
+          service_name: "Men's Suit / Lehenga / Heavy Dresses",
+          quantity: 1,
+          unit_price: 150,
+          total_price: 150
         },
         {
-          service_name: "Trouser/Jeans - Dry Clean",
+          service_name: "Ladies Suit / Kurta & Pyjama / Saree",
+          quantity: 1,
+          unit_price: 100,
+          total_price: 100
+        },
+        {
+          service_name: "Laundry and Iron",
           quantity: 1,
           unit_price: 120,
           total_price: 120
         },
         {
-          service_name: "Cotton Shirt - Wash & Fold",
-          quantity: 3,
-          unit_price: 50,
-          total_price: 150
+          service_name: "Men's Shirt/T-Shirt",
+          quantity: 1,
+          unit_price: 100,
+          total_price: 100
+        },
+        {
+          service_name: "Kurta Pyjama (2 PC)",
+          quantity: 1,
+          unit_price: 220,
+          total_price: 220
         }
       ],
 
@@ -943,7 +955,7 @@ export default function RiderOrders() {
                     </div>
                     <div className={`flex justify-between items-center font-semibold ${totalAmount > originalTotal ? 'text-red-600' : 'text-green-600'}`}>
                       <span>Difference:</span>
-                      <span>{totalAmount > originalTotal ? '+' : ''}���{totalAmount - originalTotal}</span>
+                      <span>{totalAmount > originalTotal ? '+' : ''}₹{totalAmount - originalTotal}</span>
                     </div>
                   </div>
 
