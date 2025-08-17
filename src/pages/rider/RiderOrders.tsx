@@ -284,12 +284,16 @@ export default function RiderOrders() {
     // Helper function to use mock data
     const useMockData = (reason: string) => {
       console.log(`📋 Using mock data: ${reason}`);
+      console.log('📋 Order ID being processed:', id);
       const mockData = getMockOrderData(id);
+      console.log('📋 Mock data generated:', mockData);
       setOrder(mockData);
       const items = mockData.items || [];
       setEditedItems([...items]);
       setOriginalTotal(items.reduce((sum: number, item: any) => sum + (item.quantity * item.price), 0));
-      setIsQuickPickup(items.length === 0 || mockData.type === 'Quick Pickup');
+      const isQuickPickupDetected = items.length === 0 || mockData.type === 'Quick Pickup';
+      console.log('📋 Quick pickup detected:', isQuickPickupDetected, 'Items length:', items.length, 'Type:', mockData.type);
+      setIsQuickPickup(isQuickPickupDetected);
     };
 
     try {
