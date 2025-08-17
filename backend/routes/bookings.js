@@ -1268,6 +1268,137 @@ router.get("/:bookingId", async (req, res) => {
   }
 });
 
+// General booking update route (for item quantities and other fields)
+router.put("/:bookingId", async (req, res) => {
+  try {
+    const { bookingId } = req.params;
+    let userId = req.headers["user-id"] || req.body.user_id;
+    const updates = req.body;
+
+    console.log("🔄 General booking update request:", { bookingId, userId, updates: Object.keys(updates) });
+
+    // Validate bookingId format
+    if (!mongoose.Types.ObjectId.isValid(bookingId)) {
+      console.error("❌ Invalid booking ID format:", bookingId);
+      return res.status(400).json({ error: "Invalid booking ID format" });
+    }
+
+    // Get booking details first
+    const booking = await Booking.findById(bookingId);
+    if (!booking) {
+      console.log("❌ Booking not found:", bookingId);
+      return res.status(404).json({ error: "Booking not found" });
+    }
+
+    // AUTHORIZATION: Check if user can update this booking
+    let canUpdate = false;
+
+    if (userId) {
+      console.log("🔍 Validating update authorization:", {
+        userId,
+        userIdType: typeof userId,
+        bookingCustomerId: booking.customer_id,
+      });
+
+      // Direct ObjectId match
+      if (booking.customer_id.toString() === userId) {
+        canUpdate = true;
+        console.log("✅ Direct ObjectId match - customer can update");
+      }
+
+      // Phone number matching
+      if (!canUpdate) {
+        try {
+          const bookingCustomer = await User.findById(booking.customer_id);
+          if (bookingCustomer && bookingCustomer.phone) {
+            let requestingUserPhone = null;
+
+            // Extract phone from various formats
+            if (userId && userId.match(/^\d{10,}$/)) {
+              requestingUserPhone = userId;
+            } else if (userId && userId.startsWith("user_")) {
+              const extractedPhone = userId.replace("user_", "");
+              if (extractedPhone.match(/^\d{10,}$/)) {
+                requestingUserPhone = extractedPhone;
+              }
+            }
+
+            if (requestingUserPhone && bookingCustomer.phone === requestingUserPhone) {
+              canUpdate = true;
+              console.log("✅ Phone number match - customer can update");
+            }
+          }
+        } catch (userError) {
+          console.warn("Failed to lookup user for authorization:", userError);
+        }
+      }
+    }
+
+    if (!canUpdate) {
+      console.log("❌ User not authorized to update this booking");
+      return res.status(403).json({ error: "Not authorized to update this booking" });
+    }
+
+    // Prepare update data
+    const updateData = {
+      ...updates,
+      updated_at: new Date(),
+      updatedAt: new Date(),
+    };
+
+    // Remove the user_id from updateData to avoid conflicts
+    delete updateData.user_id;
+
+    // Special handling for items array update
+    if (updates.items && Array.isArray(updates.items)) {
+      console.log("🔄 Updating items array:", updates.items.length, "items");
+
+      // Update item_prices array to match new items
+      updateData.item_prices = updates.items.map(item => ({
+        service_name: item.name,
+        quantity: item.quantity,
+        unit_price: item.price,
+        total_price: item.quantity * item.price
+      }));
+
+      // Recalculate totals if items are provided
+      const subtotal = updates.items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+      updateData.total_price = subtotal;
+      updateData.final_amount = subtotal; // Simplified - should include taxes/fees
+
+      console.log("💰 Recalculated totals - subtotal:", subtotal);
+    }
+
+    // Update the booking
+    const updatedBooking = await Booking.findByIdAndUpdate(
+      bookingId,
+      updateData,
+      {
+        new: true,
+        runValidators: true,
+      }
+    )
+      .populate("customer_id", "full_name phone email")
+      .populate("rider_id", "full_name phone");
+
+    if (!updatedBooking) {
+      console.error("❌ Failed to update booking:", bookingId);
+      return res.status(500).json({ error: "Failed to update booking" });
+    }
+
+    console.log("✅ Booking updated successfully:", updatedBooking._id);
+
+    res.json({
+      success: true,
+      message: "Booking updated successfully",
+      booking: updatedBooking,
+    });
+  } catch (error) {
+    console.error("Booking update error:", error);
+    res.status(500).json({ error: "Internal server error", details: error.message });
+  }
+});
+
 // Cancel booking (PUT route)
 router.put("/:bookingId/cancel", async (req, res) => {
   try {
