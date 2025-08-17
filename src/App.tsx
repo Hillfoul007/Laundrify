@@ -73,6 +73,7 @@ function App() {
               <Route path="/rider/profile" element={<RiderDashboard />} />
               <Route path="/verify-order" element={<OrderVerificationDemo />} />
               <Route path="/customer-notifications" element={<CustomerNotificationDemo />} />
+              <Route path="/customer-verification" element={<CustomerVerificationDemo />} />
               <Route path="*" element={<LaundryIndex />} />
             </Routes>
             <Toaster />
