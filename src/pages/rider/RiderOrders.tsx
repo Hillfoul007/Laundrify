@@ -72,7 +72,16 @@ export default function RiderOrders() {
     // Simulate different order types based on ID
     const isQuickPickupDemo = id.includes('quick') || id.includes('QP') || id === '68a1cb6dbea207fd0ace501b';
 
+    console.log('📋 getMockOrderData called with ID:', id);
+    console.log('📋 isQuickPickupDemo:', isQuickPickupDemo);
+    console.log('📋 ID checks:', {
+      includesQuick: id.includes('quick'),
+      includesQP: id.includes('QP'),
+      exactMatch: id === '68a1cb6dbea207fd0ace501b'
+    });
+
     if (isQuickPickupDemo) {
+      console.log('✅ Returning quick pickup mock data for ID:', id);
       return {
         _id: id,
         bookingId: id === '68a1cb6dbea207fd0ace501b' ? id.slice(-6).toUpperCase() : 'QP-002',
