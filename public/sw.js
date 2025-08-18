@@ -1,5 +1,5 @@
-const CACHE_NAME = "laundrify-v6";
-const STATIC_CACHE = "laundrify-static-v6";
+const CACHE_NAME = "laundrify-v7";
+const STATIC_CACHE = "laundrify-static-v7";
 
 const urlsToCache = [
   "/",
@@ -24,7 +24,7 @@ self.addEventListener("install", (event) => {
 
 // Activate service worker
 self.addEventListener("activate", (event) => {
-  console.log("Service Worker: Activating v5...");
+  console.log("Service Worker: Activating v7...");
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
