@@ -15,7 +15,7 @@ const PWAUpdateNotification: React.FC = () => {
         setShowUpdatePrompt(true);
       });
 
-      // Check for updates periodically
+      // Check for updates periodically (but less aggressively)
       const checkForUpdates = () => {
         navigator.serviceWorker.getRegistrations().then((registrations) => {
           registrations.forEach((registration) => {
@@ -23,14 +23,15 @@ const PWAUpdateNotification: React.FC = () => {
               setUpdateAvailable(true);
               setShowUpdatePrompt(true);
             }
-            registration.update();
+            // Only check for updates on user interaction, not automatically
+            // registration.update();
           });
         });
       };
 
-      // Check on load and every 30 seconds
+      // Check on load and every 10 minutes (instead of 30 seconds)
       checkForUpdates();
-      const interval = setInterval(checkForUpdates, 30000);
+      const interval = setInterval(checkForUpdates, 10 * 60 * 1000);
 
       return () => clearInterval(interval);
     }
