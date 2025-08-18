@@ -1,4 +1,3 @@
-
 const CACHE_NAME = "laundrify-v6";
 const STATIC_CACHE = "laundrify-static-v6";
 
@@ -19,7 +18,8 @@ self.addEventListener("install", (event) => {
       return cache.addAll(urlsToCache);
     }),
   );
-  self.skipWaiting(); // Force the waiting service worker to become active
+  // Don't force immediate activation - wait for user confirmation
+  // self.skipWaiting(); // Commented out to prevent aggressive updates
 });
 
 // Activate service worker
@@ -37,7 +37,8 @@ self.addEventListener("activate", (event) => {
       );
     }),
   );
-  self.clients.claim(); // Take control of all pages
+  // Don't immediately claim control - let user decide when to update
+  // self.clients.claim(); // Commented out to prevent aggressive updates
 });
 
 // Fetch event
