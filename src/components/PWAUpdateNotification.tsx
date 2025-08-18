@@ -38,6 +38,12 @@ const PWAUpdateNotification: React.FC = () => {
   }, []);
 
   const handleUpdate = () => {
+    // Ask user for confirmation before reloading
+    const confirmed = confirm("Update Laundrify now? This will refresh the page.");
+    if (!confirmed) {
+      return;
+    }
+
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.getRegistrations().then((registrations) => {
         registrations.forEach((registration) => {
@@ -47,7 +53,11 @@ const PWAUpdateNotification: React.FC = () => {
         });
       });
     }
-    window.location.reload();
+
+    // Add a small delay to allow service worker to activate
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
   };
 
   const handleDismiss = () => {
