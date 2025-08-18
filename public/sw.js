@@ -171,3 +171,11 @@ function doBackgroundSync() {
   // Handle background sync tasks
   return Promise.resolve();
 }
+
+// Handle messages from the app
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('Service Worker: Received SKIP_WAITING message');
+    self.skipWaiting();
+  }
+});
