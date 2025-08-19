@@ -241,6 +241,18 @@ export default function AdminRiderManagement() {
       if (response.ok) {
         const data = await response.json();
         console.log('📋 Riders fetched from API:', data.length, 'riders');
+
+        // Debug the structure of the first rider to check image URLs
+        if (data.length > 0) {
+          console.log('🔍 First rider data structure:', {
+            rider: data[0],
+            aadharImageUrl: data[0].aadharImageUrl,
+            aadharImageUrlType: typeof data[0].aadharImageUrl,
+            selfieImageUrl: data[0].selfieImageUrl,
+            selfieImageUrlType: typeof data[0].selfieImageUrl
+          });
+        }
+
         setRiders(data);
 
         if (data.length > 0) {
