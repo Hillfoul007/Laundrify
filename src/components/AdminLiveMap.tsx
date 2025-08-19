@@ -222,8 +222,19 @@ export default function AdminLiveMap({ fullScreen = false, onToggleFullScreen }:
                   Last updated: {lastRefresh.toLocaleTimeString()}
                 </div>
               </div>
-              <div className="text-sm text-gray-600">
-                Updates every {refreshInterval}s
+              <div className="flex items-center space-x-2">
+                <Label className="text-sm text-gray-600">Refresh every:</Label>
+                <select
+                  value={refreshInterval}
+                  onChange={(e) => setRefreshInterval(Number(e.target.value))}
+                  className="text-sm border border-gray-300 rounded px-2 py-1"
+                >
+                  <option value={10}>10s</option>
+                  <option value={30}>30s</option>
+                  <option value={60}>1min</option>
+                  <option value={120}>2min</option>
+                  <option value={300}>5min</option>
+                </select>
               </div>
             </div>
 
