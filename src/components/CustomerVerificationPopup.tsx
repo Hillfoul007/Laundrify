@@ -101,8 +101,13 @@ export default function CustomerVerificationPopup({
 
   const getItemChanges = (orderData: any) => {
     const changes = [];
-    const originalMap = new Map(orderData.originalItems.map((item: any) => [item.name, item]));
-    const updatedMap = new Map(orderData.updatedItems.map((item: any) => [item.name, item]));
+
+    // Defensive checks for required arrays
+    const originalItems = Array.isArray(orderData.originalItems) ? orderData.originalItems : [];
+    const updatedItems = Array.isArray(orderData.updatedItems) ? orderData.updatedItems : [];
+
+    const originalMap = new Map(originalItems.map((item: any) => [item.name, item]));
+    const updatedMap = new Map(updatedItems.map((item: any) => [item.name, item]));
 
     // Check for added items
     for (const [name, item] of updatedMap) {
