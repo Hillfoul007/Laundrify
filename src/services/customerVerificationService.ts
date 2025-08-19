@@ -431,10 +431,29 @@ export class CustomerVerificationService {
   public createCustomVerification(customData: Partial<PendingVerification>): string {
     const verificationId = `custom-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
 
+    // Ensure orderData has required structure
+    const defaultOrderData = {
+      bookingId: `order-${Date.now()}`,
+      customerName: 'Unknown Customer',
+      customerPhone: '',
+      address: '',
+      pickupTime: '',
+      riderName: '',
+      updatedAt: new Date().toISOString(),
+      status: 'pending',
+      originalItems: [],
+      updatedItems: [],
+      originalTotal: 0,
+      updatedTotal: 0,
+      priceChange: 0,
+      riderNotes: '',
+      isQuickPickup: false
+    };
+
     const verification: PendingVerification = {
       id: verificationId,
-      orderId: customData.orderData?.bookingId || `order-${Date.now()}`,
-      orderData: customData.orderData || {} as any,
+      orderId: customData.orderData?.bookingId || defaultOrderData.bookingId,
+      orderData: { ...defaultOrderData, ...customData.orderData },
       type: customData.type || 'items_change',
       priority: customData.priority || 'medium',
       createdAt: new Date().toISOString(),
