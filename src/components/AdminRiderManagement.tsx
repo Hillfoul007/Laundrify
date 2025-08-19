@@ -152,6 +152,8 @@ export default function AdminRiderManagement() {
   const [vendorModalOpen, setVendorModalOpen] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [backendConnected, setBackendConnected] = useState(true);
+  const [errorShown, setErrorShown] = useState(false);
 
   useEffect(() => {
     console.log('🚀 AdminRiderManagement component mounted, fetching data...');
@@ -1014,7 +1016,7 @@ export default function AdminRiderManagement() {
                                       <div className="text-right">
                                         <span className="text-green-700 font-bold text-lg">₹{order.final_amount}</span>
                                         {order.total_price && order.final_amount !== order.total_price && (
-                                          <div className="text-xs text-gray-500 line-through">₹{order.total_price}</div>
+                                          <div className="text-xs text-gray-500 line-through">���{order.total_price}</div>
                                         )}
                                       </div>
                                     </div>
