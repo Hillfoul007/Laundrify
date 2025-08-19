@@ -679,10 +679,20 @@ export default function AdminRiderManagement() {
                                       <div>
                                         <Label className="font-medium">Aadhar Card</Label>
                                         {selectedRider.aadharImageUrl && typeof selectedRider.aadharImageUrl === 'string' ? (
-                                          <RiderImageDisplay
-                                            src={selectedRider.aadharImageUrl}
-                                            alt="Aadhar Card"
-                                          />
+                                          <div>
+                                            <RiderImageDisplay
+                                              src={selectedRider.aadharImageUrl}
+                                              alt="Aadhar Card"
+                                            />
+                                            {/* Test with a hardcoded image to isolate the issue */}
+                                            <div className="mt-2 border-t pt-2">
+                                              <p className="text-xs text-gray-500 mb-1">Test with sample image:</p>
+                                              <RiderImageDisplay
+                                                src="/uploads/riders/aadhar-sample.jpg"
+                                                alt="Test Aadhar"
+                                              />
+                                            </div>
+                                          </div>
                                         ) : (
                                           <div className="mt-2 p-4 border rounded bg-gray-50 text-center text-gray-500">
                                             No image uploaded
