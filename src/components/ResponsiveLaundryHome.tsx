@@ -55,6 +55,7 @@ import QuickPickupModal from "./QuickPickupModal";
 import CustomerVerificationPopup from "./CustomerVerificationPopup";
 import { DVHostingSmsService } from "@/services/dvhostingSmsService";
 import { useCustomerVerification } from "@/hooks/useCustomerVerification";
+import { useCustomerNotifications } from "@/hooks/useCustomerNotifications";
 import { LocationDetectionService } from "@/services/locationDetectionService";
 import { saveCartData, getCartData } from "@/utils/formPersistence";
 import "@/styles/mobile-sticky-search.css";
