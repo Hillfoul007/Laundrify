@@ -59,6 +59,7 @@ export class CustomerVerificationService {
     }
 
     this.loadPendingVerifications();
+    this.loadProcessedVerifications();
     console.log("📱 CustomerVerificationService initialized");
   }
 
