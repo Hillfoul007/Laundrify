@@ -195,12 +195,22 @@ export class CustomerVerificationService {
    * Get all pending verifications for current user
    */
   public getPendingVerifications(): PendingVerification[] {
-    // Remove expired verifications
+    // Remove expired and invalid verifications
     const now = new Date();
     this.pendingVerifications = this.pendingVerifications.filter(v => {
+      // Check expiration
       if (v.expiresAt && new Date(v.expiresAt) < now) {
         return false;
       }
+
+      // Check data structure validity
+      if (!v.orderData ||
+          !Array.isArray(v.orderData.originalItems) ||
+          !Array.isArray(v.orderData.updatedItems)) {
+        console.warn('🗑️ Removing invalid verification:', v.id);
+        return false;
+      }
+
       return true;
     });
 
@@ -209,11 +219,11 @@ export class CustomerVerificationService {
       const priorityOrder = { high: 3, medium: 2, low: 1 };
       const aPriority = priorityOrder[a.priority] || 1;
       const bPriority = priorityOrder[b.priority] || 1;
-      
+
       if (aPriority !== bPriority) {
         return bPriority - aPriority; // Higher priority first
       }
-      
+
       return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(); // Older first
     });
   }
