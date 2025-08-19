@@ -671,15 +671,6 @@ export default function RiderOrders() {
     }
   };
 
-  const simulateCustomerVerification = (approved: boolean) => {
-    setVerificationStatus(approved ? 'approved' : 'rejected');
-    if (approved) {
-      toast.success('Customer approved the changes! You can now save the order.');
-    } else {
-      toast.error('Customer rejected the changes. Please modify the order.');
-      setCustomerVerificationRequired(false);
-    }
-  };
 
   const handleSaveClick = () => {
     const newTotal = totalAmount;
