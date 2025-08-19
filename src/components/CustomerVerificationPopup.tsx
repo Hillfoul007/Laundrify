@@ -191,27 +191,7 @@ export default function CustomerVerificationPopup({
     }
   };
 
-  if (!currentVerification) {
-    return null;
-  }
-
-  // Validate verification data structure
-  if (!isValidVerificationData(currentVerification)) {
-    console.error('CustomerVerificationPopup: Invalid verification data structure', {
-      verification: currentVerification
-    });
-
-    // Try to get the next valid verification
-    const validVerifications = verificationService.getPendingVerifications()
-      .filter(v => isValidVerificationData(v));
-
-    if (validVerifications.length > 0) {
-      setCurrentVerification(validVerifications[0]);
-      return null; // Re-render with valid data
-    }
-
-    // No valid verifications found, close popup
-    onClose();
+  if (!currentVerification || !isValidVerificationData(currentVerification)) {
     return null;
   }
 
