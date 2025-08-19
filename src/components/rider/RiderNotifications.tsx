@@ -70,14 +70,22 @@ export default function RiderNotifications({ compact = false }: RiderNotificatio
   const [autoRefresh, setAutoRefresh] = useState(true);
 
   useEffect(() => {
-    fetchNotifications();
-    fetchUnreadCount();
+    // Initial fetch with slight delay
+    setTimeout(() => {
+      fetchNotifications();
+      fetchUnreadCount();
+    }, 500);
 
     let interval: NodeJS.Timeout;
     if (autoRefresh) {
       interval = setInterval(() => {
-        fetchNotifications();
-        fetchUnreadCount();
+        // Only auto-refresh if online and authenticated
+        if (navigator.onLine && localStorage.getItem('riderToken')) {
+          fetchNotifications();
+          fetchUnreadCount();
+        } else {
+          console.log('⏸️ Skipping auto-refresh: offline or not authenticated');
+        }
       }, 30000); // Refresh every 30 seconds
     }
 
