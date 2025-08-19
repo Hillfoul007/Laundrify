@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import RiderLayout from '@/components/rider/RiderLayout';
+import CustomerVerificationService from '@/services/customerVerificationService';
 
 // Helper function to get the correct API URL for rider endpoints
 const getRiderApiUrl = (endpoint: string): string => {
@@ -61,6 +62,9 @@ export default function RiderOrders() {
   const [isSaving, setIsSaving] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [originalTotal, setOriginalTotal] = useState(0);
+
+  // Initialize customer verification service
+  const verificationService = CustomerVerificationService.getInstance();
 
   useEffect(() => {
     if (orderId) {
