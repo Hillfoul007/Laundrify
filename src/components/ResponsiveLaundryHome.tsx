@@ -385,6 +385,45 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
     }
   }, [currentUser, checkOnStartup]);
 
+  // Handle verification notification events
+  useEffect(() => {
+    const handleOpenVerificationPopup = (event: CustomEvent) => {
+      console.log('🔔 Opening verification popup from notification:', event.detail);
+      if (event.detail.verification) {
+        showVerificationPopup(event.detail.verification);
+      } else {
+        showVerificationPopup();
+      }
+    };
+
+    const handleInAppNotification = (event: CustomEvent) => {
+      console.log('🔔 Showing in-app notification:', event.detail);
+      const { title, message, action } = event.detail;
+
+      // Show a toast notification that's clickable
+      const toastId = toast(title, {
+        description: message,
+        duration: 10000, // 10 seconds
+        action: {
+          label: 'Review Changes',
+          onClick: () => {
+            if (action) action();
+            toast.dismiss(toastId);
+          }
+        }
+      });
+    };
+
+    // Add event listeners
+    window.addEventListener('openVerificationPopup', handleOpenVerificationPopup as EventListener);
+    window.addEventListener('showInAppNotification', handleInAppNotification as EventListener);
+
+    return () => {
+      window.removeEventListener('openVerificationPopup', handleOpenVerificationPopup as EventListener);
+      window.removeEventListener('showInAppNotification', handleInAppNotification as EventListener);
+    };
+  }, [showVerificationPopup]);
+
   const handleSearch = (query: string) => {
     setSearchQuery(query);
   };
