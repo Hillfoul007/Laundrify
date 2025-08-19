@@ -72,6 +72,7 @@ function App() {
               <Route path="*" element={<LaundryIndex />} />
             </Routes>
             <Toaster />
+            <SonnerToaster />
             <InstallPrompt />
             <PWAUpdateNotification />
             <MapsPerformanceIndicator />
