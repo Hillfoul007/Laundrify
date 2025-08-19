@@ -199,7 +199,11 @@ export default function AdminRiderManagement() {
       }
     } catch (error) {
       console.error('Failed to fetch riders:', error);
-      toast.error('Network error loading riders');
+      setRiders([]); // Prevent crashes with empty array
+      // Only show specific error for non-fetch errors to reduce noise
+      if (!error.message.includes('Failed to fetch')) {
+        toast.error('Network error loading riders');
+      }
     }
   };
 
