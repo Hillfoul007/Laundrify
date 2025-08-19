@@ -344,6 +344,7 @@ export default function AdminRiderManagement() {
         special_instructions: 'Handle with care',
         assignedRider: null,
         rider_id: null,
+        coordinates: { lat: 28.4595, lng: 77.0266 }, // DLF Phase 1, Gurugram
         items: [
           { name: 'Shirt', quantity: 2, price: 50 },
           { name: 'Trouser', quantity: 1, price: 80 }
