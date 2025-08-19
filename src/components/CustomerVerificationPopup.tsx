@@ -210,6 +210,8 @@ export default function CustomerVerificationPopup({
   const itemChanges = getItemChanges(orderData);
   const pendingCount = verificationService.getPendingVerifications().length;
 
+  console.log('📱 CustomerVerificationPopup render - isOpen:', isOpen, 'currentVerification:', currentVerification);
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl w-[95vw] max-h-[95vh] overflow-y-auto sm:w-full p-3 sm:p-6 sm:m-4 m-2">
