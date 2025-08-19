@@ -942,6 +942,11 @@ router.post("/orders/assign", verifyAdminAccess, async (req, res) => {
       if (order.status === 'pending') {
         order.status = 'confirmed';
         console.log(`📋 Order status updated: pending → confirmed for order ${orderId}`);
+
+        // TODO: Send customer notification about order confirmation
+        // This would typically send an SMS or push notification to the customer
+        // For now, we'll log this for implementation later
+        console.log(`📱 Customer notification: Order ${order.custom_order_id || orderId} confirmed, rider assigned`);
       }
 
       // Add to rider's assigned orders
