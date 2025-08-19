@@ -734,7 +734,7 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
                         showVerificationPopup();
                       }}
                       size="sm"
-                      className="mobile-button mobile-touch bg-red-500 hover:bg-red-600 active:bg-red-700 text-white border-0 h-12 px-4 animate-pulse transition-all duration-200 min-w-[60px]"
+                      className="mobile-button mobile-touch verification-button-mobile bg-red-500 hover:bg-red-600 active:bg-red-700 text-white border-0 h-12 px-4 animate-pulse transition-all duration-200 min-w-[60px] verification-alert"
                       type="button"
                     >
                       <Bell className="h-4 w-4 mr-1" />
