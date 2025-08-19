@@ -395,6 +395,11 @@ export default function AdminRiderManagement() {
   };
 
   const fetchActiveRiders = async () => {
+    if (!backendConnected) {
+      console.log('⚪ Skipping fetchActiveRiders - backend disconnected');
+      return;
+    }
+
     try {
       const response = await fetch(getAdminApiUrl('/riders/active'), {
         headers: {
@@ -404,19 +409,15 @@ export default function AdminRiderManagement() {
       if (response.ok) {
         const data = await response.json();
         setActiveRiders(data);
+        setBackendConnected(true);
       } else {
-        console.error('Failed to fetch active riders:', response.status);
-        if (response.status === 404) {
-          toast.error('Admin active riders API not available. Please ensure you are using the local development environment.');
-        }
+        console.warn('Failed to fetch active riders:', response.status);
+        setBackendConnected(false);
       }
     } catch (error) {
-      console.error('Failed to fetch active riders:', error);
+      console.log('⚪ Backend unavailable for active riders:', error.message);
       setActiveRiders([]); // Prevent crashes with empty array
-      // Only show specific error for non-fetch errors to reduce noise
-      if (!error.message.includes('Failed to fetch')) {
-        toast.error('Network error loading active riders');
-      }
+      setBackendConnected(false);
     }
   };
 
