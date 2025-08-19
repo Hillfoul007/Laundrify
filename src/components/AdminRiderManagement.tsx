@@ -878,7 +878,7 @@ export default function AdminRiderManagement() {
                                 <div>
                                   <Label className="font-medium">Available Riders (Nearest First)</Label>
                                   <div className="mt-2 space-y-2 max-h-60 overflow-y-auto">
-                                    {selectedOrder && getNearestRiders(selectedOrder.location || {lat: 0, lng: 0}).map((rider) => (
+                                    {selectedOrder && getNearestRiders(selectedOrder.location || null).map((rider) => (
                                       <div
                                         key={rider._id}
                                         className={`p-3 border rounded cursor-pointer transition-colors ${
