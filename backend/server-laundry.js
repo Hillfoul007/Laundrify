@@ -260,13 +260,10 @@ if (bookingRoutes) {
   console.log("🔗 Booking routes registered at /api/bookings");
 }
 
-// Temporarily commented out due to path-to-regexp error
-/*
 if (locationRoutes) {
   app.use("/api/location", locationRoutes);
   console.log("🔗 Location routes registered at /api/location");
 }
-*/
 
 // WhatsApp Auth routes
 try {
