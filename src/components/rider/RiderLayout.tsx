@@ -35,14 +35,26 @@ export default function RiderLayout({ children }: RiderLayoutProps) {
 
   React.useEffect(() => {
     if (rider) {
-      // Initial fetch
-      fetchUnreadCount();
+      // Initial fetch with delay to allow component to mount
+      setTimeout(fetchUnreadCount, 1000);
 
-      // Set up periodic fetch with error handling
+      // Set up periodic fetch with error handling and exponential backoff
+      let failureCount = 0;
       const interval = setInterval(() => {
         // Only fetch if we're still authenticated and online
         if (localStorage.getItem('riderToken') && navigator.onLine) {
-          fetchUnreadCount();
+          // Exponential backoff: increase interval after failures
+          const backoffMultiplier = Math.min(failureCount + 1, 4); // Max 4x interval
+          if (failureCount === 0 || Date.now() % (30000 * backoffMultiplier) === 0) {
+            fetchUnreadCount()
+              .then(() => {
+                failureCount = 0; // Reset on success
+              })
+              .catch(() => {
+                failureCount++;
+                console.log(`📊 Fetch failure count: ${failureCount}`);
+              });
+          }
         }
       }, 30000);
 
