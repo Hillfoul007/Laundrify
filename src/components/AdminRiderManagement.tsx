@@ -370,6 +370,7 @@ export default function AdminRiderManagement() {
         special_instructions: 'Urgent delivery needed',
         assignedRider: null,
         rider_id: null,
+        coordinates: { lat: 28.4949, lng: 77.0828 }, // Cyber City, Gurugram
         items: [
           { name: 'Dress', quantity: 1, price: 120 },
           { name: 'Jacket', quantity: 1, price: 200 }
