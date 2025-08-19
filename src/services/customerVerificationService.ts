@@ -155,12 +155,19 @@ export class CustomerVerificationService {
         const data = await response.json();
         if (data.verifications && data.verifications.length > 0) {
           console.log(`✅ Fetched ${data.verifications.length} pending verifications from backend`);
-          
+
+          // Filter out already processed verifications
+          const unprocessedVerifications = data.verifications.filter((v: PendingVerification) =>
+            !this.processedVerifications.has(v.id)
+          );
+
+          console.log(`📋 After filtering processed verifications: ${unprocessedVerifications.length} remaining`);
+
           // Merge with local verifications (backend takes precedence)
-          const backendIds = new Set(data.verifications.map((v: PendingVerification) => v.id));
+          const backendIds = new Set(unprocessedVerifications.map((v: PendingVerification) => v.id));
           const localOnly = this.pendingVerifications.filter(v => !backendIds.has(v.id));
-          
-          this.pendingVerifications = [...data.verifications, ...localOnly];
+
+          this.pendingVerifications = [...unprocessedVerifications, ...localOnly];
           this.savePendingVerifications();
         }
       } else {
