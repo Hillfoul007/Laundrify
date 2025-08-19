@@ -245,6 +245,11 @@ export default function AdminRiderManagement() {
   };
 
   const fetchOrders = async () => {
+    if (!backendConnected) {
+      console.log('⚪ Skipping fetchOrders - backend disconnected');
+      return;
+    }
+
     console.log('📋 Fetching orders from API...');
 
     try {
