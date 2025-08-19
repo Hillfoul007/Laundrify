@@ -691,11 +691,6 @@ export default function AdminRiderManagement() {
                                         ) : (
                                           <div className="mt-2 p-4 border rounded bg-gray-50 text-center text-gray-500">
                                             No image uploaded
-                                            {selectedRider.selfieImageUrl && typeof selectedRider.selfieImageUrl !== 'string' && (
-                                              <p className="text-xs text-red-500 mt-1">
-                                                Invalid image URL type: {typeof selectedRider.selfieImageUrl}
-                                              </p>
-                                            )}
                                           </div>
                                         )}
                                       </div>
