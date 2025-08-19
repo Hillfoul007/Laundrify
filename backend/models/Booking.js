@@ -37,6 +37,19 @@ const bookingSchema = new mongoose.Schema(
       ref: "Rider",
       default: null,
     },
+    assignedRiderPhone: {
+      type: String,
+      default: null,
+    },
+    assignedVendor: {
+      type: String,
+      default: null,
+    },
+    assignedVendorDetails: {
+      name: String,
+      address: String,
+      phone: String,
+    },
     riderStatus: {
       type: String,
       enum: ["unassigned", "assigned", "accepted", "picked_up", "delivered", "completed"],
