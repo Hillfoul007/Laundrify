@@ -1257,30 +1257,6 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
                     />
                   </div>
 
-                  {/* Verification Alert Button */}
-                  {pendingCount > 0 && (
-                    <Button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        console.log('🖥️ Desktop verification button clicked, pending count:', pendingCount);
-                        console.log('📋 Current verification:', currentVerification);
-                        console.log('📋 Popup open state:', isVerificationPopupOpen);
-                        showVerificationPopup();
-                      }}
-                      variant="outline"
-                      size="sm"
-                      className="bg-red-50 border-red-200 text-red-700 hover:bg-red-100 hover:border-red-300 relative animate-pulse"
-                      type="button"
-                    >
-                      <Bell className="h-4 w-4 mr-1" />
-                      <span className="hidden sm:inline">Verification</span>
-                      <span className="sm:hidden">Verify</span>
-                      <Badge className="ml-1 bg-red-500 text-white h-5 w-5 p-0 text-xs">
-                        {pendingCount}
-                      </Badge>
-                    </Button>
-                  )}
                 </div>
               )}
 
