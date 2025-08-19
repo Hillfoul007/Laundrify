@@ -753,42 +753,6 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
                     </Button>
                   )}
 
-                  {/* Debug button for mobile testing - only show when no verifications */}
-                  {pendingCount === 0 && (
-                    <Button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        console.log('🎭 Creating demo verification for mobile testing');
-
-                        // Debug current state first
-                        debugVerificationSystem();
-
-                        // Create demo verification
-                        const verificationId = verificationService.createDemoVerification();
-                        console.log('🔄 Created verification:', verificationId);
-
-                        // Check what we created
-                        const allPending = verificationService.getPendingVerifications();
-                        console.log('📋 All pending verifications after creation:', allPending);
-
-                        // Force update the pending count
-                        checkPendingVerifications();
-
-                        // Debug again after update
-                        setTimeout(() => {
-                          debugVerificationSystem();
-                        }, 100);
-                      }}
-                      size="sm"
-                      className="mobile-button mobile-touch bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white border-0 h-12 px-4 transition-all duration-200 min-w-[60px]"
-                      type="button"
-                      title="Create test verification"
-                    >
-                      <Bell className="h-4 w-4 mr-1" />
-                      <span className="text-xs font-bold">+</span>
-                    </Button>
-                  )}
                 </div>
               )}
 
