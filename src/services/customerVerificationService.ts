@@ -419,8 +419,10 @@ export class CustomerVerificationService {
    */
   public clearAllVerifications(): void {
     this.pendingVerifications = [];
+    this.processedVerifications.clear();
     this.savePendingVerifications();
-    console.log('🗑️ All pending verifications cleared');
+    this.saveProcessedVerifications();
+    console.log('🗑️ All pending and processed verifications cleared');
   }
 
   /**
