@@ -235,15 +235,12 @@ try {
   console.error("❌ Failed to load Booking routes:", error.message);
 }
 
-// Temporarily commented out due to path-to-regexp error
-/*
 try {
   locationRoutes = require("./routes/location");
   console.log("✅ Location routes loaded");
 } catch (error) {
   console.error("❌ Failed to load Location routes:", error.message);
 }
-*/
 
 // Serve static frontend files in production
 if (productionConfig.isProduction()) {
