@@ -473,6 +473,36 @@ export default function AdminRiderManagement() {
     }
   };
 
+  const assignVendorToOrder = async () => {
+    if (!selectedOrder || !selectedVendor) return;
+
+    try {
+      const response = await fetch(getAdminApiUrl('/orders/assign-vendor'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'admin-token': 'admin-access-granted'
+        },
+        body: JSON.stringify({
+          orderId: selectedOrder._id,
+          vendorData: { vendorId: selectedVendor },
+          orderType: selectedOrder.type
+        })
+      });
+
+      if (response.ok) {
+        toast.success('Vendor assigned successfully');
+        fetchOrders();
+        setVendorModalOpen(false);
+        setSelectedVendor('');
+      } else {
+        toast.error('Failed to assign vendor');
+      }
+    } catch (error) {
+      toast.error('Network error. Please try again.');
+    }
+  };
+
   const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => {
     const R = 6371; // Radius of the Earth in kilometers
     const dLat = (lat2 - lat1) * Math.PI / 180;
