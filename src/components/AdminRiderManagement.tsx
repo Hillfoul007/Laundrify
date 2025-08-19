@@ -148,6 +148,8 @@ export default function AdminRiderManagement() {
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [verifyModalOpen, setVerifyModalOpen] = useState(false);
+  const [vendorModalOpen, setVendorModalOpen] = useState(false);
+  const [selectedVendor, setSelectedVendor] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
