@@ -41,7 +41,9 @@ export interface OrderItem {
 export class CustomerVerificationService {
   private static instance: CustomerVerificationService;
   private pendingVerifications: PendingVerification[] = [];
+  private processedVerifications: Set<string> = new Set();
   private storageKey = 'customer_pending_verifications';
+  private processedStorageKey = 'customer_processed_verifications';
   private apiBaseUrl: string;
 
   constructor() {
