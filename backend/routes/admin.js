@@ -901,6 +901,7 @@ router.post("/orders/assign", verifyAdminAccess, async (req, res) => {
 
       order.rider_id = riderId;
       order.rider_name = rider.name;
+      order.rider_phone = rider.phone;
       order.status = 'assigned';
       order.assignedAt = new Date();
       await order.save();
