@@ -158,49 +158,16 @@ export default function AdminRiderManagement() {
   useEffect(() => {
     console.log('🚀 AdminRiderManagement component mounted, fetching data...');
 
-    // Try initial fetch to check backend connection
-    const checkBackend = async () => {
-      try {
-        const response = await fetch(getAdminApiUrl('/health'), {
-          headers: { 'admin-token': 'admin-access-granted' },
-          signal: AbortSignal.timeout(5000) // 5 second timeout
-        });
-        if (response.ok) {
-          setBackendConnected(true);
-          setErrorShown(false);
-          // Backend is connected, fetch data
-          fetchRiders();
-          fetchOrders();
-          fetchActiveRiders();
-        } else {
-          setBackendConnected(false);
-        }
-      } catch (error) {
-        console.log('🔴 Backend not available, running in offline mode');
-        setBackendConnected(false);
-        if (!errorShown) {
-          toast.error('Backend not available - running in offline mode', { duration: 5000 });
-          setErrorShown(true);
-        }
-      }
-    };
+    // Directly try to fetch data - let individual functions handle connection issues
+    fetchRiders();
+    fetchOrders();
+    fetchActiveRiders();
 
-    checkBackend();
+    // Set up polling for active riders every 30 seconds (functions will handle connectivity)
+    const interval = setInterval(fetchActiveRiders, 30000);
 
-    // Only set up polling if backend is connected
-    let interval: NodeJS.Timeout | null = null;
-    if (backendConnected) {
-      interval = setInterval(() => {
-        if (backendConnected) {
-          fetchActiveRiders();
-        }
-      }, 30000);
-    }
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [backendConnected, errorShown]);
+    return () => clearInterval(interval);
+  }, []);
 
   // Debug effect to monitor orders state changes
   useEffect(() => {
