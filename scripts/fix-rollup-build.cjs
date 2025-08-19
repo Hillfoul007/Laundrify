@@ -77,9 +77,9 @@ async function fixRollupAndBuild() {
       console.log('⚠️ Direct Rollup binary install failed, continuing...');
     }
     
-    // Step 4: Use esbuild instead of Rollup for the build
-    console.log('⚡ Building with esbuild fallback...');
-    await runCommand('npx vite build --config vite.ultra-minimal.config.ts');
+    // Step 4: Use esbuild-only config to avoid Rollup entirely
+    console.log('⚡ Building with esbuild-only config...');
+    await runCommand('npx vite build --config vite.esbuild.config.ts');
     
     console.log('✅ Build completed successfully!');
     
