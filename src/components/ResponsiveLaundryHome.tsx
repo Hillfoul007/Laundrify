@@ -725,12 +725,42 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
                   {/* Mobile Verification Alert Button */}
                   {pendingCount > 0 && (
                     <Button
-                      onClick={showVerificationPopup}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('🔍 Mobile verification button clicked, pending count:', pendingCount);
+                        console.log('📱 Current verification:', currentVerification);
+                        console.log('📱 Popup open state:', isVerificationPopupOpen);
+                        showVerificationPopup();
+                      }}
                       size="sm"
-                      className="bg-red-500 hover:bg-red-600 text-white border-0 h-10 px-3 animate-pulse"
+                      className="mobile-button mobile-touch bg-red-500 hover:bg-red-600 active:bg-red-700 text-white border-0 h-12 px-4 animate-pulse transition-all duration-200 min-w-[60px]"
+                      type="button"
                     >
                       <Bell className="h-4 w-4 mr-1" />
                       <span className="text-xs font-bold">{pendingCount}</span>
+                    </Button>
+                  )}
+
+                  {/* Debug button for mobile testing - only show when no verifications */}
+                  {pendingCount === 0 && (
+                    <Button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('🎭 Creating demo verification for mobile testing');
+                        const verificationId = verificationService.createDemoVerification();
+                        console.log('🔄 Created verification:', verificationId);
+                        // Force update the pending count
+                        checkPendingVerifications();
+                      }}
+                      size="sm"
+                      className="mobile-button mobile-touch bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white border-0 h-12 px-4 transition-all duration-200 min-w-[60px]"
+                      type="button"
+                      title="Create test verification"
+                    >
+                      <Bell className="h-4 w-4 mr-1" />
+                      <span className="text-xs font-bold">+</span>
                     </Button>
                   )}
                 </div>
