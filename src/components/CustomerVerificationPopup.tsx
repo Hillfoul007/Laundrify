@@ -91,12 +91,20 @@ export default function CustomerVerificationPopup({
     // Move to next verification or close
     const allVerifications = verificationService.getPendingVerifications();
     const currentIndex = allVerifications.findIndex(v => v.id === currentVerification?.id);
-    
+
     if (currentIndex >= 0 && currentIndex < allVerifications.length - 1) {
       setCurrentVerification(allVerifications[currentIndex + 1]);
     } else {
       onClose();
     }
+  };
+
+  // Helper function to validate verification data structure
+  const isValidVerificationData = (verification: any): boolean => {
+    return verification &&
+           verification.orderData &&
+           Array.isArray(verification.orderData.originalItems) &&
+           Array.isArray(verification.orderData.updatedItems);
   };
 
   const getItemChanges = (orderData: any) => {
