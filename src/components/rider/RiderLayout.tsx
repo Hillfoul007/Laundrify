@@ -70,15 +70,21 @@ export default function RiderLayout({ children }: RiderLayoutProps) {
     try {
       const token = localStorage.getItem('riderToken');
       if (!token) {
-        console.log('No rider token found, skipping unread count fetch');
+        console.log('📝 No rider token found, skipping unread count fetch');
+        return;
+      }
+
+      // Check network connectivity before making request
+      if (!navigator.onLine) {
+        console.log('📱 Offline mode: Skipping unread count fetch');
         return;
       }
 
       const apiUrl = getRiderApiUrl('/notifications/unread-count');
-      console.log('Fetching unread count from:', apiUrl);
+      console.log('🔄 Fetching unread count from:', apiUrl);
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // Increased timeout
 
       const response = await fetch(apiUrl, {
         headers: {
@@ -93,19 +99,23 @@ export default function RiderLayout({ children }: RiderLayoutProps) {
       if (response.ok) {
         const data = await response.json();
         setUnreadCount(data.count || 0);
+        console.log('✅ Unread count updated:', data.count || 0);
       } else {
-        console.warn('Failed to fetch unread count:', response.status, response.statusText);
-        // Fallback to 0 on error
-        setUnreadCount(0);
+        console.warn('⚠️ API returned error:', response.status, response.statusText);
+        // Only reset count on client errors, not server errors
+        if (response.status < 500) {
+          setUnreadCount(0);
+        }
       }
     } catch (error) {
       if (error.name === 'AbortError') {
-        console.warn('Unread count fetch timed out');
+        console.log('⏰ Unread count request timed out');
+      } else if (error.message?.includes('Failed to fetch')) {
+        console.log('🌐 Network error - backend may be unreachable');
       } else {
-        console.error('Failed to fetch unread count:', error);
+        console.warn('❌ Unexpected error fetching unread count:', error.message);
       }
-      // Set fallback value
-      setUnreadCount(0);
+      // Don't reset count on network errors to avoid UI flicker
     }
   };
 
