@@ -131,10 +131,30 @@ export default function CustomerVerificationPopup({
 
   // Helper function to validate verification data structure
   const isValidVerificationData = (verification: any): boolean => {
-    return verification &&
-           verification.orderData &&
-           Array.isArray(verification.orderData.originalItems) &&
-           Array.isArray(verification.orderData.updatedItems);
+    console.log('🔍 Validating verification data:', verification);
+
+    if (!verification) {
+      console.log('❌ Validation failed: No verification object');
+      return false;
+    }
+
+    if (!verification.orderData) {
+      console.log('❌ Validation failed: No orderData');
+      return false;
+    }
+
+    if (!Array.isArray(verification.orderData.originalItems)) {
+      console.log('❌ Validation failed: originalItems is not an array:', verification.orderData.originalItems);
+      return false;
+    }
+
+    if (!Array.isArray(verification.orderData.updatedItems)) {
+      console.log('❌ Validation failed: updatedItems is not an array:', verification.orderData.updatedItems);
+      return false;
+    }
+
+    console.log('✅ Validation passed');
+    return true;
   };
 
   const getItemChanges = (orderData: any) => {
