@@ -933,6 +933,7 @@ router.post("/orders/assign", verifyAdminAccess, async (req, res) => {
       }
 
       order.assignedRider = riderId;
+      order.assignedRiderPhone = rider.phone;
       order.riderStatus = 'assigned';
       order.assignedAt = new Date();
 
