@@ -96,6 +96,37 @@ app.get('/api/admin/riders', (req, res) => {
   res.json(registeredRiders);
 });
 
+// Mock OTP service
+const mockOTPs = new Map();
+
+// OTP request endpoint for rider registration
+app.post('/api/riders/register/request-otp', (req, res) => {
+  try {
+    const { phone } = req.body;
+
+    if (!phone) {
+      return res.status(400).json({
+        message: 'Phone number is required'
+      });
+    }
+
+    // Generate mock OTP
+    const otp = '123456'; // Fixed OTP for demo
+    mockOTPs.set(phone, otp);
+
+    console.log('📱 OTP request for registration:', phone, 'OTP:', otp);
+
+    res.json({
+      message: 'OTP sent successfully',
+      // In demo mode, we can show the OTP for testing
+      demo_otp: otp
+    });
+  } catch (error) {
+    console.error('❌ OTP request error:', error);
+    res.status(500).json({ message: 'Failed to send OTP', error: error.message });
+  }
+});
+
 // Rider registration endpoint with file upload
 app.post('/api/riders/register', upload.fields([
   { name: 'aadharImage', maxCount: 1 },
