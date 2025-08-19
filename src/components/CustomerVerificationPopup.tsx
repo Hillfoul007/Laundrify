@@ -219,38 +219,6 @@ export default function CustomerVerificationPopup({
             </div>
           </div>
 
-          {/* Demo Simulation Section */}
-          <div className="border-2 border-dashed border-blue-300 bg-blue-50 p-4 rounded-lg">
-            <h3 className="font-semibold text-blue-800 mb-2 flex items-center">
-              <Package className="h-4 w-4 mr-2" />
-              Demo: Simulate Customer Response
-            </h3>
-            <p className="text-sm text-blue-700 mb-3">
-              This simulates what the customer sees on their mobile app. In a real scenario, 
-              the customer would receive a notification and respond from their device.
-            </p>
-            
-            <div className="flex space-x-2">
-              <Button
-                size="sm"
-                onClick={() => handleVerification(true)}
-                disabled={isSubmitting}
-                className="bg-green-600 hover:bg-green-700 text-white"
-              >
-                <CheckCircle className="h-3 w-3 mr-1" />
-                Approve Changes
-              </Button>
-              <Button
-                size="sm"
-                variant="destructive"
-                onClick={() => handleVerification(false)}
-                disabled={isSubmitting}
-              >
-                <XCircle className="h-3 w-3 mr-1" />
-                Reject Changes
-              </Button>
-            </div>
-          </div>
 
           {/* Customer Details */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
