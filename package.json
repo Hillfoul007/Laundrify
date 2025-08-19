@@ -23,7 +23,7 @@
     "start:frontend": "npx serve -s dist -p 8080",
     "deploy": "chmod +x deploy.sh && ./deploy.sh",
     "deploy:pwa": "npm run build:pwa && chmod +x deploy.sh && ./deploy.sh",
-    "render:build": "NODE_OPTIONS=--max-old-space-size=256 npm install --production && NODE_OPTIONS=--max-old-space-size=256 npm run build:ultra-minimal && cd backend && npm install --production && echo 'Build completed successfully'",
+    "render:build": "node scripts/create-minimal-package.cjs && NODE_OPTIONS=--max-old-space-size=256 npm install --production && NODE_OPTIONS=--max-old-space-size=256 npm run build:ultra-minimal && node scripts/restore-package.cjs && cd backend && npm install --production && echo 'Build completed successfully'",
     "render:start": "NODE_ENV=production node backend/server-laundry.js",
     "install:all": "npm install && cd backend && npm install",
     "build:production": "NODE_OPTIONS=--max-old-space-size=384 npm run install:all && NODE_OPTIONS=--max-old-space-size=384 npm run build:pwa",
