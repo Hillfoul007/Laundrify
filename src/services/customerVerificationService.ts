@@ -109,14 +109,30 @@ export class CustomerVerificationService {
       const stored = localStorage.getItem(this.storageKey);
       if (stored) {
         const verifications = JSON.parse(stored);
-        // Filter out expired verifications
+        // Filter out expired and invalid verifications
         this.pendingVerifications = verifications.filter((v: PendingVerification) => {
+          // Check expiration
           if (v.expiresAt && new Date(v.expiresAt) < new Date()) {
             return false;
           }
+
+          // Check data structure validity
+          if (!v.orderData ||
+              !Array.isArray(v.orderData.originalItems) ||
+              !Array.isArray(v.orderData.updatedItems)) {
+            console.warn('🗑️ Removing invalid verification from localStorage:', v.id);
+            return false;
+          }
+
           return true;
         });
-        console.log(`📋 Loaded ${this.pendingVerifications.length} pending verifications from localStorage`);
+        console.log(`📋 Loaded ${this.pendingVerifications.length} valid pending verifications from localStorage`);
+
+        // Save cleaned data back to localStorage
+        if (this.pendingVerifications.length !== verifications.length) {
+          this.savePendingVerifications();
+          console.log('🧹 Cleaned up localStorage with valid verifications only');
+        }
       }
 
       // Fetch from backend in background
@@ -124,6 +140,8 @@ export class CustomerVerificationService {
     } catch (error) {
       console.error('❌ Error loading pending verifications:', error);
       this.pendingVerifications = [];
+      // Clear corrupted localStorage data
+      localStorage.removeItem(this.storageKey);
     }
   }
 
