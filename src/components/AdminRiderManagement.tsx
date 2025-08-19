@@ -678,7 +678,7 @@ export default function AdminRiderManagement() {
                                     <div className="grid grid-cols-2 gap-4">
                                       <div>
                                         <Label className="font-medium">Aadhar Card</Label>
-                                        {selectedRider.aadharImageUrl ? (
+                                        {selectedRider.aadharImageUrl && typeof selectedRider.aadharImageUrl === 'string' ? (
                                           <RiderImageDisplay
                                             src={selectedRider.aadharImageUrl}
                                             alt="Aadhar Card"
@@ -686,6 +686,11 @@ export default function AdminRiderManagement() {
                                         ) : (
                                           <div className="mt-2 p-4 border rounded bg-gray-50 text-center text-gray-500">
                                             No image uploaded
+                                            {selectedRider.aadharImageUrl && typeof selectedRider.aadharImageUrl !== 'string' && (
+                                              <p className="text-xs text-red-500 mt-1">
+                                                Invalid image URL type: {typeof selectedRider.aadharImageUrl}
+                                              </p>
+                                            )}
                                           </div>
                                         )}
                                       </div>
