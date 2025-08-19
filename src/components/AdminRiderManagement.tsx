@@ -343,12 +343,8 @@ export default function AdminRiderManagement() {
       }
     } catch (error) {
       console.log('⚪ Backend unavailable for orders:', error.message);
-      setBackendConnected(false);
+      setOrders([]);
     }
-
-    // No fallback data - show empty state when backend is unavailable
-    console.log('⚪ No orders available - backend connection failed');
-    setOrders([]);
   };
 
   const fetchActiveRiders = async () => {
