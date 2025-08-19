@@ -322,90 +322,10 @@ export default function AdminRiderManagement() {
       toast.error('Failed to connect to backend API');
     }
 
-    // Fallback to comprehensive mock data that includes different order types
-    const mockOrders = [
-      {
-        _id: 'demo-order-1',
-        custom_order_id: 'LAU-001',
-        bookingId: 'LAU-001',
-        customerName: 'John Doe',
-        customerPhone: '+91 9876543210',
-        customer_id: 'demo-customer-1',
-        address: '123 MG Road, Sector 14, Gurugram',
-        service: 'Wash & Fold',
-        services: ['Wash & Fold', 'Premium Care'],
-        scheduled_date: new Date().toISOString().split('T')[0],
-        scheduled_time: '14:00',
-        pickupTime: '2:00 PM - 4:00 PM',
-        status: 'pending',
-        type: 'Regular',
-        final_amount: 350,
-        total_price: 350,
-        special_instructions: 'Handle with care',
-        assignedRider: null,
-        rider_id: null,
-        coordinates: { lat: 28.4595, lng: 77.0266 }, // DLF Phase 1, Gurugram
-        items: [
-          { name: 'Shirt', quantity: 2, price: 50 },
-          { name: 'Trouser', quantity: 1, price: 80 }
-        ]
-      },
-      {
-        _id: 'demo-order-2',
-        custom_order_id: 'LAU-002',
-        bookingId: 'LAU-002',
-        customerName: 'Jane Smith',
-        customerPhone: '+91 9876543211',
-        customer_id: 'demo-customer-2',
-        address: '456 Cyber City, Sector 25, Gurugram',
-        service: 'Dry Cleaning',
-        services: ['Dry Cleaning'],
-        scheduled_date: new Date().toISOString().split('T')[0],
-        scheduled_time: '16:00',
-        pickupTime: '4:00 PM - 6:00 PM',
-        status: 'confirmed',
-        type: 'Express',
-        final_amount: 500,
-        total_price: 500,
-        special_instructions: 'Urgent delivery needed',
-        assignedRider: null,
-        rider_id: null,
-        coordinates: { lat: 28.4949, lng: 77.0828 }, // Cyber City, Gurugram
-        items: [
-          { name: 'Dress', quantity: 1, price: 120 },
-          { name: 'Jacket', quantity: 1, price: 200 }
-        ]
-      },
-      {
-        _id: 'demo-quick-pickup-1',
-        custom_order_id: 'QP-001',
-        bookingId: 'QP-001',
-        customerName: 'Mike Johnson',
-        customerPhone: '+91 9876543212',
-        customer_id: 'demo-customer-3',
-        address: '789 Golf Course Road, Sector 56, Gurugram',
-        service: 'Quick Pickup Service',
-        services: [],
-        scheduled_date: new Date().toISOString().split('T')[0],
-        scheduled_time: '11:00',
-        pickupTime: '11:00 AM - 1:00 PM',
-        status: 'pending',
-        type: 'Quick Pickup',
-        final_amount: 0,
-        total_price: 0,
-        estimatedCost: 250,
-        special_instructions: 'Check items before pickup',
-        specialInstructions: 'Check items before pickup',
-        assignedRider: null,
-        rider_id: null,
-        coordinates: { lat: 28.4211, lng: 77.0964 }, // Golf Course Road, Gurugram
-        items: []
-      }
-    ];
-
-    console.log('🔧 Using fallback demo data with', mockOrders.length, 'orders');
-    setOrders(mockOrders);
-    toast.warning('Using demo data - backend unavailable');
+    // No fallback data - show empty state when backend is unavailable
+    console.log('❌ No orders available - backend connection failed');
+    setOrders([]);
+    toast.error('Failed to load orders - please check backend connection');
   };
 
   const fetchActiveRiders = async () => {
