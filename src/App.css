@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import mobile verification fixes */
+@import './styles/mobile-verification-fixes.css';
+
 /* Global mobile optimizations */
 @layer base {
   html {
