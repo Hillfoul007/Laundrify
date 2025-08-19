@@ -71,12 +71,10 @@ const RiderImageDisplay: React.FC<{ src: string; alt: string }> = ({ src, alt })
   };
 
   const handleImageError = (e: any) => {
-    console.error('🖼️ Image failed to load:', {
-      src,
-      imageUrl: getImageUrl(src),
-      error: e,
-      networkError: e?.target?.error
-    });
+    console.error('🖼️ Image failed to load:', src);
+    console.error('Full URL:', getImageUrl(src));
+    console.error('Error details:', e);
+    console.error('Network error:', e?.target?.error);
     setIsLoading(false);
     setHasError(true);
   };
