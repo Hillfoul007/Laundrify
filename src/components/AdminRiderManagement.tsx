@@ -898,6 +898,83 @@ export default function AdminRiderManagement() {
                               </div>
                             </DialogContent>
                           </Dialog>
+
+                          {/* Show vendor assignment button only if rider is assigned */}
+                          {(order.assignedRider || order.rider_id) && (
+                            <Dialog
+                              open={vendorModalOpen && selectedOrder?._id === order._id}
+                              onOpenChange={(open) => {
+                                setVendorModalOpen(open);
+                                if (open) setSelectedOrder(order);
+                              }}
+                            >
+                              <DialogTrigger asChild>
+                                <Button size="lg" className="bg-green-500 hover:bg-green-600 text-white ml-2">
+                                  <Store className="h-4 w-4 mr-2" />
+                                  Assign Vendor
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Assign Vendor to Order</DialogTitle>
+                                  <DialogDescription>
+                                    Select a vendor for order processing
+                                  </DialogDescription>
+                                </DialogHeader>
+
+                                <div className="space-y-4">
+                                  <div>
+                                    <Label className="font-medium">Order Details</Label>
+                                    <p className="text-sm text-gray-600">
+                                      #{order.custom_order_id || order.bookingId} - {order.name || order.customerName}
+                                    </p>
+                                    {order.assignedVendor && (
+                                      <p className="text-sm text-green-600 font-medium">
+                                        Current Vendor: {order.assignedVendor}
+                                      </p>
+                                    )}
+                                  </div>
+
+                                  <div>
+                                    <Label className="font-medium">Select Vendor</Label>
+                                    <div className="mt-2 space-y-2">
+                                      <div
+                                        className={`p-3 border rounded cursor-pointer transition-colors ${
+                                          selectedVendor === 'vendor1' ? 'border-green-500 bg-green-50' : 'hover:bg-gray-50'
+                                        }`}
+                                        onClick={() => setSelectedVendor('vendor1')}
+                                      >
+                                        <div className="font-medium">Priya Dry Cleaners</div>
+                                        <div className="text-sm text-gray-600">
+                                          Shop n.155, Spaze corporate park, 1sf, Sector 69, Gurugram, Haryana 122101
+                                        </div>
+                                      </div>
+
+                                      <div
+                                        className={`p-3 border rounded cursor-pointer transition-colors ${
+                                          selectedVendor === 'vendor2' ? 'border-green-500 bg-green-50' : 'hover:bg-gray-50'
+                                        }`}
+                                        onClick={() => setSelectedVendor('vendor2')}
+                                      >
+                                        <div className="font-medium">White Tiger Dry Cleaning</div>
+                                        <div className="text-sm text-gray-600">
+                                          Shop No. 153, First Floor, Spaze Corporate Park, Sector 69, Gurugram, Haryana 122101
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <Button
+                                    onClick={assignVendorToOrder}
+                                    disabled={!selectedVendor}
+                                    className="w-full"
+                                  >
+                                    Assign Vendor
+                                  </Button>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          )}
                         </div>
 
                         {/* Main Content Grid */}
@@ -1128,7 +1205,7 @@ export default function AdminRiderManagement() {
                             {order.estimatedCost > 0 && (
                               <div className="flex items-center space-x-2">
                                 <span className="text-xs font-medium bg-green-50 px-2 py-1 rounded">
-                                  Est. Cost: ₹{order.estimatedCost}
+                                  Est. Cost: ��{order.estimatedCost}
                                 </span>
                               </div>
                             )}
