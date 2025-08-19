@@ -1071,6 +1071,61 @@ export default function AdminRiderManagement() {
                                 </div>
                               </div>
                             )}
+
+                            {/* Assignment Information */}
+                            <div className="bg-purple-50 p-4 rounded-lg">
+                              <h5 className="font-semibold text-purple-900 mb-3 flex items-center">
+                                <Navigation className="h-4 w-4 mr-2" />
+                                Assignment Details
+                              </h5>
+                              <div className="space-y-2 text-sm">
+                                {/* Rider Assignment */}
+                                <div className="flex items-center justify-between">
+                                  <span className="text-purple-700 font-medium">Assigned Rider:</span>
+                                  <span className="font-semibold">
+                                    {order.assignedRider ? 'Assigned' : order.rider_id ? 'Assigned' : 'Unassigned'}
+                                  </span>
+                                </div>
+                                {order.assignedRiderPhone && (
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-purple-700 font-medium">Rider Phone:</span>
+                                    <span className="font-semibold">{order.assignedRiderPhone}</span>
+                                  </div>
+                                )}
+                                {order.rider_phone && (
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-purple-700 font-medium">Rider Phone:</span>
+                                    <span className="font-semibold">{order.rider_phone}</span>
+                                  </div>
+                                )}
+                                {order.assignedAt && (
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-purple-700 font-medium">Assigned At:</span>
+                                    <span className="text-xs">{new Date(order.assignedAt).toLocaleString()}</span>
+                                  </div>
+                                )}
+
+                                {/* Vendor Assignment */}
+                                <div className="border-t border-purple-200 pt-2 mt-2">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-purple-700 font-medium">Assigned Vendor:</span>
+                                    <span className="font-semibold">
+                                      {order.assignedVendor || order.assigned_vendor || 'Not Assigned'}
+                                    </span>
+                                  </div>
+                                  {(order.assignedVendorDetails || order.assigned_vendor_details) && (
+                                    <div className="mt-2 text-xs bg-purple-100 p-2 rounded">
+                                      <div className="font-medium">
+                                        {order.assignedVendorDetails?.name || order.assigned_vendor_details?.name}
+                                      </div>
+                                      <div className="text-purple-600">
+                                        {order.assignedVendorDetails?.address || order.assigned_vendor_details?.address}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
                           </div>
 
                           {/* Right Column */}
