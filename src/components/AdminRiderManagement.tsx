@@ -322,8 +322,9 @@ export default function AdminRiderManagement() {
 
           console.log('✅ Using real API data:', processedOrders.length, 'orders');
           setOrders(processedOrders);
-          setBackendConnected(true);
-          toast.success(`Loaded ${processedOrders.length} real orders from database`);
+          if (processedOrders.length > 0) {
+            toast.success(`Loaded ${processedOrders.length} real orders from database`);
+          }
           return;
         } else {
           console.log('ℹ️ API returned empty results');
