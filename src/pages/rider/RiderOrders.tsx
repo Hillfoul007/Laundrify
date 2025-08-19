@@ -619,6 +619,58 @@ export default function RiderOrders() {
     }
   };
 
+  const sendVerificationToCustomer = () => {
+    try {
+      // Calculate totals
+      const originalTotal = order?.items?.reduce((sum: number, item: any) =>
+        sum + (item.quantity * item.price), 0) || 0;
+      const updatedTotal = editedItems.reduce((sum: number, item: any) =>
+        sum + (item.quantity * item.price), 0);
+      const priceChange = updatedTotal - originalTotal;
+
+      // Create verification data
+      const verificationData = {
+        orderId: order._id || orderId,
+        orderData: {
+          bookingId: order.bookingId || order.custom_order_id || order._id,
+          customerName: order.customerName || order.name || 'Customer',
+          customerPhone: order.customerPhone || order.phone || '',
+          riderName: 'Current Rider',
+          address: order.address || '',
+          pickupTime: order.pickupTime || '',
+          originalItems: order.items || [],
+          updatedItems: editedItems,
+          originalTotal,
+          updatedTotal,
+          priceChange,
+          riderNotes: `Rider updated order items${isQuickPickup ? ' for quick pickup service' : ''}`,
+          isQuickPickup: isQuickPickup
+        },
+        type: (isQuickPickup ? 'quick_pickup_created' :
+              Math.abs(priceChange) > 0 ? 'price_change' : 'items_change') as 'price_change' | 'items_change' | 'quick_pickup_created',
+        priority: (Math.abs(priceChange) > 100 ? 'high' : 'medium') as 'high' | 'medium' | 'low'
+      };
+
+      console.log('📦 Sending verification to customer:', verificationData);
+
+      // Create the verification
+      const verificationId = verificationService.addPendingVerification(verificationData);
+
+      console.log('✅ Verification sent to customer with ID:', verificationId);
+
+      // Set local state
+      setCustomerVerificationRequired(true);
+      setVerificationStatus('pending');
+      setShowConfirmDialog(false);
+
+      toast.success('Verification sent to customer! They will receive a popup to approve/reject changes.');
+
+    } catch (error) {
+      console.error('❌ Error sending verification:', error);
+      toast.error('Failed to send verification. Please try again.');
+    }
+  };
+
   const simulateCustomerVerification = (approved: boolean) => {
     setVerificationStatus(approved ? 'approved' : 'rejected');
     if (approved) {
