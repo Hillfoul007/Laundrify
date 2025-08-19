@@ -181,9 +181,10 @@ const getAdminApiUrl = (endpoint: string): string => {
 
   // Force correct backend URL based on environment
   if (isLocalhost && isDev) {
-    // Local development - use proxy
-    console.log('🏠 Using local proxy for admin API');
-    return `/api/admin${endpoint}`;
+    // Local development - use direct backend URL
+    const localUrl = `http://localhost:3001/api/admin${endpoint}`;
+    console.log('🏠 Using local backend for admin API:', localUrl);
+    return localUrl;
   } else if (isRenderCom || isLaundrifyDomain || !isLocalhost) {
     // Any hosted environment - use backend server
     const backendUrl = 'https://backend-vaxf.onrender.com/api/admin' + endpoint;
@@ -192,7 +193,7 @@ const getAdminApiUrl = (endpoint: string): string => {
   }
 
   // Fallback
-  return `/api/admin${endpoint}`;
+  return `http://localhost:3001/api/admin${endpoint}`;
 };
 
 export default function AdminRiderManagement() {
