@@ -72,10 +72,6 @@ function App() {
               <Route path="/rider/orders/:orderId" element={<RiderOrders />} />
               <Route path="/rider/notifications" element={<RiderNotificationsPage />} />
               <Route path="/rider/profile" element={<RiderDashboard />} />
-              <Route path="/verify-order" element={<OrderVerificationDemo />} />
-              <Route path="/customer-notifications" element={<CustomerNotificationDemo />} />
-              <Route path="/customer-verification" element={<CustomerVerificationDemo />} />
-              <Route path="/verification-popup-demo" element={<VerificationPopupDemo />} />
               <Route path="*" element={<LaundryIndex />} />
             </Routes>
             <Toaster />
