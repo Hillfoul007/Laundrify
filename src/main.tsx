@@ -3,10 +3,14 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import PerformanceMonitor from "./utils/performanceMonitor";
+import { initializeErrorHandlers } from "./utils/errorHandlers";
 
 // Initialize performance monitoring
 const perfMonitor = PerformanceMonitor.getInstance();
 perfMonitor.init();
+
+// Initialize global error handlers
+initializeErrorHandlers();
 
 // Function to handle URL corruption detection and cleanup
 function handleURLCorruption() {
