@@ -66,31 +66,99 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Minimal server running' });
 });
 
+// Store registered riders in memory for demo
+let registeredRiders = [
+  {
+    _id: '507f191e810c19729de860ea',
+    name: 'Rajesh Kumar',
+    phone: '+91 9876543210',
+    aadharNumber: '1234-5678-9012',
+    status: 'pending',
+    createdAt: new Date(),
+    aadharImageUrl: '/uploads/riders/aadhar-sample.jpg',
+    selfieImageUrl: '/uploads/riders/selfie-sample.jpg'
+  },
+  {
+    _id: '507f191e810c19729de860eb',
+    name: 'Amit Singh',
+    phone: '+91 9876543211',
+    aadharNumber: '1234-5678-9013',
+    status: 'approved',
+    createdAt: new Date(),
+    aadharImageUrl: '/uploads/riders/aadhar-sample2.jpg',
+    selfieImageUrl: '/uploads/riders/selfie-sample2.jpg'
+  }
+];
+
 // Basic admin API for testing
 app.get('/api/admin/riders', (req, res) => {
   console.log('📋 Admin riders endpoint called');
-  res.json([
-    {
-      _id: '507f191e810c19729de860ea',
-      name: 'Rajesh Kumar',
-      phone: '+91 9876543210',
-      aadharNumber: '1234-5678-9012',
+  res.json(registeredRiders);
+});
+
+// Rider registration endpoint with file upload
+app.post('/api/riders/register', upload.fields([
+  { name: 'aadharImage', maxCount: 1 },
+  { name: 'selfieImage', maxCount: 1 }
+]), (req, res) => {
+  try {
+    console.log('🔍 Rider registration attempt:', {
+      hasName: !!req.body.name,
+      hasPhone: !!req.body.phone,
+      hasAadhar: !!req.body.aadharNumber,
+      hasFiles: !!req.files,
+      fileKeys: req.files ? Object.keys(req.files) : []
+    });
+
+    const { name, phone, aadharNumber, otp } = req.body;
+
+    if (!name || !phone || !aadharNumber) {
+      return res.status(400).json({
+        message: 'Name, phone, and Aadhar number are required'
+      });
+    }
+
+    // Check if files were uploaded
+    if (!req.files?.aadharImage?.[0] || !req.files?.selfieImage?.[0]) {
+      return res.status(400).json({
+        message: 'Both Aadhar card image and selfie are required'
+      });
+    }
+
+    console.log('📁 Files uploaded:', {
+      aadharImage: req.files.aadharImage[0].filename,
+      selfieImage: req.files.selfieImage[0].filename
+    });
+
+    // Create new rider
+    const newRider = {
+      _id: 'rider_' + Date.now(),
+      name,
+      phone,
+      aadharNumber,
       status: 'pending',
       createdAt: new Date(),
-      aadharImageUrl: '/uploads/riders/aadhar-sample.jpg',
-      selfieImageUrl: '/uploads/riders/selfie-sample.jpg'
-    },
-    {
-      _id: '507f191e810c19729de860eb',
-      name: 'Amit Singh',
-      phone: '+91 9876543211',
-      aadharNumber: '1234-5678-9013',
-      status: 'approved',
-      createdAt: new Date(),
-      aadharImageUrl: '/uploads/riders/aadhar-sample2.jpg',
-      selfieImageUrl: '/uploads/riders/selfie-sample2.jpg'
-    }
-  ]);
+      aadharImageUrl: `/uploads/riders/${req.files.aadharImage[0].filename}`,
+      selfieImageUrl: `/uploads/riders/${req.files.selfieImage[0].filename}`,
+    };
+
+    // Add to our in-memory store
+    registeredRiders.push(newRider);
+
+    console.log('✅ Rider registered successfully:', name);
+    console.log('📸 Image paths:', {
+      aadhar: newRider.aadharImageUrl,
+      selfie: newRider.selfieImageUrl
+    });
+
+    res.status(201).json({
+      message: 'Registration submitted successfully. Please wait for admin approval.',
+      riderId: newRider._id
+    });
+  } catch (error) {
+    console.error('❌ Rider registration error:', error);
+    res.status(500).json({ message: 'Registration failed', error: error.message });
+  }
 });
 
 // Start server
