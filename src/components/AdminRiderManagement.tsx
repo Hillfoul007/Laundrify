@@ -319,13 +319,17 @@ export default function AdminRiderManagement() {
       }
     } catch (error) {
       console.error('❌ API error:', error);
-      toast.error('Failed to connect to backend API');
+      // More specific error message for different error types
+      if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+        toast.error('Backend server is not running. Please start the backend.');
+      } else {
+        toast.error('Failed to connect to backend API');
+      }
     }
 
     // No fallback data - show empty state when backend is unavailable
     console.log('❌ No orders available - backend connection failed');
     setOrders([]);
-    toast.error('Failed to load orders - please check backend connection');
   };
 
   const fetchActiveRiders = async () => {
