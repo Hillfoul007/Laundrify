@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import {
   User,
   MapPin,
@@ -9,8 +10,12 @@ import {
   LogOut,
   Shield,
   Activity,
-  Bell
+  Bell,
+  WifiOff,
+  Wifi
 } from 'lucide-react';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 interface RiderLayoutProps {
   children?: React.ReactNode;
