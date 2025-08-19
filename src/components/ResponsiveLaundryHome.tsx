@@ -1585,6 +1585,32 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
           onVerificationComplete={handleVerificationComplete}
         />
 
+        {/* Verification Alert Banner */}
+        {pendingCount > 0 && (
+          <div className="fixed top-16 left-4 right-4 z-50 sm:left-auto sm:right-4 sm:w-96">
+            <div className="bg-orange-500 text-white p-4 rounded-lg shadow-lg border border-orange-600">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <AlertTriangle className="h-5 w-5" />
+                  <div>
+                    <p className="font-semibold">Order Changes Need Approval</p>
+                    <p className="text-sm text-orange-100">
+                      {pendingCount} verification{pendingCount > 1 ? 's' : ''} pending
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={() => showVerificationPopup()}
+                  className="bg-white text-orange-600 hover:bg-orange-50"
+                >
+                  Review
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Demo Verification Buttons - Development Only */}
         {import.meta.env.DEV && currentUser && (
           <div className="fixed bottom-4 left-4 z-50 space-y-2">
