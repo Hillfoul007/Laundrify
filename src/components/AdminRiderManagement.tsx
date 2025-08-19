@@ -213,6 +213,11 @@ export default function AdminRiderManagement() {
   }, [orders]);
 
   const fetchRiders = async () => {
+    if (!backendConnected) {
+      console.log('⚪ Skipping fetchRiders - backend disconnected');
+      return;
+    }
+
     try {
       const response = await fetch(getAdminApiUrl('/riders'), {
         headers: {
@@ -223,25 +228,19 @@ export default function AdminRiderManagement() {
         const data = await response.json();
         console.log('📋 Riders fetched from API:', data.length, 'riders');
         setRiders(data);
+        setBackendConnected(true);
 
         if (data.length > 0) {
           toast.success(`Loaded ${data.length} riders from database`);
         }
       } else {
-        console.error('Failed to fetch riders:', response.status);
-        if (response.status === 404) {
-          toast.error('Admin rider API not available. Please ensure you are using the local development environment.');
-        } else {
-          toast.error(`Failed to load riders: ${response.status}`);
-        }
+        console.warn('Failed to fetch riders:', response.status);
+        setBackendConnected(false);
       }
     } catch (error) {
-      console.error('Failed to fetch riders:', error);
+      console.log('⚪ Backend unavailable for riders:', error.message);
       setRiders([]); // Prevent crashes with empty array
-      // Only show specific error for non-fetch errors to reduce noise
-      if (!error.message.includes('Failed to fetch')) {
-        toast.error('Network error loading riders');
-      }
+      setBackendConnected(false);
     }
   };
 
