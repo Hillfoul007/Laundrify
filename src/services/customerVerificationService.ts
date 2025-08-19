@@ -71,6 +71,36 @@ export class CustomerVerificationService {
   }
 
   /**
+   * Load processed verifications from localStorage
+   */
+  private loadProcessedVerifications(): void {
+    try {
+      const stored = localStorage.getItem(this.processedStorageKey);
+      if (stored) {
+        const processedIds = JSON.parse(stored);
+        this.processedVerifications = new Set(processedIds);
+        console.log(`📋 Loaded ${this.processedVerifications.size} processed verifications from localStorage`);
+      }
+    } catch (error) {
+      console.error('❌ Error loading processed verifications:', error);
+      this.processedVerifications = new Set();
+    }
+  }
+
+  /**
+   * Save processed verifications to localStorage
+   */
+  private saveProcessedVerifications(): void {
+    try {
+      const processedIds = Array.from(this.processedVerifications);
+      localStorage.setItem(this.processedStorageKey, JSON.stringify(processedIds));
+      console.log('💾 Processed verifications saved to localStorage');
+    } catch (error) {
+      console.error('❌ Error saving processed verifications:', error);
+    }
+  }
+
+  /**
    * Load pending verifications from localStorage and backend
    */
   private loadPendingVerifications(): void {
