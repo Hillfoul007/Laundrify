@@ -17,6 +17,7 @@
     "build:ultra-minimal": "NODE_OPTIONS=--max-old-space-size=256 node scripts/ultra-minimal-build.cjs",
     "build:emergency": "NODE_OPTIONS=--max-old-space-size=200 node scripts/emergency-build.cjs",
     "deploy:fix": "node scripts/deploy-fix.cjs",
+    "build:zero-deps": "node scripts/zero-dependency-build.cjs",
     "build:check": "NODE_OPTIONS=--max-old-space-size=384 tsc -b && NODE_OPTIONS=--max-old-space-size=384 vite build && NODE_OPTIONS=--max-old-space-size=384 node scripts/optimize-build.js",
     "build:analyze": "NODE_OPTIONS=--max-old-space-size=384 vite build --mode production && NODE_OPTIONS=--max-old-space-size=384 node scripts/bundle-analyzer.js",
     "lint": "eslint .",
