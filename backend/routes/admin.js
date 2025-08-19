@@ -981,6 +981,76 @@ router.post("/orders/assign", verifyAdminAccess, async (req, res) => {
   }
 });
 
+// Assign vendor to order
+router.post("/orders/assign-vendor", verifyAdminAccess, async (req, res) => {
+  try {
+    const { orderId, vendorData, orderType } = req.body;
+
+    console.log('🏪 Assigning vendor:', { orderId, vendorData, orderType });
+
+    // Vendor options
+    const vendors = {
+      'vendor1': {
+        name: 'Priya Dry Cleaners',
+        address: 'Shop n.155, Spaze corporate park, 1sf, Sector 69, Gurugram, Haryana 122101',
+        phone: '+91 9999999991'
+      },
+      'vendor2': {
+        name: 'White Tiger Dry Cleaning',
+        address: 'Shop No. 153, First Floor, Spaze Corporate Park, Sector 69, Gurugram, Haryana 122101',
+        phone: '+91 9999999992'
+      }
+    };
+
+    const selectedVendor = vendors[vendorData.vendorId];
+    if (!selectedVendor) {
+      return res.status(400).json({ message: 'Invalid vendor selection' });
+    }
+
+    // For development/mock mode, just return success
+    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+      return res.json({
+        message: 'Vendor assigned successfully (demo mode)',
+        order: { _id: orderId, assignedVendor: selectedVendor.name },
+        vendor: selectedVendor
+      });
+    }
+
+    let order;
+
+    if (orderType === 'Quick Pickup') {
+      order = await QuickPickup.findById(orderId);
+      if (!order) {
+        return res.status(404).json({ message: 'Quick pickup not found' });
+      }
+
+      order.assigned_vendor = selectedVendor.name;
+      order.assigned_vendor_details = selectedVendor;
+      await order.save();
+    } else {
+      order = await Booking.findById(orderId);
+      if (!order) {
+        return res.status(404).json({ message: 'Booking not found' });
+      }
+
+      order.assignedVendor = selectedVendor.name;
+      order.assignedVendorDetails = selectedVendor;
+      await order.save();
+    }
+
+    console.log(`✅ Vendor ${selectedVendor.name} assigned to order ${orderId}`);
+    res.json({
+      message: 'Vendor assigned successfully',
+      order,
+      vendor: selectedVendor
+    });
+
+  } catch (error) {
+    console.error('❌ Error assigning vendor to order:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 // ==========================================
 // CUSTOMER VERIFICATION ROUTES
 // ==========================================
