@@ -170,12 +170,12 @@ export default function CustomerVerificationPopup({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto sm:w-full">
         <DialogHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
             <div className="flex items-center space-x-2">
               <AlertTriangle className="h-5 w-5 text-orange-600" />
-              <DialogTitle>Customer Verification</DialogTitle>
+              <DialogTitle className="text-base sm:text-lg">Customer Verification</DialogTitle>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 flex-wrap">
               {pendingCount > 1 && (
                 <Badge variant="outline" className="text-xs">
                   {pendingCount} pending
