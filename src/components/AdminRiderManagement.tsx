@@ -398,6 +398,7 @@ export default function AdminRiderManagement() {
         specialInstructions: 'Check items before pickup',
         assignedRider: null,
         rider_id: null,
+        coordinates: { lat: 28.4211, lng: 77.0964 }, // Golf Course Road, Gurugram
         items: []
       }
     ];
