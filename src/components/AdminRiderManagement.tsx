@@ -444,16 +444,43 @@ export default function AdminRiderManagement() {
   };
 
   const getNearestRiders = (orderLocation: {lat: number, lng: number} | null) => {
+    console.log('🗺️ Distance calculation debug:', {
+      orderLocation,
+      activeRidersCount: activeRiders.length,
+      activeRiders: activeRiders.map(r => ({ name: r.name, location: r.location }))
+    });
+
     return activeRiders
-      .map(rider => ({
-        ...rider,
-        distance: (orderLocation && rider.location) ? calculateDistance(
-          orderLocation.lat,
-          orderLocation.lng,
-          rider.location.lat,
-          rider.location.lng
-        ) : 'Unknown'
-      }))
+      .map(rider => {
+        let distance = 'Unknown';
+
+        if (orderLocation && rider.location) {
+          try {
+            distance = calculateDistance(
+              orderLocation.lat,
+              orderLocation.lng,
+              rider.location.lat,
+              rider.location.lng
+            );
+            console.log(`📍 Distance from ${rider.name} to order: ${distance} km`);
+          } catch (error) {
+            console.error('❌ Distance calculation error:', error);
+            distance = 'Error';
+          }
+        } else {
+          console.log(`⚠️ Missing location data for ${rider.name}:`, {
+            hasOrderLocation: !!orderLocation,
+            hasRiderLocation: !!rider.location,
+            orderLocation,
+            riderLocation: rider.location
+          });
+        }
+
+        return {
+          ...rider,
+          distance
+        };
+      })
       .sort((a, b) => {
         if (a.distance === 'Unknown') return 1;
         if (b.distance === 'Unknown') return -1;
