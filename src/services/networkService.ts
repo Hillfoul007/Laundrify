@@ -52,11 +52,11 @@ export class NetworkService {
   }
 
   /**
-   * Check if backend is reachable
+   * Check if backend is reachable using a lightweight endpoint
    */
   public async checkBackendHealth(apiUrl: string): Promise<boolean> {
     const now = Date.now();
-    
+
     // Don't check too frequently
     if (now - this.lastBackendCheck < this.HEALTH_CHECK_INTERVAL) {
       return this.backendHealthy;
@@ -66,19 +66,36 @@ export class NetworkService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-      const response = await fetch(`${apiUrl}/health`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        signal: controller.signal
-      });
+      // Use a lightweight endpoint that likely exists
+      // Try to hit the base API first, then specific health endpoint
+      const endpoints = [`${apiUrl}/riders/notifications/unread-count`, `${apiUrl}/health`];
 
-      clearTimeout(timeoutId);
-      
-      this.backendHealthy = response.ok;
+      for (const endpoint of endpoints) {
+        try {
+          const response = await fetch(endpoint, {
+            method: 'HEAD', // Use HEAD to minimize data transfer
+            headers: { 'Content-Type': 'application/json' },
+            signal: controller.signal
+          });
+
+          clearTimeout(timeoutId);
+
+          // Accept any response (even 401/403) as long as server responds
+          this.backendHealthy = response.status < 500;
+          this.lastBackendCheck = now;
+
+          console.log(this.backendHealthy ? '✅ Backend reachable' : '⚠️ Backend error');
+          return this.backendHealthy;
+        } catch (endpointError) {
+          // Try next endpoint
+          continue;
+        }
+      }
+
+      // If all endpoints fail
+      this.backendHealthy = false;
       this.lastBackendCheck = now;
-      
-      console.log(this.backendHealthy ? '✅ Backend healthy' : '⚠️ Backend unhealthy');
-      return this.backendHealthy;
+      return false;
     } catch (error) {
       this.backendHealthy = false;
       this.lastBackendCheck = now;
