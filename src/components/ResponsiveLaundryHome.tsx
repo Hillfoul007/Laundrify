@@ -732,7 +732,16 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
                         console.log('🔍 Mobile verification button clicked, pending count:', pendingCount);
                         console.log('📱 Current verification:', currentVerification);
                         console.log('📱 Popup open state:', isVerificationPopupOpen);
+
+                        // Debug the verification system
+                        debugVerificationSystem();
+
                         showVerificationPopup();
+
+                        // Double-check state after calling showVerificationPopup
+                        setTimeout(() => {
+                          console.log('📱 Popup state after showVerificationPopup:', isVerificationPopupOpen);
+                        }, 100);
                       }}
                       size="sm"
                       className="mobile-button mobile-touch verification-button-mobile bg-red-500 hover:bg-red-600 active:bg-red-700 text-white border-0 h-12 px-4 animate-pulse transition-all duration-200 min-w-[60px] verification-alert"
