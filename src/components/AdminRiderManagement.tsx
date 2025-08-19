@@ -32,7 +32,8 @@ import {
   Package,
   Clock,
   Activity,
-  Search
+  Search,
+  Store
 } from 'lucide-react';
 import { toast } from 'sonner';
 import AdminLiveMap from './AdminLiveMap';
