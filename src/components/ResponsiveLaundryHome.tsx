@@ -712,16 +712,24 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
 
             <div className="flex items-center gap-2">
               {currentUser && (
-                <div className="relative">
-                  <NotificationBell
-                    userId={currentUser._id || currentUser.phone}
-                    className="text-white hover:bg-white/20"
-                  />
-                  {/* Verification count badge */}
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <NotificationBell
+                      userId={currentUser._id || currentUser.phone}
+                      className="text-white hover:bg-white/20"
+                    />
+                  </div>
+
+                  {/* Mobile Verification Alert Button */}
                   {pendingCount > 0 && (
-                    <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold border-2 border-white z-10">
-                      V
-                    </div>
+                    <Button
+                      onClick={showVerificationPopup}
+                      size="sm"
+                      className="bg-red-500 hover:bg-red-600 text-white border-0 h-10 px-3 animate-pulse"
+                    >
+                      <Bell className="h-4 w-4 mr-1" />
+                      <span className="text-xs font-bold">{pendingCount}</span>
+                    </Button>
                   )}
                 </div>
               )}
