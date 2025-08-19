@@ -12,6 +12,7 @@
     "build": "NODE_OPTIONS=--max-old-space-size=384 vite build && NODE_OPTIONS=--max-old-space-size=384 node scripts/optimize-build.js",
     "build:pwa": "NODE_OPTIONS=--max-old-space-size=384 node scripts/memory-optimized-build.cjs",
     "build:minimal": "NODE_OPTIONS=--max-old-space-size=300 node scripts/minimal-build.cjs",
+    "build:ultra-minimal": "NODE_OPTIONS=--max-old-space-size=256 node scripts/ultra-minimal-build.cjs",
     "build:check": "NODE_OPTIONS=--max-old-space-size=384 tsc -b && NODE_OPTIONS=--max-old-space-size=384 vite build && NODE_OPTIONS=--max-old-space-size=384 node scripts/optimize-build.js",
     "build:analyze": "NODE_OPTIONS=--max-old-space-size=384 vite build --mode production && NODE_OPTIONS=--max-old-space-size=384 node scripts/bundle-analyzer.js",
     "lint": "eslint .",
