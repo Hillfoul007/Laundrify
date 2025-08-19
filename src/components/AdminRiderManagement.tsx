@@ -522,14 +522,14 @@ export default function AdminRiderManagement() {
     return d.toFixed(1);
   };
 
-  const getNearestRiders = (orderLocation: {lat: number, lng: number}) => {
+  const getNearestRiders = (orderLocation: {lat: number, lng: number} | null) => {
     return activeRiders
       .map(rider => ({
         ...rider,
-        distance: rider.location ? calculateDistance(
-          orderLocation.lat, 
-          orderLocation.lng, 
-          rider.location.lat, 
+        distance: (orderLocation && rider.location) ? calculateDistance(
+          orderLocation.lat,
+          orderLocation.lng,
+          rider.location.lat,
           rider.location.lng
         ) : 'Unknown'
       }))
