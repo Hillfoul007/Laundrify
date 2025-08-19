@@ -46,12 +46,22 @@ export default function CustomerVerificationPopup({
   const verificationService = CustomerVerificationService.getInstance();
 
   useEffect(() => {
+    console.log('📱 CustomerVerificationPopup - isOpen changed:', isOpen);
+    console.log('📱 CustomerVerificationPopup - verification prop:', verification);
+
     if (isOpen && !verification) {
       // Get the next pending verification
       const next = verificationService.getNextPendingVerification();
+      console.log('📱 CustomerVerificationPopup - next verification:', next);
       setCurrentVerification(next);
+      if (next) {
+        console.log('✅ CustomerVerificationPopup - set current verification');
+      } else {
+        console.log('❌ CustomerVerificationPopup - no verification found');
+      }
     } else {
       setCurrentVerification(verification || null);
+      console.log('✅ CustomerVerificationPopup - set verification from prop or null');
     }
   }, [isOpen, verification]);
 
