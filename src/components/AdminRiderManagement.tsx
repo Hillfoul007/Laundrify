@@ -152,8 +152,6 @@ export default function AdminRiderManagement() {
   const [vendorModalOpen, setVendorModalOpen] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [backendConnected, setBackendConnected] = useState(true);
-  const [errorShown, setErrorShown] = useState(false);
 
   useEffect(() => {
     console.log('🚀 AdminRiderManagement component mounted, fetching data...');
