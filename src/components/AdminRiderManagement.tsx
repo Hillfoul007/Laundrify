@@ -70,20 +70,53 @@ const RiderImageDisplay: React.FC<{ src: string; alt: string }> = ({ src, alt })
     setHasError(false);
   };
 
-  const handleImageError = () => {
+  const handleImageError = (e: any) => {
+    console.error('🖼️ Image failed to load:', {
+      src,
+      imageUrl: getImageUrl(src),
+      error: e,
+      networkError: e?.target?.error
+    });
     setIsLoading(false);
     setHasError(true);
   };
 
   const imageUrl = getImageUrl(src);
 
-  if (hasError || !imageUrl) {
+  if (!imageUrl) {
     return (
       <div className="mt-2 p-4 border rounded bg-gray-50 text-center text-gray-500">
+        <p>No image path provided</p>
+      </div>
+    );
+  }
+
+  if (hasError) {
+    return (
+      <div className="mt-2 p-4 border rounded bg-orange-50 text-center">
         <div className="space-y-2">
-          <p>Image not available</p>
-          <p className="text-xs">Path: {src}</p>
-          <p className="text-xs">URL: {imageUrl}</p>
+          <p className="text-orange-600 font-medium">Image failed to load</p>
+          <p className="text-xs text-gray-600">Path: {src}</p>
+          <p className="text-xs text-gray-600">URL: {imageUrl}</p>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              setHasError(false);
+              setIsLoading(true);
+            }}
+            className="mt-2"
+          >
+            Retry Loading
+          </Button>
+          <Button
+            size="sm"
+            variant="link"
+            onClick={() => window.open(imageUrl, '_blank')}
+            className="mt-1"
+          >
+            Open in New Tab
+          </Button>
         </div>
       </div>
     );
