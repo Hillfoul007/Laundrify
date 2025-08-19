@@ -175,13 +175,27 @@ export default function CustomerVerificationPopup({
     return null;
   }
 
-  const { orderData } = currentVerification;
+  // Validate verification data structure
+  if (!isValidVerificationData(currentVerification)) {
+    console.error('CustomerVerificationPopup: Invalid verification data structure', {
+      verification: currentVerification
+    });
 
-  // Validate orderData and its required properties
-  if (!orderData || !orderData.originalItems || !orderData.updatedItems) {
-    console.error('CustomerVerificationPopup: Invalid orderData structure', { orderData });
+    // Try to get the next valid verification
+    const validVerifications = verificationService.getPendingVerifications()
+      .filter(v => isValidVerificationData(v));
+
+    if (validVerifications.length > 0) {
+      setCurrentVerification(validVerifications[0]);
+      return null; // Re-render with valid data
+    }
+
+    // No valid verifications found, close popup
+    onClose();
     return null;
   }
+
+  const { orderData } = currentVerification;
 
   const itemChanges = getItemChanges(orderData);
   const pendingCount = verificationService.getPendingVerifications().length;
