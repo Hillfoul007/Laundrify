@@ -161,11 +161,17 @@ export default function RiderNotifications({ compact = false }: RiderNotificatio
         return;
       }
 
+      // Check if online before making request
+      if (!navigator.onLine) {
+        console.log('📱 Offline mode: Skipping unread count fetch');
+        return;
+      }
+
       const apiUrl = getRiderApiUrl('/notifications/unread-count');
-      console.log('Fetching unread count from:', apiUrl);
+      console.log('🔄 Fetching unread count from:', apiUrl);
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // Increased timeout
 
       const response = await fetch(apiUrl, {
         headers: {
@@ -180,17 +186,25 @@ export default function RiderNotifications({ compact = false }: RiderNotificatio
       if (response.ok) {
         const data = await response.json();
         setUnreadCount(data.count || 0);
+        console.log('✅ Unread count updated:', data.count || 0);
       } else {
-        console.warn('Failed to fetch unread count:', response.status, response.statusText);
-        setUnreadCount(0);
+        console.warn('⚠️ API returned error:', response.status, response.statusText);
+        // Don't set to 0 on server errors, keep existing count
+        if (response.status >= 500) {
+          console.log('🔧 Server error detected, keeping existing count');
+        } else {
+          setUnreadCount(0);
+        }
       }
     } catch (error) {
       if (error.name === 'AbortError') {
-        console.warn('Unread count fetch timed out');
+        console.log('⏰ Request timed out - network may be slow');
+      } else if (error.message?.includes('Failed to fetch')) {
+        console.log('🌐 Network error - backend may be unreachable');
       } else {
-        console.error('Failed to fetch unread count:', error);
+        console.warn('❌ Unexpected error fetching unread count:', error.message);
       }
-      setUnreadCount(0);
+      // Don't change count on network errors - avoid UI flicker
     }
   };
 
