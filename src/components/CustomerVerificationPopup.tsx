@@ -221,9 +221,17 @@ export default function CustomerVerificationPopup({
     }
   };
 
-  if (!currentVerification || !isValidVerificationData(currentVerification)) {
+  if (!currentVerification) {
+    console.log('❌ CustomerVerificationPopup: No current verification, returning null');
     return null;
   }
+
+  if (!isValidVerificationData(currentVerification)) {
+    console.log('❌ CustomerVerificationPopup: Invalid verification data, returning null');
+    return null;
+  }
+
+  console.log('��� CustomerVerificationPopup: Rendering popup with valid verification');
 
   const { orderData } = currentVerification;
 
