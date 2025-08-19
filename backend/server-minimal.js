@@ -99,6 +99,78 @@ app.get('/api/admin/riders', (req, res) => {
 // Mock OTP service
 const mockOTPs = new Map();
 
+// OTP request endpoint for rider login
+app.post('/api/riders/request-otp', (req, res) => {
+  try {
+    const { phone } = req.body;
+
+    if (!phone) {
+      return res.status(400).json({
+        message: 'Phone number is required'
+      });
+    }
+
+    // Generate mock OTP
+    const otp = '123456'; // Fixed OTP for demo
+    mockOTPs.set(phone + '_login', otp);
+
+    console.log('📱 OTP request for login:', phone, 'OTP:', otp);
+
+    res.json({
+      message: 'OTP sent successfully',
+      // In demo mode, we can show the OTP for testing
+      demo_otp: otp
+    });
+  } catch (error) {
+    console.error('❌ OTP request error:', error);
+    res.status(500).json({ message: 'Failed to send OTP', error: error.message });
+  }
+});
+
+// OTP verification endpoint for rider login
+app.post('/api/riders/verify-otp', (req, res) => {
+  try {
+    const { phone, otp } = req.body;
+
+    if (!phone || !otp) {
+      return res.status(400).json({
+        message: 'Phone number and OTP are required'
+      });
+    }
+
+    // Verify OTP
+    const storedOTP = mockOTPs.get(phone + '_login');
+    if (!storedOTP || storedOTP !== otp) {
+      return res.status(400).json({
+        message: 'Invalid or expired OTP'
+      });
+    }
+
+    // Remove used OTP
+    mockOTPs.delete(phone + '_login');
+
+    // Find or create rider
+    const existingRider = registeredRiders.find(r => r.phone === phone);
+
+    if (!existingRider) {
+      return res.status(404).json({
+        message: 'Rider not found. Please register first.'
+      });
+    }
+
+    console.log('✅ Rider OTP login successful:', phone);
+
+    res.json({
+      message: 'Login successful',
+      rider: existingRider,
+      token: 'demo_token_' + Date.now()
+    });
+  } catch (error) {
+    console.error('❌ OTP verification error:', error);
+    res.status(500).json({ message: 'OTP verification failed', error: error.message });
+  }
+});
+
 // OTP request endpoint for rider registration
 app.post('/api/riders/register/request-otp', (req, res) => {
   try {
