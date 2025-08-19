@@ -180,11 +180,6 @@ export default function AdminRiderManagement() {
   }, [orders]);
 
   const fetchRiders = async () => {
-    if (!backendConnected) {
-      console.log('⚪ Skipping fetchRiders - backend disconnected');
-      return;
-    }
-
     try {
       const response = await fetch(getAdminApiUrl('/riders'), {
         headers: {
@@ -195,19 +190,17 @@ export default function AdminRiderManagement() {
         const data = await response.json();
         console.log('📋 Riders fetched from API:', data.length, 'riders');
         setRiders(data);
-        setBackendConnected(true);
 
         if (data.length > 0) {
           toast.success(`Loaded ${data.length} riders from database`);
         }
       } else {
         console.warn('Failed to fetch riders:', response.status);
-        setBackendConnected(false);
+        setRiders([]);
       }
     } catch (error) {
       console.log('⚪ Backend unavailable for riders:', error.message);
       setRiders([]); // Prevent crashes with empty array
-      setBackendConnected(false);
     }
   };
 
