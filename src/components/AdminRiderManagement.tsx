@@ -221,29 +221,11 @@ export default function AdminRiderManagement() {
         const apiOrders = Array.isArray(data) ? data : (data.bookings || data.orders || []);
 
         if (apiOrders.length > 0) {
-          // Filter out demo orders first
-          const realOrders = apiOrders.filter((order: any) => {
-            const isDemo =
-              // Check for demo order IDs
-              (order.custom_order_id && (order.custom_order_id.startsWith('LAU-') || order.custom_order_id.startsWith('QP-'))) ||
-              (order.bookingId && (order.bookingId.startsWith('LAU-') || order.bookingId.startsWith('QP-'))) ||
-              (order._id && order._id.includes('demo')) ||
-              // Check for demo customer names
-              order.customerName === 'John Doe' ||
-              order.customerName === 'Jane Smith' ||
-              order.customerName === 'Mike Johnson' ||
-              // Check for demo addresses
-              (order.address && order.address.includes('123 MG Road')) ||
-              (order.address && order.address.includes('456 Cyber City')) ||
-              (order.address && order.address.includes('789 Golf Course Road'));
-
-            return !isDemo;
-          });
-
-          console.log(`🔍 Filtered out ${apiOrders.length - realOrders.length} demo orders`);
+          console.log('📋 Processing orders from API:', apiOrders.length, 'orders');
+          console.log('🔍 Raw API orders:', apiOrders);
 
           // Process orders to ensure consistent data format with populated customer data
-          const processedOrders = realOrders.map((order: any) => {
+          const processedOrders = apiOrders.map((order: any) => {
             // Handle populated customer_id object vs direct fields
             const customer = order.customer_id || {};
             const customerName = order.customerName ||
