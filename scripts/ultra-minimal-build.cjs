@@ -72,11 +72,11 @@ async function main() {
     
     // Use the ultra-minimal vite config
     await runCommand('npx', [
-      'vite', 
-      'build', 
-      '--config', 
-      'vite.render.config.ts',
-      '--mode', 
+      'vite',
+      'build',
+      '--config',
+      'vite.ultra-minimal.config.ts',
+      '--mode',
       'production',
       '--logLevel',
       'warn' // Reduce logging to save memory
@@ -87,7 +87,7 @@ async function main() {
     
   } catch (error) {
     console.error('❌ Build failed:', error.message);
-    console.error('💡 Try reducing dependencies or using build:production script');
+    console.error('�� Try reducing dependencies or using build:production script');
     process.exit(1);
   }
 }
