@@ -132,10 +132,12 @@ const RiderImageDisplay: React.FC<{ src: string; alt: string }> = ({ src, alt })
       <img
         src={imageUrl}
         alt={alt}
-        className="w-full h-32 object-cover border rounded"
+        className="w-full h-32 object-cover border rounded cursor-pointer hover:opacity-90 transition-opacity"
         onLoad={handleImageLoad}
         onError={handleImageError}
+        onClick={() => window.open(imageUrl, '_blank')}
         style={{ display: isLoading ? 'none' : 'block' }}
+        title="Click to open in new tab"
       />
     </div>
   );
