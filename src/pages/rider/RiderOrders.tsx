@@ -1261,12 +1261,7 @@ export default function RiderOrders() {
                       Cancel
                     </Button>
                     <Button
-                      onClick={() => {
-                        setCustomerVerificationRequired(true);
-                        setVerificationStatus('pending');
-                        setShowConfirmDialog(false);
-                        toast.info('Customer has been notified. Waiting for verification...');
-                      }}
+                      onClick={sendVerificationToCustomer}
                       disabled={isSaving}
                       className="flex-1"
                     >
