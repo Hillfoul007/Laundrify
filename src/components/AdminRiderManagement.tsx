@@ -301,7 +301,10 @@ export default function AdminRiderManagement() {
                   address: order.address
                 });
                 return order.coordinates && order.coordinates.lat && order.coordinates.lng
-                  ? { lat: order.coordinates.lat, lng: order.coordinates.lng }
+                  ? {
+                      lat: parseFloat(order.coordinates.lat),
+                      lng: parseFloat(order.coordinates.lng)
+                    }
                   : null;
               })(),
               itemsCollected: order.itemsCollected || [],
