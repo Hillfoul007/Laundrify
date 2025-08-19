@@ -43,15 +43,6 @@ const RiderImageDisplay: React.FC<{ src: string; alt: string }> = ({ src, alt })
   const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Debug logging to understand what src is being passed
-  React.useEffect(() => {
-    console.log('🖼️ RiderImageDisplay received src:', {
-      src,
-      type: typeof src,
-      isString: typeof src === 'string',
-      value: src
-    });
-  }, [src]);
 
   // Get the correct image URL based on environment
   const getImageUrl = (imagePath: string) => {
