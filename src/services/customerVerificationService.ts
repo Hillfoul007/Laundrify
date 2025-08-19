@@ -382,6 +382,10 @@ export class CustomerVerificationService {
       this.pendingVerifications = this.pendingVerifications.filter(v => v.id !== verificationId);
       this.savePendingVerifications();
 
+      // Track as processed to prevent re-showing (especially for rejected verifications)
+      this.processedVerifications.add(verificationId);
+      this.saveProcessedVerifications();
+
       // Trigger verification completed event
       window.dispatchEvent(new CustomEvent('verificationCompleted', {
         detail: { 
