@@ -207,9 +207,12 @@ export class CustomerVerificationService {
 
     this.pendingVerifications.push(newVerification);
     this.savePendingVerifications();
-    
+
     console.log('✅ Added new pending verification:', id);
-    
+
+    // Create a notification for the customer
+    this.createVerificationNotification(newVerification);
+
     // Trigger verification event
     window.dispatchEvent(new CustomEvent('newVerificationPending', {
       detail: { verification: newVerification }
