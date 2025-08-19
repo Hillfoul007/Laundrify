@@ -1620,37 +1620,6 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
           </div>
         )}
 
-        {/* Demo Verification Buttons - Development Only */}
-        {import.meta.env.DEV && currentUser && (
-          <div className="fixed bottom-4 left-4 z-50 space-y-2">
-            <div>
-              <Button
-                onClick={createDemoVerification}
-                size="sm"
-                variant="outline"
-                className="bg-yellow-400 hover:bg-yellow-500 text-black border-yellow-600"
-              >
-                <Bell className="h-4 w-4 mr-2" />
-                Demo Verification
-                {pendingCount > 0 && (
-                  <Badge className="ml-2 bg-red-500 text-white text-xs">
-                    {pendingCount}
-                  </Badge>
-                )}
-              </Button>
-            </div>
-            <div>
-              <Button
-                onClick={() => window.open('/verification-popup-demo', '_blank')}
-                size="sm"
-                variant="outline"
-                className="bg-blue-400 hover:bg-blue-500 text-white border-blue-600"
-              >
-                🎭 Full Demo Page
-              </Button>
-            </div>
-          </div>
-        )}
     </div>
       </div>
   );
