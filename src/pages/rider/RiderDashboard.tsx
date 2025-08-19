@@ -594,7 +594,21 @@ export default function RiderDashboard() {
               </div>
             ) : (
               <div className="space-y-4">
-                {assignedOrders.map((order) => (
+                {assignedOrders
+                  .sort((a, b) => {
+                    // Sort by pickup time - earliest first
+                    const timeA = a.pickupTime || a.scheduled_time || '23:59';
+                    const timeB = b.pickupTime || b.scheduled_time || '23:59';
+                    const dateA = a.pickupDate || a.scheduled_date || '2099-12-31';
+                    const dateB = b.pickupDate || b.scheduled_date || '2099-12-31';
+
+                    // Combine date and time for comparison
+                    const datetimeA = new Date(`${dateA} ${timeA}`);
+                    const datetimeB = new Date(`${dateB} ${timeB}`);
+
+                    return datetimeA.getTime() - datetimeB.getTime();
+                  })
+                  .map((order) => (
                   <Card key={order._id} className="border-l-4 border-l-laundrify-purple">
                     <CardContent className="pt-4">
                       <div className="flex justify-between items-start mb-3">
