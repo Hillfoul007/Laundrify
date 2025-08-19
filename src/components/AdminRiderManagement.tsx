@@ -292,9 +292,18 @@ export default function AdminRiderManagement() {
               actualCost: order.actualCost || 0,
 
               // Location coordinates for distance calculation
-              location: order.coordinates && order.coordinates.lat && order.coordinates.lng
-                ? { lat: order.coordinates.lat, lng: order.coordinates.lng }
-                : null,
+              location: (() => {
+                console.log(`📍 Order ${order._id || order.bookingId} location data:`, {
+                  hasCoordinates: !!order.coordinates,
+                  coordinates: order.coordinates,
+                  hasLat: !!(order.coordinates?.lat),
+                  hasLng: !!(order.coordinates?.lng),
+                  address: order.address
+                });
+                return order.coordinates && order.coordinates.lat && order.coordinates.lng
+                  ? { lat: order.coordinates.lat, lng: order.coordinates.lng }
+                  : null;
+              })(),
               itemsCollected: order.itemsCollected || [],
               riderStatus: order.riderStatus || 'unassigned'
             };
