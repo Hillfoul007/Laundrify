@@ -936,6 +936,12 @@ router.post("/orders/assign", verifyAdminAccess, async (req, res) => {
       order.riderStatus = 'assigned';
       order.assignedAt = new Date();
 
+      // Automatically update order status from pending to confirmed when rider is assigned
+      if (order.status === 'pending') {
+        order.status = 'confirmed';
+        console.log(`📋 Order status updated: pending → confirmed for order ${orderId}`);
+      }
+
       // Add to rider's assigned orders
       if (!rider.assignedOrders.includes(orderId)) {
         rider.assignedOrders.push(orderId);
