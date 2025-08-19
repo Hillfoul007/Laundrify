@@ -55,6 +55,26 @@ export default function CustomerVerificationPopup({
     }
   }, [isOpen, verification]);
 
+  // Validation effect to handle invalid verification data
+  useEffect(() => {
+    if (currentVerification && !isValidVerificationData(currentVerification)) {
+      console.error('CustomerVerificationPopup: Invalid verification data detected', {
+        verification: currentVerification
+      });
+
+      // Try to get the next valid verification
+      const validVerifications = verificationService.getPendingVerifications()
+        .filter(v => isValidVerificationData(v));
+
+      if (validVerifications.length > 0) {
+        setCurrentVerification(validVerifications[0]);
+      } else {
+        // No valid verifications found, close popup
+        onClose();
+      }
+    }
+  }, [currentVerification, onClose]);
+
   const handleVerification = async (approved: boolean) => {
     if (!currentVerification) return;
 
