@@ -1196,6 +1196,14 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
             <MessageCircle className="h-5 w-5" />
           </button>
         </div>
+
+        {/* Customer Verification Popup */}
+        <CustomerVerificationPopup
+          isOpen={isVerificationPopupOpen}
+          onClose={hideVerificationPopup}
+          verification={currentVerification}
+          onVerificationComplete={handleVerificationComplete}
+        />
       </div>
     );
   }
