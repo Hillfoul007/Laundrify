@@ -380,10 +380,28 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
   // Check for pending customer verifications on app startup
   useEffect(() => {
     if (currentUser) {
+      // Request notification permission
+      requestNotificationPermission();
+
       // Only check when user is authenticated
       checkOnStartup();
     }
   }, [currentUser, checkOnStartup]);
+
+  // Request notification permission for verification alerts
+  const requestNotificationPermission = async () => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      try {
+        const permission = await Notification.requestPermission();
+        console.log('🔔 Notification permission:', permission);
+        if (permission === 'granted') {
+          console.log('✅ Notifications enabled for order verifications');
+        }
+      } catch (error) {
+        console.warn('⚠️ Could not request notification permission:', error);
+      }
+    }
+  };
 
   // Handle verification notification events
   useEffect(() => {
