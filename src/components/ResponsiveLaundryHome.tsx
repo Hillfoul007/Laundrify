@@ -704,10 +704,18 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
 
             <div className="flex items-center gap-2">
               {currentUser && (
-                <NotificationBell
-                  userId={currentUser._id || currentUser.phone}
-                  className="text-white hover:bg-white/20"
-                />
+                <div className="relative">
+                  <NotificationBell
+                    userId={currentUser._id || currentUser.phone}
+                    className="text-white hover:bg-white/20"
+                  />
+                  {/* Verification count badge */}
+                  {pendingCount > 0 && (
+                    <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold border-2 border-white z-10">
+                      V
+                    </div>
+                  )}
+                </div>
               )}
 
               {currentUser ? (
