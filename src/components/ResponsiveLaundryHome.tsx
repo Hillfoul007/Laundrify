@@ -100,7 +100,9 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
     showVerificationPopup,
     hideVerificationPopup,
     checkOnStartup,
-    handleVerificationComplete
+    checkPendingVerifications,
+    handleVerificationComplete,
+    verificationService
   } = useCustomerVerification();
 
   // Customer notifications system
