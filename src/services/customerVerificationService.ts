@@ -222,6 +222,75 @@ export class CustomerVerificationService {
   }
 
   /**
+   * Create a notification for the customer about pending verification
+   */
+  private createVerificationNotification(verification: PendingVerification): void {
+    try {
+      // Create a browser notification if permission is granted
+      if ('Notification' in window && Notification.permission === 'granted') {
+        const notificationTitle = 'Order Changes Need Your Approval';
+        const notificationBody = `Your rider has updated your order. Total: ₹${verification.orderData.updatedTotal}. Tap to review changes.`;
+
+        const notification = new Notification(notificationTitle, {
+          body: notificationBody,
+          icon: '/laundrify-exact-icon.svg',
+          tag: `verification-${verification.id}`,
+          requireInteraction: true,
+          data: {
+            verificationId: verification.id,
+            action: 'open_verification'
+          }
+        });
+
+        // Handle notification click
+        notification.onclick = () => {
+          console.log('🔔 Verification notification clicked');
+          // Trigger verification popup
+          window.dispatchEvent(new CustomEvent('openVerificationPopup', {
+            detail: { verification }
+          }));
+          notification.close();
+
+          // Focus the window if needed
+          if (window.focus) {
+            window.focus();
+          }
+        };
+
+        console.log('🔔 Browser notification created for verification:', verification.id);
+      }
+
+      // Also create an in-app notification (fallback)
+      this.createInAppNotification(verification);
+
+    } catch (error) {
+      console.error('❌ Error creating verification notification:', error);
+    }
+  }
+
+  /**
+   * Create an in-app notification
+   */
+  private createInAppNotification(verification: PendingVerification): void {
+    // Create a custom event for in-app notification
+    window.dispatchEvent(new CustomEvent('showInAppNotification', {
+      detail: {
+        id: `verification-${verification.id}`,
+        title: 'Order Changes Need Approval',
+        message: `Your rider has updated your order (Total: ₹${verification.orderData.updatedTotal}). Tap to review changes.`,
+        type: 'verification',
+        priority: verification.priority,
+        action: () => {
+          window.dispatchEvent(new CustomEvent('openVerificationPopup', {
+            detail: { verification }
+          }));
+        },
+        verificationId: verification.id
+      }
+    }));
+  }
+
+  /**
    * Process verification response (approve/reject)
    */
   public async processVerification(verificationId: string, approved: boolean, reason?: string): Promise<{
