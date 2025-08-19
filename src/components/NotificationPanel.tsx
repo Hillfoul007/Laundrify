@@ -80,7 +80,7 @@ const NotificationPanel: React.FC = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-80 max-h-96 overflow-y-auto"
+        className="w-80 sm:w-80 w-[95vw] max-w-[380px] max-h-96 overflow-y-auto"
       >
         <div className="flex items-center justify-between p-3 border-b">
           <h3 className="font-semibold text-sm">Notifications</h3>
