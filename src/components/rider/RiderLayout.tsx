@@ -26,6 +26,7 @@ export default function RiderLayout({ children }: RiderLayoutProps) {
   const location = useLocation();
   const [rider, setRider] = React.useState<any>(null);
   const [unreadCount, setUnreadCount] = React.useState<number>(0);
+  const { isOnline } = useNetworkStatus();
 
   React.useEffect(() => {
     // Check if rider is logged in
