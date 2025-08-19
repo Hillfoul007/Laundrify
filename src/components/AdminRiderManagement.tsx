@@ -288,6 +288,11 @@ export default function AdminRiderManagement() {
               // Quick pickup specific fields
               estimatedCost: order.estimatedCost || 0,
               actualCost: order.actualCost || 0,
+
+              // Location coordinates for distance calculation
+              location: order.coordinates && order.coordinates.lat && order.coordinates.lng
+                ? { lat: order.coordinates.lat, lng: order.coordinates.lng }
+                : null,
               itemsCollected: order.itemsCollected || [],
               riderStatus: order.riderStatus || 'unassigned'
             };
