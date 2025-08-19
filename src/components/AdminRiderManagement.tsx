@@ -354,6 +354,11 @@ export default function AdminRiderManagement() {
       }
     } catch (error) {
       console.error('Failed to fetch active riders:', error);
+      setActiveRiders([]); // Prevent crashes with empty array
+      // Only show specific error for non-fetch errors to reduce noise
+      if (!error.message.includes('Failed to fetch')) {
+        toast.error('Network error loading active riders');
+      }
     }
   };
 
