@@ -203,6 +203,21 @@ export default function RiderLayout({ children }: RiderLayoutProps) {
               </nav>
 
               <div className="flex items-center space-x-4">
+                {/* Network Status Indicator */}
+                <div className="flex items-center space-x-2">
+                  {isOnline ? (
+                    <Badge variant="outline" className="text-green-600 border-green-300 bg-green-50">
+                      <Wifi className="h-3 w-3 mr-1" />
+                      Online
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="text-red-600 border-red-300 bg-red-50">
+                      <WifiOff className="h-3 w-3 mr-1" />
+                      Offline
+                    </Badge>
+                  )}
+                </div>
+
                 <div className="text-sm text-gray-600">
                   Welcome, {rider.name}
                 </div>
