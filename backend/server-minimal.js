@@ -143,11 +143,22 @@ app.post('/api/riders/register', upload.fields([
 
     const { name, phone, aadharNumber, otp } = req.body;
 
-    if (!name || !phone || !aadharNumber) {
+    if (!name || !phone || !aadharNumber || !otp) {
       return res.status(400).json({
-        message: 'Name, phone, and Aadhar number are required'
+        message: 'Name, phone, Aadhar number, and OTP are required'
       });
     }
+
+    // Verify OTP
+    const storedOTP = mockOTPs.get(phone);
+    if (!storedOTP || storedOTP !== otp) {
+      return res.status(400).json({
+        message: 'Invalid or expired OTP'
+      });
+    }
+
+    // Remove used OTP
+    mockOTPs.delete(phone);
 
     // Check if files were uploaded
     if (!req.files?.aadharImage?.[0] || !req.files?.selfieImage?.[0]) {
