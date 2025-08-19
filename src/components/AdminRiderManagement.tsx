@@ -67,8 +67,8 @@ const RiderImageDisplay: React.FC<{ src: string; alt: string }> = ({ src, alt })
     const isLocalhost = hostname.includes("localhost") || hostname.includes("127.0.0.1");
 
     if (isLocalhost && isDev) {
-      // In local development, proxy to backend
-      return `/api${imagePath}`;
+      // In local development, use direct backend URL
+      return `http://localhost:3001${imagePath}`;
     } else {
       // In production/hosted, use direct backend URL
       return `https://backend-vaxf.onrender.com${imagePath}`;
@@ -540,7 +540,7 @@ export default function AdminRiderManagement() {
               rider.location.lat,
               rider.location.lng
             );
-            console.log(`📍 Distance from ${rider.name} to order: ${distance} km`);
+            console.log(`��� Distance from ${rider.name} to order: ${distance} km`);
           } catch (error) {
             console.error('❌ Distance calculation error:', error);
             distance = 'Error';
