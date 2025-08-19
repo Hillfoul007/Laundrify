@@ -361,12 +361,45 @@ export default function CustomerVerificationPopup({
             </div>
           </div>
 
+          {/* Customer Verification Actions */}
+          <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-200">
+            <h3 className="font-semibold text-blue-900 mb-3 flex items-center">
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Verify Order Changes
+            </h3>
+            <p className="text-sm text-blue-800 mb-4">
+              Please review the changes above and choose your action:
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button
+                onClick={() => handleVerification(true)}
+                disabled={isSubmitting}
+                className="bg-green-600 hover:bg-green-700 text-white flex-1"
+                size="lg"
+              >
+                <CheckCircle className="h-4 w-4 mr-2" />
+                {isSubmitting ? 'Processing...' : 'Approve Changes'}
+              </Button>
+              <Button
+                onClick={() => handleVerification(false)}
+                disabled={isSubmitting}
+                variant="destructive"
+                className="flex-1"
+                size="lg"
+              >
+                <XCircle className="h-4 w-4 mr-2" />
+                {isSubmitting ? 'Processing...' : 'Reject Changes'}
+              </Button>
+            </div>
+          </div>
+
           {/* Action Buttons */}
           <div className="flex justify-between items-center pt-4 border-t">
             <div className="text-sm text-gray-600">
               {pendingCount > 1 && `${pendingCount - 1} more verification(s) pending`}
             </div>
-            
+
             <div className="flex space-x-3">
               {pendingCount > 1 && (
                 <Button
