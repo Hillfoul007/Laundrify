@@ -92,16 +92,25 @@ export default function RiderNotifications({ compact = false }: RiderNotificatio
       const token = localStorage.getItem('riderToken');
 
       if (!token) {
-        console.log('No rider token found, using demo notifications');
+        console.log('📝 No rider token found, using demo notifications');
         setDemoNotifications();
         return;
       }
 
+      // Check network connectivity
+      if (!navigator.onLine) {
+        console.log('📱 Offline mode: Using cached/demo notifications');
+        if (notifications.length === 0) {
+          setDemoNotifications();
+        }
+        return;
+      }
+
       const apiUrl = getRiderApiUrl('/notifications');
-      console.log('Fetching notifications from:', apiUrl);
+      console.log('🔄 Fetching notifications from:', apiUrl);
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // Increased timeout
 
       const response = await fetch(`${apiUrl}?includeRead=${!showOnlyUnread}`, {
         headers: {
@@ -116,17 +125,29 @@ export default function RiderNotifications({ compact = false }: RiderNotificatio
       if (response.ok) {
         const data = await response.json();
         setNotifications(Array.isArray(data) ? data : []);
+        console.log('✅ Notifications loaded:', Array.isArray(data) ? data.length : 0);
       } else {
-        console.warn('Failed to fetch notifications:', response.status, response.statusText);
-        setDemoNotifications();
+        console.warn('⚠️ API error response:', response.status, response.statusText);
+        if (response.status >= 500) {
+          console.log('🔧 Server error - keeping existing notifications');
+          // Don't replace notifications on server errors
+        } else {
+          setDemoNotifications();
+        }
       }
     } catch (error) {
       if (error.name === 'AbortError') {
-        console.warn('Notifications fetch timed out');
+        console.log('⏰ Notifications request timed out');
+      } else if (error.message?.includes('Failed to fetch')) {
+        console.log('🌐 Network error loading notifications - using fallback');
       } else {
-        console.error('Failed to fetch notifications:', error);
+        console.warn('❌ Unexpected error:', error.message);
       }
-      setDemoNotifications();
+
+      // Only set demo notifications if we don't have any existing ones
+      if (notifications.length === 0) {
+        setDemoNotifications();
+      }
     } finally {
       setIsLoading(false);
     }
