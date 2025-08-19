@@ -103,6 +103,13 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
     createDemoVerification
   } = useCustomerVerification();
 
+  // Customer notifications system
+  const {
+    notifications: customerNotifications,
+    simulateOrderConfirmation,
+    simulateStatusUpdate
+  } = useCustomerNotifications();
+
   // Function to request location permission and check availability
   const requestLocationPermission = async () => {
     setIsRequestingLocation(true);
