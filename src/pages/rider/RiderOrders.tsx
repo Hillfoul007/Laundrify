@@ -1124,29 +1124,9 @@ export default function RiderOrders() {
             </CardHeader>
             <CardContent>
               {verificationStatus === 'pending' && (
-                <div className="space-y-4">
-                  <p className="text-orange-800">
-                    Customer has been notified of the changes and needs to verify them before you can save the order.
-                  </p>
-                  <div className="bg-white p-4 rounded-lg border">
-                    <h4 className="font-medium mb-2">Demo: Simulate Customer Response</h4>
-                    <div className="flex space-x-2">
-                      <Button
-                        size="sm"
-                        onClick={() => simulateCustomerVerification(true)}
-                        className="bg-green-600 hover:bg-green-700"
-                      >
-                        Approve Changes
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => simulateCustomerVerification(false)}
-                      >
-                        Reject Changes
-                      </Button>
-                    </div>
-                  </div>
+                <div className="text-orange-800">
+                  <p className="font-medium">⏳ Waiting for customer verification</p>
+                  <p className="text-sm">Customer has been notified of the changes and needs to verify them before you can save the order.</p>
                 </div>
               )}
 
