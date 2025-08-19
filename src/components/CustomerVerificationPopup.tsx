@@ -371,24 +371,22 @@ export default function CustomerVerificationPopup({
               Please review the changes above and choose your action:
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row">
               <Button
                 onClick={() => handleVerification(true)}
                 disabled={isSubmitting}
-                className="bg-green-600 hover:bg-green-700 text-white flex-1"
-                size="lg"
+                className="bg-green-600 hover:bg-green-700 text-white flex-1 h-12 text-base font-semibold"
               >
-                <CheckCircle className="h-4 w-4 mr-2" />
+                <CheckCircle className="h-5 w-5 mr-2" />
                 {isSubmitting ? 'Processing...' : 'Approve Changes'}
               </Button>
               <Button
                 onClick={() => handleVerification(false)}
                 disabled={isSubmitting}
                 variant="destructive"
-                className="flex-1"
-                size="lg"
+                className="flex-1 h-12 text-base font-semibold"
               >
-                <XCircle className="h-4 w-4 mr-2" />
+                <XCircle className="h-5 w-5 mr-2" />
                 {isSubmitting ? 'Processing...' : 'Reject Changes'}
               </Button>
             </div>
