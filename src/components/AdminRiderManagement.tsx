@@ -89,6 +89,17 @@ const RiderImageDisplay: React.FC<{ src: string; alt: string }> = ({ src, alt })
     setHasError(true);
   };
 
+  // Type guard to ensure src is a string
+  if (typeof src !== 'string') {
+    console.error('🖼️ Invalid src type:', typeof src, src);
+    return (
+      <div className="mt-2 p-4 border rounded bg-red-50 text-center">
+        <p className="text-red-600 font-medium">Invalid image source</p>
+        <p className="text-xs text-gray-600">Expected string, got {typeof src}</p>
+      </div>
+    );
+  }
+
   const imageUrl = getImageUrl(src);
 
   if (!imageUrl) {
