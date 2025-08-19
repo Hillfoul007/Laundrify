@@ -163,6 +163,13 @@ export default function CustomerVerificationPopup({
   }
 
   const { orderData } = currentVerification;
+
+  // Validate orderData and its required properties
+  if (!orderData || !orderData.originalItems || !orderData.updatedItems) {
+    console.error('CustomerVerificationPopup: Invalid orderData structure', { orderData });
+    return null;
+  }
+
   const itemChanges = getItemChanges(orderData);
   const pendingCount = verificationService.getPendingVerifications().length;
 
