@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "dev:backend": "cd backend && node server-laundry.js",
+    "dev:backend-minimal": "cd backend && node server-minimal.js",
     "dev:full": "concurrently \"npm run dev\" \"npm run dev:backend\"",
+    "dev:minimal": "concurrently \"npm run dev\" \"npm run dev:backend-minimal\"",
     "build": "NODE_OPTIONS=--max-old-space-size=384 vite build && NODE_OPTIONS=--max-old-space-size=384 node scripts/optimize-build.js",
     "build:pwa": "NODE_OPTIONS=--max-old-space-size=384 node scripts/memory-optimized-build.cjs",
     "build:minimal": "NODE_OPTIONS=--max-old-space-size=300 node scripts/minimal-build.cjs",
