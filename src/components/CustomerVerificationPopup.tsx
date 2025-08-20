@@ -261,7 +261,19 @@ export default function CustomerVerificationPopup({
         if (!open) onClose();
       }}
     >
-      <DialogContent className="max-w-4xl w-[95vw] max-h-[95vh] overflow-y-auto sm:w-full p-3 sm:p-6 sm:m-4 m-2">
+      <DialogContent
+        className="max-w-4xl w-[95vw] max-h-[95vh] overflow-y-auto sm:w-full p-3 sm:p-6 sm:m-4 m-2"
+        onOpenAutoFocus={(e) => {
+          console.log('📱 Dialog auto focus event');
+        }}
+        onInteractOutside={(e) => {
+          console.log('📱 Dialog interact outside');
+          // Prevent closing on mobile when clicking outside
+          if (window.innerWidth < 768) {
+            e.preventDefault();
+          }
+        }}
+      >
         <DialogHeader>
           <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
             <div className="flex items-center space-x-2">
