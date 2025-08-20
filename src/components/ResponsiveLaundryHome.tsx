@@ -362,7 +362,7 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
         setDynamicServices(services);
         setUseStaticFallback(false);
         console.log(
-          "�� Loaded dynamic services:",
+          "✅ Loaded dynamic services:",
           services.length,
           "categories",
         );
@@ -395,6 +395,9 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
   // Check for pending customer verifications on app startup
   useEffect(() => {
     if (currentUser) {
+      // Clear any test/demo verifications first
+      clearTestVerifications();
+
       // Request notification permission
       requestNotificationPermission();
 
