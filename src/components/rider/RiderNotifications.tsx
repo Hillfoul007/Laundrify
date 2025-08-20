@@ -94,6 +94,24 @@ export default function RiderNotifications({ compact = false }: RiderNotificatio
     };
   }, [showOnlyUnread, autoRefresh]);
 
+  // Listen for verification completion events to refresh notifications immediately
+  useEffect(() => {
+    const handleVerificationCompleted = (event: CustomEvent) => {
+      console.log('🔔 RiderNotifications: Verification completed, refreshing notifications');
+      // Refresh notifications immediately when a verification is completed
+      fetchNotifications();
+      fetchUnreadCount();
+    };
+
+    // Add event listener
+    window.addEventListener('verificationCompleted', handleVerificationCompleted as EventListener);
+
+    // Cleanup on unmount
+    return () => {
+      window.removeEventListener('verificationCompleted', handleVerificationCompleted as EventListener);
+    };
+  }, []);
+
   const fetchNotifications = async () => {
     try {
       setIsLoading(true);
