@@ -1586,6 +1586,9 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
         {/* Connection Status */}
         <ConnectionStatus />
 
+        {/* Backend Connection Status */}
+        <BackendConnectionStatus className="fixed bottom-2 left-2 z-50" />
+
         {/* Location Unavailable Modal */}
         <LocationUnavailableModal
           isOpen={showLocationUnavailable}
