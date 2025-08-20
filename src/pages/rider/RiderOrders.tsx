@@ -95,6 +95,14 @@ export default function RiderOrders() {
       }
 
       fetchOrderDetails(orderId);
+
+      // Check for any pending verification status in localStorage for this order
+      const savedVerificationStatus = localStorage.getItem(`verification_status_${orderId}`);
+      if (savedVerificationStatus) {
+        console.log('📋 Found saved verification status:', savedVerificationStatus);
+        setVerificationStatus(savedVerificationStatus as 'pending' | 'approved' | 'rejected');
+        setCustomerVerificationRequired(true);
+      }
     }
   }, [orderId]);
 
