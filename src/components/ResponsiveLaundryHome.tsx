@@ -398,8 +398,28 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
 
       // Only check when user is authenticated
       checkOnStartup();
+
+      // Mobile-specific debug and verification check
+      if (window.innerWidth < 768) {
+        console.log('📱 Mobile device detected - running verification debug');
+        setTimeout(() => {
+          debugCustomerVerification();
+
+          // Force check for pending verifications on mobile with extra debugging
+          setTimeout(async () => {
+            console.log('📱 Mobile: Force checking for pending verifications...');
+            const hasPending = await checkPendingVerifications();
+            if (hasPending) {
+              console.log('📱 Mobile: Found pending verifications, showing popup...');
+              showVerificationPopup();
+            } else {
+              console.log('📱 Mobile: No pending verifications found');
+            }
+          }, 1000);
+        }, 500);
+      }
     }
-  }, [currentUser, checkOnStartup]);
+  }, [currentUser, checkOnStartup, checkPendingVerifications, showVerificationPopup]);
 
   // Request notification permission for verification alerts
   const requestNotificationPermission = async () => {
