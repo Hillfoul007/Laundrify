@@ -87,6 +87,8 @@ export default function RiderOrders() {
 
   // Listen for verification completion events
   useEffect(() => {
+    console.log('🎯 Setting up verification completion listener for rider orders');
+
     const handleVerificationCompleted = (event: CustomEvent) => {
       const { verificationId, approved, verification, backendSuccess } = event.detail;
 
@@ -94,7 +96,19 @@ export default function RiderOrders() {
         verificationId,
         approved,
         verification,
-        backendSuccess
+        backendSuccess,
+        currentOrderId: orderId
+      });
+
+      // Check if this verification is for the current order
+      const isForCurrentOrder = verification?.orderData?.orderId === orderId ||
+                               verification?.orderId === orderId ||
+                               event.detail.orderId === orderId;
+
+      console.log('🎯 Verification match check:', {
+        isForCurrentOrder,
+        verificationOrderId: verification?.orderData?.orderId || verification?.orderId,
+        currentOrderId: orderId
       });
 
       // Update verification status based on customer response
@@ -110,11 +124,14 @@ export default function RiderOrders() {
     // Add event listener
     window.addEventListener('verificationCompleted', handleVerificationCompleted as EventListener);
 
+    console.log('✅ Verification completion listener added');
+
     // Cleanup on unmount
     return () => {
+      console.log('🧹 Removing verification completion listener');
       window.removeEventListener('verificationCompleted', handleVerificationCompleted as EventListener);
     };
-  }, []);
+  }, [orderId]);
 
   // Debug order state changes
   useEffect(() => {
