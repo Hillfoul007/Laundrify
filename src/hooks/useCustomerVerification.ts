@@ -189,7 +189,7 @@ export const useCustomerVerification = () => {
     currentVerification,
     pendingCount,
     hasCheckedOnStartup,
-    
+
     // Actions
     showVerificationPopup,
     hideVerificationPopup,
@@ -197,7 +197,8 @@ export const useCustomerVerification = () => {
     checkPendingVerifications,
     handleVerificationComplete,
     createDemoVerification,
-    
+    forceShowPopup,
+
     // Service access
     verificationService
   };
