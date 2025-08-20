@@ -739,8 +739,29 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
     // Mobile Interface
     return (
       <div className="min-h-screen bg-gradient-to-br from-laundrify-purple via-purple-400 to-laundrify-pink">
+        {/* Mobile Verification Status Banner */}
+        {pendingCount > 0 && (
+          <div className="fixed top-0 left-0 right-0 z-50 bg-red-500 text-white p-3 text-center shadow-lg">
+            <div className="flex items-center justify-center space-x-2">
+              <Bell className="h-4 w-4 animate-pulse" />
+              <span className="font-semibold text-sm">
+                {pendingCount} Order Change{pendingCount > 1 ? 's' : ''} Need Your Approval
+              </span>
+              <button
+                onClick={() => {
+                  console.log('📱 Mobile banner clicked - showing verification popup');
+                  showVerificationPopup();
+                }}
+                className="bg-white bg-opacity-20 px-2 py-1 rounded text-xs font-medium ml-2 hover:bg-opacity-30 transition-all"
+              >
+                Review Now
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Mobile Header */}
-        <div className="bg-gradient-to-r from-laundrify-purple to-laundrify-pink text-white relative z-40">
+        <div className={`bg-gradient-to-r from-laundrify-purple to-laundrify-pink text-white relative z-40 ${pendingCount > 0 ? 'pt-12' : ''}`}>
           <div className="flex items-center justify-between mobile-header-safe">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-3">
