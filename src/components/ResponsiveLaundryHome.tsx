@@ -426,6 +426,39 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
     }
   };
 
+  // Global debugging methods (accessible from browser console)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).debugVerification = {
+        createDemo: createDemoVerification,
+        forceShow: forceShowPopup,
+        checkPending: checkPendingVerifications,
+        clearAll: () => verificationService.clearAllVerifications(),
+        getState: () => ({
+          isPopupOpen: isVerificationPopupOpen,
+          currentVerification,
+          pendingCount
+        }),
+        testMobile: () => {
+          console.log('📱 Mobile detection test:');
+          console.log('User Agent:', navigator.userAgent);
+          console.log('Window size:', window.innerWidth, 'x', window.innerHeight);
+          console.log('Touch support:', 'ontouchstart' in window);
+          console.log('Is mobile viewport:', window.innerWidth <= 768);
+          createDemoVerification();
+          setTimeout(forceShowPopup, 500);
+        }
+      };
+
+      console.log('🔧 Verification debugging methods available:');
+      console.log('  window.debugVerification.createDemo() - Create demo verification');
+      console.log('  window.debugVerification.forceShow() - Force show popup');
+      console.log('  window.debugVerification.testMobile() - Test mobile detection and popup');
+      console.log('  window.debugVerification.getState() - Get current state');
+      console.log('  window.debugVerification.clearAll() - Clear all verifications');
+    }
+  }, [createDemoVerification, forceShowPopup, checkPendingVerifications, isVerificationPopupOpen, currentVerification, pendingCount]);
+
   // Handle verification notification events
   useEffect(() => {
     const handleOpenVerificationPopup = (event: CustomEvent) => {
