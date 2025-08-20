@@ -82,7 +82,7 @@ export class CustomerVerificationService {
         console.log(`📋 Loaded ${this.processedVerifications.size} processed verifications from localStorage`);
       }
     } catch (error) {
-      console.error('❌ Error loading processed verifications:', error);
+      console.error('�� Error loading processed verifications:', error);
       this.processedVerifications = new Set();
     }
   }
@@ -406,6 +406,12 @@ export class CustomerVerificationService {
       // Send to backend
       let backendSuccess = false;
       try {
+        console.log(`📡 Sending verification response to backend: ${approved ? 'APPROVED' : 'REJECTED'}`);
+
+        // Set a timeout for the request
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+
         const response = await fetch(`${this.apiBaseUrl}/admin/customer-verifications/${verificationId}/respond`, {
           method: 'POST',
           headers: {
@@ -417,18 +423,31 @@ export class CustomerVerificationService {
             reason,
             orderId: verification.orderId,
             verificationId
-          })
+          }),
+          signal: controller.signal
         });
+
+        clearTimeout(timeoutId);
 
         if (response.ok) {
           const result = await response.json();
           console.log('✅ Verification response sent to backend:', result);
           backendSuccess = true;
+        } else if (response.status >= 500) {
+          console.warn(`⚠️ Backend server error (${response.status}): Response saved locally only`);
         } else {
-          console.warn('⚠️ Backend verification response failed:', response.status);
+          console.warn(`⚠️ Backend verification response failed: ${response.status} ${response.statusText}`);
         }
-      } catch (error) {
-        console.warn('⚠️ Error sending verification response to backend:', error);
+      } catch (error: any) {
+        if (error.name === 'AbortError') {
+          console.warn('⚠️ Backend response submission timed out - saved locally only');
+        } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
+          console.warn('⚠️ Network error sending response - saved locally only:', error.message);
+        } else if (error.message?.includes('CORS') || error.message?.includes('access control')) {
+          console.warn('⚠️ CORS error sending response - saved locally only');
+        } else {
+          console.warn('⚠️ Error sending verification response to backend:', error);
+        }
       }
 
       // Remove from pending list regardless of backend status
