@@ -135,6 +135,29 @@ export default function AdminLiveMap({ fullScreen = false, onToggleFullScreen }:
     }
   };
 
+  const handleToggleUserLocation = async (enabled: boolean) => {
+    setShowUserLocation(enabled);
+    if (enabled) {
+      if (userLocation) {
+        toast.success('User location is already available');
+        return;
+      }
+
+      try {
+        toast.info('Detecting your location...');
+        await detectLocation();
+        toast.success('Your location has been detected');
+      } catch (error) {
+        console.error('Failed to get user location:', error);
+        toast.error('Failed to get your location. Please check permissions.');
+        setShowUserLocation(false);
+      }
+    } else {
+      clearError();
+      toast.info('User location hidden');
+    }
+  };
+
   const openInGoogleMaps = (rider: RiderLocation) => {
     if (rider.location) {
       const url = `https://www.google.com/maps/@${rider.location.lat},${rider.location.lng},15z`;
