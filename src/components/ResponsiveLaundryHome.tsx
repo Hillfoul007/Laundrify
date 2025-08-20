@@ -54,6 +54,7 @@ import ReferralModal from "./ReferralModal";
 import NotificationBell from "./NotificationBell";
 import QuickPickupModal from "./QuickPickupModal";
 import CustomerVerificationPopup from "./CustomerVerificationPopup";
+import BackendConnectionStatus from "./BackendConnectionStatus";
 import { DVHostingSmsService } from "@/services/dvhostingSmsService";
 import { useCustomerVerification } from "@/hooks/useCustomerVerification";
 import { useCustomerNotifications } from "@/hooks/useCustomerNotifications";
