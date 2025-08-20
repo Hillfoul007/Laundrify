@@ -912,7 +912,7 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
                 <Clock className="h-5 w-5 text-purple-600" />
                 <span className="text-base">Quick Pickup</span>
                 <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center ml-1">
-                  <span className="text-white text-xs font-bold">��</span>
+                  <Zap className="h-3 w-3 text-white" />
                 </div>
               </div>
             </Button>
