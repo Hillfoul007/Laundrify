@@ -27,8 +27,7 @@ const VerificationPopupDemo: React.FC = () => {
     pendingCount,
     showVerificationPopup,
     hideVerificationPopup,
-    handleVerificationComplete,
-    createDemoVerification
+    handleVerificationComplete
   } = useCustomerVerification();
 
   const [demoScenario, setDemoScenario] = useState<string>('');
