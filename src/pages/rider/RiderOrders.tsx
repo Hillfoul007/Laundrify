@@ -66,6 +66,19 @@ export default function RiderOrders() {
   // Initialize customer verification service
   const verificationService = CustomerVerificationService.getInstance();
 
+  // Global debug listener for all verification events
+  useEffect(() => {
+    const globalDebugListener = (event: CustomEvent) => {
+      console.log('🌍 GLOBAL: verificationCompleted event detected:', event.detail);
+    };
+
+    window.addEventListener('verificationCompleted', globalDebugListener as EventListener);
+
+    return () => {
+      window.removeEventListener('verificationCompleted', globalDebugListener as EventListener);
+    };
+  }, []);
+
   useEffect(() => {
     if (orderId) {
       console.log('🔍 useEffect: Fetching order details for ID:', orderId);
