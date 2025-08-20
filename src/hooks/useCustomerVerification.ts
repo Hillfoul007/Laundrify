@@ -105,19 +105,6 @@ export const useCustomerVerification = () => {
     }
   }, [updatePendingCount, hideVerificationPopup]);
 
-  // Create demo verification for testing
-  const createDemoVerification = useCallback(() => {
-    const verificationId = verificationService.createDemoVerification();
-    updatePendingCount();
-    console.log('🎭 Created demo verification:', verificationId);
-    
-    // Show popup with the new verification
-    setTimeout(() => {
-      showVerificationPopup();
-    }, 500);
-    
-    return verificationId;
-  }, [updatePendingCount, showVerificationPopup]);
 
   // Listen for verification events
   useEffect(() => {
