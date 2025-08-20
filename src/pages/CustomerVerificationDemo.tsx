@@ -229,11 +229,12 @@ export default function CustomerVerificationDemo() {
             {/* Action buttons */}
             <div className="flex flex-wrap gap-3">
               <Button
-                onClick={() => createDemoVerification(selectedDemo)}
-                className="bg-blue-600 hover:bg-blue-700"
+                disabled
+                className="bg-gray-400 cursor-not-allowed"
+                title="Demo verification creation has been disabled"
               >
                 <Bell className="h-4 w-4 mr-2" />
-                Create {selectedDemo.replace('_', ' ')} Demo
+                Demo Creation Disabled
               </Button>
               
               {pendingCount > 0 && (
