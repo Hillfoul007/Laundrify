@@ -110,14 +110,36 @@ export const useCustomerVerification = () => {
     const verificationId = verificationService.createDemoVerification();
     updatePendingCount();
     console.log('🎭 Created demo verification:', verificationId);
-    
+
     // Show popup with the new verification
     setTimeout(() => {
       showVerificationPopup();
     }, 500);
-    
+
     return verificationId;
   }, [updatePendingCount, showVerificationPopup]);
+
+  // Force show popup for debugging (especially mobile issues)
+  const forceShowPopup = useCallback(() => {
+    console.log('🔧 Force showing verification popup for debugging');
+    const pending = verificationService.getNextPendingVerification();
+    if (pending) {
+      console.log('📋 Found pending verification:', pending.id);
+      setCurrentVerification(pending);
+      setIsPopupOpen(true);
+    } else {
+      console.log('❌ No pending verifications to show');
+      // Create a demo verification for testing
+      const demoId = verificationService.createDemoVerification();
+      setTimeout(() => {
+        const newPending = verificationService.getNextPendingVerification();
+        if (newPending) {
+          setCurrentVerification(newPending);
+          setIsPopupOpen(true);
+        }
+      }, 100);
+    }
+  }, []);
 
   // Listen for verification events
   useEffect(() => {
