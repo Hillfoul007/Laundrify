@@ -533,6 +533,11 @@ export default function AdminLiveMap({ fullScreen = false, onToggleFullScreen }:
                       <Activity className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                       <p>No active riders</p>
                       <p className="text-sm">Riders will appear here when they go active</p>
+                      {showUserLocation && userLocation && (
+                        <p className="text-xs text-blue-600 mt-2">
+                          Your location is shown above
+                        </p>
+                      )}
                     </div>
                   )}
                 </div>
