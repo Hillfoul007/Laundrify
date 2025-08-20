@@ -59,6 +59,7 @@ import { useCustomerVerification } from "@/hooks/useCustomerVerification";
 import { useCustomerNotifications } from "@/hooks/useCustomerNotifications";
 import debugCustomerVerification from "@/utils/debugCustomerVerification";
 import { initializeMobileVerificationFallback, cleanupMobileVerificationFallback } from "@/utils/mobileVerificationFallback";
+import clearTestVerifications from "@/utils/clearTestVerifications";
 import { debugVerificationSystem } from "@/utils/debugVerification";
 import { LocationDetectionService } from "@/services/locationDetectionService";
 import { saveCartData, getCartData } from "@/utils/formPersistence";
@@ -361,7 +362,7 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
         setDynamicServices(services);
         setUseStaticFallback(false);
         console.log(
-          "✅ Loaded dynamic services:",
+          "�� Loaded dynamic services:",
           services.length,
           "categories",
         );
