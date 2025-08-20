@@ -153,7 +153,7 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
             detectedLocation.full_address,
           );
 
-        console.log("🏠 Location availability:", availability);
+        console.log("�� Location availability:", availability);
 
         if (!availability.is_available) {
           // Show unavailable popup instead of reloading
@@ -913,7 +913,7 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
                 <Clock className="h-5 w-5 text-purple-600" />
                 <span className="text-base">Quick Pickup</span>
                 <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center ml-1">
-                  <Zap className="h-3 w-3 text-white" />
+                  <span className="text-white text-sm">⚡</span>
                 </div>
               </div>
             </Button>
