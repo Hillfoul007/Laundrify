@@ -419,46 +419,6 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
               showVerificationPopup();
             } else {
               console.log('📱 Mobile: No pending verifications found');
-
-              // For debugging: Create a test verification on mobile if none exist
-              if (process.env.NODE_ENV === 'development') {
-                console.log('📱 Mobile Debug: Creating test verification...');
-                const testVerificationId = verificationService.addPendingVerification({
-                  orderId: `mobile-test-${Date.now()}`,
-                  orderData: {
-                    bookingId: `MOBILE-TEST-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
-                    customerName: 'Mobile Test Customer',
-                    customerPhone: currentUser.phone || '+91 9999999999',
-                    address: 'Test Address for Mobile Verification',
-                    pickupTime: 'Next 2 hours',
-                    riderName: 'Test Rider',
-                    updatedAt: new Date().toISOString(),
-                    status: 'pending',
-                    originalItems: [
-                      { id: '1', name: 'Shirt', price: 50, quantity: 2, total: 100, unit: 'PC' }
-                    ],
-                    updatedItems: [
-                      { id: '1', name: 'Shirt', price: 60, quantity: 2, total: 120, unit: 'PC' }
-                    ],
-                    originalTotal: 100,
-                    updatedTotal: 120,
-                    priceChange: 20,
-                    riderNotes: 'Mobile test verification - price increased due to fabric care',
-                    isQuickPickup: false
-                  },
-                  type: 'price_change',
-                  priority: 'high',
-                  expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString()
-                });
-
-                console.log('📱 Mobile Debug: Created test verification:', testVerificationId);
-
-                // Show the test verification popup
-                setTimeout(() => {
-                  console.log('📱 Mobile Debug: Showing test verification popup...');
-                  showVerificationPopup();
-                }, 500);
-              }
             }
           }, 1000);
         }, 500);
