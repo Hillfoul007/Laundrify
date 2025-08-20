@@ -51,6 +51,10 @@ export function cleanupMobileVerificationFallback() {
     clearInterval(fallbackCheckInterval);
     fallbackCheckInterval = null;
   }
+
+  // Remove event listeners
+  window.removeEventListener('showVerificationPopup', handleShowVerificationPopup);
+  window.removeEventListener('newVerificationPending', handleNewVerificationPending);
 }
 
 function checkAndShowFallbackNotification() {
