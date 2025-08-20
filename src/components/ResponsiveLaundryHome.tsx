@@ -23,6 +23,7 @@ import {
   MessageCircle,
   Gift,
   AlertTriangle,
+  Zap,
 } from "lucide-react";
 import {
   laundryServices,
