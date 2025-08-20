@@ -4,6 +4,7 @@ import App from "./App.tsx";
 import "./index.css";
 import PerformanceMonitor from "./utils/performanceMonitor";
 import { initializeErrorHandlers } from "./utils/errorHandlers";
+import "./utils/runClearTestVerifications";
 
 // Initialize performance monitoring
 const perfMonitor = PerformanceMonitor.getInstance();
