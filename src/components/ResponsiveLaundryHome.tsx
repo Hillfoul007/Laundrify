@@ -454,6 +454,12 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
                   expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString() // 1 hour
                 });
                 console.log('📱 Created debug verification:', testId);
+
+                // Force refresh the pending count
+                setTimeout(async () => {
+                  await checkPendingVerifications();
+                  console.log('📱 After test creation - pendingCount should now be:', verificationService.getPendingVerifications().length);
+                }, 500);
               }
             }
           }, 1000);
