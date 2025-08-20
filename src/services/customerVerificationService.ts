@@ -192,7 +192,12 @@ export class CustomerVerificationService {
         console.warn('⚠️ Failed to fetch verifications from backend:', response.status);
       }
     } catch (error) {
-      console.warn('⚠️ Error fetching verifications from backend:', error);
+      // Graceful handling of backend connection issues
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        console.warn('⚠️ Backend not available for verification sync. Using local data only.');
+      } else {
+        console.warn('⚠️ Error fetching verifications from backend:', error);
+      }
       // Don't fail silently - keep using local data
     }
   }
