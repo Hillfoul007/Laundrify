@@ -739,6 +739,12 @@ export default function RiderOrders() {
       setVerificationStatus('pending');
       setShowConfirmDialog(false);
 
+      // Persist pending verification status
+      if (orderId) {
+        localStorage.setItem(`verification_status_${orderId}`, 'pending');
+        console.log(`💾 Saved pending verification status for order ${orderId}`);
+      }
+
       toast.success('Verification sent to customer! They will receive a popup to approve/reject changes.');
 
     } catch (error) {
