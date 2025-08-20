@@ -16,26 +16,43 @@
 
 /* Fix for verification popup on mobile */
 @media (max-width: 768px) {
+  /* Radix Dialog specific fixes */
+  [data-radix-dialog-overlay] {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 999 !important;
+    background-color: rgba(0, 0, 0, 0.8) !important;
+  }
+
   [data-radix-dialog-content] {
-    /* Ensure dialog is properly positioned on mobile */
     position: fixed !important;
     top: 50% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
     max-height: 95vh !important;
     max-width: 95vw !important;
-    width: auto !important;
+    width: calc(100vw - 20px) !important;
     margin: 0 !important;
-    z-index: 100 !important;
+    z-index: 1000 !important;
+    background: white !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+    overflow-y: auto !important;
   }
-  
-  [data-radix-dialog-overlay] {
-    /* Ensure overlay covers entire screen */
-    position: fixed !important;
-    inset: 0 !important;
-    z-index: 99 !important;
+
+  /* Force visibility */
+  [data-state="open"][data-radix-dialog-content] {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
-  
+
+  [data-state="open"][data-radix-dialog-overlay] {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
   /* Make verification buttons more prominent on mobile */
   .verification-button-mobile {
     background: #ef4444 !important;
@@ -43,11 +60,24 @@
     border: none !important;
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3) !important;
     animation: pulse 2s infinite !important;
+    min-height: 48px !important;
+    font-size: 16px !important;
   }
-  
+
   .verification-button-mobile:active {
     background: #dc2626 !important;
     transform: scale(0.95) !important;
+  }
+
+  /* Ensure dialog container is visible */
+  .customer-verification-dialog {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 1000 !important;
+    pointer-events: auto !important;
   }
 }
 
@@ -59,4 +89,34 @@
 
 .verification-alert {
   animation: verification-alert 1.5s ease-in-out infinite;
+}
+
+/* Additional mobile fixes */
+@media (max-width: 768px) {
+  /* Prevent body scroll when modal is open */
+  body.modal-open {
+    overflow: hidden !important;
+    position: fixed !important;
+    width: 100% !important;
+  }
+
+  /* Ensure safe area for iOS devices */
+  [data-radix-dialog-content] {
+    padding-top: env(safe-area-inset-top) !important;
+    padding-bottom: env(safe-area-inset-bottom) !important;
+    padding-left: max(20px, env(safe-area-inset-left)) !important;
+    padding-right: max(20px, env(safe-area-inset-right)) !important;
+  }
+
+  /* Debug styles to make dialog visible */
+  .debug-dialog-visible {
+    border: 3px solid red !important;
+    background: lime !important;
+  }
+
+  /* Force show any hidden dialogs */
+  [role="dialog"] {
+    display: block !important;
+    visibility: visible !important;
+  }
 }
