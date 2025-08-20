@@ -213,12 +213,13 @@ const VerificationPopupDemo: React.FC = () => {
             {/* Random Demo */}
             <div className="flex justify-center pt-4 border-t">
               <Button
-                onClick={createDemoVerification}
+                disabled
                 variant="outline"
-                className="bg-yellow-400 hover:bg-yellow-500 text-black border-yellow-600"
+                className="bg-gray-400 cursor-not-allowed text-gray-600"
+                title="Demo verification creation has been disabled"
               >
                 <Bell className="h-4 w-4 mr-2" />
-                Create Random Demo Verification
+                Demo Creation Disabled
               </Button>
             </div>
           </CardContent>
