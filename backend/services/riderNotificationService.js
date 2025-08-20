@@ -166,6 +166,54 @@ class RiderNotificationService {
     }
   }
 
+  // Create customer verification response notification
+  async createCustomerVerificationResponseNotification(riderId, verificationData, approved, reason = null) {
+    try {
+      console.log(`📢 Creating customer verification response notification for rider ${riderId}`);
+
+      const title = approved ? '✅ Customer Approved Changes' : '❌ Customer Rejected Changes';
+      const message = approved
+        ? `Customer approved the verification for order ${verificationData.orderId}. You can now proceed with the changes.`
+        : `Customer rejected the verification for order ${verificationData.orderId}. ${reason ? `Reason: ${reason}` : 'Please modify the order and try again.'}`;
+
+      const notification = await RiderNotification.create({
+        rider_id: riderId,
+        type: 'customer_verification_response',
+        title,
+        message,
+        data: {
+          verificationId: verificationData.id,
+          orderId: verificationData.orderId,
+          approved,
+          reason,
+          customerName: verificationData.orderData?.customerName,
+          priceChange: verificationData.orderData?.priceChange
+        },
+        related_order: verificationData.orderId,
+        priority: approved ? 'medium' : 'high',
+        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+        delivery_channels: ['app', 'sms'],
+        delivery_status: {
+          sms: false,
+          push: false
+        }
+      });
+
+      console.log(`✅ Customer verification response notification created: ${notification._id}`);
+
+      // Send SMS notification for important verification responses
+      await this.sendSMSNotification(riderId, notification);
+
+      // Send push notification
+      await this.sendPushNotification(riderId, notification);
+
+      return notification;
+    } catch (error) {
+      console.error('❌ Failed to create customer verification response notification:', error);
+      throw error;
+    }
+  }
+
   // Send push notification (placeholder for future implementation)
   async sendPushNotification(riderId, notification) {
     // TODO: Integrate with push notification service (FCM, APNS, etc.)
@@ -174,7 +222,7 @@ class RiderNotificationService {
       message: notification.message,
       data: notification.data
     });
-    
+
     // Update notification delivery status
     await RiderNotification.findByIdAndUpdate(notification._id, {
       'delivery_status.push': true
