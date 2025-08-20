@@ -941,7 +941,7 @@ router.post("/orders/assign", verifyAdminAccess, async (req, res) => {
       // Automatically update order status from pending to confirmed when rider is assigned
       if (order.status === 'pending') {
         order.status = 'confirmed';
-        console.log(`📋 Order status updated: pending → confirmed for order ${orderId}`);
+        console.log(`📋 Order status updated: pending ��� confirmed for order ${orderId}`);
 
         // TODO: Send customer notification about order confirmation
         // This would typically send an SMS or push notification to the customer
@@ -1136,6 +1136,64 @@ router.post("/customer-verifications/:verificationId/respond", verifyAdminAccess
     // 2. Notify the rider about customer's decision
     // 3. Update the order if approved, or request changes if rejected
 
+    // For now, try to find the rider from the order and send notification
+    let riderNotified = false;
+    try {
+      if (orderId) {
+        // Try to find the order and its assigned rider
+        const Booking = require('../models/Booking');
+        const QuickPickup = require('../models/QuickPickup');
+        const riderNotificationService = require('../services/riderNotificationService');
+
+        // Check in Booking collection first
+        let order = await Booking.findOne({
+          $or: [
+            { _id: orderId },
+            { custom_order_id: orderId }
+          ]
+        });
+
+        // If not found in Booking, check QuickPickup
+        if (!order) {
+          order = await QuickPickup.findOne({
+            $or: [
+              { _id: orderId },
+              { booking_id: orderId }
+            ]
+          });
+        }
+
+        if (order && (order.rider_id || order.assignedRider)) {
+          const riderId = order.rider_id || order.assignedRider;
+
+          // Create mock verification data for notification
+          const verificationData = {
+            id: verificationId,
+            orderId: orderId,
+            orderData: {
+              customerName: order.name || order.customer_name,
+              priceChange: 0 // This would come from actual verification data
+            }
+          };
+
+          await riderNotificationService.createCustomerVerificationResponseNotification(
+            riderId,
+            verificationData,
+            approved,
+            reason
+          );
+
+          riderNotified = true;
+          console.log(`📧 Rider ${riderId} notified about verification response`);
+        } else {
+          console.log('⚠️ No rider found for order:', orderId);
+        }
+      }
+    } catch (notificationError) {
+      console.error('❌ Failed to send rider notification:', notificationError);
+      // Continue with response even if notification fails
+    }
+
     // Mock response for demo
     const response = {
       success: true,
@@ -1144,7 +1202,8 @@ router.post("/customer-verifications/:verificationId/respond", verifyAdminAccess
         : 'Customer rejected the changes. Rider has been notified to modify the order.',
       verificationId,
       approved,
-      processedAt: new Date().toISOString()
+      processedAt: new Date().toISOString(),
+      riderNotified
     };
 
     console.log('✅ Verification response processed:', response);
