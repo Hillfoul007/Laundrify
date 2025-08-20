@@ -403,6 +403,10 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
       // Mobile-specific debug and verification check
       if (window.innerWidth < 768) {
         console.log('📱 Mobile device detected - running verification debug');
+
+        // Initialize mobile fallback system
+        initializeMobileVerificationFallback();
+
         setTimeout(() => {
           debugCustomerVerification();
 
