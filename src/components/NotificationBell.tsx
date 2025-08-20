@@ -28,19 +28,41 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userId, className =
 
     setIsLoading(true);
     try {
+      console.log('🔔 Fetching notification count for user:', userId);
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
       const response = await fetch('/api/notifications/count', {
         headers: {
           'user-id': userId,
           'Content-Type': 'application/json',
         },
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json();
         setUnreadCount(data.unread_count || 0);
+        console.log('✅ Notification count fetched:', data.unread_count);
+      } else if (response.status >= 500) {
+        console.warn('⚠️ Backend server error for notifications - using default count');
+        setUnreadCount(0);
+      } else {
+        console.warn(`⚠️ Failed to fetch notification count: ${response.status}`);
+        setUnreadCount(0);
       }
-    } catch (error) {
-      console.error('Error fetching notification count:', error);
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.warn('⚠️ Notification count fetch timed out');
+      } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
+        console.warn('⚠️ Network error fetching notification count:', error.message);
+      } else {
+        console.warn('⚠️ Error fetching notification count:', error);
+      }
+      setUnreadCount(0); // Fallback to 0 count
     } finally {
       setIsLoading(false);
     }
