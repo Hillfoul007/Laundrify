@@ -240,9 +240,32 @@ export default function CustomerVerificationPopup({
 
   console.log('📱 CustomerVerificationPopup render - isOpen:', isOpen, 'currentVerification:', currentVerification);
 
+  // Mobile detection for enhanced debugging
+  const isMobile = typeof window !== 'undefined' && (
+    /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+    window.innerWidth <= 768
+  );
+
+  // Add debug logging for mobile
+  useEffect(() => {
+    if (isOpen && isMobile) {
+      console.log('📱 MOBILE: Verification popup opening');
+      console.log('📱 MOBILE: Dialog state - isOpen:', isOpen);
+      console.log('📱 MOBILE: Current verification:', currentVerification);
+      console.log('📱 MOBILE: Viewport size:', window.innerWidth, 'x', window.innerHeight);
+
+      // Add body class to prevent scrolling
+      document.body.classList.add('modal-open');
+
+      return () => {
+        document.body.classList.remove('modal-open');
+      };
+    }
+  }, [isOpen, isMobile]);
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl w-[95vw] max-h-[95vh] overflow-y-auto sm:w-full p-3 sm:p-6 sm:m-4 m-2">
+      <DialogContent className={`max-w-4xl w-[95vw] max-h-[95vh] overflow-y-auto sm:w-full p-3 sm:p-6 sm:m-4 m-2 customer-verification-dialog ${isMobile ? 'mobile-verification-popup' : ''}`}>
         <DialogHeader>
           <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
             <div className="flex items-center space-x-2">
