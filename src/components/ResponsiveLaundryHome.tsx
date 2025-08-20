@@ -58,6 +58,7 @@ import { DVHostingSmsService } from "@/services/dvhostingSmsService";
 import { useCustomerVerification } from "@/hooks/useCustomerVerification";
 import { useCustomerNotifications } from "@/hooks/useCustomerNotifications";
 import debugCustomerVerification from "@/utils/debugCustomerVerification";
+import { initializeMobileVerificationFallback, cleanupMobileVerificationFallback } from "@/utils/mobileVerificationFallback";
 import { debugVerificationSystem } from "@/utils/debugVerification";
 import { LocationDetectionService } from "@/services/locationDetectionService";
 import { saveCartData, getCartData } from "@/utils/formPersistence";
