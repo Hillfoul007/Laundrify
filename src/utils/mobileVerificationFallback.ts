@@ -15,6 +15,10 @@ export function initializeMobileVerificationFallback() {
 
   console.log('📱 Initializing mobile verification fallback system');
 
+  // Add event listeners for verification events
+  window.addEventListener('showVerificationPopup', handleShowVerificationPopup);
+  window.addEventListener('newVerificationPending', handleNewVerificationPending);
+
   // Check for pending verifications every 10 seconds
   fallbackCheckInterval = setInterval(() => {
     checkAndShowFallbackNotification();
@@ -22,6 +26,24 @@ export function initializeMobileVerificationFallback() {
 
   // Also check immediately after a delay
   setTimeout(checkAndShowFallbackNotification, 3000);
+}
+
+function handleShowVerificationPopup(event: Event) {
+  console.log('📱 Fallback: Received showVerificationPopup event');
+
+  // Try to trigger the verification popup through the hook
+  setTimeout(() => {
+    const existingPopup = document.querySelector('[data-radix-dialog-content]');
+    if (!existingPopup) {
+      console.log('📱 Fallback: No popup visible, forcing manual verification check');
+      checkAndShowFallbackNotification();
+    }
+  }, 1000);
+}
+
+function handleNewVerificationPending(event: Event) {
+  console.log('📱 Fallback: New verification pending event received');
+  setTimeout(checkAndShowFallbackNotification, 2000);
 }
 
 export function cleanupMobileVerificationFallback() {
