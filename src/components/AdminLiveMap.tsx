@@ -14,9 +14,12 @@ import {
   Clock,
   User,
   Maximize2,
-  Minimize2
+  Minimize2,
+  Crosshair,
+  UserCheck
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useLocation } from '@/hooks/useLocation';
 
 // Helper function to get the correct API URL for admin rider endpoints
 const getAdminApiUrl = (endpoint: string): string => {
