@@ -30,6 +30,7 @@
     "deploy:pwa": "npm run build:pwa && chmod +x deploy.sh && ./deploy.sh",
     "render:build": "node scripts/render-safe-build.cjs && cd backend && npm install --production --no-audit --no-fund && echo 'Build completed successfully'",
     "render:build:safe": "node scripts/render-safe-build.cjs",
+    "clean:rollup": "node scripts/clean-rollup-cache.cjs",
     "render:start": "NODE_ENV=production node backend/server-laundry.js",
     "install:all": "npm install && cd backend && npm install",
     "build:production": "NODE_OPTIONS=--max-old-space-size=384 npm run install:all && NODE_OPTIONS=--max-old-space-size=384 npm run build:pwa",
