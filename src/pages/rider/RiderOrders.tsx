@@ -79,6 +79,28 @@ export default function RiderOrders() {
     };
   }, []);
 
+  // Periodic check for verification status changes (fallback)
+  useEffect(() => {
+    if (!orderId) return;
+
+    const checkVerificationStatus = () => {
+      const savedStatus = localStorage.getItem(`verification_status_${orderId}`);
+      if (savedStatus && savedStatus !== verificationStatus) {
+        console.log('🔄 Periodic check: Verification status changed:', savedStatus);
+        setVerificationStatus(savedStatus as 'pending' | 'approved' | 'rejected');
+        setCustomerVerificationRequired(true);
+      }
+    };
+
+    // Check immediately
+    checkVerificationStatus();
+
+    // Check every 5 seconds as fallback
+    const interval = setInterval(checkVerificationStatus, 5000);
+
+    return () => clearInterval(interval);
+  }, [orderId, verificationStatus]);
+
   useEffect(() => {
     if (orderId) {
       console.log('🔍 useEffect: Fetching order details for ID:', orderId);
@@ -392,7 +414,7 @@ export default function RiderOrders() {
       setEditedItems([...items]);
       setOriginalTotal(items.reduce((sum: number, item: any) => sum + (item.quantity * item.price), 0));
       const isQuickPickupDetected = items.length === 0 || mockData.type === 'Quick Pickup';
-      console.log('📋 Quick pickup detected:', isQuickPickupDetected, 'Items length:', items.length, 'Type:', mockData.type);
+      console.log('��� Quick pickup detected:', isQuickPickupDetected, 'Items length:', items.length, 'Type:', mockData.type);
       setIsQuickPickup(isQuickPickupDetected);
     };
 
@@ -750,7 +772,7 @@ export default function RiderOrders() {
       // Persist pending verification status
       if (orderId) {
         localStorage.setItem(`verification_status_${orderId}`, 'pending');
-        console.log(`��� Saved pending verification status for order ${orderId}`);
+        console.log(`💾 Saved pending verification status for order ${orderId}`);
       }
 
       toast.success('Verification sent to customer! They will receive a popup to approve/reject changes.');
