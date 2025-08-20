@@ -245,34 +245,91 @@ export default function AdminLiveMap({ fullScreen = false, onToggleFullScreen }:
         <CardContent>
           <div className="space-y-4">
             {/* Controls */}
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div className="flex items-center space-x-4">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="auto-refresh"
+                      checked={autoRefresh}
+                      onCheckedChange={handleToggleAutoRefresh}
+                    />
+                    <Label htmlFor="auto-refresh">Auto-refresh</Label>
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    Last updated: {lastRefresh.toLocaleTimeString()}
+                  </div>
+                </div>
                 <div className="flex items-center space-x-2">
-                  <Switch
-                    id="auto-refresh"
-                    checked={autoRefresh}
-                    onCheckedChange={handleToggleAutoRefresh}
-                  />
-                  <Label htmlFor="auto-refresh">Auto-refresh</Label>
+                  <Label className="text-sm text-gray-600">Refresh every:</Label>
+                  <select
+                    value={refreshInterval}
+                    onChange={(e) => setRefreshInterval(Number(e.target.value))}
+                    className="text-sm border border-gray-300 rounded px-2 py-1"
+                  >
+                    <option value={10}>10s</option>
+                    <option value={30}>30s</option>
+                    <option value={60}>1min</option>
+                    <option value={120}>2min</option>
+                    <option value={300}>5min</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* User Location Controls */}
+              <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="show-user-location"
+                      checked={showUserLocation}
+                      onCheckedChange={handleToggleUserLocation}
+                      disabled={locationLoading}
+                    />
+                    <Label htmlFor="show-user-location" className="flex items-center space-x-2">
+                      <Crosshair className="h-4 w-4" />
+                      <span>Show My Location</span>
+                    </Label>
+                  </div>
+                  {locationLoading && (
+                    <RefreshCw className="h-4 w-4 animate-spin text-blue-500" />
+                  )}
+                  {userLocation && showUserLocation && (
+                    <Badge variant="default" className="bg-blue-500">
+                      <UserCheck className="h-3 w-3 mr-1" />
+                      Located
+                    </Badge>
+                  )}
                 </div>
                 <div className="text-sm text-gray-600">
-                  Last updated: {lastRefresh.toLocaleTimeString()}
+                  {userLocation && showUserLocation ? (
+                    <span className="text-blue-700">
+                      📍 {userLocation.lat.toFixed(6)}, {userLocation.lng.toFixed(6)}
+                    </span>
+                  ) : (
+                    'Your location will be shown on the map'
+                  )}
                 </div>
               </div>
-              <div className="flex items-center space-x-2">
-                <Label className="text-sm text-gray-600">Refresh every:</Label>
-                <select
-                  value={refreshInterval}
-                  onChange={(e) => setRefreshInterval(Number(e.target.value))}
-                  className="text-sm border border-gray-300 rounded px-2 py-1"
-                >
-                  <option value={10}>10s</option>
-                  <option value={30}>30s</option>
-                  <option value={60}>1min</option>
-                  <option value={120}>2min</option>
-                  <option value={300}>5min</option>
-                </select>
-              </div>
+
+              {/* Location Error Display */}
+              {locationError && showUserLocation && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex items-start space-x-2">
+                    <div className="text-red-600 text-sm">
+                      <strong>Location Error:</strong> {locationError}
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => clearError()}
+                      className="ml-auto"
+                    >
+                      Dismiss
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Map Placeholder and Rider List */}
