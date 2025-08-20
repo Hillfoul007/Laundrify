@@ -61,6 +61,7 @@ import { useCustomerNotifications } from "@/hooks/useCustomerNotifications";
 import debugCustomerVerification from "@/utils/debugCustomerVerification";
 import { initializeMobileVerificationFallback, cleanupMobileVerificationFallback } from "@/utils/mobileVerificationFallback";
 import clearTestVerifications from "@/utils/clearTestVerifications";
+import debugMobileVerificationBanner from "@/utils/debugMobileVerification";
 import { debugVerificationSystem } from "@/utils/debugVerification";
 import { LocationDetectionService } from "@/services/locationDetectionService";
 import { saveCartData, getCartData } from "@/utils/formPersistence";
