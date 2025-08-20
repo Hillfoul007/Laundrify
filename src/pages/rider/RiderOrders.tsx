@@ -85,6 +85,37 @@ export default function RiderOrders() {
     }
   }, [orderId]);
 
+  // Listen for verification completion events
+  useEffect(() => {
+    const handleVerificationCompleted = (event: CustomEvent) => {
+      const { verificationId, approved, verification, backendSuccess } = event.detail;
+
+      console.log('🔔 Rider received verification completion:', {
+        verificationId,
+        approved,
+        verification,
+        backendSuccess
+      });
+
+      // Update verification status based on customer response
+      if (approved) {
+        setVerificationStatus('approved');
+        toast.success('✅ Customer approved the changes! You can now save the order.');
+      } else {
+        setVerificationStatus('rejected');
+        toast.error('❌ Customer rejected the changes. Please modify the order.');
+      }
+    };
+
+    // Add event listener
+    window.addEventListener('verificationCompleted', handleVerificationCompleted as EventListener);
+
+    // Cleanup on unmount
+    return () => {
+      window.removeEventListener('verificationCompleted', handleVerificationCompleted as EventListener);
+    };
+  }, []);
+
   // Debug order state changes
   useEffect(() => {
     console.log('📋 Order state changed:', order);
