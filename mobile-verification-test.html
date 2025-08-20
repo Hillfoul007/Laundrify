@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Verification Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            margin: 0;
+        }
+        .test-button {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 8px;
+            margin: 10px 0;
+            width: 100%;
+            min-height: 44px;
+            cursor: pointer;
+        }
+        .test-button:active {
+            background: #dc2626;
+            transform: scale(0.98);
+        }
+        .info {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .status {
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mobile Verification Test</h1>
+    
+    <div class="info">
+        <h3>Device Info:</h3>
+        <p><strong>User Agent:</strong> <span id="userAgent"></span></p>
+        <p><strong>Screen Size:</strong> <span id="screenSize"></span></p>
+        <p><strong>Viewport Size:</strong> <span id="viewportSize"></span></p>
+        <p><strong>Touch Support:</strong> <span id="touchSupport"></span></p>
+        <p><strong>Is Mobile:</strong> <span id="isMobile"></span></p>
+    </div>
+
+    <div class="status" id="status">Ready to test...</div>
+
+    <button class="test-button" onclick="testVerificationSystem()">
+        🧪 Test Verification System
+    </button>
+
+    <button class="test-button" onclick="createDemoVerification()">
+        📱 Create Demo Verification
+    </button>
+
+    <button class="test-button" onclick="checkLocalStorage()">
+        💾 Check Local Storage
+    </button>
+
+    <button class="test-button" onclick="testDialogSupport()">
+        🔍 Test Dialog Support
+    </button>
+
+    <button class="test-button" onclick="simulateVerificationPopup()">
+        🎭 Simulate Verification Popup
+    </button>
+
+    <div id="results"></div>
+
+    <script>
+        // Display device info
+        document.getElementById('userAgent').textContent = navigator.userAgent;
+        document.getElementById('screenSize').textContent = `${screen.width}x${screen.height}`;
+        document.getElementById('viewportSize').textContent = `${window.innerWidth}x${window.innerHeight}`;
+        document.getElementById('touchSupport').textContent = 'ontouchstart' in window ? 'Yes' : 'No';
+        
+        // Mobile detection logic (same as app)
+        function detectMobile() {
+            const userAgent = navigator.userAgent.toLowerCase();
+            const isMobileUserAgent = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+            const isMobileViewport = window.innerWidth <= 768;
+            const hasTouchSupport = 'ontouchstart' in window;
+            
+            return isMobileUserAgent || (isMobileViewport && hasTouchSupport);
+        }
+        
+        document.getElementById('isMobile').textContent = detectMobile() ? 'Yes' : 'No';
+
+        function updateStatus(message, isError = false) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = isError ? 'status error' : 'status success';
+        }
+
+        function addResult(title, content, isError = false) {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = 'info';
+            div.innerHTML = `<h4>${title}</h4><pre>${content}</pre>`;
+            if (isError) div.style.borderLeft = '4px solid red';
+            results.appendChild(div);
+        }
+
+        async function testVerificationSystem() {
+            updateStatus('Testing verification system...');
+            
+            try {
+                // Test localStorage access
+                const testKey = 'verification_test_' + Date.now();
+                localStorage.setItem(testKey, 'test');
+                const canUseLocalStorage = localStorage.getItem(testKey) === 'test';
+                localStorage.removeItem(testKey);
+
+                addResult('LocalStorage Test', `Can use localStorage: ${canUseLocalStorage}`);
+
+                // Test fetch API
+                const response = await fetch('/api/health').catch(e => null);
+                const canFetchAPI = response && response.ok;
+                addResult('API Test', `Can reach backend: ${canFetchAPI ? 'Yes' : 'No'}`);
+
+                // Test notification permission
+                const notificationPermission = 'Notification' in window ? Notification.permission : 'not-supported';
+                addResult('Notifications', `Permission: ${notificationPermission}`);
+
+                // Test custom events
+                let eventReceived = false;
+                const testListener = () => { eventReceived = true; };
+                window.addEventListener('testEvent', testListener);
+                window.dispatchEvent(new CustomEvent('testEvent'));
+                window.removeEventListener('testEvent', testListener);
+                addResult('Custom Events', `Event system works: ${eventReceived}`);
+
+                updateStatus('✅ Verification system test completed');
+
+            } catch (error) {
+                addResult('Error', error.message, true);
+                updateStatus('❌ Test failed: ' + error.message, true);
+            }
+        }
+
+        function createDemoVerification() {
+            updateStatus('Creating demo verification...');
+            
+            try {
+                const demoVerification = {
+                    id: 'demo-' + Date.now(),
+                    orderId: 'ORDER-123',
+                    orderData: {
+                        bookingId: 'BOOK-123',
+                        customerName: 'Test Customer',
+                        customerPhone: '+91 9999999999',
+                        address: 'Test Address',
+                        pickupTime: '2:00 PM - 4:00 PM',
+                        riderName: 'Test Rider',
+                        updatedAt: new Date().toISOString(),
+                        status: 'pending',
+                        originalItems: [{
+                            id: '1',
+                            name: 'Shirt',
+                            price: 50,
+                            quantity: 2,
+                            total: 100,
+                            unit: 'PC'
+                        }],
+                        updatedItems: [{
+                            id: '1',
+                            name: 'Shirt',
+                            price: 50,
+                            quantity: 3,
+                            total: 150,
+                            unit: 'PC'
+                        }],
+                        originalTotal: 100,
+                        updatedTotal: 150,
+                        priceChange: 50,
+                        riderNotes: 'Test verification',
+                        isQuickPickup: false
+                    },
+                    type: 'items_change',
+                    priority: 'high',
+                    createdAt: new Date().toISOString()
+                };
+
+                localStorage.setItem('customer_pending_verifications', JSON.stringify([demoVerification]));
+                addResult('Demo Created', JSON.stringify(demoVerification, null, 2));
+                updateStatus('✅ Demo verification created in localStorage');
+
+                // Trigger the event that the app listens for
+                window.dispatchEvent(new CustomEvent('newVerificationPending', {
+                    detail: { verification: demoVerification }
+                }));
+
+            } catch (error) {
+                addResult('Error', error.message, true);
+                updateStatus('❌ Failed to create demo: ' + error.message, true);
+            }
+        }
+
+        function checkLocalStorage() {
+            updateStatus('Checking localStorage...');
+            
+            try {
+                const verifications = localStorage.getItem('customer_pending_verifications');
+                const processed = localStorage.getItem('customer_processed_verifications');
+                
+                addResult('Pending Verifications', verifications || 'None');
+                addResult('Processed Verifications', processed || 'None');
+                
+                updateStatus('✅ LocalStorage check completed');
+            } catch (error) {
+                addResult('Error', error.message, true);
+                updateStatus('❌ Failed to check localStorage: ' + error.message, true);
+            }
+        }
+
+        function testDialogSupport() {
+            updateStatus('Testing dialog support...');
+            
+            try {
+                // Test if HTMLDialogElement is supported
+                const dialogSupported = 'HTMLDialogElement' in window;
+                addResult('Native Dialog', `Supported: ${dialogSupported}`);
+
+                // Test creating a simple dialog
+                const dialog = document.createElement('dialog');
+                dialog.innerHTML = `
+                    <div style="padding: 20px; background: white; border-radius: 8px;">
+                        <h3>Test Dialog</h3>
+                        <p>This is a test dialog on mobile</p>
+                        <button onclick="this.closest('dialog').close()">Close</button>
+                    </div>
+                `;
+                dialog.style.position = 'fixed';
+                dialog.style.top = '50%';
+                dialog.style.left = '50%';
+                dialog.style.transform = 'translate(-50%, -50%)';
+                dialog.style.zIndex = '1000';
+                dialog.style.border = 'none';
+                dialog.style.background = 'rgba(0,0,0,0.5)';
+                
+                document.body.appendChild(dialog);
+                
+                if (dialogSupported) {
+                    dialog.showModal();
+                } else {
+                    dialog.style.display = 'block';
+                }
+
+                setTimeout(() => {
+                    dialog.close();
+                    document.body.removeChild(dialog);
+                }, 3000);
+
+                updateStatus('✅ Dialog test completed (dialog shown for 3 seconds)');
+            } catch (error) {
+                addResult('Error', error.message, true);
+                updateStatus('❌ Dialog test failed: ' + error.message, true);
+            }
+        }
+
+        function simulateVerificationPopup() {
+            updateStatus('Simulating verification popup...');
+            
+            try {
+                // Create a mock verification popup similar to the app
+                const overlay = document.createElement('div');
+                overlay.style.cssText = `
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(0,0,0,0.5);
+                    z-index: 100;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                `;
+
+                const popup = document.createElement('div');
+                popup.style.cssText = `
+                    background: white;
+                    border-radius: 12px;
+                    padding: 20px;
+                    margin: 20px;
+                    max-width: 95vw;
+                    max-height: 95vh;
+                    overflow-y: auto;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                `;
+
+                popup.innerHTML = `
+                    <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
+                        <h2 style="margin: 0; color: #ef4444;">🚨 Customer Verification</h2>
+                        <p style="margin: 5px 0 0 0; color: #666;">Order changes need your approval</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h3>Order Details:</h3>
+                        <p><strong>Order ID:</strong> DEMO-123</p>
+                        <p><strong>Customer:</strong> Test Customer</p>
+                        <p><strong>Total:</strong> ₹150 (was ₹100)</p>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; flex-direction: column;">
+                        <button onclick="closePopup(true)" style="background: #22c55e; color: white; border: none; padding: 15px; border-radius: 8px; font-size: 16px; min-height: 44px;">
+                            ✅ Approve Changes
+                        </button>
+                        <button onclick="closePopup(false)" style="background: #ef4444; color: white; border: none; padding: 15px; border-radius: 8px; font-size: 16px; min-height: 44px;">
+                            ❌ Reject Changes
+                        </button>
+                    </div>
+                `;
+
+                overlay.appendChild(popup);
+                document.body.appendChild(overlay);
+
+                // Add close function to global scope temporarily
+                window.closePopup = (approved) => {
+                    addResult('User Action', `User ${approved ? 'approved' : 'rejected'} the verification`);
+                    document.body.removeChild(overlay);
+                    delete window.closePopup;
+                    updateStatus(`✅ Popup ${approved ? 'approved' : 'rejected'} and closed`);
+                };
+
+                updateStatus('✅ Verification popup displayed - interact with it to test');
+
+            } catch (error) {
+                addResult('Error', error.message, true);
+                updateStatus('❌ Popup simulation failed: ' + error.message, true);
+            }
+        }
+
+        // Auto-run basic checks on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                updateStatus('Page loaded - ready for testing');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
