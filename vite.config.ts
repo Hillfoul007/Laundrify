@@ -36,7 +36,7 @@ export default defineConfig(({ mode }) => {
           // Aggressive chunking to reduce memory
           manualChunks: {
             vendor: ['react', 'react-dom'],
-            ui: ['@radix-ui/react-dialog', '@radix-ui/react-button'],
+            ui: ['@radix-ui/react-dialog', '@radix-ui/react-select'],
           },
         },
       },
