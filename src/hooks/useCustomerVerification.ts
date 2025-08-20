@@ -161,8 +161,7 @@ export const useCustomerVerification = () => {
     checkOnStartup,
     checkPendingVerifications,
     handleVerificationComplete,
-    createDemoVerification,
-    
+
     // Service access
     verificationService
   };
