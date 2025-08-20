@@ -64,8 +64,19 @@ export default function AdminLiveMap({ fullScreen = false, onToggleFullScreen }:
   const [refreshInterval, setRefreshInterval] = useState(30); // seconds
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
   const [isLoading, setIsLoading] = useState(false);
+  const [showUserLocation, setShowUserLocation] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Use location hook for user position
+  const {
+    currentLocation: userLocation,
+    currentAddress: userAddress,
+    isLoading: locationLoading,
+    error: locationError,
+    detectLocation,
+    clearError
+  } = useLocation();
 
   useEffect(() => {
     fetchActiveRiders();
