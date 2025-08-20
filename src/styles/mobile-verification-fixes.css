@@ -26,14 +26,36 @@
     max-width: 95vw !important;
     width: auto !important;
     margin: 0 !important;
-    z-index: 100 !important;
+    z-index: 999999 !important; /* Very high z-index for mobile */
+    background: white !important;
+    border-radius: 8px !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
   }
-  
+
   [data-radix-dialog-overlay] {
     /* Ensure overlay covers entire screen */
     position: fixed !important;
     inset: 0 !important;
-    z-index: 99 !important;
+    z-index: 999998 !important; /* High z-index for mobile */
+    background: rgba(0, 0, 0, 0.8) !important;
+    backdrop-filter: blur(4px) !important;
+  }
+
+  /* Force dialog to appear on mobile */
+  [data-state="open"][data-radix-dialog-content] {
+    animation: mobile-dialog-in 0.3s ease-out !important;
+  }
+
+  /* Mobile dialog animation */
+  @keyframes mobile-dialog-in {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
   }
   
   /* Make verification buttons more prominent on mobile */
