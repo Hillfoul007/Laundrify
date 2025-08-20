@@ -414,7 +414,7 @@ export default function RiderOrders() {
       setEditedItems([...items]);
       setOriginalTotal(items.reduce((sum: number, item: any) => sum + (item.quantity * item.price), 0));
       const isQuickPickupDetected = items.length === 0 || mockData.type === 'Quick Pickup';
-      console.log('��� Quick pickup detected:', isQuickPickupDetected, 'Items length:', items.length, 'Type:', mockData.type);
+      console.log('📋 Quick pickup detected:', isQuickPickupDetected, 'Items length:', items.length, 'Type:', mockData.type);
       setIsQuickPickup(isQuickPickupDetected);
     };
 
@@ -803,13 +803,31 @@ export default function RiderOrders() {
   };
 
   const openMapsNavigation = (address: string, type: 'pickup' | 'delivery') => {
-    const destination = type === 'delivery' 
+    const destination = type === 'delivery'
       ? 'Sector 69, Gurugram, Haryana' // Vendor address
       : address; // Customer address
-    
+
     const encodedAddress = encodeURIComponent(destination);
     const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
     window.open(googleMapsUrl, '_blank');
+  };
+
+  // Debug function to test verification completion
+  const testVerificationCompletion = (approved: boolean) => {
+    console.log('🧪 Testing verification completion:', approved);
+    const testEvent = new CustomEvent('verificationCompleted', {
+      detail: {
+        verificationId: 'test-verification-id',
+        approved,
+        verification: {
+          orderId: orderId,
+          orderData: { orderId: orderId }
+        },
+        backendSuccess: true,
+        orderId: orderId
+      }
+    });
+    window.dispatchEvent(testEvent);
   };
 
   if (!order) {
