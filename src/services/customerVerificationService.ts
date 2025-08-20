@@ -459,14 +459,21 @@ export class CustomerVerificationService {
       this.saveProcessedVerifications();
 
       // Trigger verification completed event
+      const eventDetail = {
+        verificationId,
+        approved,
+        verification,
+        backendSuccess,
+        orderId: verification?.orderId || verification?.orderData?.orderId
+      };
+
+      console.log('📡 Dispatching verificationCompleted event:', eventDetail);
+
       window.dispatchEvent(new CustomEvent('verificationCompleted', {
-        detail: { 
-          verificationId, 
-          approved, 
-          verification,
-          backendSuccess 
-        }
+        detail: eventDetail
       }));
+
+      console.log('✅ verificationCompleted event dispatched successfully');
 
       const message = approved 
         ? 'Order changes approved! The rider has been notified and can now complete the order.'
