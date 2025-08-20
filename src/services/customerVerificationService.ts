@@ -158,16 +158,25 @@ export class CustomerVerificationService {
         return;
       }
 
-      const customerId = currentUser.phone.startsWith('user_') 
-        ? currentUser.phone 
+      const customerId = currentUser.phone.startsWith('user_')
+        ? currentUser.phone
         : `user_${currentUser.phone}`;
+
+      console.log(`📡 Attempting to fetch verifications for customer: ${customerId}`);
+
+      // Set a timeout for the fetch request
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
       const response = await fetch(`${this.apiBaseUrl}/admin/customer-verifications/${customerId}`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('cleancare_auth_token')}`,
         },
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json();
@@ -187,13 +196,29 @@ export class CustomerVerificationService {
 
           this.pendingVerifications = [...unprocessedVerifications, ...localOnly];
           this.savePendingVerifications();
+        } else {
+          console.log('📋 No pending verifications found on backend');
         }
+      } else if (response.status === 404) {
+        console.log('📋 Customer not found on backend (normal for new users)');
+      } else if (response.status >= 500) {
+        console.warn(`⚠️ Backend server error (${response.status}): Using local data only`);
       } else {
-        console.warn('⚠️ Failed to fetch verifications from backend:', response.status);
+        console.warn(`⚠️ Failed to fetch verifications from backend: ${response.status} ${response.statusText}`);
       }
-    } catch (error) {
-      console.warn('⚠️ Error fetching verifications from backend:', error);
-      // Don't fail silently - keep using local data
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.warn('⚠️ Backend verification fetch timed out - using local data only');
+      } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
+        console.warn('⚠️ Network error fetching verifications - using local data only:', error.message);
+      } else if (error.message?.includes('CORS') || error.message?.includes('access control')) {
+        console.warn('⚠️ CORS error fetching verifications - using local data only');
+      } else {
+        console.warn('⚠️ Unknown error fetching verifications from backend:', error);
+      }
+
+      // Continue working with local data - don't let backend issues break the app
+      console.log('📱 Continuing with locally stored verifications only');
     }
   }
 
