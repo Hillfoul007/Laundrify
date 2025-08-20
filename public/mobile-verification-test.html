@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Verification Test - Laundrify</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f3f4f6;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+        }
+        .test-button {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .test-button:hover {
+            background: #dc2626;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .status.success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        .status.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+        .log {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧺 Mobile Verification Test</h1>
+            <p>Testing customer verification popup on mobile devices</p>
+        </div>
+
+        <div class="test-section">
+            <h3>📱 Device Info</h3>
+            <div id="device-info"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>💾 Storage Test</h3>
+            <button class="test-button" onclick="testLocalStorage()">Test localStorage</button>
+            <button class="test-button" onclick="createTestVerification()">Create Test Verification</button>
+            <button class="test-button" onclick="checkPendingVerifications()">Check Pending Verifications</button>
+            <div id="storage-status"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔔 Notification Test</h3>
+            <button class="test-button" onclick="testNotifications()">Test Notifications</button>
+            <button class="test-button" onclick="createFallbackAlert()">Create Fallback Alert</button>
+            <div id="notification-status"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🪟 Popup Test</h3>
+            <button class="test-button" onclick="openMainApp()">Open Main App</button>
+            <button class="test-button" onclick="triggerVerificationEvent()">Trigger Verification Event</button>
+            <div id="popup-status"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📋 Debug Log</h3>
+            <button class="test-button" onclick="clearLog()">Clear Log</button>
+            <div id="debug-log" class="log"></div>
+        </div>
+    </div>
+
+    <script>
+        // Logger function
+        function log(message) {
+            const logElement = document.getElementById('debug-log');
+            const time = new Date().toLocaleTimeString();
+            logElement.innerHTML += `[${time}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(message);
+        }
+
+        function setStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        function clearLog() {
+            document.getElementById('debug-log').innerHTML = '';
+        }
+
+        // Initialize device info
+        function initDeviceInfo() {
+            const info = {
+                'Screen Size': `${window.innerWidth} x ${window.innerHeight}`,
+                'User Agent': navigator.userAgent.substring(0, 50) + '...',
+                'Is Mobile': window.innerWidth < 768 ? 'Yes' : 'No',
+                'Touch Support': 'ontouchstart' in window ? 'Yes' : 'No',
+                'Notification Support': 'Notification' in window ? 'Yes' : 'No',
+                'Notification Permission': 'Notification' in window ? Notification.permission : 'N/A'
+            };
+
+            let html = '';
+            for (const [key, value] of Object.entries(info)) {
+                html += `<strong>${key}:</strong> ${value}<br>`;
+            }
+            document.getElementById('device-info').innerHTML = html;
+        }
+
+        // Test localStorage
+        function testLocalStorage() {
+            try {
+                const testKey = 'mobile_test_' + Date.now();
+                const testData = { test: 'mobile verification', timestamp: Date.now() };
+                
+                localStorage.setItem(testKey, JSON.stringify(testData));
+                const retrieved = JSON.parse(localStorage.getItem(testKey));
+                localStorage.removeItem(testKey);
+                
+                if (retrieved.test === testData.test) {
+                    setStatus('storage-status', 'localStorage is working correctly', 'success');
+                    log('✅ localStorage test passed');
+                } else {
+                    setStatus('storage-status', 'localStorage data mismatch', 'error');
+                    log('❌ localStorage test failed - data mismatch');
+                }
+            } catch (error) {
+                setStatus('storage-status', `localStorage error: ${error.message}`, 'error');
+                log(`❌ localStorage test failed: ${error.message}`);
+            }
+        }
+
+        // Create test verification
+        function createTestVerification() {
+            try {
+                const verification = {
+                    id: `mobile-test-${Date.now()}`,
+                    orderId: `test-order-${Date.now()}`,
+                    orderData: {
+                        bookingId: `MOBILE-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+                        customerName: 'Mobile Test Customer',
+                        customerPhone: '+91 9999999999',
+                        address: 'Test Address, Mobile City',
+                        pickupTime: 'ASAP',
+                        riderName: 'Test Rider',
+                        updatedAt: new Date().toISOString(),
+                        status: 'pending',
+                        originalItems: [
+                            { id: '1', name: 'Shirt', price: 50, quantity: 2, total: 100, unit: 'PC' }
+                        ],
+                        updatedItems: [
+                            { id: '1', name: 'Shirt', price: 60, quantity: 2, total: 120, unit: 'PC' }
+                        ],
+                        originalTotal: 100,
+                        updatedTotal: 120,
+                        priceChange: 20,
+                        riderNotes: 'Mobile test - price adjustment required',
+                        isQuickPickup: false
+                    },
+                    type: 'price_change',
+                    priority: 'high',
+                    createdAt: new Date().toISOString(),
+                    expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString()
+                };
+
+                const pending = JSON.parse(localStorage.getItem('customer_pending_verifications') || '[]');
+                pending.push(verification);
+                localStorage.setItem('customer_pending_verifications', JSON.stringify(pending));
+
+                setStatus('storage-status', `Created test verification: ${verification.id}`, 'success');
+                log(`✅ Created test verification: ${verification.id}`);
+
+                // Trigger event if possible
+                if (window.dispatchEvent) {
+                    const event = new CustomEvent('newVerificationPending', { 
+                        detail: { verification } 
+                    });
+                    window.dispatchEvent(event);
+                    log('📡 Dispatched newVerificationPending event');
+                }
+            } catch (error) {
+                setStatus('storage-status', `Failed to create verification: ${error.message}`, 'error');
+                log(`❌ Failed to create verification: ${error.message}`);
+            }
+        }
+
+        // Check pending verifications
+        function checkPendingVerifications() {
+            try {
+                const pending = JSON.parse(localStorage.getItem('customer_pending_verifications') || '[]');
+                const processed = JSON.parse(localStorage.getItem('customer_processed_verifications') || '[]');
+
+                setStatus('storage-status', 
+                    `Found ${pending.length} pending and ${processed.length} processed verifications`, 
+                    pending.length > 0 ? 'success' : 'info'
+                );
+
+                log(`📋 Pending verifications: ${pending.length}`);
+                log(`📋 Processed verifications: ${processed.length}`);
+
+                if (pending.length > 0) {
+                    log('📋 Pending verification details:');
+                    pending.forEach((v, i) => {
+                        log(`  ${i + 1}. ${v.id} - ${v.type} - ${v.priority}`);
+                    });
+                }
+            } catch (error) {
+                setStatus('storage-status', `Error checking verifications: ${error.message}`, 'error');
+                log(`❌ Error checking verifications: ${error.message}`);
+            }
+        }
+
+        // Test notifications
+        async function testNotifications() {
+            try {
+                if (!('Notification' in window)) {
+                    setStatus('notification-status', 'Notifications not supported', 'error');
+                    log('❌ Notifications not supported in this browser');
+                    return;
+                }
+
+                let permission = Notification.permission;
+                log(`🔔 Current notification permission: ${permission}`);
+
+                if (permission === 'default') {
+                    permission = await Notification.requestPermission();
+                    log(`🔔 Requested permission, result: ${permission}`);
+                }
+
+                if (permission === 'granted') {
+                    const notification = new Notification('Mobile Verification Test', {
+                        body: 'This is a test notification for the mobile verification system',
+                        icon: '/laundrify-exact-icon.svg',
+                        tag: 'mobile-test'
+                    });
+
+                    notification.onclick = () => {
+                        log('🔔 Test notification clicked');
+                        notification.close();
+                    };
+
+                    setStatus('notification-status', 'Test notification sent', 'success');
+                    log('✅ Test notification created');
+                } else {
+                    setStatus('notification-status', `Permission denied: ${permission}`, 'error');
+                    log(`❌ Notification permission denied: ${permission}`);
+                }
+            } catch (error) {
+                setStatus('notification-status', `Notification error: ${error.message}`, 'error');
+                log(`❌ Notification error: ${error.message}`);
+            }
+        }
+
+        // Create fallback alert
+        function createFallbackAlert() {
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                background: #ef4444;
+                color: white;
+                padding: 16px;
+                text-align: center;
+                z-index: 999999;
+                font-weight: 600;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            `;
+
+            overlay.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <span>🔔</span>
+                    <span>Test Fallback Alert - Order Changes Need Approval</span>
+                    <button onclick="this.parentElement.parentElement.remove()" 
+                            style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 4px 8px; border-radius: 4px; margin-left: 8px;">
+                        Close
+                    </button>
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+            log('✅ Created fallback alert overlay');
+            setStatus('notification-status', 'Fallback alert created', 'success');
+
+            setTimeout(() => {
+                if (overlay.parentNode) {
+                    overlay.remove();
+                    log('⏰ Auto-removed fallback alert');
+                }
+            }, 5000);
+        }
+
+        // Open main app
+        function openMainApp() {
+            const currentUrl = window.location.href;
+            const appUrl = currentUrl.replace('/mobile-verification-test.html', '/');
+            window.open(appUrl, '_blank');
+            log(`🔗 Opened main app: ${appUrl}`);
+            setStatus('popup-status', 'Main app opened in new tab', 'success');
+        }
+
+        // Trigger verification event
+        function triggerVerificationEvent() {
+            try {
+                const event = new CustomEvent('showVerificationPopup', {
+                    detail: { source: 'mobile-test' }
+                });
+                window.dispatchEvent(event);
+                log('📡 Triggered showVerificationPopup event');
+                setStatus('popup-status', 'Verification event triggered', 'success');
+            } catch (error) {
+                log(`❌ Error triggering event: ${error.message}`);
+                setStatus('popup-status', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initDeviceInfo();
+            log('📱 Mobile verification test page loaded');
+            
+            // Auto-check for existing verifications
+            setTimeout(checkPendingVerifications, 1000);
+        });
+
+        // Listen for verification events
+        window.addEventListener('newVerificationPending', (event) => {
+            log('📡 Received newVerificationPending event');
+        });
+
+        window.addEventListener('showVerificationPopup', (event) => {
+            log('📡 Received showVerificationPopup event');
+        });
+    </script>
+</body>
+</html>
