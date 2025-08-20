@@ -240,8 +240,27 @@ export default function CustomerVerificationPopup({
 
   console.log('📱 CustomerVerificationPopup render - isOpen:', isOpen, 'currentVerification:', currentVerification);
 
+  // Mobile-specific debugging
+  if (typeof window !== 'undefined' && window.innerWidth < 768) {
+    console.log('📱 Mobile CustomerVerificationPopup render:', {
+      isOpen,
+      hasVerification: !!currentVerification,
+      verificationId: currentVerification?.id,
+      verificationType: currentVerification?.type,
+      pendingCount,
+      windowWidth: window.innerWidth,
+      windowHeight: window.innerHeight
+    });
+  }
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        console.log('📱 Dialog onOpenChange called with:', open);
+        if (!open) onClose();
+      }}
+    >
       <DialogContent className="max-w-4xl w-[95vw] max-h-[95vh] overflow-y-auto sm:w-full p-3 sm:p-6 sm:m-4 m-2">
         <DialogHeader>
           <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
