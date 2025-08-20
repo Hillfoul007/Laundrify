@@ -57,6 +57,7 @@ import CustomerVerificationPopup from "./CustomerVerificationPopup";
 import { DVHostingSmsService } from "@/services/dvhostingSmsService";
 import { useCustomerVerification } from "@/hooks/useCustomerVerification";
 import { useCustomerNotifications } from "@/hooks/useCustomerNotifications";
+import debugCustomerVerification from "@/utils/debugCustomerVerification";
 import { debugVerificationSystem } from "@/utils/debugVerification";
 import { LocationDetectionService } from "@/services/locationDetectionService";
 import { saveCartData, getCartData } from "@/utils/formPersistence";
@@ -852,7 +853,7 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
                 <Clock className="h-5 w-5 text-purple-600" />
                 <span className="text-base">Quick Pickup</span>
                 <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center ml-1">
-                  <span className="text-white text-xs font-bold">⚡</span>
+                  <span className="text-white text-xs font-bold">��</span>
                 </div>
               </div>
             </Button>
