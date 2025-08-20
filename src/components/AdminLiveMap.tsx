@@ -336,19 +336,55 @@ export default function AdminLiveMap({ fullScreen = false, onToggleFullScreen }:
             <div className={`grid ${fullScreen ? 'grid-cols-3' : 'grid-cols-1 lg:grid-cols-2'} gap-6`}>
               {/* Map Area */}
               <div className={`${fullScreen ? 'col-span-2' : 'col-span-1'}`}>
-                <div 
+                <div
                   ref={mapRef}
-                  className="w-full h-96 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center"
+                  className="w-full h-96 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center p-6"
                 >
-                  <div className="text-center text-gray-500 space-y-2">
+                  <div className="text-center text-gray-500 space-y-4">
                     <MapPin className="h-12 w-12 mx-auto text-gray-400" />
-                    <p className="font-medium">Interactive Map</p>
-                    <p className="text-sm">
-                      Map integration can be added here to show live rider locations
-                    </p>
-                    <p className="text-xs">
-                      Click "View on Map" buttons to see individual rider locations
-                    </p>
+                    <div>
+                      <p className="font-medium">Interactive Map</p>
+                      <p className="text-sm">
+                        Map integration can be added here to show live rider locations
+                      </p>
+                    </div>
+
+                    {/* Current Map Status */}
+                    <div className="text-xs space-y-2 border-t pt-4">
+                      <p className="font-medium text-gray-600">Current Map Status:</p>
+                      <div className="grid grid-cols-1 gap-2 text-left max-w-md">
+                        <div className="flex justify-between">
+                          <span>Active Riders:</span>
+                          <Badge variant="outline">{activeRiders.length}</Badge>
+                        </div>
+                        {showUserLocation && userLocation && (
+                          <div className="flex justify-between">
+                            <span>Your Location:</span>
+                            <Badge variant="default" className="bg-blue-500">
+                              <Crosshair className="h-3 w-3 mr-1" />
+                              Visible
+                            </Badge>
+                          </div>
+                        )}
+                        {showUserLocation && !userLocation && (
+                          <div className="flex justify-between">
+                            <span>Your Location:</span>
+                            <Badge variant="outline" className="text-yellow-600">
+                              Detecting...
+                            </Badge>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="text-xs text-gray-400 border-t pt-4">
+                      <p>Click "View on Map" buttons to see individual rider locations on Google Maps</p>
+                      {userLocation && showUserLocation && (
+                        <p className="text-blue-600 mt-1">
+                          🎯 Your location pin would be shown at: {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
