@@ -392,6 +392,65 @@ export default function AdminLiveMap({ fullScreen = false, onToggleFullScreen }:
               {/* Rider List */}
               <div className="space-y-4">
                 <h3 className="font-semibold text-lg">Active Riders</h3>
+
+                {/* User Location Card */}
+                {showUserLocation && userLocation && (
+                  <Card className="border-blue-200 bg-blue-50">
+                    <CardContent className="pt-4">
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="font-semibold text-blue-900 flex items-center space-x-2">
+                              <Crosshair className="h-4 w-4" />
+                              <span>Your Location</span>
+                            </h4>
+                            <div className="text-sm text-blue-700">
+                              {userAddress || 'Address not available'}
+                            </div>
+                          </div>
+                          <Badge variant="default" className="bg-blue-500">
+                            <UserCheck className="h-3 w-3 mr-1" />
+                            Admin
+                          </Badge>
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="text-sm">
+                            <div className="flex items-center space-x-1 text-blue-600">
+                              <MapPin className="h-3 w-3" />
+                              <span>
+                                {userLocation.lat.toFixed(6)}, {userLocation.lng.toFixed(6)}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="text-xs px-2 py-1 rounded border bg-blue-100 border-blue-200 text-blue-700">
+                            <Clock className="h-3 w-3 inline mr-1" />
+                            Current location (Live)
+                          </div>
+                        </div>
+
+                        <div className="flex space-x-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              if (userLocation) {
+                                const url = `https://www.google.com/maps/@${userLocation.lat},${userLocation.lng},15z`;
+                                window.open(url, '_blank');
+                              }
+                            }}
+                            className="flex-1 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+                          >
+                            <Navigation className="h-3 w-3 mr-1" />
+                            View My Location
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
                 <div className="space-y-3 max-h-96 overflow-y-auto">
                   {activeRiders.map((rider) => {
                     const freshness = getLocationFreshness(rider.lastLocationUpdate);
