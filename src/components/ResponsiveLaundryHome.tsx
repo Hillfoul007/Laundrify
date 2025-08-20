@@ -104,6 +104,8 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
     checkOnStartup,
     checkPendingVerifications,
     handleVerificationComplete,
+    createDemoVerification,
+    forceShowPopup,
     verificationService
   } = useCustomerVerification();
 
