@@ -445,6 +445,23 @@ export default function AdminLiveMap({ fullScreen = false, onToggleFullScreen }:
                             <Navigation className="h-3 w-3 mr-1" />
                             View My Location
                           </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={async () => {
+                              try {
+                                toast.info('Refreshing your location...');
+                                await detectLocation();
+                                toast.success('Location updated');
+                              } catch (error) {
+                                toast.error('Failed to refresh location');
+                              }
+                            }}
+                            disabled={locationLoading}
+                            className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+                          >
+                            <RefreshCw className={`h-3 w-3 ${locationLoading ? 'animate-spin' : ''}`} />
+                          </Button>
                         </div>
                       </div>
                     </CardContent>
