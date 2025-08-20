@@ -38,9 +38,17 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userId, className =
       if (response.ok) {
         const data = await response.json();
         setUnreadCount(data.unread_count || 0);
+      } else {
+        console.warn('Failed to fetch notification count:', response.status);
+        // Gracefully handle API errors by keeping current count
       }
     } catch (error) {
-      console.error('Error fetching notification count:', error);
+      console.warn('Backend not available for notifications:', error.message);
+      // Gracefully handle network errors - don't break the UI
+      // Keep existing unread count or set to 0 if none
+      if (unreadCount === null) {
+        setUnreadCount(0);
+      }
     } finally {
       setIsLoading(false);
     }
