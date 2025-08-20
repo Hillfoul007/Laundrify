@@ -645,6 +645,14 @@ export default function RiderOrders() {
             duration: 4000,
             icon: <Bell className="h-4 w-4" />
           });
+
+          // Clean up verification status after successful save
+          if (orderId) {
+            localStorage.removeItem(`verification_status_${orderId}`);
+            console.log(`🧹 Cleaned up verification status for order ${orderId}`);
+          }
+          setCustomerVerificationRequired(false);
+          setVerificationStatus(null);
         } else {
           toast.success('Order updated and customer notified!', {
             description: result.price_change !== 0
@@ -742,7 +750,7 @@ export default function RiderOrders() {
       // Persist pending verification status
       if (orderId) {
         localStorage.setItem(`verification_status_${orderId}`, 'pending');
-        console.log(`💾 Saved pending verification status for order ${orderId}`);
+        console.log(`��� Saved pending verification status for order ${orderId}`);
       }
 
       toast.success('Verification sent to customer! They will receive a popup to approve/reject changes.');
