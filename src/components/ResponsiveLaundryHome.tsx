@@ -261,6 +261,15 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
         event.preventDefault();
         setShowAdminServices(true);
       }
+      // Ctrl+Shift+V to test verification system
+      if (event.ctrlKey && event.shiftKey && event.key === "V") {
+        event.preventDefault();
+        console.log('🧪 Testing verification system via keyboard shortcut...');
+        verificationService.createDemoVerification();
+        setTimeout(() => {
+          showVerificationPopup();
+        }, 500);
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
