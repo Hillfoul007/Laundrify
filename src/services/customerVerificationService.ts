@@ -162,7 +162,7 @@ export class CustomerVerificationService {
         ? currentUser.phone 
         : `user_${currentUser.phone}`;
 
-      const response = await fetch(`${this.apiBaseUrl}/customer-verifications/${customerId}`, {
+      const response = await fetch(`${this.apiBaseUrl}/admin/customer-verifications/${customerId}`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('cleancare_auth_token')}`,
@@ -381,7 +381,7 @@ export class CustomerVerificationService {
       // Send to backend
       let backendSuccess = false;
       try {
-        const response = await fetch(`${this.apiBaseUrl}/customer-verifications/${verificationId}/respond`, {
+        const response = await fetch(`${this.apiBaseUrl}/admin/customer-verifications/${verificationId}/respond`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
