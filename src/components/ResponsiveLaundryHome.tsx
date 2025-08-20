@@ -466,6 +466,15 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
     }
   }, [currentUser, checkOnStartup, checkPendingVerifications, showVerificationPopup]);
 
+  // Cleanup mobile verification fallback on unmount
+  useEffect(() => {
+    return () => {
+      if (window.innerWidth < 768) {
+        cleanupMobileVerificationFallback();
+      }
+    };
+  }, []);
+
   // Request notification permission for verification alerts
   const requestNotificationPermission = async () => {
     if ('Notification' in window && Notification.permission === 'default') {
