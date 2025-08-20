@@ -415,6 +415,7 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
 
         setTimeout(() => {
           debugCustomerVerification();
+          debugMobileVerificationBanner();
 
           // Force check for pending verifications on mobile with extra debugging
           setTimeout(async () => {
@@ -425,6 +426,35 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
               showVerificationPopup();
             } else {
               console.log('📱 Mobile: No pending verifications found');
+
+              // Temporary: Create one test verification to check if banner works (development only)
+              if (process.env.NODE_ENV === 'development') {
+                console.log('📱 Mobile Debug: Creating ONE test verification to check banner...');
+                const testId = verificationService.addPendingVerification({
+                  orderId: `debug-mobile-${Date.now()}`,
+                  orderData: {
+                    bookingId: `DEBUG-${Math.random().toString(36).substr(2, 4).toUpperCase()}`,
+                    customerName: 'Debug Customer',
+                    customerPhone: currentUser.phone || '+91 9999999999',
+                    address: 'Debug Address',
+                    pickupTime: 'ASAP',
+                    riderName: 'Debug Rider',
+                    updatedAt: new Date().toISOString(),
+                    status: 'pending',
+                    originalItems: [{ id: '1', name: 'Test Item', price: 50, quantity: 1, total: 50, unit: 'PC' }],
+                    updatedItems: [{ id: '1', name: 'Test Item', price: 60, quantity: 1, total: 60, unit: 'PC' }],
+                    originalTotal: 50,
+                    updatedTotal: 60,
+                    priceChange: 10,
+                    riderNotes: 'Debug verification for mobile banner testing',
+                    isQuickPickup: false
+                  },
+                  type: 'price_change',
+                  priority: 'high',
+                  expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString() // 1 hour
+                });
+                console.log('📱 Created debug verification:', testId);
+              }
             }
           }, 1000);
         }, 500);
