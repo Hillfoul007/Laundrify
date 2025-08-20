@@ -1268,6 +1268,34 @@ export default function RiderOrders() {
           </Card>
         )}
 
+        {/* Debug verification test buttons (only show in development) */}
+        {import.meta.env.DEV && customerVerificationRequired && verificationStatus === 'pending' && (
+          <Card className="border-yellow-200 bg-yellow-50">
+            <CardHeader>
+              <CardTitle className="text-yellow-800">🧪 Debug: Test Verification</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => testVerificationCompletion(true)}
+                  className="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600"
+                >
+                  Test Approve
+                </button>
+                <button
+                  onClick={() => testVerificationCompletion(false)}
+                  className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
+                >
+                  Test Reject
+                </button>
+              </div>
+              <p className="text-xs text-yellow-700 mt-2">
+                These buttons simulate customer verification responses for testing.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Delivery Information */}
         <Card>
           <CardHeader>
