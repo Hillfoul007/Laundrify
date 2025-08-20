@@ -24,23 +24,21 @@ export default defineConfig(({ mode }) => {
           target: "http://localhost:3001",
           changeOrigin: true,
           secure: false,
-          // Add CORS headers for development
-          configure: (proxy, options) => {
-            proxy.on('proxyReq', (proxyReq, req, res) => {
-              console.log('🔄 Proxying API request:', req.url);
-            });
-            proxy.on('error', (err, req, res) => {
-              console.error('❌ Proxy error:', err);
-            });
-          }
         },
       },
     },
             build: {
-      chunkSizeWarningLimit: 1000,
-            rollupOptions: {
+      chunkSizeWarningLimit: 500,
+      rollupOptions: {
         // Minimize parallel operations to reduce memory usage
         maxParallelFileOps: 1,
+        output: {
+          // Aggressive chunking to reduce memory
+          manualChunks: {
+            vendor: ['react', 'react-dom'],
+            ui: ['@radix-ui/react-dialog', '@radix-ui/react-button'],
+          },
+        },
       },
       // Use esbuild instead of terser for lower memory usage
       minify: mode === "production" ? "esbuild" : false,
@@ -52,10 +50,19 @@ export default defineConfig(({ mode }) => {
       reportCompressedSize: false,
       // Reduce target to minimize polyfills
       target: 'esnext',
+      // Reduce chunk size
+      assetsInlineLimit: 0,
     },
     // Enable gzip compression for assets
     esbuild: {
       drop: mode === "production" ? ["console", "debugger"] : [],
+      // Reduce memory usage during build
+      logLevel: 'warning',
+    },
+    // Optimize dependencies
+    optimizeDeps: {
+      include: ['react', 'react-dom'],
+      exclude: ['vite-plugin-pwa'],
     },
     plugins: [
       react({
