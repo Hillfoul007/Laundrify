@@ -133,11 +133,18 @@ export default function RiderOrders() {
       });
 
       // Update verification status based on customer response
+      const newStatus = approved ? 'approved' : 'rejected';
+      setVerificationStatus(newStatus);
+
+      // Persist verification status for this order
+      if (orderId) {
+        localStorage.setItem(`verification_status_${orderId}`, newStatus);
+        console.log(`💾 Saved verification status ${newStatus} for order ${orderId}`);
+      }
+
       if (approved) {
-        setVerificationStatus('approved');
         toast.success('✅ Customer approved the changes! You can now save the order.');
       } else {
-        setVerificationStatus('rejected');
         toast.error('❌ Customer rejected the changes. Please modify the order.');
       }
     };
