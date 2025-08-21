@@ -282,6 +282,29 @@ app.get('/api/riders/orders/:orderId', verifyRiderToken, async (req, res) => {
   }
 });
 
+// Catch-all handler for React Router (SPA support)
+app.get('*', (req, res) => {
+  // Don't interfere with API routes
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'API endpoint not found' });
+  }
+
+  const frontendIndexPath = path.join(__dirname, '../dist/index.html');
+  try {
+    if (require('fs').existsSync(frontendIndexPath)) {
+      res.sendFile(frontendIndexPath);
+    } else {
+      // In development, let Vite handle routing
+      res.redirect('http://localhost:10000' + req.path);
+    }
+  } catch (error) {
+    res.status(404).json({
+      error: 'Page not found',
+      message: 'Frontend not built. Use http://localhost:10000 for development.'
+    });
+  }
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Test backend server running on port ${PORT}`);
