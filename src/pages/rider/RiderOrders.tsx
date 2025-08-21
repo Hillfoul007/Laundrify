@@ -46,6 +46,8 @@ export default function RiderOrders() {
   const [verificationStatus, setVerificationStatus] = useState<'pending' | 'approved' | 'rejected' | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [originalTotal, setOriginalTotal] = useState(0);
+  const [deliveryDate, setDeliveryDate] = useState('');
+  const [deliveryTime, setDeliveryTime] = useState('');
 
   // Initialize customer verification service
   const verificationService = CustomerVerificationService.getInstance();
@@ -53,7 +55,7 @@ export default function RiderOrders() {
   // Global debug listener for all verification events
   useEffect(() => {
     const globalDebugListener = (event: CustomEvent) => {
-      console.log('��� GLOBAL: verificationCompleted event detected:', event.detail);
+      console.log('����� GLOBAL: verificationCompleted event detected:', event.detail);
     };
 
     window.addEventListener('verificationCompleted', globalDebugListener as EventListener);
