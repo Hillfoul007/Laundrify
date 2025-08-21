@@ -742,34 +742,41 @@ export default function RiderOrders() {
       let responseData: any = null;
       let responseText: string = '';
 
-      try {
-        // Check if response body is readable
-        if (response.body && !response.bodyUsed) {
-          responseText = await response.text();
+      // Helper function to safely read response
+      const safeReadResponse = async (res: Response): Promise<{ text: string; data: any }> => {
+        try {
+          // Check if we can read the response
+          if (!res || typeof res.text !== 'function') {
+            console.warn('Invalid response object');
+            return { text: '', data: null };
+          }
 
-          // Try to parse as JSON if possible
-          if (responseText) {
+          if (res.bodyUsed) {
+            console.warn('Response body already consumed');
+            return { text: '', data: null };
+          }
+
+          const text = await res.text();
+          let data = null;
+
+          if (text) {
             try {
-              responseData = JSON.parse(responseText);
+              data = JSON.parse(text);
             } catch (parseError) {
-              console.warn('Response is not valid JSON, using as text');
-              responseData = null;
+              console.log('Response is not JSON, treating as text');
             }
           }
-        } else if (response.bodyUsed) {
-          console.warn('Response body already consumed');
-          responseText = '';
-          responseData = null;
-        } else {
-          console.warn('Response body is null or empty');
-          responseText = '';
-          responseData = null;
+
+          return { text, data };
+        } catch (readError) {
+          console.error('❌ Error reading response:', readError);
+          return { text: '', data: null };
         }
-      } catch (error) {
-        console.error('❌ Failed to read response:', error);
-        responseText = '';
-        responseData = null;
-      }
+      };
+
+      const { text, data } = await safeReadResponse(response);
+      responseText = text;
+      responseData = data;
 
       if (response.ok) {
         const result = responseData || {};
