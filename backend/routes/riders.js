@@ -1148,20 +1148,33 @@ router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
 
     // Update item_prices array to match new items
     if (items && items.length > 0) {
-      order.item_prices = items.map(item => ({
+      console.log('📋 Original item_prices before update:', JSON.stringify(order.item_prices, null, 2));
+      console.log('📋 New items received from frontend:', JSON.stringify(items, null, 2));
+
+      const newItemPrices = items.map(item => ({
         service_name: item.name,
         quantity: item.quantity,
         unit_price: item.price,
         total_price: item.quantity * item.price
       }));
 
+      console.log('📋 Transformed item_prices for database:', JSON.stringify(newItemPrices, null, 2));
+
+      order.item_prices = newItemPrices;
+
       // Recalculate totals
       const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
       order.total_price = subtotal;
       order.final_amount = subtotal; // Simplified - should include taxes/fees
+
+      console.log('💰 Updated totals - subtotal:', subtotal, 'total_price:', order.total_price);
+    } else {
+      console.log('⚠️ No items provided for update');
     }
 
-    await order.save();
+    console.log('💾 About to save order to database...');
+    const savedOrder = await order.save();
+    console.log('✅ Order saved successfully. Updated item_prices:', JSON.stringify(savedOrder.item_prices, null, 2));
 
     console.log(`✅ Order ${orderId} updated with Indian time: ${indianTime}`);
 
