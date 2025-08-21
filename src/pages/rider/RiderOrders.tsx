@@ -732,17 +732,31 @@ export default function RiderOrders() {
 
       clearTimeout(timeoutId);
 
-      // Read response body once and handle both success and error cases
-      let responseData: any;
-      let responseText: string;
+      // Safely read response body once and handle both success and error cases
+      let responseData: any = null;
+      let responseText: string = '';
 
       try {
-        responseText = await response.text();
+        // Check if response body is readable
+        if (response.body && !response.bodyUsed) {
+          responseText = await response.text();
 
-        // Try to parse as JSON if possible
-        try {
-          responseData = JSON.parse(responseText);
-        } catch {
+          // Try to parse as JSON if possible
+          if (responseText) {
+            try {
+              responseData = JSON.parse(responseText);
+            } catch (parseError) {
+              console.warn('Response is not valid JSON, using as text');
+              responseData = null;
+            }
+          }
+        } else if (response.bodyUsed) {
+          console.warn('Response body already consumed');
+          responseText = '';
+          responseData = null;
+        } else {
+          console.warn('Response body is null or empty');
+          responseText = '';
           responseData = null;
         }
       } catch (error) {
