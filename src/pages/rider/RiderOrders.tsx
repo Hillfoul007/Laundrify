@@ -191,7 +191,7 @@ export default function RiderOrders() {
                                verification?.orderId === orderId ||
                                event.detail.orderId === orderId;
 
-      console.log('🎯 Verification match check:', {
+      console.log('��� Verification match check:', {
         isForCurrentOrder,
         verificationOrderId: verification?.orderData?.orderId || verification?.orderId,
         currentOrderId: orderId
@@ -713,8 +713,7 @@ export default function RiderOrders() {
 
           // Clean up verification status after successful save
           if (orderId) {
-            localStorage.removeItem(`verification_status_${orderId}`);
-            console.log(`🧹 Cleaned up verification status for order ${orderId}`);
+            globalVerificationManager.clearVerificationStatus(orderId);
           }
           setCustomerVerificationRequired(false);
           setVerificationStatus(null);
