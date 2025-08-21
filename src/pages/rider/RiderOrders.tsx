@@ -32,6 +32,7 @@ import CustomerVerificationService from '@/services/customerVerificationService'
 import globalVerificationManager from '@/utils/globalVerificationManager';
 import { getRiderApiUrl } from '@/lib/riderApi';
 import analyticsService from '@/services/analyticsService';
+import { quickPickupService } from '@/services/quickPickupService';
 
 export default function RiderOrders() {
   const { orderId } = useParams();
@@ -55,7 +56,7 @@ export default function RiderOrders() {
   // Global debug listener for all verification events
   useEffect(() => {
     const globalDebugListener = (event: CustomEvent) => {
-      console.log('����� GLOBAL: verificationCompleted event detected:', event.detail);
+      console.log('��� GLOBAL: verificationCompleted event detected:', event.detail);
     };
 
     window.addEventListener('verificationCompleted', globalDebugListener as EventListener);
