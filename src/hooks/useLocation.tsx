@@ -144,18 +144,8 @@ export const useLocation = (
           resolve(coordinates);
         },
         (error) => {
-          let errorMessage = "Failed to get location";
-          switch (error.code) {
-            case error.PERMISSION_DENIED:
-              errorMessage = "Location access denied by user";
-              break;
-            case error.POSITION_UNAVAILABLE:
-              errorMessage = "Location information unavailable";
-              break;
-            case error.TIMEOUT:
-              errorMessage = "Location request timed out";
-              break;
-          }
+          const errorMessage = getErrorMessage(error);
+          logError("useLocation.getCurrentPosition", error);
           reject(new Error(errorMessage));
         },
         {
