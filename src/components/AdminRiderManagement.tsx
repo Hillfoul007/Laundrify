@@ -1000,9 +1000,13 @@ export default function AdminRiderManagement() {
                             </DialogTrigger>
                             <DialogContent>
                               <DialogHeader>
-                                <DialogTitle>Assign Order to Rider</DialogTitle>
+                                <DialogTitle className="flex items-center space-x-2">
+                                  <Navigation className="h-5 w-5 text-orange-500" />
+                                  <Store className="h-5 w-5 text-green-500" />
+                                  <span>Assign Rider & Vendor Together</span>
+                                </DialogTitle>
                                 <DialogDescription>
-                                  Select a rider to assign this order to
+                                  Select both a rider and vendor to assign this order completely. Distance from pickup to vendor is shown for each vendor.
                                 </DialogDescription>
                               </DialogHeader>
 
@@ -1216,7 +1220,7 @@ export default function AdminRiderManagement() {
                                     <div className="flex items-center justify-between border-t border-green-200 pt-2 mt-2">
                                       <span className="text-green-700 font-medium">Amount:</span>
                                       <div className="text-right">
-                                        <span className="text-green-700 font-bold text-lg">₹{order.final_amount}</span>
+                                        <span className="text-green-700 font-bold text-lg">��{order.final_amount}</span>
                                         {order.total_price && order.final_amount !== order.total_price && (
                                           <div className="text-xs text-gray-500 line-through">₹{order.total_price}</div>
                                         )}
