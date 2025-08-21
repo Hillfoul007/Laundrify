@@ -811,6 +811,65 @@ export default function RiderOrders() {
     let timeoutId: NodeJS.Timeout | null = null;
 
     try {
+      // Handle quick pickup orders differently
+      if (isQuickPickup) {
+        console.log('💾 Saving quick pickup order changes:', { orderId, editedItems, deliveryDate, deliveryTime });
+
+        const result = await quickPickupService.updateDeliveryInfo(orderId!, {
+          delivery_date: deliveryDate,
+          delivery_time: deliveryTime,
+          items_collected: editedItems.map(item => ({
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+            total: item.quantity * item.price
+          })),
+          actual_cost: totalAmount,
+          rider_notes: 'Order updated by rider with collected items'
+        });
+
+        if (result.success) {
+          toast.success('✅ Quick pickup order saved successfully!', {
+            description: `Items collected and delivery scheduled for ${deliveryDate} at ${deliveryTime}`,
+            duration: 4000
+          });
+
+          // Update the order with new data
+          if (result.quickPickup) {
+            setOrder(prevOrder => ({
+              ...prevOrder,
+              delivery_date: result.quickPickup.delivery_date,
+              delivery_time: result.quickPickup.delivery_time,
+              status: 'picked_up',
+              items: editedItems,
+              total_price: totalAmount,
+              final_amount: totalAmount
+            }));
+          }
+
+          // Track successful quick pickup update
+          analyticsService.trackEvent('rider_quick_pickup_update', {
+            event_category: 'rider',
+            order_id: orderId,
+            items_count: editedItems.length,
+            total_amount: totalAmount,
+            delivery_date: deliveryDate,
+            delivery_time: deliveryTime
+          });
+
+          // Dispatch event for booking history refresh
+          window.dispatchEvent(new CustomEvent('refreshBookings'));
+
+          setIsSaving(false);
+          return;
+        } else {
+          toast.error('❌ Failed to save quick pickup: ' + (result.error || 'Unknown error'));
+          setIsSaving(false);
+          return;
+        }
+      }
+
+      // Regular order handling
       const token = localStorage.getItem('riderToken');
 
       if (!token) {
