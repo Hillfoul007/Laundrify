@@ -732,8 +732,27 @@ export default function RiderOrders() {
 
       clearTimeout(timeoutId);
 
+      // Read response body once and handle both success and error cases
+      let responseData: any;
+      let responseText: string;
+
+      try {
+        responseText = await response.text();
+
+        // Try to parse as JSON if possible
+        try {
+          responseData = JSON.parse(responseText);
+        } catch {
+          responseData = null;
+        }
+      } catch (error) {
+        console.error('❌ Failed to read response:', error);
+        responseText = '';
+        responseData = null;
+      }
+
       if (response.ok) {
-        const result = await response.json();
+        const result = responseData || {};
 
         if (customerVerificationRequired) {
           toast.success('Order saved successfully!', {
@@ -763,14 +782,13 @@ export default function RiderOrders() {
         setShowConfirmDialog(false);
         fetchOrderDetails(orderId!);
       } else {
-        const errorText = await response.text();
         let errorMessage = 'Failed to update order';
 
-        try {
-          const errorData = JSON.parse(errorText);
-          errorMessage = errorData.message || errorMessage;
-        } catch {
-          // If response is not JSON, use status text
+        if (responseData && responseData.message) {
+          errorMessage = responseData.message;
+        } else if (responseText) {
+          errorMessage = responseText;
+        } else {
           errorMessage = response.statusText || errorMessage;
         }
 
