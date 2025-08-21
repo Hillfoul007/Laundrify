@@ -540,6 +540,76 @@ export default function AdminRiderManagement() {
     }
   };
 
+  // Combined assignment function for rider and vendor together
+  const assignRiderAndVendor = async () => {
+    if (!selectedOrder || !selectedRider || !selectedVendor) return;
+
+    try {
+      const selectedVendorData = recommendedVendors.find(v => v.id === selectedVendor);
+
+      console.log('🚚🏪 Assigning rider and vendor together:', {
+        order: selectedOrder._id,
+        rider: selectedRider._id,
+        vendor: selectedVendor,
+        vendorData: selectedVendorData,
+        orderType: selectedOrder.type
+      });
+
+      // First assign rider
+      const riderResponse = await fetch(getAdminApiUrl('/orders/assign'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'admin-token': 'admin-access-granted'
+        },
+        body: JSON.stringify({
+          orderId: selectedOrder._id,
+          riderId: selectedRider._id,
+          orderType: selectedOrder.type
+        })
+      });
+
+      if (!riderResponse.ok) {
+        throw new Error('Failed to assign rider');
+      }
+
+      // Then assign vendor
+      const vendorResponse = await fetch(getAdminApiUrl('/orders/assign-vendor'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'admin-token': 'admin-access-granted'
+        },
+        body: JSON.stringify({
+          orderId: selectedOrder._id,
+          vendorData: {
+            vendorId: selectedVendor,
+            vendorName: selectedVendorData?.name,
+            vendorAddress: selectedVendorData?.address,
+            distance: selectedVendorData?.distance,
+            estimatedTime: selectedVendorData?.estimatedTime
+          },
+          orderType: selectedOrder.type
+        })
+      });
+
+      if (!vendorResponse.ok) {
+        throw new Error('Failed to assign vendor');
+      }
+
+      toast.success(`✅ Order assigned to ${selectedRider.name} and ${selectedVendorData?.name}`);
+      fetchOrders();
+      fetchActiveRiders();
+      setAssignModalOpen(false);
+      setCombinedAssignModalOpen(false);
+      setSelectedRider(null);
+      setSelectedVendor('');
+    } catch (error) {
+      console.error('Error in combined assignment:', error);
+      toast.error('Failed to assign rider and vendor. Please try again.');
+    }
+  };
+
   const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => {
     const R = 6371; // Radius of the Earth in kilometers
     const dLat = (lat2 - lat1) * Math.PI / 180;
