@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertCircle, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { authHelpers } from "@/integrations/mongodb/client";
+import analyticsService from "@/services/analyticsService";
 
 interface AuthModalProps {
   isOpen: boolean;
