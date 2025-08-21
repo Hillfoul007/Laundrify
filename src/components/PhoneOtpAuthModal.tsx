@@ -73,6 +73,25 @@ const PhoneOtpAuthModal: React.FC<PhoneOtpAuthModalProps> = ({
     return () => window.removeEventListener("error", handleError);
   }, []);
 
+  // Auto-fill referral code from URL parameter
+  React.useEffect(() => {
+    if (isOpen) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const refCode = urlParams.get('ref');
+
+      if (refCode && refCode.trim()) {
+        console.log('🎁 Auto-filling referral code from URL:', refCode);
+        setFormData(prev => ({
+          ...prev,
+          referralCode: refCode.trim().toUpperCase()
+        }));
+
+        // Validate the referral code automatically
+        validateReferralCode(refCode.trim());
+      }
+    }
+  }, [isOpen]);
+
   // Early return after all hooks are declared
   if (hasError) {
     return (

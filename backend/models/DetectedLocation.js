@@ -62,11 +62,11 @@ const detectedLocationSchema = new mongoose.Schema(
     },
     created_at: {
       type: Date,
-      default: Date.now,
+      default: () => new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"})),
     },
     updated_at: {
       type: Date,
-      default: Date.now,
+      default: () => new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"})),
     },
   },
   {
@@ -76,7 +76,7 @@ const detectedLocationSchema = new mongoose.Schema(
 
 // Update the updated_at field before saving
 detectedLocationSchema.pre("save", function (next) {
-  this.updated_at = new Date();
+  this.updated_at = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"}));
   next();
 });
 
@@ -93,49 +93,24 @@ detectedLocationSchema.statics.checkAvailability = function (city, pincode) {
   const normalizedCity = city?.toLowerCase().trim();
   const normalizedPincode = pincode?.trim();
 
-  // Legacy keyword-based detection (city + sector)
-  const availableLocations = [
-    {
-      city: "Gurgaon",
-      area: "Sector 69",
-      pincode: "122101",
-      keywords: ["tulip", "sector 69", "sector-69", "tulip violet", "sector 69 gurugram", "sector 69 gurgaon"],
-    },
-    {
-      city: "Gurugram",
-      area: "Sector 69",
-      pincode: "122101",
-      keywords: ["tulip", "sector 69", "sector-69", "tulip violet", "sector 69 gurugram", "sector 69 gurgaon"],
-    },
-  ];
+  // Extended service to all of Gurugram/Gurgaon
+  const availableCities = ["gurgaon", "gurugram"];
 
-  const isAvailableByCity = availableLocations.some((location) => {
-    const matchesCity = normalizedCity?.includes(location.city.toLowerCase());
-    const matchesKeyword = location.keywords.some((k) =>
-      normalizedCity?.includes(k)
-    );
-    return matchesCity && matchesKeyword;
+  // Check if the city matches Gurgaon or Gurugram
+  const isAvailableCity = availableCities.some((availableCity) => {
+    return normalizedCity?.includes(availableCity);
   });
 
-  if (normalizedPincode === "122101") {
+  if (isAvailableCity) {
     return {
       is_available: true,
-      message: "Service available for pincode 122101",
-    };
-  }
-
-  if (isAvailableByCity) {
-    return {
-      is_available: true,
-      message: "Service available in your area (Sector 69)",
+      message: "Service available in Gurugram/Gurgaon",
     };
   }
 
   return {
     is_available: false,
-    message: normalizedPincode
-      ? `Service currently not available for pincode ${normalizedPincode}. Available only for pincode 122101 or Sector 69 area.`
-      : "Service not available in your area. Currently serving Sector 69 (pincode 122101).",
+    message: "Service currently available only in Gurugram/Gurgaon area.",
   };
 };
 
@@ -168,10 +143,10 @@ detectedLocationSchema.statics.saveDetectedLocation = async function (
     const detectedLocation = new this({
       ...locationData,
       device_fingerprint: fingerprint,
-
       is_available: availabilityResult.is_available, // Extract boolean value
       availability_message: availabilityResult.message, // Store message separately
-
+      created_at: new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"})),
+      updated_at: new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"})),
     });
 
     await detectedLocation.save();
