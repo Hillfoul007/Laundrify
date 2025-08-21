@@ -951,24 +951,95 @@ router.get("/customer/:customerId", async (req, res) => {
       `🎯 Using target customer ID for booking lookup: ${targetCustomerId}`,
     );
 
-    // Query bookings using the single, definitive customer ID
+    // Query both regular bookings and quick pickups using the single, definitive customer ID
     let query = { customer_id: targetCustomerId };
     if (status) {
       query.status = status;
     }
 
-    const bookings = await Booking.find(query)
-      .select("+item_prices +charges_breakdown") // Explicitly include item_prices and charges_breakdown
-      .populate("customer_id", "full_name phone email")
-      .populate("rider_id", "full_name phone")
-      .sort({ created_at: -1 })
-      .limit(parseInt(limit))
-      .skip(parseInt(offset));
+    // Import QuickPickup model
+    const QuickPickup = require("../models/QuickPickup");
+
+    // Fetch both regular bookings and quick pickups in parallel
+    const [bookings, quickPickups] = await Promise.all([
+      Booking.find(query)
+        .select("+item_prices +charges_breakdown") // Explicitly include item_prices and charges_breakdown
+        .populate("customer_id", "full_name phone email")
+        .populate("rider_id", "full_name phone")
+        .sort({ created_at: -1 }),
+      QuickPickup.find(query)
+        .populate("customer_id", "full_name phone email")
+        .populate("rider_id", "full_name phone")
+        .sort({ createdAt: -1 })
+    ]);
 
     console.log(
-      `✅ Found ${bookings.length} bookings for customer: ${targetCustomerId}`,
+      `✅ Found ${bookings.length} regular bookings and ${quickPickups.length} quick pickups for customer: ${targetCustomerId}`,
     );
-    res.json({ bookings });
+
+    // Transform quick pickups to match booking format for unified display
+    const transformedQuickPickups = quickPickups.map(qp => {
+      // Convert items_collected to item_prices format for consistent display
+      const itemPrices = qp.items_collected && qp.items_collected.length > 0
+        ? qp.items_collected.map(item => ({
+            service_name: item.name,
+            quantity: item.quantity,
+            unit_price: item.price,
+            total_price: item.total || (item.quantity * item.price)
+          }))
+        : [];
+
+      // Create services array from items_collected
+      const services = qp.items_collected && qp.items_collected.length > 0
+        ? qp.items_collected.map(item =>
+            item.quantity > 1 ? `${item.name} x${item.quantity}` : item.name
+          )
+        : ["Quick Pickup"];
+
+      return {
+        _id: qp._id,
+        custom_order_id: `QP-${qp._id.toString().slice(-6).toUpperCase()}`,
+        customer_id: qp.customer_id,
+        service: services.join(', '),
+        services: services,
+        service_type: "quick_pickup",
+        scheduled_date: qp.pickup_date,
+        scheduled_time: qp.pickup_time,
+        delivery_date: qp.pickup_date, // For quick pickups, delivery is same day as pickup
+        delivery_time: "Same Day",
+        provider_name: "Laundrify Quick Pickup",
+        address: qp.address,
+        additional_details: qp.special_instructions,
+        special_instructions: qp.special_instructions,
+        total_price: qp.actual_cost || qp.estimated_cost || 0,
+        final_amount: qp.actual_cost || qp.estimated_cost || 0,
+        status: qp.status,
+        payment_status: qp.status === 'completed' ? 'paid' : 'pending',
+        rider_id: qp.rider_id,
+        assignedRider: qp.rider_id,
+        item_prices: itemPrices, // Include transformed item prices for booking history
+        items_collected: qp.items_collected, // Keep original for quick pickup identification
+        notes: qp.notes,
+        created_at: qp.createdAt,
+        createdAt: qp.createdAt,
+        updated_at: qp.updatedAt,
+        updatedAt: qp.updatedAt,
+        isQuickPickup: true, // Flag to identify quick pickup orders
+        pickup_date: qp.pickup_date,
+        pickup_time: qp.pickup_time
+      };
+    });
+
+    // Combine and sort all orders by creation date
+    const allOrders = [...bookings, ...transformedQuickPickups]
+      .sort((a, b) => new Date(b.created_at || b.createdAt) - new Date(a.created_at || a.createdAt))
+      .slice(parseInt(offset), parseInt(offset) + parseInt(limit));
+
+    console.log(
+      `✅ Returning ${allOrders.length} total orders (${bookings.length} bookings + ${quickPickups.length} quick pickups) for customer booking history`,
+    );
+
+    res.json({ bookings: allOrders });
   } catch (error) {
     console.error("Bookings fetch error:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -1382,7 +1453,7 @@ router.put("/:bookingId", async (req, res) => {
       updateData.services = updatedServices;
       updateData.service = updatedServices.join(', ');
 
-      console.log("📋 Updated services array:", updateData.services);
+      console.log("�� Updated services array:", updateData.services);
       console.log("📋 Updated service string:", updateData.service);
 
       // Recalculate totals if items are provided
