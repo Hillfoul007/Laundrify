@@ -128,6 +128,7 @@ export const ENV_CONFIG = {
   
   // Google Services
   GOOGLE_MAPS_API_KEY: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+  GOOGLE_ANALYTICS_ID: import.meta.env.VITE_GOOGLE_ANALYTICS_ID,
   
   // SMS Service
   DVHOSTING_API_KEY: import.meta.env.VITE_DVHOSTING_API_KEY,
