@@ -30,24 +30,7 @@ import { toast } from 'sonner';
 import RiderLayout from '@/components/rider/RiderLayout';
 import CustomerVerificationService from '@/services/customerVerificationService';
 import globalVerificationManager from '@/utils/globalVerificationManager';
-
-// Helper function to get the correct API URL for rider endpoints
-const getRiderApiUrl = (endpoint: string): string => {
-  const isDev = import.meta.env.DEV;
-  const hostname = window.location.hostname;
-  const isLocalhost = hostname.includes("localhost") || hostname.includes("127.0.0.1");
-  const isRenderCom = hostname.includes("onrender.com");
-  const isLaundrifyDomain = hostname.includes("laundrify.online");
-
-  // Force correct backend URL based on environment
-  if (isLocalhost && isDev) {
-    return `/api/riders${endpoint}`;
-  } else if (isRenderCom || isLaundrifyDomain || !isLocalhost) {
-    return 'https://backend-vaxf.onrender.com/api/riders' + endpoint;
-  }
-
-  return `/api/riders${endpoint}`;
-};
+import { getRiderApiUrl } from '@/lib/riderApi';
 
 export default function RiderOrders() {
   const { orderId } = useParams();
