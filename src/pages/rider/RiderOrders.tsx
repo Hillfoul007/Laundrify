@@ -666,6 +666,62 @@ export default function RiderOrders() {
     return getServicesByCategory(selectedCategory);
   };
 
+  const saveDeliveryInfo = async () => {
+    if (!deliveryDate || !deliveryTime || !orderId) {
+      toast.error('Please select both delivery date and time');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      console.log('🚚 Saving delivery info for quick pickup:', { orderId, deliveryDate, deliveryTime });
+
+      const result = await quickPickupService.updateDeliveryInfo(orderId, {
+        delivery_date: deliveryDate,
+        delivery_time: deliveryTime,
+        items_collected: editedItems.map(item => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+          total: item.quantity * item.price
+        })),
+        actual_cost: totalAmount
+      });
+
+      if (result.success) {
+        toast.success('✅ Delivery schedule saved successfully!', {
+          description: `Delivery set for ${deliveryDate} at ${deliveryTime}`,
+          duration: 4000
+        });
+
+        // Update the order with new delivery info
+        if (result.quickPickup) {
+          setOrder(prevOrder => ({
+            ...prevOrder,
+            delivery_date: result.quickPickup.delivery_date,
+            delivery_time: result.quickPickup.delivery_time,
+            status: 'picked_up'
+          }));
+        }
+
+        // Track delivery schedule event
+        analyticsService.trackEvent('rider_delivery_scheduled', {
+          event_category: 'rider',
+          order_id: orderId,
+          delivery_date: deliveryDate,
+          delivery_time: deliveryTime
+        });
+      } else {
+        toast.error('❌ Failed to save delivery schedule: ' + (result.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('❌ Error saving delivery info:', error);
+      toast.error('❌ Failed to save delivery schedule');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const saveOrderChanges = async () => {
     // If verification is required and not approved, show error
     if (verificationStatus && verificationStatus !== 'approved') {
