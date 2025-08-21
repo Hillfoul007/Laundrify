@@ -3,6 +3,9 @@ const url = require('url');
 
 const PORT = 3001;
 
+// In-memory storage for updated orders
+const orderUpdates = new Map();
+
 // Simple JSON parser for POST requests
 function parseJSON(req, callback) {
   let body = '';
