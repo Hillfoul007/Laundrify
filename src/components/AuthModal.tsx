@@ -90,6 +90,9 @@ const AuthModal: React.FC<AuthModalProps> = ({
     setIsLoading(true);
     setError("");
 
+    // Track sign-in attempt
+    analyticsService.trackAuth('login', 'email');
+
     if (!validateEmail(formData.email)) {
       setError("Please enter a valid email address");
       setIsLoading(false);
