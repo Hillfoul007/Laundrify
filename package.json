@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:backend": "cd backend && node server-laundry.js",
+    "dev:backend": "cd backend && node simple-server.js",
     "dev:full": "concurrently \"npm run dev\" \"npm run dev:backend\"",
     "build": "NODE_OPTIONS=--max-old-space-size=384 vite build && NODE_OPTIONS=--max-old-space-size=384 node scripts/optimize-build.js",
     "build:pwa": "NODE_OPTIONS=--max-old-space-size=384 node scripts/memory-optimized-build.cjs",
