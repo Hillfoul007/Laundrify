@@ -18,6 +18,7 @@ import {
   Minus,
   ShoppingCart,
 } from "lucide-react";
+import analyticsService from "@/services/analyticsService";
 
 interface ServiceCategoriesProps {
   onServiceSelect: (service: any) => void;
