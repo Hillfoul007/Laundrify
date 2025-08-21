@@ -68,21 +68,7 @@ export default function RiderLayout({ children }: RiderLayoutProps) {
     }
   }, [rider]);
 
-  const getRiderApiUrl = (endpoint: string): string => {
-    const isDev = import.meta.env.DEV;
-    const hostname = window.location.hostname;
-    const isLocalhost = hostname.includes("localhost") || hostname.includes("127.0.0.1");
-    const isRenderCom = hostname.includes("onrender.com");
-    const isLaundrifyDomain = hostname.includes("laundrify.online");
-
-    if (isLocalhost && isDev) {
-      return `/api/riders${endpoint}`;
-    } else if (isRenderCom || isLaundrifyDomain || !isLocalhost) {
-      return `https://backend-vaxf.onrender.com/api/riders${endpoint}`;
-    }
-
-    return `/api/riders${endpoint}`;
-  };
+  // Using centralized rider API configuration
 
   const fetchUnreadCount = async () => {
     try {
