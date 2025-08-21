@@ -1028,6 +1028,24 @@ function getMockOrderData(orderId) {
   };
 }
 
+// Debug route to check if rider routes are working
+router.get('/debug/routes', (req, res) => {
+  res.json({
+    message: 'Rider routes are loaded and working',
+    timestamp: new Date().toISOString(),
+    availableRoutes: [
+      'GET /api/riders/health',
+      'GET /api/riders/test',
+      'POST /api/riders/login',
+      'GET /api/riders/orders',
+      'GET /api/riders/orders/:orderId',
+      'PUT /api/riders/orders/:orderId/update', // This is the problematic route
+      'POST /api/riders/order-action',
+      'GET /api/riders/notifications'
+    ]
+  });
+});
+
 // Update order items and details
 router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
   try {
