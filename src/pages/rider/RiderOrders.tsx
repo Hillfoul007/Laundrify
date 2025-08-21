@@ -160,17 +160,28 @@ export default function RiderOrders() {
     if (orderId) {
       console.log('🔍 useEffect: Fetching order details for ID:', orderId);
 
-      // Force quick pickup order display for the specific order ID
-      if (orderId === '68a1cb6dbea207fd0ace501b') {
-        console.log('✅ Force loading quick pickup mock data for order:', orderId);
-        const quickPickupMockData = getMockOrderData(orderId);
-        setOrder(quickPickupMockData);
-        setEditedItems([]);
-        setOriginalTotal(0);
-        setIsQuickPickup(true);
-        setDeliveryDate(quickPickupMockData.delivery_date || '');
-        setDeliveryTime(quickPickupMockData.delivery_time || '');
-        return; // Skip the API call and use mock data
+      // Try to load from quick pickup service first for quick pickup orders
+      if (orderId && orderId.startsWith('qp_')) {
+        console.log('🚚 Loading quick pickup order from service:', orderId);
+        try {
+          const quickPickupResult = await quickPickupService.getUserQuickPickups(getCurrentUserId() || '');
+          if (quickPickupResult.success && quickPickupResult.quickPickups) {
+            const quickPickup = quickPickupResult.quickPickups.find(qp => qp.id === orderId);
+            if (quickPickup) {
+              console.log('✅ Quick pickup found:', quickPickup);
+              const transformedOrder = transformQuickPickupToOrder(quickPickup);
+              setOrder(transformedOrder);
+              setEditedItems(quickPickup.items_collected || []);
+              setOriginalTotal(quickPickup.estimated_cost || 0);
+              setIsQuickPickup(true);
+              setDeliveryDate(quickPickup.delivery_date || '');
+              setDeliveryTime(quickPickup.delivery_time || '');
+              return;
+            }
+          }
+        } catch (error) {
+          console.warn('⚠️ Failed to load quick pickup:', error);
+        }
       }
 
       fetchOrderDetails(orderId);
