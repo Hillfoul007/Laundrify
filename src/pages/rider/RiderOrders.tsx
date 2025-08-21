@@ -1418,84 +1418,15 @@ export default function RiderOrders() {
                 <h4 className="font-medium text-blue-900 mb-2">Pickup & Delivery Process</h4>
                 <ol className="list-decimal list-inside space-y-1 text-sm text-blue-800">
                   <li>Navigate to customer address and collect the items</li>
-                  <li>Verify items match the order (edit if needed)</li>
-                  <li>Transport items to vendor location in Sector 69</li>
-                  <li>After vendor completes the order, return items to customer</li>
+                  <li>If order changes are needed, edit the order and wait for customer approval</li>
+                  <li>Once approved (or no changes needed), deliver items to vendor address</li>
+                  <li>Complete the order in the system after delivery</li>
                 </ol>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Confirmation Dialog */}
-        {showConfirmDialog && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <Card className="w-full max-w-md">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <AlertTriangle className="h-5 w-5 text-orange-600" />
-                  <span>Confirm Order Changes</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <p className="text-gray-700">
-                    You've made changes to the order that will affect the total price:
-                  </p>
-
-                  <div className="bg-gray-50 p-3 rounded-lg">
-                    <div className="flex justify-between items-center">
-                      <span>Original Total:</span>
-                      <span>₹{originalTotal}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>New Total:</span>
-                      <span>₹{totalAmount}</span>
-                    </div>
-                    <div className={`flex justify-between items-center font-semibold ${totalAmount > originalTotal ? 'text-red-600' : 'text-green-600'}`}>
-                      <span>Difference:</span>
-                      <span>{totalAmount > originalTotal ? '+' : ''}₹{totalAmount - originalTotal}</span>
-                    </div>
-                  </div>
-
-                  <div className="bg-blue-50 p-3 rounded-lg">
-                    <div className="flex items-start space-x-2">
-                      <Bell className="h-4 w-4 text-blue-600 mt-0.5" />
-                      <div className="text-sm text-blue-800">
-                        <p className="font-medium">Two-Way Verification Process</p>
-                        <p>1. Customer will be notified of these changes via in-app notification</p>
-                        <p>2. Customer must approve/reject the changes</p>
-                        <p>3. You can only save the order after customer approval</p>
-                        {isQuickPickup && (
-                          <p className="font-medium text-orange-700 mt-2">
-                            ⚠️ Quick Pickup: Creating order from scratch based on collected items
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex space-x-3">
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowConfirmDialog(false)}
-                      className="flex-1"
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={sendVerificationToCustomer}
-                      disabled={isSaving}
-                      className="flex-1"
-                    >
-                      {isSaving ? 'Notifying...' : 'Send for Verification'}
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
       </div>
     </RiderLayout>
   );
