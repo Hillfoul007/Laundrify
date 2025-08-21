@@ -14,6 +14,25 @@ const riderNotificationService = require("../services/riderNotificationService")
 
 const router = express.Router();
 
+// Health check endpoint
+router.get('/health', (req, res) => {
+  console.log('🏥 Health check endpoint hit');
+  res.json({
+    status: 'healthy',
+    service: 'rider-service',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    database: {
+      connected: !!mongoose.connection.readyState,
+      state: mongoose.connection.readyState,
+      status: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+    },
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
+    version: '1.0.0'
+  });
+});
+
 // Test endpoint to verify rider routes are working
 router.get('/test', (req, res) => {
   console.log('🔍 Rider routes test endpoint hit');
