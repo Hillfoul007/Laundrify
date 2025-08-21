@@ -614,7 +614,7 @@ router.post('/toggle-status', verifyRiderToken, async (req, res) => {
     }
 
     if (rider.status !== 'approved') {
-      console.log('⚠️ Rider not approved, allowing in demo mode');
+      console.log('��️ Rider not approved, allowing in demo mode');
       return res.json({
         message: `Status updated to ${isActive ? 'active' : 'inactive'} (approval not required in demo)`,
         isActive,
@@ -1146,16 +1146,28 @@ router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
       return res.status(404).json({ message: 'Rider not found' });
     }
 
-    // Store original items for comparison (using item_prices since items field doesn't exist in schema)
-    const originalItems = order.item_prices || [];
+    // Store original items for comparison based on order type
+    let originalItems, originalItemsForComparison;
 
-    // Convert item_prices format to items format for comparison
-    const originalItemsForComparison = originalItems.map(item => ({
-      name: item.service_name,
-      price: item.unit_price,
-      quantity: item.quantity,
-      total: item.total_price
-    }));
+    if (isQuickPickup) {
+      // QuickPickup uses items_collected array
+      originalItems = order.items_collected || [];
+      originalItemsForComparison = originalItems.map(item => ({
+        name: item.name || item.service_name,
+        price: item.price || item.unit_price || 0,
+        quantity: item.quantity || 1,
+        total: item.total || item.total_price || (item.quantity * item.price) || 0
+      }));
+    } else {
+      // Booking uses item_prices array
+      originalItems = order.item_prices || [];
+      originalItemsForComparison = originalItems.map(item => ({
+        name: item.service_name,
+        price: item.unit_price,
+        quantity: item.quantity,
+        total: item.total_price
+      }));
+    }
 
     // Calculate price changes
     const priceComparison = notificationService.calculatePriceChanges(originalItemsForComparison, items);
@@ -1164,47 +1176,67 @@ router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
     // Update order with Indian timezone
     const indianTime = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
 
-    // Note: No need to update order.items as it doesn't exist in the schema
-    // The item_prices field will be updated below which is the actual field in the database
+    // Update common fields
     order.notes = notes || order.notes;
     order.updatedBy = 'rider';
     order.lastModified = new Date(indianTime);
     order.updated_at = new Date(indianTime);
     order.special_instructions = order.special_instructions || notes;
 
-    // Update item_prices array to match new items
+    // Update items based on order type
     if (items && items.length > 0) {
-      console.log('📋 Original item_prices before update:', JSON.stringify(order.item_prices, null, 2));
-      console.log('📋 New items received from frontend:', JSON.stringify(items, null, 2));
+      if (isQuickPickup) {
+        // QuickPickup order - update items_collected
+        console.log('📋 Original items_collected before update:', JSON.stringify(order.items_collected, null, 2));
+        console.log('📋 New items received from frontend:', JSON.stringify(items, null, 2));
 
-      const newItemPrices = items.map(item => ({
-        service_name: item.name,
-        quantity: item.quantity,
-        unit_price: item.price,
-        total_price: item.quantity * item.price
-      }));
+        const newItemsCollected = items.map(item => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+          total: item.quantity * item.price
+        }));
 
-      console.log('📋 Transformed item_prices for database:', JSON.stringify(newItemPrices, null, 2));
+        console.log('📋 Transformed items_collected for database:', JSON.stringify(newItemsCollected, null, 2));
+        order.items_collected = newItemsCollected;
 
-      order.item_prices = newItemPrices;
+        // Update cost for QuickPickup
+        const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+        order.actual_cost = subtotal;
 
-      // Update services array and service string to stay synchronized with item_prices
-      // Include quantities in service representation for better tracking
-      const updatedServices = items.map(item =>
-        item.quantity > 1 ? `${item.name} x${item.quantity}` : item.name
-      );
-      order.services = updatedServices;
-      order.service = updatedServices.join(', ');
+        console.log('💰 Updated QuickPickup cost:', subtotal);
+      } else {
+        // Regular Booking order - update item_prices
+        console.log('📋 Original item_prices before update:', JSON.stringify(order.item_prices, null, 2));
+        console.log('📋 New items received from frontend:', JSON.stringify(items, null, 2));
 
-      console.log('📋 Updated services array:', order.services);
-      console.log('📋 Updated service string:', order.service);
+        const newItemPrices = items.map(item => ({
+          service_name: item.name,
+          quantity: item.quantity,
+          unit_price: item.price,
+          total_price: item.quantity * item.price
+        }));
 
-      // Recalculate totals
-      const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
-      order.total_price = subtotal;
-      order.final_amount = subtotal; // Simplified - should include taxes/fees
+        console.log('📋 Transformed item_prices for database:', JSON.stringify(newItemPrices, null, 2));
+        order.item_prices = newItemPrices;
 
-      console.log('💰 Updated totals - subtotal:', subtotal, 'total_price:', order.total_price);
+        // Update services array and service string for Booking orders
+        const updatedServices = items.map(item =>
+          item.quantity > 1 ? `${item.name} x${item.quantity}` : item.name
+        );
+        order.services = updatedServices;
+        order.service = updatedServices.join(', ');
+
+        console.log('📋 Updated services array:', order.services);
+        console.log('📋 Updated service string:', order.service);
+
+        // Recalculate totals for Booking
+        const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+        order.total_price = subtotal;
+        order.final_amount = subtotal;
+
+        console.log('💰 Updated Booking totals - subtotal:', subtotal, 'total_price:', order.total_price);
+      }
     } else {
       console.log('⚠️ No items provided for update');
     }
