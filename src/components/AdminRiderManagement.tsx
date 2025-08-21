@@ -450,6 +450,51 @@ export default function AdminRiderManagement() {
     }
   };
 
+  const loadVendorRecommendations = async (order: any) => {
+    if (!order?.address) {
+      console.warn('No address found for order:', order);
+      setRecommendedVendors(vendorService.getActiveVendors().map(vendor => ({
+        ...vendor,
+        distance: 0,
+        estimatedTime: 60
+      })));
+      return;
+    }
+
+    setLoadingVendors(true);
+    try {
+      const address = typeof order.address === 'string' ? order.address :
+        `${order.address?.flatNo || ''} ${order.address?.street || ''} ${order.address?.city || 'Gurugram'}`.trim();
+
+      console.log('🏪 Loading vendor recommendations for address:', address);
+
+      const vendors = await vendorService.getVendorRecommendations(
+        address,
+        order.services || []
+      );
+
+      console.log('✅ Loaded vendor recommendations:', vendors);
+      setRecommendedVendors(vendors);
+    } catch (error) {
+      console.error('Error loading vendor recommendations:', error);
+      // Fallback to default vendors
+      setRecommendedVendors(vendorService.getActiveVendors().map(vendor => ({
+        ...vendor,
+        distance: 0,
+        estimatedTime: 60
+      })));
+    } finally {
+      setLoadingVendors(false);
+    }
+  };
+
+  const openVendorModal = (order: any) => {
+    setSelectedOrder(order);
+    setVendorModalOpen(true);
+    setSelectedVendor('');
+    loadVendorRecommendations(order);
+  };
+
   const assignVendorToOrder = async () => {
     if (!selectedOrder || !selectedVendor) return;
 
