@@ -93,20 +93,8 @@ class LocationService {
           resolve(coords);
         },
         (error) => {
-          let errorMessage = "Unknown geolocation error";
-          switch (error.code) {
-            case error.PERMISSION_DENIED:
-              errorMessage = "Location access denied by user";
-              break;
-            case error.POSITION_UNAVAILABLE:
-              errorMessage = "Location information unavailable";
-              break;
-            case error.TIMEOUT:
-              errorMessage = "Location request timed out";
-              break;
-          }
-
-          console.error("❌ Geolocation error:", errorMessage, error);
+          const errorMessage = getErrorMessage(error);
+          logError("LocationService.getCurrentPosition", error);
           reject(new Error(errorMessage));
         },
         defaultOptions,
