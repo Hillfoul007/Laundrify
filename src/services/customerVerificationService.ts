@@ -475,6 +475,14 @@ export class CustomerVerificationService {
 
       console.log('✅ verificationCompleted event dispatched successfully');
 
+      // Also use global manager for more reliable status updates
+      const orderId = verification?.orderId || verification?.orderData?.orderId;
+      if (orderId && (window as any).globalVerificationManager) {
+        const status = approved ? 'approved' : 'rejected';
+        console.log(`🌍 Updating global verification manager: ${status} for order ${orderId}`);
+        (window as any).globalVerificationManager.setVerificationStatus(orderId, status);
+      }
+
       const message = approved 
         ? 'Order changes approved! The rider has been notified and can now complete the order.'
         : 'Order changes rejected. The rider will be informed to modify the order.';
