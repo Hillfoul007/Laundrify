@@ -243,11 +243,11 @@ const EnhancedBookingHistory: React.FC<EnhancedBookingHistoryProps> =
             console.warn("⚠️ Failed to load quick pickup orders for fallback:", error);
           }
 
-          // Combine regular bookings with quick pickup demo
-          const bookingsWithQuickPickup = [mockQuickPickupOrder, ...productionBookings];
+          // Combine regular bookings with real quick pickup orders
+          const bookingsWithQuickPickup = [...quickPickupOrders, ...productionBookings];
 
           console.log(
-            "✅ Bookings loaded from BookingService (filtered + quick pickup demo):",
+            "✅ Bookings loaded from BookingService (filtered + real quick pickups):",
             bookingsWithQuickPickup.length,
           );
           setBookings(bookingsWithQuickPickup);
