@@ -90,7 +90,6 @@ export default function RiderOrders() {
       if (eventOrderId === orderId && status) {
         console.log(`🔄 Updating rider view: ${status} for order ${orderId}`);
         setVerificationStatus(status);
-        setCustomerVerificationRequired(true);
 
         if (status === 'approved') {
           toast.success('✅ Customer approved the changes! You can now save the order.');
@@ -100,7 +99,6 @@ export default function RiderOrders() {
       } else if (eventOrderId === orderId && status === null) {
         // Status cleared
         setVerificationStatus(null);
-        setCustomerVerificationRequired(false);
       }
     };
 
@@ -112,7 +110,6 @@ export default function RiderOrders() {
     if (currentStatus && currentStatus.status !== verificationStatus) {
       console.log('📋 Found existing verification status in global manager:', currentStatus);
       setVerificationStatus(currentStatus.status);
-      setCustomerVerificationRequired(true);
     }
 
     return () => {
@@ -134,7 +131,6 @@ export default function RiderOrders() {
       if (globalStatus && globalStatus.status !== verificationStatus) {
         console.log('🔄 Window focus: Verification status changed:', globalStatus.status);
         setVerificationStatus(globalStatus.status);
-        setCustomerVerificationRequired(true);
 
         if (globalStatus.status === 'approved') {
           toast.success('✅ Customer approved the changes! You can now save the order.');
@@ -160,7 +156,6 @@ export default function RiderOrders() {
       if (savedStatus && savedStatus !== verificationStatus) {
         console.log('🔄 Periodic check: Verification status changed:', savedStatus);
         setVerificationStatus(savedStatus as 'pending' | 'approved' | 'rejected');
-        setCustomerVerificationRequired(true);
       }
     };
 
@@ -195,7 +190,6 @@ export default function RiderOrders() {
       if (savedVerificationStatus) {
         console.log('📋 Found saved verification status:', savedVerificationStatus);
         setVerificationStatus(savedVerificationStatus as 'pending' | 'approved' | 'rejected');
-        setCustomerVerificationRequired(true);
       }
     }
   }, [orderId]);
