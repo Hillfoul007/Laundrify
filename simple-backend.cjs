@@ -466,6 +466,115 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // Customer bookings endpoint (for testing the integration)
+  if (path.startsWith('/api/bookings/customer/') && method === 'GET') {
+    const customerId = path.split('/').pop();
+    console.log('📋 Get customer bookings for:', customerId);
+
+    // Mock customer bookings data (including both regular and quick pickup orders)
+    const mockBookings = [
+      // Regular booking with items
+      {
+        _id: '67890123456789abcdef0123',
+        custom_order_id: 'A202412001',
+        customer_id: customerId,
+        service: "Men's Shirt/T-Shirt - Dry Clean, Trouser/Jeans - Dry Clean",
+        services: ["Men's Shirt/T-Shirt - Dry Clean x2", "Trouser/Jeans - Dry Clean"],
+        service_type: "premium",
+        scheduled_date: new Date().toISOString().split('T')[0],
+        scheduled_time: '14:00',
+        delivery_date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        delivery_time: '18:00',
+        provider_name: 'Laundrify Premium Services',
+        address: 'D62, Extension, Chhawla, New Delhi, Delhi, 122101',
+        additional_details: 'Handle with care - customer prefers gentle wash for delicate items.',
+        total_price: 320,
+        final_amount: 320,
+        status: 'confirmed',
+        payment_status: 'pending',
+        item_prices: [
+          {
+            service_name: "Men's Shirt/T-Shirt - Dry Clean",
+            quantity: 2,
+            unit_price: 100,
+            total_price: 200
+          },
+          {
+            service_name: "Trouser/Jeans - Dry Clean",
+            quantity: 1,
+            unit_price: 120,
+            total_price: 120
+          }
+        ],
+        created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+        updated_at: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      },
+      // Quick pickup order with items (simulating one that was edited by rider)
+      {
+        _id: 'quick123456789abcdef0123',
+        custom_order_id: 'QP-123456',
+        customer_id: customerId,
+        service: "Women's Kurti x2, Saree x1", // Items added by rider
+        services: ["Women's Kurti x2", "Saree x1"],
+        service_type: "quick_pickup",
+        scheduled_date: new Date().toISOString().split('T')[0],
+        scheduled_time: '15:00',
+        delivery_date: new Date().toISOString().split('T')[0],
+        delivery_time: 'Same Day',
+        provider_name: 'Laundrify Quick Pickup',
+        address: 'B-123, Sector 45, Gurgaon, Haryana, 122003',
+        additional_details: 'Quick pickup - rider will assess items on location and create order',
+        total_price: 350, // Updated price after rider added items
+        final_amount: 350,
+        status: 'picked_up',
+        payment_status: 'pending',
+        item_prices: [
+          // These items were added when rider edited the quick pickup
+          {
+            service_name: "Women's Kurti",
+            quantity: 2,
+            unit_price: 120,
+            total_price: 240
+          },
+          {
+            service_name: "Saree",
+            quantity: 1,
+            unit_price: 110,
+            total_price: 110
+          }
+        ],
+        items_collected: [
+          {
+            name: "Women's Kurti",
+            quantity: 2,
+            price: 120,
+            total: 240
+          },
+          {
+            name: "Saree",
+            quantity: 1,
+            price: 110,
+            total: 110
+          }
+        ],
+        isQuickPickup: true,
+        pickup_date: new Date().toISOString().split('T')[0],
+        pickup_time: '15:00',
+        created_at: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+        createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+        updated_at: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+    ];
+
+    console.log(`✅ Returning ${mockBookings.length} bookings for customer: ${customerId}`);
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ bookings: mockBookings }));
+    return;
+  }
+
   // 404 handler
   console.log('⚠️ 404 - Route not found:', path);
   res.writeHead(404, { 'Content-Type': 'application/json' });
