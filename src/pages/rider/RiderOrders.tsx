@@ -1392,10 +1392,12 @@ export default function RiderOrders() {
 
         {/* Customer Verification Status */}
         {verificationStatus && (
-          <Card className={`border-2 ${
-            verificationStatus === 'approved' ? 'border-green-500 bg-green-50' :
+          <Card className={`border-2 transition-all duration-300 ${
+            verificationStatus === 'approved' ? 'border-green-500 bg-green-50 shadow-lg shadow-green-200' :
             verificationStatus === 'rejected' ? 'border-red-500 bg-red-50' :
             'border-orange-500 bg-orange-50'
+          } ${
+            verificationStatus === 'approved' ? 'animate-pulse' : ''
           }`}>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
