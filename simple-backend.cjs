@@ -467,7 +467,7 @@ const server = http.createServer((req, res) => {
   }
 
   // Customer bookings endpoint (for testing the integration)
-  if (path.startsWith('/api/bookings/customer/') && method === 'GET') {
+  if ((path.startsWith('/api/bookings/customer/') || path.startsWith('/bookings/customer/')) && method === 'GET') {
     const customerId = path.split('/').pop();
     console.log('📋 Get customer bookings for:', customerId);
 
