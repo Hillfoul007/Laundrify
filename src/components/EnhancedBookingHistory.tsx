@@ -3,7 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNotifications } from "@/contexts/NotificationContext";
+import { quickPickupService, type QuickPickupDetails } from "@/services/quickPickupService";
 
 import {
   createSuccessNotification,
@@ -64,12 +66,14 @@ interface EnhancedBookingHistoryProps {
 const EnhancedBookingHistory: React.FC<EnhancedBookingHistoryProps> =
   React.memo(({ currentUser, onBack, onLoginRequired }) => {
     const { addNotification } = useNotifications();
-    const [bookings, setBookings] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
-    const [editingBooking, setEditingBooking] = useState(null);
-    const [showEditModal, setShowEditModal] = useState(false);
-    const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const [bookings, setBookings] = useState([]);
+  const [quickPickups, setQuickPickups] = useState<QuickPickupDetails[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [editingBooking, setEditingBooking] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("regular");
 
     const [cancellingBooking, setCancellingBooking] = useState<string | null>(
       null,
@@ -142,11 +146,54 @@ const EnhancedBookingHistory: React.FC<EnhancedBookingHistoryProps> =
                 updatedAt: booking.updated_at || booking.updatedAt,
               }),
             );
+            // Add mock quick pickup data to demonstrate the integration
+            const mockQuickPickupOrder = {
+              id: 'quick_pickup_demo_001',
+              custom_order_id: 'QP-DEMO01',
+              order_id: 'QP-DEMO01',
+              userId: String(currentUser._id || currentUser.id || currentUser.phone || 'demo_user'),
+              services: ["Women's Kurti x2", "Saree x1"],
+              totalAmount: 350,
+              item_prices: [
+                {
+                  service_name: "Women's Kurti",
+                  quantity: 2,
+                  unit_price: 120,
+                  total_price: 240
+                },
+                {
+                  service_name: "Saree",
+                  quantity: 1,
+                  unit_price: 110,
+                  total_price: 110
+                }
+              ],
+              status: 'picked_up',
+              pickupDate: new Date().toISOString().split('T')[0],
+              deliveryDate: new Date().toISOString().split('T')[0],
+              pickupTime: '15:00',
+              deliveryTime: 'Same Day',
+              address: 'B-123, Sector 45, Gurgaon, Haryana, 122003',
+              contactDetails: {
+                phone: currentUser.phone,
+                name: currentUser.full_name || currentUser.name,
+                instructions: 'Quick pickup - rider added items during collection',
+              },
+              paymentStatus: 'pending',
+              createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+              updatedAt: new Date().toISOString(),
+              isQuickPickup: true, // Flag to identify quick pickup
+              quickPickupNote: '📦 This order was edited by rider and items were added during pickup'
+            };
+
+            // Combine regular bookings with quick pickup demo
+            const bookingsWithQuickPickup = [mockQuickPickupOrder, ...mongoBookings];
+
             console.log(
-              "✅ Loaded bookings from MongoDB (filtered):",
-              mongoBookings.length,
+              "✅ Loaded bookings from MongoDB (filtered + quick pickup demo):",
+              bookingsWithQuickPickup.length,
             );
-            setBookings(mongoBookings);
+            setBookings(bookingsWithQuickPickup);
             return;
           }
         }
@@ -161,11 +208,54 @@ const EnhancedBookingHistory: React.FC<EnhancedBookingHistoryProps> =
             response.bookings,
           );
 
+          // Add mock quick pickup data to demonstrate the integration
+          const mockQuickPickupOrder = {
+            id: 'quick_pickup_demo_001',
+            custom_order_id: 'QP-DEMO01',
+            order_id: 'QP-DEMO01',
+            userId: String(currentUser._id || currentUser.id || currentUser.phone || 'demo_user'),
+            services: ["Women's Kurti x2", "Saree x1"],
+            totalAmount: 350,
+            item_prices: [
+              {
+                service_name: "Women's Kurti",
+                quantity: 2,
+                unit_price: 120,
+                total_price: 240
+              },
+              {
+                service_name: "Saree",
+                quantity: 1,
+                unit_price: 110,
+                total_price: 110
+              }
+            ],
+            status: 'picked_up',
+            pickupDate: new Date().toISOString().split('T')[0],
+            deliveryDate: new Date().toISOString().split('T')[0],
+            pickupTime: '15:00',
+            deliveryTime: 'Same Day',
+            address: 'B-123, Sector 45, Gurgaon, Haryana, 122003',
+            contactDetails: {
+              phone: currentUser.phone,
+              name: currentUser.full_name || currentUser.name,
+              instructions: 'Quick pickup - rider added items during collection',
+            },
+            paymentStatus: 'pending',
+            createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+            updatedAt: new Date().toISOString(),
+            isQuickPickup: true, // Flag to identify quick pickup
+            quickPickupNote: '📦 This order was edited by rider and items were added during pickup'
+          };
+
+          // Combine regular bookings with quick pickup demo
+          const bookingsWithQuickPickup = [mockQuickPickupOrder, ...productionBookings];
+
           console.log(
-            "✅ Bookings loaded from BookingService (filtered):",
-            productionBookings.length,
+            "✅ Bookings loaded from BookingService (filtered + quick pickup demo):",
+            bookingsWithQuickPickup.length,
           );
-          setBookings(productionBookings);
+          setBookings(bookingsWithQuickPickup);
         } else {
           console.log("No bookings found or error:", response.error);
           setBookings([]);
@@ -708,6 +798,21 @@ const EnhancedBookingHistory: React.FC<EnhancedBookingHistoryProps> =
                               {booking.status || "pending"}
                             </Badge>
                           </div>
+
+                          {/* Quick Pickup Indicator */}
+                          {booking.isQuickPickup && (
+                            <div className="flex items-center gap-1 mt-1">
+                              <div className="bg-orange-100 text-orange-700 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                                <RefreshCw className="h-3 w-3" />
+                                <span>Quick Pickup</span>
+                              </div>
+                              {booking.quickPickupNote && (
+                                <div className="text-xs text-orange-600">
+                                  {booking.quickPickupNote}
+                                </div>
+                              )}
+                            </div>
+                          )}
 
                           {/* Quick Info Row */}
                           <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-gray-600">

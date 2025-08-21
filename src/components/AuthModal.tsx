@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertCircle, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { authHelpers } from "@/integrations/mongodb/client";
+import analyticsService from "@/services/analyticsService";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -53,6 +54,22 @@ const AuthModal: React.FC<AuthModalProps> = ({
     setShowConfirmPassword(false);
   };
 
+  // Auto-fill referral code from URL parameter
+  React.useEffect(() => {
+    if (isOpen) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const refCode = urlParams.get('ref');
+
+      if (refCode && refCode.trim()) {
+        console.log('🎁 Auto-filling referral code from URL:', refCode);
+        setFormData(prev => ({
+          ...prev,
+          referralCode: refCode.trim().toUpperCase()
+        }));
+      }
+    }
+  }, [isOpen]);
+
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -72,6 +89,9 @@ const AuthModal: React.FC<AuthModalProps> = ({
     e.preventDefault();
     setIsLoading(true);
     setError("");
+
+    // Track sign-in attempt
+    analyticsService.trackAuth('login', 'email');
 
     if (!validateEmail(formData.email)) {
       setError("Please enter a valid email address");

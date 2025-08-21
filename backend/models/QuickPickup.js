@@ -54,6 +54,19 @@ const quickPickupSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    rider_phone: {
+      type: String,
+      default: "",
+    },
+    assigned_vendor: {
+      type: String,
+      default: null,
+    },
+    assigned_vendor_details: {
+      name: String,
+      address: String,
+      phone: String,
+    },
     estimated_cost: {
       type: Number,
       default: 0,
