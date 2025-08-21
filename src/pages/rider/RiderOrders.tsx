@@ -839,6 +839,7 @@ export default function RiderOrders() {
             duration: 4000
           });
           setIsEditing(false);
+          fetchOrderDetails(orderId!); // Refresh data even in demo mode
           return; // Don't show error for 404, treat as success in demo mode
         } else if (response.status >= 500) {
           errorMessage = 'Server error. Please try again later.';
