@@ -66,12 +66,14 @@ interface EnhancedBookingHistoryProps {
 const EnhancedBookingHistory: React.FC<EnhancedBookingHistoryProps> =
   React.memo(({ currentUser, onBack, onLoginRequired }) => {
     const { addNotification } = useNotifications();
-    const [bookings, setBookings] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
-    const [editingBooking, setEditingBooking] = useState(null);
-    const [showEditModal, setShowEditModal] = useState(false);
-    const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const [bookings, setBookings] = useState([]);
+  const [quickPickups, setQuickPickups] = useState<QuickPickupDetails[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [editingBooking, setEditingBooking] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("regular");
 
     const [cancellingBooking, setCancellingBooking] = useState<string | null>(
       null,
