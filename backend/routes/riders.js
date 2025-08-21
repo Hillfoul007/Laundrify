@@ -828,11 +828,26 @@ router.get('/orders/:orderId', verifyRiderToken, async (req, res) => {
           status: quickPickup.status,
           riderStatus: quickPickup.status === 'pending' ? 'assigned' : 'accepted',
           payment_status: 'pending',
-          items: [], // Quick pickups start with no items
-          item_prices: [],
-          total_price: 0,
+          items: quickPickup.items_collected?.map(item => ({
+            id: item.id || Math.random(),
+            serviceId: item.serviceId || 'quick-pickup-item',
+            name: item.name,
+            description: item.description || `Quick pickup item: ${item.name}`,
+            price: item.price,
+            unit: 'PC',
+            category: item.category || 'quick-pickup',
+            quantity: item.quantity,
+            total: item.total || (item.quantity * item.price)
+          })) || [],
+          item_prices: quickPickup.items_collected?.map(item => ({
+            service_name: item.name,
+            quantity: item.quantity,
+            unit_price: item.price,
+            total_price: item.total || (item.quantity * item.price)
+          })) || [],
+          total_price: quickPickup.actual_cost || quickPickup.items_collected?.reduce((sum, item) => sum + (item.total || (item.quantity * item.price)), 0) || 0,
           discount_amount: 0,
-          final_amount: 0,
+          final_amount: quickPickup.actual_cost || quickPickup.items_collected?.reduce((sum, item) => sum + (item.total || (item.quantity * item.price)), 0) || 0,
           special_instructions: quickPickup.special_instructions || '',
           additional_details: 'Quick pickup service - assess items on location',
           provider_name: 'Laundrify Express',
