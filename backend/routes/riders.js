@@ -1083,30 +1083,52 @@ router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
     // First try to find the order with more detailed logging
     console.log(`🔍 Searching for order ${orderId} assigned to rider ${req.rider.riderId}`);
 
-    const order = await Booking.findOne({
+    // Try to find in both Booking and QuickPickup models
+    let order = await Booking.findOne({
       _id: orderId,
       assignedRider: req.rider.riderId
     }).populate('customer_id', 'name phone email');
 
+    let isQuickPickup = false;
+
+    // If not found in Booking, try QuickPickup
     if (!order) {
-      // Enhanced error logging
+      console.log(`🔍 Order not found in Bookings, checking QuickPickup...`);
+      order = await QuickPickup.findOne({
+        _id: orderId,
+        assignedRider: req.rider.riderId
+      });
+
+      if (order) {
+        isQuickPickup = true;
+        console.log(`✅ QuickPickup order found: ${order.custom_order_id || orderId}`);
+      }
+    }
+
+    if (!order) {
+      // Enhanced error logging - check both models
       console.log(`❌ Order not found: ${orderId}. Checking if order exists at all...`);
 
-      const anyOrder = await Booking.findById(orderId);
-      if (!anyOrder) {
-        console.log(`❌ Order ${orderId} does not exist in database`);
+      const anyBooking = await Booking.findById(orderId);
+      const anyQuickPickup = await QuickPickup.findById(orderId);
+
+      if (!anyBooking && !anyQuickPickup) {
+        console.log(`❌ Order ${orderId} does not exist in any database`);
         return res.status(404).json({
           message: 'Order not found',
           error: 'ORDER_NOT_EXISTS',
           orderId
         });
       } else {
-        console.log(`⚠️ Order ${orderId} exists but is assigned to rider: ${anyOrder.assignedRider}, not ${req.rider.riderId}`);
+        const existingOrder = anyBooking || anyQuickPickup;
+        const orderType = anyBooking ? 'Booking' : 'QuickPickup';
+        console.log(`⚠️ ${orderType} ${orderId} exists but is assigned to rider: ${existingOrder.assignedRider}, not ${req.rider.riderId}`);
         return res.status(403).json({
           message: 'Order not assigned to you',
           error: 'ORDER_NOT_ASSIGNED',
           orderId,
-          assignedRider: anyOrder.assignedRider
+          orderType,
+          assignedRider: existingOrder.assignedRider
         });
       }
     }
