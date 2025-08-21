@@ -595,6 +595,8 @@ export default function RiderOrders() {
                                   (items.length === 0 && orderData.service_type === 'express');
 
         setIsQuickPickup(isQuickPickupOrder);
+        setDeliveryDate(processedOrder.delivery_date || '');
+        setDeliveryTime(processedOrder.delivery_time || '');
         console.log('📦 Order type detected:', isQuickPickupOrder ? 'Quick Pickup' : 'Regular Order');
 
         // Show success message only in development
