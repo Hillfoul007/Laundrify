@@ -1579,12 +1579,57 @@ export default function RiderOrders() {
                 )}
               </div>
               
+              {/* Delivery Date/Time Section for Quick Pickups */}
+              {isQuickPickup && (
+                <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                  <h4 className="font-medium text-purple-900 mb-3 flex items-center">
+                    <Clock className="h-4 w-4 mr-2" />
+                    Set Delivery Date & Time
+                  </h4>
+                  <p className="text-sm text-purple-700 mb-4">
+                    Set the delivery date and time for this quick pickup order. Customer will be notified of the delivery schedule.
+                  </p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-sm font-medium">Delivery Date</Label>
+                      <Input
+                        type="date"
+                        value={deliveryDate || order.delivery_date || ''}
+                        onChange={(e) => setDeliveryDate(e.target.value)}
+                        min={new Date().toISOString().split('T')[0]}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium">Delivery Time</Label>
+                      <Input
+                        type="time"
+                        value={deliveryTime || order.delivery_time || ''}
+                        onChange={(e) => setDeliveryTime(e.target.value)}
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={saveDeliveryInfo}
+                    disabled={!deliveryDate || !deliveryTime || isSaving}
+                    className="mt-4 w-full bg-purple-600 hover:bg-purple-700"
+                    size="sm"
+                  >
+                    <Save className="h-4 w-4 mr-2" />
+                    {isSaving ? 'Saving...' : 'Save Delivery Schedule'}
+                  </Button>
+                </div>
+              )}
+
               <div className="bg-blue-50 p-4 rounded-lg">
                 <h4 className="font-medium text-blue-900 mb-2">Pickup & Delivery Process</h4>
                 <ol className="list-decimal list-inside space-y-1 text-sm text-blue-800">
                   <li>Navigate to customer address and collect the items</li>
                   <li>If order changes are needed, edit the order and wait for customer approval</li>
-                  <li>Once approved (or no changes needed), deliver items to vendor address</li>
+                  <li>{isQuickPickup ? 'Set delivery date/time above, then deliver items to vendor address' : 'Once approved (or no changes needed), deliver items to vendor address'}</li>
                   <li>Complete the order in the system after delivery</li>
                 </ol>
               </div>
