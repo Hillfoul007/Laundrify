@@ -245,7 +245,7 @@ export default function RiderOrders() {
     // Add event listener
     window.addEventListener('verificationCompleted', handleVerificationCompleted as EventListener);
 
-    console.log('✅ Verification completion listener added');
+    console.log('�� Verification completion listener added');
 
     // Cleanup on unmount
     return () => {
@@ -1434,6 +1434,43 @@ export default function RiderOrders() {
                 <div className="text-orange-800">
                   <p className="font-medium">⏳ Waiting for customer verification</p>
                   <p className="text-sm">Customer has been notified of the changes and needs to verify them before you can save the order.</p>
+
+                  {/* Demo Buttons for Testing */}
+                  <div className="mt-4 p-3 bg-yellow-100 border border-yellow-300 rounded-lg">
+                    <p className="text-sm font-medium text-yellow-800 mb-2">🧪 Demo Testing Controls:</p>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => {
+                          setVerificationStatus('approved');
+                          toast.success('Demo: Customer approved changes!');
+                        }}
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                      >
+                        ✅ Demo Approve
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setVerificationStatus('rejected');
+                          toast.error('Demo: Customer rejected changes!');
+                        }}
+                        size="sm"
+                        variant="destructive"
+                      >
+                        ❌ Demo Reject
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setVerificationStatus('pending');
+                          toast.info('Demo: Reset to pending status');
+                        }}
+                        size="sm"
+                        variant="outline"
+                      >
+                        🔄 Reset
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               )}
 
