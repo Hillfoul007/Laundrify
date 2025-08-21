@@ -118,32 +118,18 @@ export default function RiderNotifications({ compact = false }: RiderNotificatio
         return;
       }
 
-      const apiUrl = getRiderApiUrl('/notifications');
-      console.log('🔄 Fetching notifications from:', apiUrl);
+      // Use centralized rider API with demo mode fallback
+      const { riderApiGet } = await import('@/lib/riderApi');
+      const endpoint = showOnlyUnread ? '/notifications' : '/notifications?includeRead=true';
+      const data = await riderApiGet<Notification[]>(endpoint);
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // Increased timeout
-
-      const response = await fetch(`${apiUrl}?includeRead=${!showOnlyUnread}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        signal: controller.signal
-      });
-
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        const data = await response.json();
-        setNotifications(Array.isArray(data) ? data : []);
-        console.log('✅ Notifications loaded:', Array.isArray(data) ? data.length : 0);
+      if (data && Array.isArray(data)) {
+        setNotifications(data);
+        console.log('✅ Notifications loaded:', data.length);
       } else {
-        console.warn('⚠️ API error response:', response.status, response.statusText);
-        if (response.status >= 500) {
-          console.log('🔧 Server error - keeping existing notifications');
-          // Don't replace notifications on server errors
-        } else {
+        console.warn('⚠️ No notifications data received');
+        // Only set demo notifications if we don't have existing ones
+        if (notifications.length === 0) {
           setDemoNotifications();
         }
       }
