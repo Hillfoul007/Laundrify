@@ -6,6 +6,7 @@ import {
   type GeocodeResult,
 } from "@/services/locationService";
 import { authHelpers } from "@/integrations/mongodb/client";
+import { getErrorMessage, logError } from '@/lib/error-utils';
 
 export interface UseLocationOptions {
   enableHighAccuracy?: boolean;
