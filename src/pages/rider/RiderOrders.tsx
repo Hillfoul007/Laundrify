@@ -80,6 +80,48 @@ export default function RiderOrders() {
     };
   }, []);
 
+  // Listen for global verification status changes
+  useEffect(() => {
+    if (!orderId) return;
+
+    const handleGlobalVerificationChange = (event: CustomEvent) => {
+      const { orderId: eventOrderId, status, timestamp } = event.detail;
+
+      console.log('🌍 Global verification status change detected:', { eventOrderId, status, orderId });
+
+      if (eventOrderId === orderId && status) {
+        console.log(`🔄 Updating rider view: ${status} for order ${orderId}`);
+        setVerificationStatus(status);
+        setCustomerVerificationRequired(true);
+
+        if (status === 'approved') {
+          toast.success('✅ Customer approved the changes! You can now save the order.');
+        } else if (status === 'rejected') {
+          toast.error('❌ Customer rejected the changes. Please modify the order.');
+        }
+      } else if (eventOrderId === orderId && status === null) {
+        // Status cleared
+        setVerificationStatus(null);
+        setCustomerVerificationRequired(false);
+      }
+    };
+
+    // Add listener for global verification changes
+    window.addEventListener('globalVerificationStatusChanged', handleGlobalVerificationChange as EventListener);
+
+    // Check current status from global manager
+    const currentStatus = globalVerificationManager.getVerificationStatus(orderId);
+    if (currentStatus && currentStatus.status !== verificationStatus) {
+      console.log('📋 Found existing verification status in global manager:', currentStatus);
+      setVerificationStatus(currentStatus.status);
+      setCustomerVerificationRequired(true);
+    }
+
+    return () => {
+      window.removeEventListener('globalVerificationStatusChanged', handleGlobalVerificationChange as EventListener);
+    };
+  }, [orderId]);
+
   // Periodic check for verification status changes (fallback)
   useEffect(() => {
     if (!orderId) return;
