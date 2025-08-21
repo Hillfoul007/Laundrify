@@ -423,7 +423,7 @@ router.post('/login', async (req, res) => {
 
     // Only use demo mode if database is not connected AND not in production
     if (!mongoose.connection.readyState && process.env.NODE_ENV !== 'production') {
-      console.log('��� Demo mode: Database not connected, using demo rider for:', phone);
+      console.log('�� Demo mode: Database not connected, using demo rider for:', phone);
 
       const demoRiders = {
         '9876543210': { name: 'Demo Rider A', status: 'approved', isActive: false },
@@ -1243,7 +1243,12 @@ router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
 
     console.log(`💾 About to save ${isQuickPickup ? 'QuickPickup' : 'Booking'} order to database...`);
     const savedOrder = await order.save();
-    console.log(`✅ ${isQuickPickup ? 'QuickPickup' : 'Booking'} order saved successfully. Updated item_prices:`, JSON.stringify(savedOrder.item_prices, null, 2));
+
+    if (isQuickPickup) {
+      console.log(`✅ QuickPickup order saved successfully. Updated items_collected:`, JSON.stringify(savedOrder.items_collected, null, 2));
+    } else {
+      console.log(`✅ Booking order saved successfully. Updated item_prices:`, JSON.stringify(savedOrder.item_prices, null, 2));
+    }
 
     // Verify the update by re-fetching from database
     const verificationOrder = isQuickPickup ?
@@ -1343,7 +1348,7 @@ router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
 // Handle order actions (accept, start, complete)
 router.post('/order-action', verifyRiderToken, async (req, res) => {
   try {
-    console.log('🔍 Order action request:', {
+    console.log('�� Order action request:', {
       hasRiderId: !!req.rider?.riderId,
       body: req.body
     });
