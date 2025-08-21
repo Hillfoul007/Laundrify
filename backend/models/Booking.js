@@ -32,6 +32,49 @@ const bookingSchema = new mongoose.Schema(
       ref: "User",
       default: null,
     },
+    assignedRider: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Rider",
+      default: null,
+    },
+    assignedRiderPhone: {
+      type: String,
+      default: null,
+    },
+    assignedVendor: {
+      type: String,
+      default: null,
+    },
+    assignedVendorDetails: {
+      name: String,
+      address: String,
+      phone: String,
+    },
+    riderStatus: {
+      type: String,
+      enum: ["unassigned", "assigned", "accepted", "picked_up", "delivered", "completed"],
+      default: "unassigned",
+    },
+    assignedAt: {
+      type: Date,
+      default: null,
+    },
+    acceptedAt: {
+      type: Date,
+      default: null,
+    },
+    pickedUpAt: {
+      type: Date,
+      default: null,
+    },
+    deliveredAt: {
+      type: Date,
+      default: null,
+    },
+    completedAt: {
+      type: Date,
+      default: null,
+    },
     service: {
       type: String,
       required: [true, "Service is required"],
@@ -189,11 +232,11 @@ const bookingSchema = new mongoose.Schema(
     },
     created_at: {
       type: Date,
-      default: Date.now,
+      default: () => new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"})),
     },
     updated_at: {
       type: Date,
-      default: Date.now,
+      default: () => new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"})),
     },
   },
   {
@@ -283,7 +326,16 @@ bookingSchema.statics.generateCustomOrderId = async function () {
 // Calculate final amount and generate custom order ID before saving
 bookingSchema.pre("save", async function (next) {
   try {
-    this.updated_at = new Date();
+    // Get Indian Standard Time
+    const indianTime = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
+    const indianDate = new Date(indianTime);
+
+    this.updated_at = indianDate;
+
+    // Set created_at for new documents
+    if (this.isNew && !this.created_at) {
+      this.created_at = indianDate;
+    }
 
     // Generate custom order ID if it's a new document
     if (this.isNew && !this.custom_order_id) {

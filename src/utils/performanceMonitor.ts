@@ -4,6 +4,7 @@ import React from "react";
 export class PerformanceMonitor {
   private static instance: PerformanceMonitor;
   private metrics: Map<string, number> = new Map();
+  private memoryCheckInterval: NodeJS.Timeout | null = null;
 
   static getInstance(): PerformanceMonitor {
     if (!PerformanceMonitor.instance) {
@@ -110,11 +111,23 @@ export class PerformanceMonitor {
       // Monitor long tasks
       this.observeLongTasks();
 
-      // Check memory periodically
-      setInterval(() => {
+      // Check memory periodically - but clean up existing interval first
+      if (this.memoryCheckInterval) {
+        clearInterval(this.memoryCheckInterval);
+      }
+      this.memoryCheckInterval = setInterval(() => {
         this.checkMemoryUsage();
       }, 30000); // Every 30 seconds
     }
+  }
+
+  // Cleanup method
+  cleanup(): void {
+    if (this.memoryCheckInterval) {
+      clearInterval(this.memoryCheckInterval);
+      this.memoryCheckInterval = null;
+    }
+    this.metrics.clear();
   }
 }
 
