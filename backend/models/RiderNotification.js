@@ -19,7 +19,7 @@ const riderNotificationSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ["order_assigned", "order_updated", "order_cancelled", "general", "location_request"],
+      enum: ["order_assigned", "order_updated", "order_cancelled", "general", "location_request", "customer_verification_response"],
       default: "general",
     },
     data: {
