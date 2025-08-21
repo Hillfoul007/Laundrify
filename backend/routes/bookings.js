@@ -1374,6 +1374,14 @@ router.put("/:bookingId", async (req, res) => {
         total_price: item.quantity * item.price
       }));
 
+      // Update services array and service string to stay synchronized with item_prices
+      const updatedServices = updates.items.map(item => item.name);
+      updateData.services = updatedServices;
+      updateData.service = updatedServices.join(', ');
+
+      console.log("📋 Updated services array:", updateData.services);
+      console.log("📋 Updated service string:", updateData.service);
+
       // Recalculate totals if items are provided
       const subtotal = updates.items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
       updateData.total_price = subtotal;
