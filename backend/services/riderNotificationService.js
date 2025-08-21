@@ -178,7 +178,7 @@ class RiderNotificationService {
 
       const notification = await RiderNotification.create({
         rider_id: riderId,
-        type: 'customer_verification_response',
+        type: 'order_updated',
         title,
         message,
         data: {
