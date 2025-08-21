@@ -190,7 +190,6 @@ export default function AdminRiderManagement() {
   const [selectedVendor, setSelectedVendor] = useState<string>('');
   const [recommendedVendors, setRecommendedVendors] = useState<VendorWithDistance[]>([]);
   const [loadingVendors, setLoadingVendors] = useState(false);
-  const [loadingVendors, setLoadingVendors] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
