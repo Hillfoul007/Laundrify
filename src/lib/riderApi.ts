@@ -98,21 +98,69 @@ export const riderApiFetch = async (
 };
 
 /**
- * Safely fetch data from rider API with error handling
+ * Safely fetch data from rider API with error handling and demo mode fallback
  */
 export const riderApiGet = async <T = any>(endpoint: string): Promise<T | null> => {
   try {
     const response = await riderApiFetch(endpoint, { method: 'GET' });
-    
+
     if (!response.ok) {
       log(`❌ Rider API GET failed: ${response.status} ${response.statusText}`);
+
+      // Try demo mode on API failures
+      if (import.meta.env.DEV) {
+        return await tryDemoMode<T>(endpoint);
+      }
+
       return null;
     }
-    
+
     const data = await response.json();
     return data as T;
   } catch (error) {
     log(`❌ Rider API GET error:`, error);
+
+    // Fall back to demo mode on network errors
+    if (import.meta.env.DEV) {
+      log('🎭 Falling back to demo mode due to API error');
+      return await tryDemoMode<T>(endpoint);
+    }
+
+    return null;
+  }
+};
+
+/**
+ * Try demo mode for specific endpoints
+ */
+const tryDemoMode = async <T = any>(endpoint: string): Promise<T | null> => {
+  try {
+    const { default: RiderDemoService } = await import('@/services/riderDemoService');
+    const demoService = RiderDemoService.getInstance();
+
+    // Map endpoints to demo service methods
+    switch (endpoint) {
+      case '/notifications/unread-count':
+        return (await demoService.getUnreadNotificationCount()) as T;
+
+      case '/notifications':
+        return (await demoService.getNotifications(false)) as T;
+
+      case '/notifications?includeRead=true':
+        return (await demoService.getNotifications(true)) as T;
+
+      case '/orders':
+        return (await demoService.getOrders()) as T;
+
+      case '/health':
+        return { status: 'demo', message: 'Running in demo mode' } as T;
+
+      default:
+        log(`🎭 Demo mode: No handler for endpoint ${endpoint}`);
+        return null;
+    }
+  } catch (demoError) {
+    log(`❌ Demo mode failed:`, demoError);
     return null;
   }
 };
