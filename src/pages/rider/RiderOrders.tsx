@@ -867,6 +867,7 @@ export default function RiderOrders() {
           duration: 4000
         });
         setIsEditing(false);
+        fetchOrderDetails(orderId!); // Refresh data even after network errors
       } else {
         toast.error('Unexpected error. Please try again.');
       }
