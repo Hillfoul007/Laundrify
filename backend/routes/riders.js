@@ -1208,9 +1208,9 @@ router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
       console.log('⚠️ No items provided for update');
     }
 
-    console.log('💾 About to save order to database...');
+    console.log(`💾 About to save ${isQuickPickup ? 'QuickPickup' : 'Booking'} order to database...`);
     const savedOrder = await order.save();
-    console.log('✅ Order saved successfully. Updated item_prices:', JSON.stringify(savedOrder.item_prices, null, 2));
+    console.log(`✅ ${isQuickPickup ? 'QuickPickup' : 'Booking'} order saved successfully. Updated item_prices:`, JSON.stringify(savedOrder.item_prices, null, 2));
 
     // Verify the update by re-fetching from database
     const verificationOrder = await Booking.findById(orderId);
