@@ -269,7 +269,7 @@ export default function RiderOrders() {
     const isQuickPickupDemo = id.includes('quick') || id.includes('QP') || id === '68a1cb6dbea207fd0ace501b';
 
     console.log('📋 getMockOrderData called with ID:', id);
-    console.log('📋 isQuickPickupDemo:', isQuickPickupDemo);
+    console.log('��� isQuickPickupDemo:', isQuickPickupDemo);
     console.log('📋 ID checks:', {
       includesQuick: id.includes('quick'),
       includesQP: id.includes('QP'),
@@ -780,7 +780,7 @@ export default function RiderOrders() {
         }
       };
 
-      const { text, data } = await safeReadResponse(response);
+      const { text, data } = await safeReadResponse(response, controller.signal);
       responseText = text;
       responseData = data;
 
