@@ -14,6 +14,8 @@ export interface QuickPickupDetails {
   customer_phone: string;
   pickup_date: string;
   pickup_time: string;
+  delivery_date?: string;
+  delivery_time?: string;
   house_number?: string;
   address: string;
   special_instructions?: string;
@@ -237,6 +239,8 @@ export class QuickPickupService {
       customer_phone: backendQP.customer_phone,
       pickup_date: backendQP.pickup_date,
       pickup_time: backendQP.pickup_time,
+      delivery_date: backendQP.delivery_date || "",
+      delivery_time: backendQP.delivery_time || "",
       house_number: backendQP.house_number,
       address: backendQP.address,
       special_instructions: backendQP.special_instructions,
@@ -312,7 +316,9 @@ export class QuickPickupService {
         customer_name: quickPickupData.customer_name || "",
         customer_phone: quickPickupData.customer_phone || "",
         pickup_date: quickPickupData.pickup_date || "",
-        pickup_time: quickPickupData.pickup_time || "",
+      pickup_time: quickPickupData.pickup_time || "",
+      delivery_date: quickPickupData.delivery_date || "",
+      delivery_time: quickPickupData.delivery_time || "",
         house_number: quickPickupData.house_number,
         address: quickPickupData.address || "",
         special_instructions: quickPickupData.special_instructions,
@@ -341,6 +347,8 @@ export class QuickPickupService {
             customer_phone: quickPickup.customer_phone,
             pickup_date: quickPickup.pickup_date,
             pickup_time: quickPickup.pickup_time,
+            delivery_date: quickPickup.delivery_date,
+            delivery_time: quickPickup.delivery_time,
             house_number: quickPickup.house_number,
             address: quickPickup.address,
             special_instructions: quickPickup.special_instructions,
