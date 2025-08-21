@@ -146,48 +146,46 @@ const EnhancedBookingHistory: React.FC<EnhancedBookingHistoryProps> =
                 updatedAt: booking.updated_at || booking.updatedAt,
               }),
             );
-            // Add mock quick pickup data to demonstrate the integration
-            const mockQuickPickupOrder = {
-              id: 'quick_pickup_demo_001',
-              custom_order_id: 'QP-DEMO01',
-              order_id: 'QP-DEMO01',
-              userId: String(currentUser._id || currentUser.id || currentUser.phone || 'demo_user'),
-              services: ["Women's Kurti x2", "Saree x1"],
-              totalAmount: 350,
-              item_prices: [
-                {
-                  service_name: "Women's Kurti",
-                  quantity: 2,
-                  unit_price: 120,
-                  total_price: 240
-                },
-                {
-                  service_name: "Saree",
-                  quantity: 1,
-                  unit_price: 110,
-                  total_price: 110
-                }
-              ],
-              status: 'picked_up',
-              pickupDate: new Date().toISOString().split('T')[0],
-              deliveryDate: new Date().toISOString().split('T')[0],
-              pickupTime: '15:00',
-              deliveryTime: 'Same Day',
-              address: 'B-123, Sector 45, Gurgaon, Haryana, 122003',
-              contactDetails: {
-                phone: currentUser.phone,
-                name: currentUser.full_name || currentUser.name,
-                instructions: 'Quick pickup - rider added items during collection',
-              },
-              paymentStatus: 'pending',
-              createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
-              updatedAt: new Date().toISOString(),
-              isQuickPickup: true, // Flag to identify quick pickup
-              quickPickupNote: '📦 This order was edited by rider and items were added during pickup'
-            };
 
-            // Combine regular bookings with quick pickup demo
-            const bookingsWithQuickPickup = [mockQuickPickupOrder, ...mongoBookings];
+            // Load real quick pickup orders
+            console.log("Loading quick pickup orders...");
+            let quickPickupOrders = [];
+            try {
+              const quickPickupResult = await quickPickupService.getCurrentUserQuickPickups();
+              if (quickPickupResult.success && quickPickupResult.quickPickups) {
+                quickPickupOrders = quickPickupResult.quickPickups.map((qp: any) => ({
+                  id: qp.id,
+                  custom_order_id: qp.custom_order_id || `QP${qp.id.slice(-6).toUpperCase()}`,
+                  order_id: qp.custom_order_id || `QP${qp.id.slice(-6).toUpperCase()}`,
+                  userId: qp.userId,
+                  services: qp.items_collected?.map((item: any) => `${item.name} x${item.quantity}`) || ["Quick Pickup - Items TBD"],
+                  totalAmount: qp.actual_cost || qp.estimated_cost || 0,
+                  item_prices: qp.items_collected || [],
+                  status: qp.status,
+                  pickupDate: qp.pickup_date,
+                  deliveryDate: qp.delivery_date || "TBD",
+                  pickupTime: qp.pickup_time,
+                  deliveryTime: qp.delivery_time || "TBD",
+                  address: qp.address,
+                  contactDetails: {
+                    phone: qp.customer_phone,
+                    name: qp.customer_name,
+                    instructions: qp.special_instructions || 'Quick pickup service',
+                  },
+                  paymentStatus: 'pending',
+                  createdAt: qp.createdAt,
+                  updatedAt: qp.updatedAt,
+                  isQuickPickup: true,
+                  quickPickupNote: '🚚 Quick pickup order'
+                }));
+                console.log("✅ Loaded real quick pickup orders:", quickPickupOrders.length);
+              }
+            } catch (error) {
+              console.warn("⚠️ Failed to load quick pickup orders:", error);
+            }
+
+            // Combine regular bookings with real quick pickup orders
+            const bookingsWithQuickPickup = [...quickPickupOrders, ...mongoBookings];
 
             console.log(
               "✅ Loaded bookings from MongoDB (filtered + quick pickup demo):",
