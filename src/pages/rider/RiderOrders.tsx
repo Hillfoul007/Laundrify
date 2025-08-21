@@ -122,6 +122,37 @@ export default function RiderOrders() {
     };
   }, [orderId]);
 
+  // Window focus verification check (for when rider returns to tab)
+  useEffect(() => {
+    if (!orderId) return;
+
+    const handleWindowFocus = () => {
+      console.log('🪟 Window focused, checking verification status');
+      const globalStatus = globalVerificationManager.getVerificationStatus(orderId);
+      const localStatus = localStorage.getItem(`verification_status_${orderId}`);
+
+      console.log('Focus check:', { globalStatus, localStatus, currentState: verificationStatus });
+
+      if (globalStatus && globalStatus.status !== verificationStatus) {
+        console.log('🔄 Window focus: Verification status changed:', globalStatus.status);
+        setVerificationStatus(globalStatus.status);
+        setCustomerVerificationRequired(true);
+
+        if (globalStatus.status === 'approved') {
+          toast.success('✅ Customer approved the changes! You can now save the order.');
+        } else if (globalStatus.status === 'rejected') {
+          toast.error('❌ Customer rejected the changes. Please modify the order.');
+        }
+      }
+    };
+
+    window.addEventListener('focus', handleWindowFocus);
+
+    return () => {
+      window.removeEventListener('focus', handleWindowFocus);
+    };
+  }, [orderId, verificationStatus]);
+
   // Periodic check for verification status changes (fallback)
   useEffect(() => {
     if (!orderId) return;
