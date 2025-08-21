@@ -1,4 +1,5 @@
 import { getApiUrl } from '../config/env';
+import { getISTTimestamp, getISTUnixTimestamp, isTimestampExpired } from '../utils/timeUtils';
 
 export interface WhatsAppOTPResponse {
   success: boolean;
@@ -70,7 +71,7 @@ export class WhatsAppOTPService {
           `whatsapp_otp_${fullPhoneNumber}`,
           JSON.stringify({
             otp,
-            timestamp: Date.now(),
+            timestamp: getISTUnixTimestamp(),
             phone: fullPhoneNumber,
             name,
           }),
@@ -108,7 +109,7 @@ export class WhatsAppOTPService {
         `whatsapp_otp_${fullPhoneNumber}`,
         JSON.stringify({
           otp,
-          timestamp: Date.now(),
+          timestamp: getISTUnixTimestamp(),
           phone: fullPhoneNumber,
           name,
         }),
@@ -193,7 +194,7 @@ export class WhatsAppOTPService {
           `whatsapp_otp_${fullPhoneNumber}`,
           JSON.stringify({
             otp,
-            timestamp: Date.now(),
+            timestamp: getISTUnixTimestamp(),
             phone: fullPhoneNumber,
             name,
           }),
@@ -236,7 +237,7 @@ export class WhatsAppOTPService {
       const { otp: storedOtp, timestamp } = JSON.parse(storedData);
 
       // Check OTP expiry (5 minutes)
-      if (Date.now() - timestamp > 5 * 60 * 1000) {
+      if (isTimestampExpired(timestamp, 5 * 60 * 1000)) {
         sessionStorage.removeItem(`whatsapp_otp_${fullPhoneNumber}`);
         return {
           success: false,
@@ -262,7 +263,7 @@ export class WhatsAppOTPService {
       localStorage.setItem("cleancare_user", JSON.stringify(user));
       localStorage.setItem(
         "cleancare_auth_token",
-        `whatsapp_${user.id}_${Date.now()}`,
+        `whatsapp_${user.id}_${getISTUnixTimestamp()}`,
       );
 
       // Clear previous orders as requested
@@ -315,12 +316,12 @@ export class WhatsAppOTPService {
       console.log("⚠️ Backend unavailable, creating user locally");
 
       // Create user locally
-      const userId = `whatsapp_${phoneNumber}_${Date.now()}`;
+      const userId = `whatsapp_${phoneNumber}_${getISTUnixTimestamp()}`;
       const user: User = {
         id: userId,
         name: name.trim(),
         phone: phoneNumber,
-        createdAt: new Date().toISOString(),
+        createdAt: getISTTimestamp(),
         isVerified: true,
       };
 
