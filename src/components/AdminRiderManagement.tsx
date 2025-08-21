@@ -187,6 +187,8 @@ export default function AdminRiderManagement() {
   const [verifyModalOpen, setVerifyModalOpen] = useState(false);
   const [vendorModalOpen, setVendorModalOpen] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState<string>('');
+  const [recommendedVendors, setRecommendedVendors] = useState<VendorWithDistance[]>([]);
+  const [loadingVendors, setLoadingVendors] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
