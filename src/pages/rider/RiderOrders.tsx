@@ -1159,6 +1159,7 @@ export default function RiderOrders() {
                       size="sm"
                       onClick={handleSaveClick}
                       disabled={isSaving || (verificationStatus === 'pending')}
+                      data-save-button
                     >
                       <Save className="h-4 w-4 mr-2" />
                       {isSaving ? 'Saving...' :
