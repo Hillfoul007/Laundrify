@@ -1213,8 +1213,10 @@ router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
     console.log(`✅ ${isQuickPickup ? 'QuickPickup' : 'Booking'} order saved successfully. Updated item_prices:`, JSON.stringify(savedOrder.item_prices, null, 2));
 
     // Verify the update by re-fetching from database
-    const verificationOrder = await Booking.findById(orderId);
-    console.log('🔍 Verification - item_prices from fresh DB query:', JSON.stringify(verificationOrder.item_prices, null, 2));
+    const verificationOrder = isQuickPickup ?
+      await QuickPickup.findById(orderId) :
+      await Booking.findById(orderId);
+    console.log(`🔍 Verification - item_prices from fresh ${isQuickPickup ? 'QuickPickup' : 'Booking'} DB query:`, JSON.stringify(verificationOrder.item_prices, null, 2));
 
     console.log(`✅ Order ${orderId} updated with Indian time: ${indianTime}`);
 
