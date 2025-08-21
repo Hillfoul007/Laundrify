@@ -1318,30 +1318,68 @@ export default function RiderOrders() {
           </Card>
         )}
 
-        {/* Debug verification test buttons (only show in development) */}
-        {import.meta.env.DEV && customerVerificationRequired && verificationStatus === 'pending' && (
-          <Card className="border-yellow-200 bg-yellow-50">
+        {/* Debug verification status panel (only show in development) */}
+        {import.meta.env.DEV && (
+          <Card className="border-blue-200 bg-blue-50">
             <CardHeader>
-              <CardTitle className="text-yellow-800">🧪 Debug: Test Verification</CardTitle>
+              <CardTitle className="text-blue-800">🔍 Debug: Verification Status</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex space-x-2">
+              <div className="space-y-2 text-sm">
+                <div>
+                  <strong>Order ID:</strong> {orderId || 'None'}
+                </div>
+                <div>
+                  <strong>Verification Required:</strong> {customerVerificationRequired ? '✅ Yes' : '❌ No'}
+                </div>
+                <div>
+                  <strong>Verification Status:</strong> {verificationStatus || 'None'}
+                </div>
+                <div>
+                  <strong>LocalStorage:</strong> {orderId ? localStorage.getItem(`verification_status_${orderId}`) || 'None' : 'N/A'}
+                </div>
+                <div>
+                  <strong>Global Manager:</strong> {orderId ? (globalVerificationManager.getVerificationStatus(orderId)?.status || 'None') : 'N/A'}
+                </div>
+              </div>
+
+              {customerVerificationRequired && verificationStatus === 'pending' && (
+                <div className="mt-4">
+                  <div className="flex space-x-2 mb-2">
+                    <button
+                      onClick={() => testVerificationCompletion(true)}
+                      className="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600"
+                    >
+                      Test Approve
+                    </button>
+                    <button
+                      onClick={() => testVerificationCompletion(false)}
+                      className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
+                    >
+                      Test Reject
+                    </button>
+                  </div>
+                  <p className="text-xs text-blue-700">
+                    These buttons simulate customer verification responses for testing.
+                  </p>
+                </div>
+              )}
+
+              <div className="mt-4">
                 <button
-                  onClick={() => testVerificationCompletion(true)}
-                  className="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600"
+                  onClick={() => {
+                    console.log('🔄 Manual refresh verification status');
+                    if (orderId) {
+                      const globalStatus = globalVerificationManager.getVerificationStatus(orderId);
+                      const localStatus = localStorage.getItem(`verification_status_${orderId}`);
+                      console.log('Current status check:', { globalStatus, localStatus, currentState: verificationStatus });
+                    }
+                  }}
+                  className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
                 >
-                  Test Approve
-                </button>
-                <button
-                  onClick={() => testVerificationCompletion(false)}
-                  className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
-                >
-                  Test Reject
+                  Check Status
                 </button>
               </div>
-              <p className="text-xs text-yellow-700 mt-2">
-                These buttons simulate customer verification responses for testing.
-              </p>
             </CardContent>
           </Card>
         )}
