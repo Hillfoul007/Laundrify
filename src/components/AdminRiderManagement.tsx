@@ -983,11 +983,15 @@ export default function AdminRiderManagement() {
                               open={vendorModalOpen && selectedOrder?._id === order._id}
                               onOpenChange={(open) => {
                                 setVendorModalOpen(open);
-                                if (open) setSelectedOrder(order);
+                                if (!open) setSelectedOrder(null);
                               }}
                             >
                               <DialogTrigger asChild>
-                                <Button size="lg" className="bg-green-500 hover:bg-green-600 text-white ml-2">
+                                <Button
+                                  size="lg"
+                                  className="bg-green-500 hover:bg-green-600 text-white ml-2"
+                                  onClick={() => openVendorModal(order)}
+                                >
                                   <Store className="h-4 w-4 mr-2" />
                                   Assign Vendor
                                 </Button>
