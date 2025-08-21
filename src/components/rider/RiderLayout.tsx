@@ -85,7 +85,22 @@ export default function RiderLayout({ children }: RiderLayoutProps) {
       }
 
       // Use centralized rider API
-      const { riderApiGet } = await import('@/lib/riderApi');
+      const { riderApiGet, checkRiderApiHealth } = await import('@/lib/riderApi');
+
+      // First check if the rider API is available
+      const isApiHealthy = await checkRiderApiHealth();
+      if (!isApiHealthy) {
+        console.log('🚫 Rider API not available - using demo mode');
+
+        // Use demo data when API is not available
+        if (import.meta.env.DEV) {
+          const demoCount = Math.floor(Math.random() * 5); // Random 0-4 for demo
+          setUnreadCount(demoCount);
+          console.log('🎭 Demo mode: Set unread count to', demoCount);
+        }
+        return;
+      }
+
       const data = await riderApiGet<{ count: number }>('/notifications/unread-count');
 
       if (data && typeof data.count === 'number') {
@@ -105,7 +120,14 @@ export default function RiderLayout({ children }: RiderLayoutProps) {
       if (error.name === 'AbortError') {
         console.log('⏰ Unread count fetch timeout');
       } else if (error.message?.includes('Failed to fetch')) {
-        console.log('🌐 Network error - backend may be unreachable. Will retry later.');
+        console.log('🌐 Network error - backend may be unreachable. Using fallback.');
+
+        // Fallback to demo mode on network errors
+        if (import.meta.env.DEV) {
+          console.log('🎭 Falling back to demo mode due to network error');
+          const fallbackCount = 2; // Fixed fallback count
+          setUnreadCount(fallbackCount);
+        }
       } else {
         console.warn('❌ Unexpected error fetching unread count:', error.message || error);
       }
