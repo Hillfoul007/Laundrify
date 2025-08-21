@@ -26,6 +26,28 @@ import "./App.css";
 import "./styles/mobile-fixes.css";
 import "./styles/mobile-touch-fixes.css";
 
+// Component to track route changes
+function AnalyticsTracker() {
+  const location = useLocation();
+
+  useEffect(() => {
+    // Track page view on route change
+    const pagePath = location.pathname + location.search;
+
+    // Get page title based on route
+    const getPageTitle = (path: string) => {
+      if (path.startsWith('/admin')) return 'Admin Portal - Laundrify';
+      if (path.startsWith('/rider')) return 'Rider Portal - Laundrify';
+      if (path === '/') return 'Home - Laundrify';
+      return 'Laundrify';
+    };
+
+    analyticsService.trackPageView(pagePath, getPageTitle(pagePath));
+  }, [location]);
+
+  return null;
+}
+
 function App() {
   // Initialize authentication persistence and restore user session
   useEffect(() => {
