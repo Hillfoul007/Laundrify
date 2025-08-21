@@ -1227,7 +1227,12 @@ router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
       order: {
         _id: order._id,
         custom_order_id: order.custom_order_id,
-        items: order.items,
+        items: order.item_prices?.map(item => ({
+          name: item.service_name,
+          price: item.unit_price,
+          quantity: item.quantity,
+          total: item.total_price
+        })) || [],
         total_price: order.total_price,
         final_amount: order.final_amount,
         updated_at: order.updated_at
