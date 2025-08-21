@@ -84,21 +84,14 @@
 
     <title>Laundrify - Quick clean & convenient</title>
 
-    <!-- Google Analytics 4 -->
+    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=%VITE_GOOGLE_ANALYTICS_ID%"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
 
-      // Initialize GA4 with environment variable
-      const gaId = '%VITE_GOOGLE_ANALYTICS_ID%';
-      if (gaId && gaId !== '%VITE_GOOGLE_ANALYTICS_ID%') {
-        gtag('config', gaId, {
-          page_title: document.title,
-          page_location: window.location.href
-        });
-      }
+      gtag('config', '%VITE_GOOGLE_ANALYTICS_ID%');
     </script>
   </head>
   <body>
