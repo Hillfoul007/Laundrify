@@ -1442,6 +1442,10 @@ export default function RiderOrders() {
                       <Button
                         onClick={() => {
                           setVerificationStatus('approved');
+                          if (orderId) {
+                            localStorage.setItem(`verification_status_${orderId}`, 'approved');
+                            globalVerificationManager.setVerificationStatus(orderId, 'approved');
+                          }
                           toast.success('Demo: Customer approved changes!');
                         }}
                         size="sm"
@@ -1452,6 +1456,10 @@ export default function RiderOrders() {
                       <Button
                         onClick={() => {
                           setVerificationStatus('rejected');
+                          if (orderId) {
+                            localStorage.setItem(`verification_status_${orderId}`, 'rejected');
+                            globalVerificationManager.setVerificationStatus(orderId, 'rejected');
+                          }
                           toast.error('Demo: Customer rejected changes!');
                         }}
                         size="sm"
@@ -1462,6 +1470,10 @@ export default function RiderOrders() {
                       <Button
                         onClick={() => {
                           setVerificationStatus('pending');
+                          if (orderId) {
+                            localStorage.setItem(`verification_status_${orderId}`, 'pending');
+                            globalVerificationManager.setVerificationStatus(orderId, 'pending');
+                          }
                           toast.info('Demo: Reset to pending status');
                         }}
                         size="sm"
