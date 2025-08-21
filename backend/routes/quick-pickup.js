@@ -306,6 +306,55 @@ router.get("/:quickPickupId", async (req, res) => {
   }
 });
 
+// Update delivery date/time by rider during pickup
+router.put("/:quickPickupId/delivery", async (req, res) => {
+  try {
+    const { quickPickupId } = req.params;
+    const { delivery_date, delivery_time, items_collected, actual_cost, rider_notes } = req.body;
+
+    console.log("📝 Rider updating delivery info for quick pickup:", { quickPickupId, delivery_date, delivery_time });
+
+    // Validate quickPickupId
+    if (!mongoose.Types.ObjectId.isValid(quickPickupId)) {
+      return res.status(400).json({ error: "Invalid quick pickup ID" });
+    }
+
+    // Prepare update data for rider
+    const updateData = {};
+    if (delivery_date) updateData.delivery_date = delivery_date;
+    if (delivery_time) updateData.delivery_time = delivery_time;
+    if (items_collected) updateData.items_collected = items_collected;
+    if (actual_cost !== undefined) updateData.actual_cost = actual_cost;
+    if (rider_notes) updateData.notes = rider_notes;
+
+    // Update status to picked_up if items were collected
+    if (items_collected && items_collected.length > 0) {
+      updateData.status = "picked_up";
+    }
+
+    const quickPickup = await QuickPickup.findByIdAndUpdate(
+      quickPickupId,
+      updateData,
+      { new: true, runValidators: true }
+    )
+      .populate("customer_id", "name full_name phone email")
+      .populate("rider_id", "name phone");
+
+    if (!quickPickup) {
+      return res.status(404).json({ error: "Quick pickup not found" });
+    }
+
+    console.log("✅ Quick pickup delivery info updated by rider:", quickPickup._id);
+    res.json({
+      message: "Delivery information updated successfully",
+      quickPickup,
+    });
+  } catch (error) {
+    console.error("❌ Error updating delivery info:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // Update quick pickup status (for riders/admin)
 router.put("/:quickPickupId", async (req, res) => {
   try {
@@ -347,7 +396,7 @@ router.put("/:quickPickupId", async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Error updating quick pickup:", error);
-    
+
     if (error.name === "ValidationError") {
       const validationErrors = Object.values(error.errors).map(err => err.message);
       return res.status(400).json({
