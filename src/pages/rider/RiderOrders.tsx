@@ -795,11 +795,11 @@ export default function RiderOrders() {
           });
 
           // Clean up verification status after successful save
-          if (orderId) {
-            globalVerificationManager.clearVerificationStatus(orderId);
-          }
-          setCustomerVerificationRequired(false);
-          setVerificationStatus(null);
+      if (orderId) {
+        globalVerificationManager.clearVerificationStatus(orderId);
+        localStorage.removeItem(`verification_status_${orderId}`);
+      }
+      setVerificationStatus(null);
         } else {
           toast.success('Order updated and customer notified!', {
             description: result.price_change !== 0
@@ -912,20 +912,12 @@ export default function RiderOrders() {
 
 
   const handleSaveClick = () => {
-    const newTotal = totalAmount;
-    const priceDifference = newTotal - originalTotal;
-
-    // For quick pickups or significant changes, always require customer verification first
-    if ((isQuickPickup && editedItems.length > 0) || Math.abs(priceDifference) > 0) {
-      if (!customerVerificationRequired) {
-        setShowConfirmDialog(true);
-      } else if (verificationStatus === 'approved') {
-        saveOrderChanges();
-      } else {
-        toast.error('Please wait for customer verification');
-      }
-    } else {
+    // Check if customer verification is required and approved
+    if (verificationStatus === 'approved') {
       saveOrderChanges();
+    } else {
+      // Send for verification first
+      sendVerificationToCustomer();
     }
   };
 
@@ -1122,12 +1114,12 @@ export default function RiderOrders() {
                       variant="default"
                       size="sm"
                       onClick={handleSaveClick}
-                      disabled={isSaving || (customerVerificationRequired && verificationStatus !== 'approved')}
+                      disabled={isSaving || (verificationStatus === 'pending')}
                     >
                       <Save className="h-4 w-4 mr-2" />
                       {isSaving ? 'Saving...' :
-                       customerVerificationRequired && verificationStatus === 'approved' ? 'Save Order' :
-                       customerVerificationRequired ? 'Waiting for Customer' :
+                       verificationStatus === 'approved' ? 'Save Order' :
+                       verificationStatus === 'pending' ? 'Waiting for Customer' :
                        'Send for Verification'}
                     </Button>
                   </>
@@ -1354,7 +1346,7 @@ export default function RiderOrders() {
         </Card>
 
         {/* Customer Verification Status */}
-        {customerVerificationRequired && (
+        {verificationStatus && (
           <Card className={`border-2 ${
             verificationStatus === 'approved' ? 'border-green-500 bg-green-50' :
             verificationStatus === 'rejected' ? 'border-red-500 bg-red-50' :
@@ -1404,71 +1396,6 @@ export default function RiderOrders() {
           </Card>
         )}
 
-        {/* Debug verification status panel (only show in development) */}
-        {import.meta.env.DEV && (
-          <Card className="border-blue-200 bg-blue-50">
-            <CardHeader>
-              <CardTitle className="text-blue-800">🔍 Debug: Verification Status</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 text-sm">
-                <div>
-                  <strong>Order ID:</strong> {orderId || 'None'}
-                </div>
-                <div>
-                  <strong>Verification Required:</strong> {customerVerificationRequired ? '✅ Yes' : '❌ No'}
-                </div>
-                <div>
-                  <strong>Verification Status:</strong> {verificationStatus || 'None'}
-                </div>
-                <div>
-                  <strong>LocalStorage:</strong> {orderId ? localStorage.getItem(`verification_status_${orderId}`) || 'None' : 'N/A'}
-                </div>
-                <div>
-                  <strong>Global Manager:</strong> {orderId ? (globalVerificationManager.getVerificationStatus(orderId)?.status || 'None') : 'N/A'}
-                </div>
-              </div>
-
-              {customerVerificationRequired && verificationStatus === 'pending' && (
-                <div className="mt-4">
-                  <div className="flex space-x-2 mb-2">
-                    <button
-                      onClick={() => testVerificationCompletion(true)}
-                      className="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600"
-                    >
-                      Test Approve
-                    </button>
-                    <button
-                      onClick={() => testVerificationCompletion(false)}
-                      className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
-                    >
-                      Test Reject
-                    </button>
-                  </div>
-                  <p className="text-xs text-blue-700">
-                    These buttons simulate customer verification responses for testing.
-                  </p>
-                </div>
-              )}
-
-              <div className="mt-4">
-                <button
-                  onClick={() => {
-                    console.log('🔄 Manual refresh verification status');
-                    if (orderId) {
-                      const globalStatus = globalVerificationManager.getVerificationStatus(orderId);
-                      const localStatus = localStorage.getItem(`verification_status_${orderId}`);
-                      console.log('Current status check:', { globalStatus, localStatus, currentState: verificationStatus });
-                    }
-                  }}
-                  className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
-                >
-                  Check Status
-                </button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Delivery Information */}
         <Card>
