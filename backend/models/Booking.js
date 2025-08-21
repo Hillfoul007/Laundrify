@@ -387,6 +387,23 @@ bookingSchema.pre("save", async function (next) {
       this.final_amount = 0;
     }
 
+    // Synchronize services and service fields with item_prices
+    if (this.item_prices && this.item_prices.length > 0) {
+      const serviceNames = this.item_prices.map(item => item.service_name);
+
+      // Only update if they're different to avoid unnecessary changes
+      if (!this.services || this.services.join(',') !== serviceNames.join(',')) {
+        this.services = serviceNames;
+        console.log('🔄 Pre-save: Synchronized services array from item_prices');
+      }
+
+      const serviceString = serviceNames.join(', ');
+      if (this.service !== serviceString) {
+        this.service = serviceString;
+        console.log('🔄 Pre-save: Synchronized service string from item_prices');
+      }
+    }
+
     // Set completion timestamp if status is completed
     if (this.status === "completed" && !this.completed_at) {
       this.completed_at = new Date();
