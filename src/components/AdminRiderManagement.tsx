@@ -499,6 +499,15 @@ export default function AdminRiderManagement() {
     if (!selectedOrder || !selectedVendor) return;
 
     try {
+      const selectedVendorData = recommendedVendors.find(v => v.id === selectedVendor);
+
+      console.log('🏪 Assigning vendor to order:', {
+        order: selectedOrder._id,
+        vendor: selectedVendor,
+        vendorData: selectedVendorData,
+        orderType: selectedOrder.type
+      });
+
       const response = await fetch(getAdminApiUrl('/orders/assign-vendor'), {
         method: 'POST',
         headers: {
@@ -507,13 +516,19 @@ export default function AdminRiderManagement() {
         },
         body: JSON.stringify({
           orderId: selectedOrder._id,
-          vendorData: { vendorId: selectedVendor },
+          vendorData: {
+            vendorId: selectedVendor,
+            vendorName: selectedVendorData?.name,
+            vendorAddress: selectedVendorData?.address,
+            distance: selectedVendorData?.distance,
+            estimatedTime: selectedVendorData?.estimatedTime
+          },
           orderType: selectedOrder.type
         })
       });
 
       if (response.ok) {
-        toast.success('Vendor assigned successfully');
+        toast.success(`${selectedVendorData?.name || 'Vendor'} assigned successfully`);
         fetchOrders();
         setVendorModalOpen(false);
         setSelectedVendor('');
