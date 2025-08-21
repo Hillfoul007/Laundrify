@@ -328,6 +328,25 @@ const server = http.createServer((req, res) => {
 
       console.log(`💰 Price change: ₹${priceChange} (${originalTotal} → ${newTotal})`);
 
+      // Store the updated order data in memory
+      const updateData = {
+        items: items || [],
+        item_prices: items?.map(item => ({
+          service_name: item.name,
+          quantity: item.quantity,
+          unit_price: item.price,
+          total_price: item.quantity * item.price
+        })) || [],
+        total_price: newTotal,
+        final_amount: newTotal,
+        notes: notes,
+        updated_at: new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"}),
+        updatedBy: 'rider'
+      };
+
+      orderUpdates.set(orderId, updateData);
+      console.log(`💾 Stored order update for ${orderId}:`, updateData);
+
       // Simulate successful save
       const response = {
         message: 'Order updated successfully (demo mode)',
@@ -337,11 +356,11 @@ const server = http.createServer((req, res) => {
           items: items || [],
           total_price: newTotal,
           final_amount: newTotal,
-          updated_at: new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"})
+          updated_at: updateData.updated_at
         },
         price_change: priceChange,
         notification_sent: !!notificationData,
-        indian_time: new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"}),
+        indian_time: updateData.updated_at,
         mode: 'demo'
       };
 
