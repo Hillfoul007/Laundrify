@@ -232,12 +232,13 @@ export const useLocation = (
         }
       }
     } catch (error) {
+      const errorMessage = getErrorMessage(error);
+      logError("useLocation.detectLocation", error);
       setState((prev) => ({
         ...prev,
         isDetecting: false,
         isLoading: false,
-        error:
-          error instanceof Error ? error.message : "Location detection failed",
+        error: errorMessage,
       }));
     }
   }, [
