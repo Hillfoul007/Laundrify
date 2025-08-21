@@ -1428,8 +1428,21 @@ export default function RiderOrders() {
 
               {verificationStatus === 'approved' && (
                 <div className="text-green-800">
-                  <p className="font-medium">✅ Customer has approved the changes!</p>
-                  <p className="text-sm">You can now save the updated order.</p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">✅ Customer has approved the changes!</p>
+                      <p className="text-sm">You can now save the updated order.</p>
+                    </div>
+                    <Button
+                      onClick={saveOrderChanges}
+                      disabled={isSaving}
+                      className="bg-green-600 hover:bg-green-700 text-white ml-4"
+                      size="sm"
+                    >
+                      <Save className="h-4 w-4 mr-2" />
+                      {isSaving ? 'Saving...' : 'Save Now'}
+                    </Button>
+                  </div>
                 </div>
               )}
 
