@@ -1061,6 +1061,9 @@ router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
       dbConnected: !!mongoose.connection.readyState
     });
 
+    // Log the complete request body for debugging
+    console.log('📤 Complete request body:', JSON.stringify(req.body, null, 2));
+
     // Get Indian timezone date
     const getIndianTime = () => {
       return new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
