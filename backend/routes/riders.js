@@ -423,7 +423,7 @@ router.post('/login', async (req, res) => {
 
     // Only use demo mode if database is not connected AND not in production
     if (!mongoose.connection.readyState && process.env.NODE_ENV !== 'production') {
-      console.log('�� Demo mode: Database not connected, using demo rider for:', phone);
+      console.log('��� Demo mode: Database not connected, using demo rider for:', phone);
 
       const demoRiders = {
         '9876543210': { name: 'Demo Rider A', status: 'approved', isActive: false },
@@ -614,7 +614,7 @@ router.post('/toggle-status', verifyRiderToken, async (req, res) => {
     }
 
     if (rider.status !== 'approved') {
-      console.log('��️ Rider not approved, allowing in demo mode');
+      console.log('⚠️ Rider not approved, allowing in demo mode');
       return res.json({
         message: `Status updated to ${isActive ? 'active' : 'inactive'} (approval not required in demo)`,
         isActive,
@@ -1249,7 +1249,12 @@ router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
     const verificationOrder = isQuickPickup ?
       await QuickPickup.findById(orderId) :
       await Booking.findById(orderId);
-    console.log(`🔍 Verification - item_prices from fresh ${isQuickPickup ? 'QuickPickup' : 'Booking'} DB query:`, JSON.stringify(verificationOrder.item_prices, null, 2));
+
+    if (isQuickPickup) {
+      console.log(`🔍 Verification - items_collected from fresh QuickPickup DB query:`, JSON.stringify(verificationOrder.items_collected, null, 2));
+    } else {
+      console.log(`🔍 Verification - item_prices from fresh Booking DB query:`, JSON.stringify(verificationOrder.item_prices, null, 2));
+    }
 
     console.log(`✅ Order ${orderId} updated with Indian time: ${indianTime}`);
 
