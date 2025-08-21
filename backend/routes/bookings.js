@@ -1377,7 +1377,7 @@ router.put("/:bookingId", async (req, res) => {
       // Update services array and service string to stay synchronized with item_prices
       // Include quantities in service representation for better tracking
       const updatedServices = updates.items.map(item =>
-        item.quantity > 1 ? `${item.name} (x${item.quantity})` : item.name
+        item.quantity > 1 ? `${item.name} x${item.quantity}` : item.name
       );
       updateData.services = updatedServices;
       updateData.service = updatedServices.join(', ');

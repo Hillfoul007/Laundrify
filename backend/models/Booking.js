@@ -316,7 +316,7 @@ bookingSchema.statics.generateCustomOrderId = async function () {
     sequence++;
     const fallbackSequenceStr = String(sequence).padStart(5, "0");
     const fallbackOrderId = `${letter}${yearMonth}${fallbackSequenceStr}`;
-    console.log("🔄 Fallback order ID:", fallbackOrderId);
+    console.log("�� Fallback order ID:", fallbackOrderId);
     return fallbackOrderId;
   }
 
@@ -391,7 +391,7 @@ bookingSchema.pre("save", async function (next) {
     if (this.item_prices && this.item_prices.length > 0) {
       // Include quantities in service representation for better tracking
       const serviceNamesWithQty = this.item_prices.map(item =>
-        item.quantity > 1 ? `${item.service_name} (x${item.quantity})` : item.service_name
+        item.quantity > 1 ? `${item.service_name} x${item.quantity}` : item.service_name
       );
 
       // Only update if they're different to avoid unnecessary changes
