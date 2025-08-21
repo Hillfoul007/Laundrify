@@ -985,16 +985,17 @@ export default function AdminRiderManagement() {
                           </div>
 
                           <Dialog
-                            open={assignModalOpen && selectedOrder?._id === order._id}
+                            open={combinedAssignModalOpen && selectedOrder?._id === order._id}
                             onOpenChange={(open) => {
-                              setAssignModalOpen(open);
-                              if (open) setSelectedOrder(order);
+                              setCombinedAssignModalOpen(open);
+                              if (open) openCombinedAssignModal(order);
                             }}
                           >
                             <DialogTrigger asChild>
-                              <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white">
+                              <Button size="lg" className="bg-gradient-to-r from-orange-500 to-green-500 hover:from-orange-600 hover:to-green-600 text-white shadow-lg">
                                 <Navigation className="h-4 w-4 mr-2" />
-                                Assign Rider
+                                <Store className="h-4 w-4 mr-1" />
+                                Assign Rider & Vendor
                               </Button>
                             </DialogTrigger>
                             <DialogContent>
