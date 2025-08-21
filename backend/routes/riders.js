@@ -1122,13 +1122,14 @@ router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
       } else {
         const existingOrder = anyBooking || anyQuickPickup;
         const orderType = anyBooking ? 'Booking' : 'QuickPickup';
-        console.log(`⚠️ ${orderType} ${orderId} exists but is assigned to rider: ${existingOrder.assignedRider}, not ${req.rider.riderId}`);
+        const assignedRiderId = anyBooking ? existingOrder.assignedRider : existingOrder.rider_id;
+        console.log(`⚠️ ${orderType} ${orderId} exists but is assigned to rider: ${assignedRiderId}, not ${req.rider.riderId}`);
         return res.status(403).json({
           message: 'Order not assigned to you',
           error: 'ORDER_NOT_ASSIGNED',
           orderId,
           orderType,
-          assignedRider: existingOrder.assignedRider
+          assignedRider: assignedRiderId
         });
       }
     }
