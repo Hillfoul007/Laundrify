@@ -226,25 +226,34 @@ export default function RiderOrders() {
       // Try to load from quick pickup service first for quick pickup orders
       if (orderId && orderId.startsWith('qp_')) {
         console.log('🚚 Loading quick pickup order from service:', orderId);
-        try {
-          const quickPickupResult = await quickPickupService.getUserQuickPickups(getCurrentUserId() || '');
-          if (quickPickupResult.success && quickPickupResult.quickPickups) {
-            const quickPickup = quickPickupResult.quickPickups.find(qp => qp.id === orderId);
-            if (quickPickup) {
-              console.log('✅ Quick pickup found:', quickPickup);
-              const transformedOrder = transformQuickPickupToOrder(quickPickup);
-              setOrder(transformedOrder);
-              setEditedItems(quickPickup.items_collected || []);
-              setOriginalTotal(quickPickup.estimated_cost || 0);
-              setIsQuickPickup(true);
-              setDeliveryDate(quickPickup.delivery_date || '');
-              setDeliveryTime(quickPickup.delivery_time || '');
-              return;
+        const loadQuickPickup = async () => {
+          try {
+            const quickPickupResult = await quickPickupService.getUserQuickPickups(getCurrentUserId() || '');
+            if (quickPickupResult.success && quickPickupResult.quickPickups) {
+              const quickPickup = quickPickupResult.quickPickups.find(qp => qp.id === orderId);
+              if (quickPickup) {
+                console.log('✅ Quick pickup found:', quickPickup);
+                const transformedOrder = transformQuickPickupToOrder(quickPickup);
+                setOrder(transformedOrder);
+                setEditedItems(quickPickup.items_collected || []);
+                setOriginalTotal(quickPickup.estimated_cost || 0);
+                setIsQuickPickup(true);
+                setDeliveryDate(quickPickup.delivery_date || '');
+                setDeliveryTime(quickPickup.delivery_time || '');
+                return;
+              }
             }
+            // If quick pickup not found, continue with regular order loading
+            fetchOrderDetails(orderId);
+          } catch (error) {
+            console.warn('⚠️ Failed to load quick pickup:', error);
+            // Fallback to regular order loading
+            fetchOrderDetails(orderId);
           }
-        } catch (error) {
-          console.warn('⚠️ Failed to load quick pickup:', error);
-        }
+        };
+
+        loadQuickPickup();
+        return;
       }
 
       fetchOrderDetails(orderId);
