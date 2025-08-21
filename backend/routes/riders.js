@@ -1120,8 +1120,8 @@ router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
       return res.status(404).json({ message: 'Rider not found' });
     }
 
-    // Store original items for comparison
-    const originalItems = order.items || [];
+    // Store original items for comparison (using item_prices since items field doesn't exist in schema)
+    const originalItems = order.item_prices || [];
 
     // Calculate price changes
     const priceComparison = notificationService.calculatePriceChanges(originalItems, items);
@@ -1130,8 +1130,8 @@ router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
     // Update order with Indian timezone
     const indianTime = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
 
-    // Update order items with Indian time
-    order.items = items;
+    // Note: No need to update order.items as it doesn't exist in the schema
+    // The item_prices field will be updated below which is the actual field in the database
     order.notes = notes || order.notes;
     order.updatedBy = 'rider';
     order.lastModified = new Date(indianTime);
