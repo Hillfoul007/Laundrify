@@ -50,6 +50,9 @@ const server = http.createServer((req, res) => {
   // Set CORS headers
   setCORSHeaders(res);
 
+  // Log all requests to help debug
+  console.log(`🔍 [${method}] ${path}`);
+
   // Handle OPTIONS requests
   if (method === 'OPTIONS') {
     res.writeHead(200);
