@@ -674,6 +674,8 @@ export default function RiderOrders() {
     }
 
     setIsSaving(true);
+    let timeoutId: NodeJS.Timeout | null = null;
+
     try {
       const token = localStorage.getItem('riderToken');
 
@@ -708,7 +710,7 @@ export default function RiderOrders() {
       };
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => {
+      timeoutId = setTimeout(() => {
         controller.abort();
         console.log('⏰ Save request timeout');
       }, 15000); // 15 second timeout for save operations
