@@ -48,6 +48,7 @@ import OptimizedImage from "./OptimizedImage";
 import DebugPanel from "./DebugPanel";
 import BookingDebugPanel from "./BookingDebugPanel";
 import ConnectionStatus from "./ConnectionStatus";
+import analyticsService from "@/services/analyticsService";
 import VoiceSearch from "./VoiceSearch";
 import AdminServicesManager from "./AdminServicesManager";
 import LocationUnavailableModal from "./LocationUnavailableModal";
