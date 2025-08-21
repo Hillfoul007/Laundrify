@@ -812,10 +812,9 @@ export default function RiderOrders() {
       setVerificationStatus('pending');
       setShowConfirmDialog(false);
 
-      // Persist pending verification status
+      // Use global manager to set pending status
       if (orderId) {
-        localStorage.setItem(`verification_status_${orderId}`, 'pending');
-        console.log(`💾 Saved pending verification status for order ${orderId}`);
+        globalVerificationManager.setVerificationStatus(orderId, 'pending');
       }
 
       toast.success('Verification sent to customer! They will receive a popup to approve/reject changes.');
