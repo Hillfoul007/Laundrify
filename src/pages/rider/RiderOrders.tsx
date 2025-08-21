@@ -231,9 +231,29 @@ export default function RiderOrders() {
       }
 
       if (approved) {
-        toast.success('✅ Customer approved the changes! You can now save the order.');
+        toast.success('✅ Customer approved the changes! You can now save the order.', {
+          duration: 5000,
+          description: 'Click "Save Order" to complete the update'
+        });
+
+        // Auto-focus save button for immediate action
+        setTimeout(() => {
+          const saveButton = document.querySelector('[data-save-button]');
+          if (saveButton && saveButton instanceof HTMLElement) {
+            saveButton.focus();
+            saveButton.style.boxShadow = '0 0 10px #10b981';
+            saveButton.style.transform = 'scale(1.05)';
+            setTimeout(() => {
+              saveButton.style.boxShadow = '';
+              saveButton.style.transform = '';
+            }, 2000);
+          }
+        }, 100);
       } else {
-        toast.error('❌ Customer rejected the changes. Please modify the order.');
+        toast.error('❌ Customer rejected the changes. Please modify the order.', {
+          duration: 5000,
+          description: 'Update the order and try again'
+        });
       }
     };
 
