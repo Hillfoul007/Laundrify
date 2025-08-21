@@ -1613,4 +1613,36 @@ router.post('/admin/orders/assign', async (req, res) => {
   }
 });
 
+// Debug catch-all route for unmatched rider routes
+router.all('*', (req, res) => {
+  console.log(`❌ Unmatched rider route: ${req.method} ${req.originalUrl}`);
+  console.log('Available rider routes:', [
+    'GET /api/riders/health',
+    'GET /api/riders/test',
+    'POST /api/riders/login',
+    'GET /api/riders/orders',
+    'GET /api/riders/orders/:orderId',
+    'PUT /api/riders/orders/:orderId/update',
+    'POST /api/riders/order-action',
+    'GET /api/riders/notifications'
+  ]);
+
+  res.status(404).json({
+    error: 'Rider route not found',
+    method: req.method,
+    path: req.originalUrl,
+    message: 'This rider route does not exist',
+    availableRoutes: [
+      'GET /api/riders/health',
+      'GET /api/riders/test',
+      'POST /api/riders/login',
+      'GET /api/riders/orders',
+      'GET /api/riders/orders/:orderId',
+      'PUT /api/riders/orders/:orderId/update',
+      'POST /api/riders/order-action',
+      'GET /api/riders/notifications'
+    ]
+  });
+});
+
 module.exports = router;
