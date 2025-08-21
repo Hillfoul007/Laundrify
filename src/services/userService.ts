@@ -1,4 +1,5 @@
 import MongoDBService from "./mongodbService";
+import { getISTTimestamp } from "../utils/timeUtils";
 
 export interface UserData {
   phone: string;
@@ -54,8 +55,8 @@ export class UserService {
       // Add timestamps
       const userWithTimestamps = {
         ...userData,
-        createdAt: userData.createdAt || new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: userData.createdAt || getISTTimestamp(),
+        updatedAt: getISTTimestamp(),
       };
 
       // Save to localStorage first (immediate)
@@ -152,8 +153,8 @@ export class UserService {
             },
           },
           addresses: [],
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          createdAt: getISTTimestamp(),
+          updatedAt: getISTTimestamp(),
         };
 
         existingUser = await this.saveUser(newUser);
@@ -167,7 +168,7 @@ export class UserService {
         ...existingUser,
         ...updates,
         phone, // Ensure phone doesn't change
-        updatedAt: new Date().toISOString(),
+        updatedAt: getISTTimestamp(),
       };
 
       return await this.saveUser(updatedUser);
