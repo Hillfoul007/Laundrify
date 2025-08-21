@@ -151,7 +151,7 @@ const EnhancedBookingHistory: React.FC<EnhancedBookingHistoryProps> =
               id: 'quick_pickup_demo_001',
               custom_order_id: 'QP-DEMO01',
               order_id: 'QP-DEMO01',
-              userId: currentUser._id || currentUser.id,
+              userId: String(currentUser._id || currentUser.id || currentUser.phone || 'demo_user'),
               services: ["Women's Kurti x2", "Saree x1"],
               totalAmount: 350,
               item_prices: [
