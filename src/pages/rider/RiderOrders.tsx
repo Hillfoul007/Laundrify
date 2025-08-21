@@ -842,6 +842,37 @@ export default function RiderOrders() {
     }
   };
 
+  // Cancel verification request
+  const cancelVerificationRequest = () => {
+    try {
+      if (orderId && verificationStatus === 'pending') {
+        console.log('🚫 Cancelling verification request for order:', orderId);
+
+        // Clear verification status locally
+        setVerificationStatus(null);
+
+        // Clear from global manager
+        globalVerificationManager.clearVerificationStatus(orderId);
+
+        // Clear from localStorage
+        localStorage.removeItem(`verification_status_${orderId}`);
+
+        // Cancel any pending verification in the service
+        const pendingVerifications = verificationService.getPendingVerifications();
+        const orderVerification = pendingVerifications.find(v => v.orderId === orderId);
+
+        if (orderVerification) {
+          // Remove the verification from service
+          verificationService.processVerification(orderVerification.id, false, 'Cancelled by rider');
+          console.log('✅ Verification request cancelled successfully');
+          toast.info('Verification request cancelled');
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error cancelling verification:', error);
+    }
+  };
+
   const sendVerificationToCustomer = () => {
     try {
       // Calculate totals
@@ -1088,10 +1119,16 @@ export default function RiderOrders() {
                       variant="outline"
                       size="sm"
                       onClick={() => {
+                        // Cancel any pending verification
+                        cancelVerificationRequest();
+
+                        // Reset editing state
                         setIsEditing(false);
                         setEditedItems([...order.items]);
                         setSelectedService(null);
                         setServiceQuantity(1);
+
+                        toast.success('Edit cancelled');
                       }}
                     >
                       <X className="h-4 w-4 mr-2" />
