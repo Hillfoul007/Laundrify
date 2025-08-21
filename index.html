@@ -92,7 +92,7 @@
       gtag('js', new Date());
 
       // Initialize GA4 with environment variable
-      const gaId = import.meta.env?.VITE_GOOGLE_ANALYTICS_ID || '%VITE_GOOGLE_ANALYTICS_ID%';
+      const gaId = '%VITE_GOOGLE_ANALYTICS_ID%';
       if (gaId && gaId !== '%VITE_GOOGLE_ANALYTICS_ID%') {
         gtag('config', gaId, {
           page_title: document.title,
