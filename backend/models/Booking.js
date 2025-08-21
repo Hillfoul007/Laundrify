@@ -389,18 +389,21 @@ bookingSchema.pre("save", async function (next) {
 
     // Synchronize services and service fields with item_prices
     if (this.item_prices && this.item_prices.length > 0) {
-      const serviceNames = this.item_prices.map(item => item.service_name);
+      // Include quantities in service representation for better tracking
+      const serviceNamesWithQty = this.item_prices.map(item =>
+        item.quantity > 1 ? `${item.service_name} (x${item.quantity})` : item.service_name
+      );
 
       // Only update if they're different to avoid unnecessary changes
-      if (!this.services || this.services.join(',') !== serviceNames.join(',')) {
-        this.services = serviceNames;
-        console.log('🔄 Pre-save: Synchronized services array from item_prices');
+      if (!this.services || this.services.join(',') !== serviceNamesWithQty.join(',')) {
+        this.services = serviceNamesWithQty;
+        console.log('🔄 Pre-save: Synchronized services array from item_prices with quantities');
       }
 
-      const serviceString = serviceNames.join(', ');
+      const serviceString = serviceNamesWithQty.join(', ');
       if (this.service !== serviceString) {
         this.service = serviceString;
-        console.log('🔄 Pre-save: Synchronized service string from item_prices');
+        console.log('🔄 Pre-save: Synchronized service string from item_prices with quantities');
       }
     }
 
