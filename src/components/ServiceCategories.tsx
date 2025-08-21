@@ -250,6 +250,15 @@ const ServiceCategories: React.FC<ServiceCategoriesProps> = ({
   };
 
   const addToCart = (service: any) => {
+    // Track add to cart event
+    analyticsService.trackEvent('add_to_cart', {
+      event_category: 'ecommerce',
+      item_id: service.id,
+      item_name: service.name,
+      currency: 'INR',
+      value: service.price || 0
+    });
+
     setCart((prevCart) => {
       const existingItem = prevCart.find((item) => item.id === service.id);
 
