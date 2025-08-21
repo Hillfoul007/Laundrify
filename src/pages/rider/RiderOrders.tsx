@@ -168,6 +168,8 @@ export default function RiderOrders() {
         setEditedItems([]);
         setOriginalTotal(0);
         setIsQuickPickup(true);
+        setDeliveryDate(quickPickupMockData.delivery_date || '');
+        setDeliveryTime(quickPickupMockData.delivery_time || '');
         return; // Skip the API call and use mock data
       }
 
