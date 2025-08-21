@@ -799,6 +799,21 @@ const EnhancedBookingHistory: React.FC<EnhancedBookingHistoryProps> =
                             </Badge>
                           </div>
 
+                          {/* Quick Pickup Indicator */}
+                          {booking.isQuickPickup && (
+                            <div className="flex items-center gap-1 mt-1">
+                              <div className="bg-orange-100 text-orange-700 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                                <RefreshCw className="h-3 w-3" />
+                                <span>Quick Pickup</span>
+                              </div>
+                              {booking.quickPickupNote && (
+                                <div className="text-xs text-orange-600">
+                                  {booking.quickPickupNote}
+                                </div>
+                              )}
+                            </div>
+                          )}
+
                           {/* Quick Info Row */}
                           <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-gray-600">
                             <div className="flex items-center gap-1">
