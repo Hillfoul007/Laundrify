@@ -743,8 +743,14 @@ export default function RiderOrders() {
       let responseText: string = '';
 
       // Helper function to safely read response
-      const safeReadResponse = async (res: Response): Promise<{ text: string; data: any }> => {
+      const safeReadResponse = async (res: Response, signal?: AbortSignal): Promise<{ text: string; data: any }> => {
         try {
+          // Check if request was aborted
+          if (signal && signal.aborted) {
+            console.log('Request was aborted, skipping response read');
+            return { text: '', data: null };
+          }
+
           // Check if we can read the response
           if (!res || typeof res.text !== 'function') {
             console.warn('Invalid response object');
