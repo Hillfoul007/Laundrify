@@ -186,7 +186,7 @@ export default function RiderOrders() {
         if (globalStatus.status === 'approved') {
           toast.success('✅ Customer approved the changes! You can now save the order.');
         } else if (globalStatus.status === 'rejected') {
-          toast.error('❌ Customer rejected the changes. Please modify the order.');
+          toast.error('��� Customer rejected the changes. Please modify the order.');
         }
       }
     };
@@ -558,6 +558,13 @@ export default function RiderOrders() {
       console.log(`📋 Using mock data: ${reason}`);
       console.log('📋 Order ID being processed:', id);
       const mockData = getMockOrderData(id);
+
+      if (!mockData) {
+        console.log('📋 No mock data available for this ID (likely a quick pickup)');
+        toast.error('Order not found. Please check the order ID.');
+        return;
+      }
+
       console.log('📋 Mock data generated:', mockData);
       setOrder(mockData);
       const items = mockData.items || [];
