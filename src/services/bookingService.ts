@@ -1056,11 +1056,15 @@ export class BookingService {
         localStorage.getItem("user_bookings") || "[]",
       );
 
-      console.log("🔍 Searching localStorage for user ID:", userId);
+      console.log("🔍 Searching localStorage for user ID:", userId, typeof userId);
       console.log("📊 Total localStorage bookings:", allBookings.length);
       console.log(
         "📋 Available booking user IDs:",
-        allBookings.map((b) => b.userId).slice(0, 5),
+        allBookings.map((b) => ({
+          userId: b.userId,
+          type: typeof b.userId,
+          id: b.id || b._id
+        })).slice(0, 5),
       );
 
       // Flexible filtering to handle different user ID formats
