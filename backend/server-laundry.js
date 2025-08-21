@@ -252,6 +252,33 @@ if (productionConfig.isProduction()) {
   console.log("📁 Serving frontend static files from:", frontendPath);
 }
 
+// Main health check endpoint
+app.get('/api/health', (req, res) => {
+  console.log('🏥 Main health check endpoint hit');
+  res.json({
+    status: 'healthy',
+    service: 'laundrify-backend',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    version: '1.0.0',
+    database: {
+      connected: !!mongoose.connection.readyState,
+      state: mongoose.connection.readyState,
+      status: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+    },
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
+    routes: {
+      auth: '/api/auth',
+      bookings: '/api/bookings',
+      riders: '/api/riders',
+      admin: '/api/admin',
+      quickPickup: '/api/quick-pickup',
+      notifications: '/api/notifications'
+    }
+  });
+});
+
 // API Routes with error handling
 if (otpAuthRoutes) {
   app.use("/api/auth", otpAuthRoutes);
@@ -486,7 +513,7 @@ if (fs.existsSync(frontendPath)) {
       }
     });
   });
-  console.log("🔄 SPA catch-all route configured for React Router");
+  console.log("��� SPA catch-all route configured for React Router");
 } else {
   console.log("📁 Dist folder not found - running in development mode");
 
