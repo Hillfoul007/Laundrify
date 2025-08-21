@@ -1484,17 +1484,52 @@ export default function RiderOrders() {
           <CardContent>
             <div className="space-y-4">
               <div>
-                <Label className="text-sm font-medium">Vendor Address</Label>
-                <p className="text-gray-900">Sector 69, Gurugram, Haryana</p>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="mt-2"
-                  onClick={() => openMapsNavigation(order.address, 'delivery')}
-                >
-                  <Navigation className="h-4 w-4 mr-2" />
-                  Navigate to Vendor
-                </Button>
+                <Label className="text-sm font-medium">Assigned Vendor</Label>
+                {order.assignedVendor || order.assigned_vendor ? (
+                  <div className="space-y-2">
+                    <div className="bg-green-50 p-3 rounded-lg border border-green-200">
+                      <div className="font-medium text-green-900">
+                        {order.assignedVendorDetails?.name || order.assigned_vendor_details?.name ||
+                         (order.assignedVendor === 'vendor1' ? 'Priya Dry Cleaners' :
+                          order.assignedVendor === 'vendor2' ? 'White Tiger Dry Cleaning' :
+                          order.assignedVendor || order.assigned_vendor)}
+                      </div>
+                      <div className="text-sm text-green-700 mt-1">
+                        {order.assignedVendorDetails?.address || order.assigned_vendor_details?.address ||
+                         (order.assignedVendor === 'vendor1' ? 'Shop n.155, Spaze corporate park, 1sf, Sector 69, Gurugram, Haryana 122101' :
+                          order.assignedVendor === 'vendor2' ? 'Shop No. 153, First Floor, Spaze Corporate Park, Sector 69, Gurugram, Haryana 122101' :
+                          'Sector 69, Gurugram, Haryana')}
+                      </div>
+                      <div className="flex items-center gap-2 mt-2">
+                        {order.assignedVendorDetails?.distance && (
+                          <Badge variant="secondary" className="text-xs">
+                            📍 {vendorService.formatDistance(order.assignedVendorDetails.distance)}
+                          </Badge>
+                        )}
+                        {order.assignedVendorDetails?.estimatedTime && (
+                          <Badge variant="outline" className="text-xs">
+                            ⏱️ {vendorService.formatEstimatedTime(order.assignedVendorDetails.estimatedTime)}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => openMapsNavigation(order.address, 'delivery')}
+                    >
+                      <Navigation className="h-4 w-4 mr-2" />
+                      Navigate to Vendor
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                    <p className="text-yellow-800 text-sm">
+                      ⚠️ No vendor assigned yet. Contact admin for vendor assignment.
+                    </p>
+                  </div>
+                )}
               </div>
               
               <div className="bg-blue-50 p-4 rounded-lg">
