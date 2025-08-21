@@ -1123,9 +1123,17 @@ router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
     // Store original items for comparison (using item_prices since items field doesn't exist in schema)
     const originalItems = order.item_prices || [];
 
+    // Convert item_prices format to items format for comparison
+    const originalItemsForComparison = originalItems.map(item => ({
+      name: item.service_name,
+      price: item.unit_price,
+      quantity: item.quantity,
+      total: item.total_price
+    }));
+
     // Calculate price changes
-    const priceComparison = notificationService.calculatePriceChanges(originalItems, items);
-    const itemChanges = notificationService.compareItems(originalItems, items);
+    const priceComparison = notificationService.calculatePriceChanges(originalItemsForComparison, items);
+    const itemChanges = notificationService.compareItems(originalItemsForComparison, items);
 
     // Update order with Indian timezone
     const indianTime = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
