@@ -5,6 +5,7 @@ import "./index.css";
 import PerformanceMonitor from "./utils/performanceMonitor";
 import { initializeErrorHandlers } from "./utils/errorHandlers";
 import "./utils/runClearTestVerifications";
+import "./utils/globalVerificationManager";
 
 // Initialize performance monitoring
 const perfMonitor = PerformanceMonitor.getInstance();
