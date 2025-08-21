@@ -2,6 +2,7 @@
 // This is a stub implementation for demo purposes
 
 import { apiClient } from "@/lib/api";
+import { getErrorMessage, logError } from '@/lib/error-utils';
 import { MAPS_PERFORMANCE_CONFIG, isFeatureEnabled, getCacheDuration, getMinRequestInterval } from "../config/mapsConfig";
 import { performanceMonitor, trackPerformance } from "../utils/mapsPerformanceMonitor";
 
