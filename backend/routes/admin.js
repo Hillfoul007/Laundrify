@@ -782,7 +782,7 @@ router.get("/quick-pickups", verifyAdminAccess, async (req, res) => {
       query.status = { $in: statusArray };
     }
 
-    console.log('���� Fetching quick pickup orders...');
+    console.log('📋 Fetching quick pickup orders...');
 
     const quickPickups = await QuickPickup.find(query)
       .populate('customer_id', 'name phone email')
@@ -1031,8 +1031,8 @@ router.post("/orders/assign-vendor", verifyAdminAccess, async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(orderId)) {
       return res.json({
         message: 'Vendor assigned successfully (demo mode)',
-        order: { _id: orderId, assignedVendor: selectedVendor.name },
-        vendor: selectedVendor
+        order: { _id: orderId, assignedVendor: vendorWithDistanceData.name },
+        vendor: vendorWithDistanceData
       });
     }
 
@@ -1044,8 +1044,8 @@ router.post("/orders/assign-vendor", verifyAdminAccess, async (req, res) => {
         return res.status(404).json({ message: 'Quick pickup not found' });
       }
 
-      order.assigned_vendor = selectedVendor.name;
-      order.assigned_vendor_details = selectedVendor;
+      order.assigned_vendor = vendorWithDistanceData.name;
+      order.assigned_vendor_details = vendorWithDistanceData;
       await order.save();
     } else {
       order = await Booking.findById(orderId);
@@ -1053,16 +1053,16 @@ router.post("/orders/assign-vendor", verifyAdminAccess, async (req, res) => {
         return res.status(404).json({ message: 'Booking not found' });
       }
 
-      order.assignedVendor = selectedVendor.name;
-      order.assignedVendorDetails = selectedVendor;
+      order.assignedVendor = vendorWithDistanceData.name;
+      order.assignedVendorDetails = vendorWithDistanceData;
       await order.save();
     }
 
-    console.log(`✅ Vendor ${selectedVendor.name} assigned to order ${orderId}`);
+    console.log(`✅ Vendor ${vendorWithDistanceData.name} assigned to order ${orderId} (Distance: ${vendorWithDistanceData.distance}km, Est. Time: ${vendorWithDistanceData.estimatedTime}min)`);
     res.json({
       message: 'Vendor assigned successfully',
       order,
-      vendor: selectedVendor
+      vendor: vendorWithDistanceData
     });
 
   } catch (error) {
