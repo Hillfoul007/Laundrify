@@ -19,32 +19,7 @@ import {
 import { toast } from 'sonner';
 import RiderLayout from '@/components/rider/RiderLayout';
 import RiderNotifications from '@/components/rider/RiderNotifications';
-
-// Helper function to get the correct API URL for rider endpoints
-const getRiderApiUrl = (endpoint: string): string => {
-  const isDev = import.meta.env.DEV;
-  const hostname = window.location.hostname;
-  const isLocalhost = hostname.includes("localhost") || hostname.includes("127.0.0.1");
-  const isRenderCom = hostname.includes("onrender.com");
-  const isLaundrifyDomain = hostname.includes("laundrify.online");
-
-  let apiUrl: string;
-
-  // Force correct backend URL based on environment
-  if (isLocalhost && isDev) {
-    // Local development - try proxy first, fallback to production
-    apiUrl = `/api/riders${endpoint}`;
-  } else if (isRenderCom || isLaundrifyDomain || !isLocalhost) {
-    // Any hosted environment - use backend server
-    apiUrl = 'https://backend-vaxf.onrender.com/api/riders' + endpoint;
-  } else {
-    // Fallback to production backend
-    apiUrl = 'https://backend-vaxf.onrender.com/api/riders' + endpoint;
-  }
-
-  console.log('🔗 API URL for', endpoint, '→', apiUrl);
-  return apiUrl;
-};
+import { getRiderApiUrl } from '@/lib/riderApi';
 
 export default function RiderDashboard() {
   const navigate = useNavigate();
