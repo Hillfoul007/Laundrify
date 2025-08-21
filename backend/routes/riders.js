@@ -1034,12 +1034,19 @@ router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
     const { orderId } = req.params;
     const { items, notes, requiresVerification, verificationStatus, notificationData } = req.body;
 
+    // Enhanced logging for debugging
+    console.log(`🔄 Order update request received:`, {
+      orderId,
+      itemsCount: items?.length || 0,
+      riderId: req.rider?.riderId,
+      hasVerificationData: !!notificationData,
+      dbConnected: !!mongoose.connection.readyState
+    });
+
     // Get Indian timezone date
     const getIndianTime = () => {
       return new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
     };
-
-    console.log(`🔄 Updating order: ${orderId}, items: ${items?.length || 0}`);
 
     // For demo mode when database is not connected
     if (!mongoose.connection.readyState) {
@@ -1052,10 +1059,38 @@ router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
       });
     }
 
+    // First try to find the order with more detailed logging
+    console.log(`🔍 Searching for order ${orderId} assigned to rider ${req.rider.riderId}`);
+
     const order = await Booking.findOne({
       _id: orderId,
       assignedRider: req.rider.riderId
     }).populate('customer_id', 'name phone email');
+
+    if (!order) {
+      // Enhanced error logging
+      console.log(`❌ Order not found: ${orderId}. Checking if order exists at all...`);
+
+      const anyOrder = await Booking.findById(orderId);
+      if (!anyOrder) {
+        console.log(`❌ Order ${orderId} does not exist in database`);
+        return res.status(404).json({
+          message: 'Order not found',
+          error: 'ORDER_NOT_EXISTS',
+          orderId
+        });
+      } else {
+        console.log(`⚠️ Order ${orderId} exists but is assigned to rider: ${anyOrder.assignedRider}, not ${req.rider.riderId}`);
+        return res.status(403).json({
+          message: 'Order not assigned to you',
+          error: 'ORDER_NOT_ASSIGNED',
+          orderId,
+          assignedRider: anyOrder.assignedRider
+        });
+      }
+    }
+
+    console.log(`✅ Order found: ${order.custom_order_id || orderId}`);
 
     if (!order) {
       return res.status(404).json({ message: 'Order not found or not assigned to you' });
