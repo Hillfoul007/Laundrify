@@ -827,6 +827,10 @@ export default function RiderOrders() {
       }
     } finally {
       setIsSaving(false);
+      // Ensure timeout is always cleared
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
     }
   };
 
