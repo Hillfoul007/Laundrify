@@ -28,6 +28,7 @@ import {
 import { toast } from 'sonner';
 import RiderLayout from '@/components/rider/RiderLayout';
 import CustomerVerificationService from '@/services/customerVerificationService';
+import globalVerificationManager from '@/utils/globalVerificationManager';
 
 // Helper function to get the correct API URL for rider endpoints
 const getRiderApiUrl = (endpoint: string): string => {
