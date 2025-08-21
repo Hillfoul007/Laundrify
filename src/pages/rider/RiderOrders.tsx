@@ -53,6 +53,69 @@ export default function RiderOrders() {
   // Initialize customer verification service
   const verificationService = CustomerVerificationService.getInstance();
 
+  // Helper function to get current user ID
+  const getCurrentUserId = (): string | null => {
+    try {
+      return localStorage.getItem("user_id") || localStorage.getItem("cleancare_user_id");
+    } catch (error) {
+      console.error("Error getting current user ID:", error);
+      return null;
+    }
+  };
+
+  // Helper function to transform quick pickup to order format
+  const transformQuickPickupToOrder = (quickPickup: any) => {
+    return {
+      _id: quickPickup.id,
+      bookingId: quickPickup.custom_order_id || `QP${quickPickup.id.slice(-6).toUpperCase()}`,
+      custom_order_id: quickPickup.custom_order_id || `QP${quickPickup.id.slice(-6).toUpperCase()}`,
+      customerName: quickPickup.customer_name,
+      customerPhone: quickPickup.customer_phone,
+      customer_id: quickPickup.userId,
+      address: quickPickup.address,
+      address_details: {
+        flatNo: quickPickup.house_number || '',
+        street: quickPickup.address,
+        city: quickPickup.address.includes('Gurugram') ? 'Gurugram' : 'Unknown',
+        pincode: '110071',
+        type: 'home'
+      },
+      pickupTime: quickPickup.pickup_time,
+      scheduled_date: quickPickup.pickup_date,
+      scheduled_time: quickPickup.pickup_time,
+      delivery_date: quickPickup.delivery_date,
+      delivery_time: quickPickup.delivery_time,
+      type: 'Quick Pickup',
+      service: 'Quick Pickup Service',
+      service_type: 'express',
+      services: ['Quick Pickup', 'On-Location Assessment'],
+      riderStatus: 'accepted',
+      assignedAt: quickPickup.assignedAt,
+      status: quickPickup.status,
+      payment_status: 'pending',
+      items: quickPickup.items_collected || [],
+      item_prices: [],
+      charges_breakdown: {
+        base_price: quickPickup.estimated_cost || 0,
+        tax_amount: 0,
+        service_fee: 0,
+        delivery_fee: 0,
+        handling_fee: 0,
+        discount: 0
+      },
+      total_price: quickPickup.actual_cost || quickPickup.estimated_cost || 0,
+      discount_amount: 0,
+      final_amount: quickPickup.actual_cost || quickPickup.estimated_cost || 0,
+      specialInstructions: quickPickup.special_instructions || 'Quick pickup service - rider will assess items on location and create order based on customer needs',
+      additional_details: 'Real quick pickup order from customer',
+      provider_name: 'Laundrify Express Services',
+      estimated_duration: 0,
+      created_at: quickPickup.createdAt,
+      updated_at: quickPickup.updatedAt,
+      isQuickPickup: true
+    };
+  };
+
   // Global debug listener for all verification events
   useEffect(() => {
     const globalDebugListener = (event: CustomEvent) => {
