@@ -461,7 +461,7 @@ router.post('/login', async (req, res) => {
       const rider = await Rider.findOne({ phone });
 
       if (!rider) {
-        console.log(`❌ Rider not found in database for phone: ${phone}`);
+        console.log(`�� Rider not found in database for phone: ${phone}`);
         return res.status(400).json({
           message: 'Invalid phone number or password',
           error: 'Authentication failed'
@@ -1178,6 +1178,10 @@ router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
     console.log('💾 About to save order to database...');
     const savedOrder = await order.save();
     console.log('✅ Order saved successfully. Updated item_prices:', JSON.stringify(savedOrder.item_prices, null, 2));
+
+    // Verify the update by re-fetching from database
+    const verificationOrder = await Booking.findById(orderId);
+    console.log('🔍 Verification - item_prices from fresh DB query:', JSON.stringify(verificationOrder.item_prices, null, 2));
 
     console.log(`✅ Order ${orderId} updated with Indian time: ${indianTime}`);
 
