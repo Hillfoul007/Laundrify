@@ -496,6 +496,15 @@ export default function AdminRiderManagement() {
     loadVendorRecommendations(order);
   };
 
+  // Function to open combined assignment modal
+  const openCombinedAssignModal = (order: any) => {
+    setSelectedOrder(order);
+    setCombinedAssignModalOpen(true);
+    setSelectedRider(null);
+    setSelectedVendor('');
+    loadVendorRecommendations(order);
+  };
+
   const assignVendorToOrder = async () => {
     if (!selectedOrder || !selectedVendor) return;
 
