@@ -807,6 +807,15 @@ export default function RiderOrders() {
           });
           setVerificationStatus('pending');
         }
+
+        // Track successful order update
+        analyticsService.trackEvent('rider_order_update', {
+          event_category: 'rider',
+          order_id: orderId,
+          items_count: editedItems.length,
+          total_amount: editedItems.reduce((sum, item) => sum + (item.quantity * item.price), 0)
+        });
+
         setIsEditing(false);
         fetchOrderDetails(orderId!);
       } else {
