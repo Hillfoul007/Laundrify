@@ -732,7 +732,11 @@ export default function RiderOrders() {
         signal: controller.signal
       });
 
-      clearTimeout(timeoutId);
+      // Clear timeout immediately after successful fetch
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
 
       // Safely read response body once and handle both success and error cases
       let responseData: any = null;
