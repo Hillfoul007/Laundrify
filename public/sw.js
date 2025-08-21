@@ -1,6 +1,5 @@
-
-const CACHE_NAME = "laundrify-v6";
-const STATIC_CACHE = "laundrify-static-v6";
+const CACHE_NAME = "laundrify-v7";
+const STATIC_CACHE = "laundrify-static-v7";
 
 const urlsToCache = [
   "/",
@@ -19,12 +18,13 @@ self.addEventListener("install", (event) => {
       return cache.addAll(urlsToCache);
     }),
   );
-  self.skipWaiting(); // Force the waiting service worker to become active
+  // Don't force immediate activation - wait for user confirmation
+  // self.skipWaiting(); // Commented out to prevent aggressive updates
 });
 
 // Activate service worker
 self.addEventListener("activate", (event) => {
-  console.log("Service Worker: Activating v5...");
+  console.log("Service Worker: Activating v7...");
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
@@ -37,7 +37,8 @@ self.addEventListener("activate", (event) => {
       );
     }),
   );
-  self.clients.claim(); // Take control of all pages
+  // Don't immediately claim control - let user decide when to update
+  // self.clients.claim(); // Commented out to prevent aggressive updates
 });
 
 // Fetch event
@@ -170,3 +171,11 @@ function doBackgroundSync() {
   // Handle background sync tasks
   return Promise.resolve();
 }
+
+// Handle messages from the app
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('Service Worker: Received SKIP_WAITING message');
+    self.skipWaiting();
+  }
+});

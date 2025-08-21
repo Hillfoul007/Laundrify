@@ -2,6 +2,7 @@ import MongoDBService from "./mongodbService";
 import { DVHostingSmsService } from "./dvhostingSmsService";
 import { AddressService } from "./addressService";
 import { config } from "../config/env";
+import { getISTTimestamp, getISTUnixTimestamp } from "../utils/timeUtils";
 
 export interface AddressDetails {
   fullAddress?: string;
@@ -243,14 +244,14 @@ export class BookingService {
 
       try {
         // Generate booking ID
-        const bookingId = `booking_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const bookingId = `booking_${getISTUnixTimestamp()}_${Math.random().toString(36).substr(2, 9)}`;
 
         const booking: BookingDetails = {
           ...bookingData,
           userId: resolvedUserId, // Use resolved user ID
           id: bookingId,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          createdAt: getISTTimestamp(),
+          updatedAt: getISTTimestamp(),
           // Add item prices if provided
           ...(itemPrices && { item_prices: itemPrices }),
         };
@@ -596,11 +597,11 @@ export class BookingService {
       createdAt:
         backendBooking.created_at ||
         backendBooking.createdAt ||
-        new Date().toISOString(),
+        getISTTimestamp(),
       updatedAt:
         backendBooking.updated_at ||
         backendBooking.updatedAt ||
-        new Date().toISOString(),
+        getISTTimestamp(),
     };
   }
 
@@ -608,7 +609,7 @@ export class BookingService {
    * Calculate delivery date from pickup date
    */
   private calculateDeliveryDate(pickupDate: string): string {
-    if (!pickupDate) return new Date().toISOString().split("T")[0];
+    if (!pickupDate) return getISTTimestamp().split("T")[0];
 
     if (pickupDate.includes("-")) {
       const [year, month, day] = pickupDate.split("-");
@@ -746,12 +747,12 @@ export class BookingService {
         service_type: "home-service",
         services: servicesArray,
         scheduled_date:
-          booking.pickupDate || new Date().toISOString().split("T")[0],
+          booking.pickupDate || getISTTimestamp().split("T")[0],
         scheduled_time: booking.pickupTime || "10:00",
         delivery_date:
           booking.deliveryDate ||
           booking.pickupDate ||
-          new Date().toISOString().split("T")[0],
+          getISTTimestamp().split("T")[0],
         delivery_time: booking.deliveryTime || "18:00",
         provider_name: "CleanCare Pro",
         address: addressString,
@@ -936,7 +937,7 @@ export class BookingService {
 
       const updatedData = {
         ...updates,
-        updatedAt: new Date().toISOString(),
+        updatedAt: getISTTimestamp(),
       };
 
       // Try to update in localStorage first
@@ -997,7 +998,7 @@ export class BookingService {
   async cancelBooking(bookingId: string): Promise<BookingResponse> {
     return this.updateBooking(bookingId, {
       status: "cancelled",
-      updatedAt: new Date().toISOString(),
+      updatedAt: getISTTimestamp(),
     });
   }
 
@@ -1387,9 +1388,69 @@ export class BookingService {
         };
       }
 
-      // For other updates, we'd need a general update endpoint
-      // For now, return success to indicate localStorage update is sufficient
-      return { success: false, error: "General update endpoint not available" };
+      // For other updates (like item quantities), use the general update endpoint
+      console.log("🔄 Syncing general booking update to backend:", {
+        bookingId,
+        updates: Object.keys(updates),
+        currentUser: {
+          id: currentUser.id,
+          _id: currentUser._id,
+          phone: currentUser.phone,
+        },
+      });
+
+      // Get proper user ID for backend
+      let userId = null;
+      if (currentUser._id && !currentUser._id.startsWith("user_")) {
+        userId = currentUser._id;
+      } else if (currentUser.id && !currentUser.id.startsWith("user_")) {
+        userId = currentUser.id;
+      } else if (currentUser.phone) {
+        userId = currentUser.phone;
+      } else if (currentUser.id || currentUser._id) {
+        userId = currentUser.id || currentUser._id;
+      }
+
+      const response = await fetch(
+        `${this.apiBaseUrl}/bookings/${bookingId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "user-id": userId || "",
+          },
+          body: JSON.stringify({
+            ...updates,
+            user_id: userId,
+          }),
+        },
+      );
+
+      console.log("📡 Backend response status:", response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("❌ Backend error response:", errorText);
+
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { error: errorText };
+        }
+
+        throw new Error(
+          errorData.error || `HTTP ${response.status}: ${errorText}`,
+        );
+      }
+
+      const data = await response.json();
+      console.log("✅ Backend general update successful:", data);
+
+      return {
+        success: true,
+        booking: data.booking,
+      };
     } catch (error) {
       console.error("Backend sync error:", error);
       return {

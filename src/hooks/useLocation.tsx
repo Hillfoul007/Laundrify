@@ -6,6 +6,7 @@ import {
   type GeocodeResult,
 } from "@/services/locationService";
 import { authHelpers } from "@/integrations/mongodb/client";
+import { getErrorMessage, logError } from '@/lib/error-utils';
 
 export interface UseLocationOptions {
   enableHighAccuracy?: boolean;
@@ -143,18 +144,8 @@ export const useLocation = (
           resolve(coordinates);
         },
         (error) => {
-          let errorMessage = "Failed to get location";
-          switch (error.code) {
-            case error.PERMISSION_DENIED:
-              errorMessage = "Location access denied by user";
-              break;
-            case error.POSITION_UNAVAILABLE:
-              errorMessage = "Location information unavailable";
-              break;
-            case error.TIMEOUT:
-              errorMessage = "Location request timed out";
-              break;
-          }
+          const errorMessage = getErrorMessage(error);
+          logError("useLocation.getCurrentPosition", error);
           reject(new Error(errorMessage));
         },
         {
@@ -241,12 +232,13 @@ export const useLocation = (
         }
       }
     } catch (error) {
+      const errorMessage = getErrorMessage(error);
+      logError("useLocation.detectLocation", error);
       setState((prev) => ({
         ...prev,
         isDetecting: false,
         isLoading: false,
-        error:
-          error instanceof Error ? error.message : "Location detection failed",
+        error: errorMessage,
       }));
     }
   }, [

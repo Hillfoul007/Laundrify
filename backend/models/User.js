@@ -71,11 +71,11 @@ const userSchema = new mongoose.Schema(
     },
     created_at: {
       type: Date,
-      default: Date.now,
+      default: () => new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"})),
     },
     updated_at: {
       type: Date,
-      default: Date.now,
+      default: () => new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"})),
     },
     // Coupon tracking fields
     used_coupons: [{
@@ -98,6 +98,90 @@ const userSchema = new mongoose.Schema(
       orderAmount: Number,
       discountAmount: Number,
     }],
+
+    // Referral system fields
+    referral_code: {
+      type: String,
+      unique: true,
+      sparse: true,
+      uppercase: true,
+      trim: true,
+      index: true,
+    },
+
+    // Referral statistics
+    referral_stats: {
+      total_referrals: {
+        type: Number,
+        default: 0,
+        min: 0,
+      },
+      successful_referrals: {
+        type: Number,
+        default: 0,
+        min: 0,
+      },
+      pending_rewards: {
+        type: Number,
+        default: 0,
+        min: 0,
+      },
+      total_rewards_earned: {
+        type: Number,
+        default: 0,
+        min: 0,
+      },
+      last_referral_at: {
+        type: Date,
+        default: null,
+      },
+    },
+
+    // Available discount coupons (including referral rewards)
+    available_coupons: [{
+      code: {
+        type: String,
+        uppercase: true,
+        required: true,
+      },
+      type: {
+        type: String,
+        enum: ["referral_reward", "promotional", "bonus"],
+        required: true,
+      },
+      discount_percentage: {
+        type: Number,
+        required: true,
+        min: 0,
+        max: 100,
+      },
+      max_discount_amount: {
+        type: Number,
+        default: 500,
+        min: 0,
+      },
+      created_at: {
+        type: Date,
+        default: () => new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"})),
+      },
+      expires_at: {
+        type: Date,
+        required: true,
+      },
+      is_used: {
+        type: Boolean,
+        default: false,
+      },
+      used_at: {
+        type: Date,
+        default: null,
+      },
+      used_in_booking: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Booking",
+        default: null,
+      },
+    }],
   },
   {
     timestamps: true,
@@ -106,7 +190,7 @@ const userSchema = new mongoose.Schema(
 
 // Update the updated_at field before saving
 userSchema.pre("save", function (next) {
-  this.updated_at = new Date();
+  this.updated_at = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"}));
   next();
 });
 

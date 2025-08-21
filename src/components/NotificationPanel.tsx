@@ -80,11 +80,11 @@ const NotificationPanel: React.FC = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-80 max-h-96 overflow-y-auto"
+        className="w-80 sm:w-80 w-[95vw] max-w-[380px] max-h-96 overflow-y-auto"
       >
-        <div className="flex items-center justify-between p-3 border-b">
+        <div className="flex flex-col space-y-2 p-3 border-b sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <h3 className="font-semibold text-sm">Notifications</h3>
-          <div className="flex gap-1">
+          <div className="flex gap-1 flex-wrap">
             {unreadCount > 0 && (
               <Button
                 variant="ghost"
@@ -92,8 +92,8 @@ const NotificationPanel: React.FC = () => {
                 onClick={markAllAsRead}
                 className="h-7 px-2 text-xs"
               >
-                <CheckCheck className="h-3 w-3 mr-1" />
-                Mark All Read
+                <CheckCheck className="h-3 w-3 sm:mr-1" />
+                <span className="hidden sm:inline">Mark All Read</span>
               </Button>
             )}
             {notifications.length > 0 && (
@@ -103,8 +103,8 @@ const NotificationPanel: React.FC = () => {
                 onClick={clearAllNotifications}
                 className="h-7 px-2 text-xs text-red-600 hover:text-red-700"
               >
-                <Trash2 className="h-3 w-3 mr-1" />
-                Clear All
+                <Trash2 className="h-3 w-3 sm:mr-1" />
+                <span className="hidden sm:inline">Clear All</span>
               </Button>
             )}
           </div>

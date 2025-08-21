@@ -84,11 +84,18 @@ export const addIosOtpDelay = async (): Promise<void> => {
   }
 };
 
+// Global flags to prevent multiple interval creation
+let iosIntervalsSetup = false;
+let iosPreservationInterval: NodeJS.Timeout | null = null;
+let iosMonitoringInterval: NodeJS.Timeout | null = null;
+
 /**
  * iPhone-specific session persistence to prevent auto logout
  */
 export const preventIosAutoLogout = (): void => {
-  if (!isIosDevice()) return;
+  if (!isIosDevice() || iosIntervalsSetup) return;
+
+  iosIntervalsSetup = true;
 
   const mode = isPWAMode() ? "PWA" : "Safari";
   console.log(
@@ -288,14 +295,20 @@ export const preventIosAutoLogout = (): void => {
     `🍎 ${isPWAMode() ? "PWA" : "Safari"} mode detected - using ${preservationInterval / 1000}s preservation interval`,
   );
 
-  // Run preservation more frequently for PWA
-  setInterval(preserveAuth, preservationInterval);
+  // Run preservation more frequently for PWA - with cleanup protection
+  if (iosPreservationInterval) {
+    clearInterval(iosPreservationInterval);
+  }
+  iosPreservationInterval = setInterval(preserveAuth, preservationInterval);
 
   // Run initial preservation
   preserveAuth();
 
   // Aggressive session monitoring for iPhone - more frequent for PWA
-  setInterval(async () => {
+  if (iosMonitoringInterval) {
+    clearInterval(iosMonitoringInterval);
+  }
+  iosMonitoringInterval = setInterval(async () => {
     const user =
       localStorage.getItem("current_user") ||
       localStorage.getItem("cleancare_user");
@@ -329,6 +342,22 @@ export const preventIosAutoLogout = (): void => {
       }
     }
   }, monitoringInterval);
+};
+
+/**
+ * Cleanup iOS intervals (useful for testing or memory cleanup)
+ */
+export const cleanupIosIntervals = (): void => {
+  if (iosPreservationInterval) {
+    clearInterval(iosPreservationInterval);
+    iosPreservationInterval = null;
+  }
+  if (iosMonitoringInterval) {
+    clearInterval(iosMonitoringInterval);
+    iosMonitoringInterval = null;
+  }
+  iosIntervalsSetup = false;
+  console.log('🍎 iOS auth intervals cleaned up');
 };
 
 /**
