@@ -287,6 +287,31 @@ const server = http.createServer((req, res) => {
       };
     }
 
+    // Check if there are any stored updates for this order
+    const storedUpdates = orderUpdates.get(orderId);
+    if (storedUpdates) {
+      console.log(`🔄 Applying stored updates for order ${orderId}:`, storedUpdates);
+
+      // Merge stored updates with the base order data
+      orderData = {
+        ...orderData,
+        items: storedUpdates.items,
+        item_prices: storedUpdates.item_prices,
+        total_price: storedUpdates.total_price,
+        final_amount: storedUpdates.final_amount,
+        updated_at: storedUpdates.updated_at,
+        notes: storedUpdates.notes || orderData.specialInstructions,
+        specialInstructions: storedUpdates.notes || orderData.specialInstructions
+      };
+
+      console.log(`✅ Order data with updates:`, {
+        orderId,
+        itemsCount: orderData.items?.length || 0,
+        totalPrice: orderData.total_price,
+        finalAmount: orderData.final_amount
+      });
+    }
+
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(orderData));
     return;
