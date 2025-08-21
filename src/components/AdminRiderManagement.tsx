@@ -1010,53 +1010,158 @@ export default function AdminRiderManagement() {
                                 </DialogDescription>
                               </DialogHeader>
 
-                              <div className="space-y-4">
-                                <div>
-                                  <Label className="font-medium">Order Details</Label>
-                                  <p className="text-sm text-gray-600">
-                                    #{selectedOrder?.custom_order_id || selectedOrder?.bookingId} - {selectedOrder?.name || selectedOrder?.customerName}
-                                  </p>
+                              <div className="space-y-6 max-h-[70vh] overflow-y-auto">
+                                {/* Order Details */}
+                                <div className="bg-gray-50 p-4 rounded-lg">
+                                  <Label className="font-medium text-lg">Order Details</Label>
+                                  <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                      <span className="font-medium">Order ID:</span>
+                                      <p className="text-gray-600">#{selectedOrder?.custom_order_id || selectedOrder?.bookingId}</p>
+                                    </div>
+                                    <div>
+                                      <span className="font-medium">Customer:</span>
+                                      <p className="text-gray-600">{selectedOrder?.name || selectedOrder?.customerName}</p>
+                                    </div>
+                                    <div>
+                                      <span className="font-medium">Phone:</span>
+                                      <p className="text-gray-600">{selectedOrder?.customerPhone || selectedOrder?.phone}</p>
+                                    </div>
+                                    <div>
+                                      <span className="font-medium">Type:</span>
+                                      <p className="text-gray-600">{selectedOrder?.type || 'Regular'} Order</p>
+                                    </div>
+                                  </div>
+                                  <div className="mt-3">
+                                    <span className="font-medium">Pickup Address:</span>
+                                    <p className="text-gray-600 text-sm bg-white p-2 rounded border mt-1">
+                                      {selectedOrder?.address || 'Address not available'}
+                                    </p>
+                                  </div>
                                 </div>
 
-                                <div>
-                                  <Label className="font-medium">Available Riders (Nearest First)</Label>
-                                  <div className="mt-2 space-y-2 max-h-60 overflow-y-auto">
-                                    {selectedOrder && getNearestRiders(selectedOrder.location || null).map((rider) => (
-                                      <div
-                                        key={rider._id}
-                                        className={`p-3 border rounded cursor-pointer transition-colors ${
-                                          selectedRider?._id === rider._id ? 'border-laundrify-purple bg-purple-50' : 'hover:bg-gray-50'
-                                        }`}
-                                        onClick={() => setSelectedRider(rider)}
-                                      >
-                                        <div className="flex justify-between items-center">
-                                          <div>
-                                            <p className="font-medium">{rider.name}</p>
-                                            <p className="text-sm text-gray-600">{rider.phone}</p>
-                                          </div>
-                                          <div className="text-right">
-                                            <Badge variant="outline">
-                                              {rider.distance} km away
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                  {/* Rider Selection */}
+                                  <div className="space-y-3">
+                                    <div className="flex items-center space-x-2">
+                                      <Navigation className="h-5 w-5 text-orange-500" />
+                                      <Label className="font-medium text-lg">Select Rider</Label>
+                                    </div>
+                                    <div className="border rounded-lg p-3 max-h-64 overflow-y-auto">
+                                      {selectedOrder && getNearestRiders(selectedOrder.location || null).map((rider) => (
+                                        <div
+                                          key={rider._id}
+                                          className={`p-3 border rounded mb-2 cursor-pointer transition-colors ${
+                                            selectedRider?._id === rider._id ? 'border-orange-500 bg-orange-50' : 'hover:bg-gray-50'
+                                          }`}
+                                          onClick={() => setSelectedRider(rider)}
+                                        >
+                                          <div className="flex justify-between items-center">
+                                            <div>
+                                              <p className="font-medium">{rider.name}</p>
+                                              <p className="text-sm text-gray-600">{rider.phone}</p>
+                                              {rider.distance && (
+                                                <p className="text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded mt-1">
+                                                  📍 {rider.distance} km away
+                                                </p>
+                                              )}
+                                            </div>
+                                            <Badge variant="outline" className="bg-orange-50">
+                                              Available
                                             </Badge>
                                           </div>
                                         </div>
-                                      </div>
-                                    ))}
+                                      ))}
 
-                                    {activeRiders.length === 0 && (
-                                      <p className="text-center text-gray-500 py-4">
-                                        No active riders available
-                                      </p>
+                                      {(!selectedOrder || getNearestRiders(selectedOrder.location || null).length === 0) && (
+                                        <p className="text-center text-gray-500 py-4">
+                                          No active riders available
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {/* Vendor Selection */}
+                                  <div className="space-y-3">
+                                    <div className="flex items-center space-x-2">
+                                      <Store className="h-5 w-5 text-green-500" />
+                                      <Label className="font-medium text-lg">Select Vendor</Label>
+                                    </div>
+                                    <div className="text-xs text-gray-500 mb-2">
+                                      📍 Distance from pickup to vendor shown below
+                                    </div>
+                                    {loadingVendors ? (
+                                      <div className="flex items-center justify-center py-8 border rounded-lg">
+                                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
+                                        <span className="ml-2 text-sm text-gray-600">Loading vendors...</span>
+                                      </div>
+                                    ) : (
+                                      <div className="border rounded-lg p-3 max-h-64 overflow-y-auto">
+                                        {recommendedVendors.map((vendor) => (
+                                          <div
+                                            key={vendor.id}
+                                            className={`p-4 border rounded mb-2 cursor-pointer transition-colors ${
+                                              selectedVendor === vendor.id ? 'border-green-500 bg-green-50' : 'hover:bg-gray-50'
+                                            }`}
+                                            onClick={() => setSelectedVendor(vendor.id)}
+                                          >
+                                            <div className="space-y-2">
+                                              <div className="font-medium text-gray-900">{vendor.name}</div>
+                                              <div className="text-sm text-gray-600 leading-relaxed">
+                                                {vendor.address}
+                                              </div>
+                                              <div className="flex items-center gap-2 flex-wrap">
+                                                <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">
+                                                  📍 {vendorService.formatDistance(vendor.distance)} from pickup
+                                                </Badge>
+                                                <Badge variant="outline" className="text-xs">
+                                                  ⏱️ {vendorService.formatEstimatedTime(vendor.estimatedTime)}
+                                                </Badge>
+                                                {vendor.rating && (
+                                                  <Badge variant="outline" className="text-xs">
+                                                    ⭐ {vendor.rating}
+                                                  </Badge>
+                                                )}
+                                              </div>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
                                     )}
                                   </div>
                                 </div>
 
+                                {/* Assignment Summary */}
+                                {selectedRider && selectedVendor && (
+                                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                    <h4 className="font-medium text-blue-900 mb-2">✅ Assignment Summary</h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                      <div>
+                                        <span className="font-medium text-blue-800">Selected Rider:</span>
+                                        <p className="text-blue-700">{selectedRider.name} ({selectedRider.phone})</p>
+                                      </div>
+                                      <div>
+                                        <span className="font-medium text-blue-800">Selected Vendor:</span>
+                                        <p className="text-blue-700">
+                                          {recommendedVendors.find(v => v.id === selectedVendor)?.name}
+                                        </p>
+                                        <p className="text-xs text-blue-600">
+                                          📍 {vendorService.formatDistance(recommendedVendors.find(v => v.id === selectedVendor)?.distance || 0)} from pickup location
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+
                                 <Button
-                                  onClick={assignOrderToRider}
-                                  disabled={!selectedRider}
-                                  className="w-full"
+                                  onClick={assignRiderAndVendor}
+                                  disabled={!selectedRider || !selectedVendor}
+                                  className="w-full bg-gradient-to-r from-orange-500 to-green-500 hover:from-orange-600 hover:to-green-600 text-white py-3"
+                                  size="lg"
                                 >
-                                  Assign Order
+                                  <Navigation className="h-4 w-4 mr-2" />
+                                  <Store className="h-4 w-4 mr-2" />
+                                  Assign Rider & Vendor Together
                                 </Button>
                               </div>
                             </DialogContent>
@@ -1220,7 +1325,7 @@ export default function AdminRiderManagement() {
                                     <div className="flex items-center justify-between border-t border-green-200 pt-2 mt-2">
                                       <span className="text-green-700 font-medium">Amount:</span>
                                       <div className="text-right">
-                                        <span className="text-green-700 font-bold text-lg">��{order.final_amount}</span>
+                                        <span className="text-green-700 font-bold text-lg">₹{order.final_amount}</span>
                                         {order.total_price && order.final_amount !== order.total_price && (
                                           <div className="text-xs text-gray-500 line-through">₹{order.total_price}</div>
                                         )}
