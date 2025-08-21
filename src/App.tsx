@@ -76,6 +76,7 @@ function App() {
     <ErrorBoundary>
       <NotificationProvider>
         <Router>
+          <AnalyticsTracker />
           <div className="App">
             <Routes>
               <Route path="/" element={<LaundryIndex />} />
