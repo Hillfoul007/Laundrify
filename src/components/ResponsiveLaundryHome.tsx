@@ -693,6 +693,9 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
   };
 
   const handleBookService = () => {
+    // Track Browse Services button click
+    analyticsService.trackButtonClick('Browse Services', 'hero-section');
+
     // Scroll to services section
     const servicesSection = document.getElementById("services-section");
     if (servicesSection) {
