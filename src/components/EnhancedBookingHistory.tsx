@@ -165,11 +165,54 @@ const EnhancedBookingHistory: React.FC<EnhancedBookingHistoryProps> =
             response.bookings,
           );
 
+          // Add mock quick pickup data to demonstrate the integration
+          const mockQuickPickupOrder = {
+            id: 'quick_pickup_demo_001',
+            custom_order_id: 'QP-DEMO01',
+            order_id: 'QP-DEMO01',
+            userId: currentUser._id || currentUser.id,
+            services: ["Women's Kurti x2", "Saree x1"],
+            totalAmount: 350,
+            item_prices: [
+              {
+                service_name: "Women's Kurti",
+                quantity: 2,
+                unit_price: 120,
+                total_price: 240
+              },
+              {
+                service_name: "Saree",
+                quantity: 1,
+                unit_price: 110,
+                total_price: 110
+              }
+            ],
+            status: 'picked_up',
+            pickupDate: new Date().toISOString().split('T')[0],
+            deliveryDate: new Date().toISOString().split('T')[0],
+            pickupTime: '15:00',
+            deliveryTime: 'Same Day',
+            address: 'B-123, Sector 45, Gurgaon, Haryana, 122003',
+            contactDetails: {
+              phone: currentUser.phone,
+              name: currentUser.full_name || currentUser.name,
+              instructions: 'Quick pickup - rider added items during collection',
+            },
+            paymentStatus: 'pending',
+            createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+            updatedAt: new Date().toISOString(),
+            isQuickPickup: true, // Flag to identify quick pickup
+            quickPickupNote: '📦 This order was edited by rider and items were added during pickup'
+          };
+
+          // Combine regular bookings with quick pickup demo
+          const bookingsWithQuickPickup = [mockQuickPickupOrder, ...productionBookings];
+
           console.log(
-            "✅ Bookings loaded from BookingService (filtered):",
-            productionBookings.length,
+            "✅ Bookings loaded from BookingService (filtered + quick pickup demo):",
+            bookingsWithQuickPickup.length,
           );
-          setBookings(productionBookings);
+          setBookings(bookingsWithQuickPickup);
         } else {
           console.log("No bookings found or error:", response.error);
           setBookings([]);
@@ -930,7 +973,7 @@ const EnhancedBookingHistory: React.FC<EnhancedBookingHistoryProps> =
                               );
 
                               console.log(
-                                `💰 Using static pricing for "${serviceName}": ₹${unitPrice} x ${quantity} = ₹${totalServicePrice}`,
+                                `���� Using static pricing for "${serviceName}": ₹${unitPrice} x ${quantity} = ₹${totalServicePrice}`,
                               );
 
                               return (
