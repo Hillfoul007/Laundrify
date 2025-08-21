@@ -77,10 +77,50 @@ try {
   console.error('❌ Failed to load Booking model:', error.message);
 }
 
+// Serve static files from dist directory if available
+const frontendPath = path.join(__dirname, '../dist');
+try {
+  if (require('fs').existsSync(frontendPath)) {
+    app.use(express.static(frontendPath));
+    console.log('✅ Serving static files from:', frontendPath);
+  }
+} catch (error) {
+  console.log('⚠️ Static files not found, frontend served by Vite dev server');
+}
+
+// Root route handler
+app.get('/', (req, res) => {
+  const frontendIndexPath = path.join(__dirname, '../dist/index.html');
+  try {
+    if (require('fs').existsSync(frontendIndexPath)) {
+      res.sendFile(frontendIndexPath);
+    } else {
+      // In development, redirect to Vite dev server
+      res.json({
+        message: 'Laundrify Backend API Server',
+        status: 'running',
+        frontend: 'Development server available at http://localhost:10000',
+        api_health: '/api/health',
+        database_connected: mongoose.connection.readyState === 1,
+        timestamp: new Date().toISOString()
+      });
+    }
+  } catch (error) {
+    res.json({
+      message: 'Laundrify Backend API Server',
+      status: 'running',
+      frontend: 'Development server available at http://localhost:10000',
+      api_health: '/api/health',
+      error: 'Frontend files not found',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
+  res.json({
+    status: 'ok',
     message: 'Test backend server running',
     database_connected: mongoose.connection.readyState === 1,
     timestamp: new Date().toISOString()
