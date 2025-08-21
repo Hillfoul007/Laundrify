@@ -191,7 +191,7 @@ export default function RiderOrders() {
                                verification?.orderId === orderId ||
                                event.detail.orderId === orderId;
 
-      console.log('��� Verification match check:', {
+      console.log('🎯 Verification match check:', {
         isForCurrentOrder,
         verificationOrderId: verification?.orderData?.orderId || verification?.orderId,
         currentOrderId: orderId
@@ -856,19 +856,28 @@ export default function RiderOrders() {
   // Debug function to test verification completion
   const testVerificationCompletion = (approved: boolean) => {
     console.log('🧪 Testing verification completion:', approved);
-    const testEvent = new CustomEvent('verificationCompleted', {
-      detail: {
-        verificationId: 'test-verification-id',
-        approved,
-        verification: {
-          orderId: orderId,
-          orderData: { orderId: orderId }
-        },
-        backendSuccess: true,
-        orderId: orderId
-      }
-    });
-    window.dispatchEvent(testEvent);
+
+    if (orderId) {
+      const status = approved ? 'approved' : 'rejected';
+
+      // Use global manager directly for immediate update
+      globalVerificationManager.setVerificationStatus(orderId, status);
+
+      // Also dispatch the original event for compatibility
+      const testEvent = new CustomEvent('verificationCompleted', {
+        detail: {
+          verificationId: 'test-verification-id',
+          approved,
+          verification: {
+            orderId: orderId,
+            orderData: { orderId: orderId }
+          },
+          backendSuccess: true,
+          orderId: orderId
+        }
+      });
+      window.dispatchEvent(testEvent);
+    }
   };
 
   if (!order) {
