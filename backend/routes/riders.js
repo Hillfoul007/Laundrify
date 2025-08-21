@@ -1191,7 +1191,7 @@ router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
           read: false,
           data: {
             changes: notificationData.riderChanges,
-            old_items: originalItems,
+            old_items: originalItemsForComparison,
             new_items: items,
             price_change: notificationData.riderChanges.priceChange,
             old_total: notificationData.riderChanges.originalTotal,
