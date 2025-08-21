@@ -68,9 +68,18 @@ const ConnectionStatus: React.FC<ConnectionStatusProps> = ({
     });
 
     clearTimeout(timeoutId);
-    setBackendStatus(response.ok ? "online" : "offline");
+
+    if (response.ok) {
+      setBackendStatus("online");
+    } else if (response.status === 404) {
+      // Health endpoint not found - likely development mode without backend
+      console.log("ConnectionStatus: Health endpoint not found, assuming local mode");
+      setBackendStatus("offline");
+    } else {
+      setBackendStatus("offline");
+    }
   } catch (error) {
-    console.warn("ConnectionStatus: Backend health check failed:", error);
+    console.log("ConnectionStatus: Backend health check failed - using local mode");
     setBackendStatus("offline");
   }
 };
