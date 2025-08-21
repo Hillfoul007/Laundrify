@@ -58,10 +58,8 @@ export default function RiderOrders() {
   const [selectedService, setSelectedService] = useState<LaundryService | null>(null);
   const [serviceQuantity, setServiceQuantity] = useState(1);
   const [isQuickPickup, setIsQuickPickup] = useState(false);
-  const [customerVerificationRequired, setCustomerVerificationRequired] = useState(false);
   const [verificationStatus, setVerificationStatus] = useState<'pending' | 'approved' | 'rejected' | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [originalTotal, setOriginalTotal] = useState(0);
 
   // Initialize customer verification service
@@ -808,11 +806,9 @@ export default function RiderOrders() {
             duration: 4000,
             icon: <Bell className="h-4 w-4" />
           });
-          setCustomerVerificationRequired(true);
           setVerificationStatus('pending');
         }
         setIsEditing(false);
-        setShowConfirmDialog(false);
         fetchOrderDetails(orderId!);
       } else {
         let errorMessage = 'Failed to update order';
@@ -839,7 +835,6 @@ export default function RiderOrders() {
         if (import.meta.env.DEV) {
           toast.info('Demo mode: Changes saved locally only');
           setIsEditing(false);
-          setShowConfirmDialog(false);
         }
       } else {
         toast.error('Unexpected error. Please try again.');
@@ -893,9 +888,7 @@ export default function RiderOrders() {
       console.log('✅ Verification sent to customer with ID:', verificationId);
 
       // Set local state
-      setCustomerVerificationRequired(true);
       setVerificationStatus('pending');
-      setShowConfirmDialog(false);
 
       // Use global manager to set pending status
       if (orderId) {
