@@ -68,7 +68,7 @@ export default function RiderOrders() {
   // Global debug listener for all verification events
   useEffect(() => {
     const globalDebugListener = (event: CustomEvent) => {
-      console.log('🌍 GLOBAL: verificationCompleted event detected:', event.detail);
+      console.log('��� GLOBAL: verificationCompleted event detected:', event.detail);
     };
 
     window.addEventListener('verificationCompleted', globalDebugListener as EventListener);
@@ -660,7 +660,7 @@ export default function RiderOrders() {
 
   const saveOrderChanges = async () => {
     // If verification is required and not approved, show error
-    if (customerVerificationRequired && verificationStatus !== 'approved') {
+    if (verificationStatus && verificationStatus !== 'approved') {
       toast.error('Customer verification required before saving changes');
       return;
     }
@@ -716,9 +716,9 @@ export default function RiderOrders() {
         body: JSON.stringify({
           items: editedItems,
           updatedBy: 'rider',
-          notes: `Order updated by rider ${new Date().toLocaleString()}. ${customerVerificationRequired ? 'Customer approved changes.' : 'Customer will be notified to verify changes.'}`,
-          requiresVerification: !customerVerificationRequired,
-          verificationStatus: customerVerificationRequired ? 'approved' : 'pending',
+          notes: `Order updated by rider ${new Date().toLocaleString()}. ${verificationStatus === 'approved' ? 'Customer approved changes.' : 'Customer will be notified to verify changes.'}`,
+          requiresVerification: verificationStatus !== 'approved',
+          verificationStatus: verificationStatus || 'pending',
           notificationData: notificationData
         }),
         signal: controller.signal
@@ -779,7 +779,7 @@ export default function RiderOrders() {
       if (response.ok) {
         const result = responseData || {};
 
-        if (customerVerificationRequired) {
+        if (verificationStatus === 'approved') {
           toast.success('Order saved successfully!', {
             description: 'Customer has approved the changes',
             duration: 4000,
@@ -1304,7 +1304,7 @@ export default function RiderOrders() {
                 <div className="flex justify-between items-center text-lg font-semibold">
                   <span>Total Amount:</span>
                   <div className="text-right">
-                    <span>₹{totalAmount}</span>
+                    <span>��{totalAmount}</span>
                     {isEditing && totalAmount !== originalTotal && (
                       <div className="text-sm font-normal">
                         <span className={`${totalAmount > originalTotal ? 'text-red-600' : 'text-green-600'}`}>
