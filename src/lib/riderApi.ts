@@ -165,10 +165,81 @@ const tryDemoMode = async <T = any>(endpoint: string): Promise<T | null> => {
   }
 };
 
+/**
+ * Safely send POST data to rider API with error handling and demo mode fallback
+ */
+export const riderApiPost = async <T = any>(
+  endpoint: string,
+  data: any = {}
+): Promise<T | null> => {
+  try {
+    const response = await riderApiFetch(endpoint, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+      log(`❌ Rider API POST failed: ${response.status} ${response.statusText}`);
+
+      // Try demo mode on API failures
+      if (import.meta.env.DEV) {
+        return await tryDemoModePost<T>(endpoint, data);
+      }
+
+      return null;
+    }
+
+    const responseData = await response.json();
+    return responseData as T;
+  } catch (error) {
+    log(`❌ Rider API POST error:`, error);
+
+    // Fall back to demo mode on network errors
+    if (import.meta.env.DEV) {
+      log('🎭 Falling back to demo mode for POST due to API error');
+      return await tryDemoModePost<T>(endpoint, data);
+    }
+
+    return null;
+  }
+};
+
+/**
+ * Try demo mode for POST endpoints
+ */
+const tryDemoModePost = async <T = any>(endpoint: string, data: any): Promise<T | null> => {
+  try {
+    const { default: RiderDemoService } = await import('@/services/riderDemoService');
+    const demoService = RiderDemoService.getInstance();
+
+    // Map endpoints to demo service methods
+    if (endpoint.includes('/notifications/') && endpoint.includes('/read')) {
+      const notificationId = endpoint.split('/')[2];
+      return (await demoService.markNotificationAsRead(notificationId)) as T;
+    }
+
+    if (endpoint === '/notifications/read-all') {
+      return (await demoService.markAllNotificationsAsRead()) as T;
+    }
+
+    if (endpoint.includes('/orders/') && endpoint.includes('/status')) {
+      const orderId = endpoint.split('/')[2];
+      return (await demoService.updateOrderStatus(orderId, data.status)) as T;
+    }
+
+    log(`🎭 Demo mode: No POST handler for endpoint ${endpoint}`);
+    return { success: true, message: 'Demo mode operation completed' } as T;
+  } catch (demoError) {
+    log(`❌ Demo mode POST failed:`, demoError);
+    return null;
+  }
+};
+
 export default {
   getRiderApiUrl,
   checkRiderApiHealth,
   getRiderAuthHeaders,
   riderApiFetch,
-  riderApiGet
+  riderApiGet,
+  riderApiPost
 };
