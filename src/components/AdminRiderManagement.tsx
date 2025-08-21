@@ -1498,31 +1498,49 @@ export default function AdminRiderManagement() {
 
                                 <div>
                                   <Label className="font-medium">Select Vendor</Label>
-                                  <div className="mt-2 space-y-2">
-                                    <div
-                                      className={`p-3 border rounded cursor-pointer transition-colors ${
-                                        selectedVendor === 'vendor1' ? 'border-green-500 bg-green-50' : 'hover:bg-gray-50'
-                                      }`}
-                                      onClick={() => setSelectedVendor('vendor1')}
-                                    >
-                                      <div className="font-medium">Priya Dry Cleaners</div>
-                                      <div className="text-sm text-gray-600">
-                                        Shop n.155, Spaze corporate park, 1sf, Sector 69, Gurugram, Haryana 122101
-                                      </div>
-                                    </div>
-
-                                    <div
-                                      className={`p-3 border rounded cursor-pointer transition-colors ${
-                                        selectedVendor === 'vendor2' ? 'border-green-500 bg-green-50' : 'hover:bg-gray-50'
-                                      }`}
-                                      onClick={() => setSelectedVendor('vendor2')}
-                                    >
-                                      <div className="font-medium">White Tiger Dry Cleaning</div>
-                                      <div className="text-sm text-gray-600">
-                                        Shop No. 153, First Floor, Spaze Corporate Park, Sector 69, Gurugram, Haryana 122101
-                                      </div>
-                                    </div>
+                                  <div className="text-xs text-gray-500 mb-2">
+                                    Sorted by distance from pickup location
                                   </div>
+                                  {loadingVendors ? (
+                                    <div className="flex items-center justify-center py-4">
+                                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                                      <span className="ml-2 text-sm text-gray-600">Loading vendors...</span>
+                                    </div>
+                                  ) : (
+                                    <div className="mt-2 space-y-2 max-h-64 overflow-y-auto">
+                                      {recommendedVendors.map((vendor) => (
+                                        <div
+                                          key={vendor.id}
+                                          className={`p-3 border rounded cursor-pointer transition-colors ${
+                                            selectedVendor === vendor.id ? 'border-green-500 bg-green-50' : 'hover:bg-gray-50'
+                                          }`}
+                                          onClick={() => setSelectedVendor(vendor.id)}
+                                        >
+                                          <div className="flex justify-between items-start">
+                                            <div className="flex-1">
+                                              <div className="font-medium">{vendor.name}</div>
+                                              <div className="text-sm text-gray-600 mt-1">
+                                                {vendor.address}
+                                              </div>
+                                              <div className="flex items-center gap-2 mt-2">
+                                                <Badge variant="secondary" className="text-xs">
+                                                  📍 {vendorService.formatDistance(vendor.distance)}
+                                                </Badge>
+                                                <Badge variant="outline" className="text-xs">
+                                                  ⏱️ {vendorService.formatEstimatedTime(vendor.estimatedTime)}
+                                                </Badge>
+                                                {vendor.rating && (
+                                                  <Badge variant="outline" className="text-xs">
+                                                    ⭐ {vendor.rating}
+                                                  </Badge>
+                                                )}
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
                                 </div>
 
                                 <Button
