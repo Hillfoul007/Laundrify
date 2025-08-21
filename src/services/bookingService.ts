@@ -1067,6 +1067,18 @@ export class BookingService {
       const matchingBookings = allBookings.filter((booking: BookingDetails) => {
         const bookingUserId = booking.userId;
 
+        // Ensure bookingUserId is a string before doing string operations
+        if (!bookingUserId || typeof bookingUserId !== 'string') {
+          console.warn('⚠️ Invalid bookingUserId type:', typeof bookingUserId, bookingUserId);
+          return false;
+        }
+
+        // Ensure userId is a string
+        if (!userId || typeof userId !== 'string') {
+          console.warn('⚠️ Invalid userId type:', typeof userId, userId);
+          return false;
+        }
+
         // Direct match
         if (bookingUserId === userId) {
           return true;
@@ -1081,7 +1093,7 @@ export class BookingService {
         }
 
         if (
-          bookingUserId?.startsWith("user_") &&
+          bookingUserId.startsWith("user_") &&
           bookingUserId.replace("user_", "") === userId
         ) {
           return true;
