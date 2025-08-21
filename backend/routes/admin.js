@@ -782,7 +782,7 @@ router.get("/quick-pickups", verifyAdminAccess, async (req, res) => {
       query.status = { $in: statusArray };
     }
 
-    console.log('📋 Fetching quick pickup orders...');
+    console.log('���� Fetching quick pickup orders...');
 
     const quickPickups = await QuickPickup.find(query)
       .populate('customer_id', 'name phone email')
@@ -993,17 +993,25 @@ router.post("/orders/assign-vendor", verifyAdminAccess, async (req, res) => {
 
     console.log('🏪 Assigning vendor:', { orderId, vendorData, orderType });
 
-    // Vendor options
+    // Vendor options with enhanced data
     const vendors = {
       'vendor1': {
+        id: 'vendor1',
         name: 'Priya Dry Cleaners',
         address: 'Shop n.155, Spaze corporate park, 1sf, Sector 69, Gurugram, Haryana 122101',
-        phone: '+91 9999999991'
+        phone: '+91 9999999991',
+        coordinates: { lat: 28.3984, lng: 77.0648 },
+        services: ['Dry Cleaning', 'Laundry', 'Ironing', 'Stain Removal'],
+        rating: 4.5
       },
       'vendor2': {
+        id: 'vendor2',
         name: 'White Tiger Dry Cleaning',
         address: 'Shop No. 153, First Floor, Spaze Corporate Park, Sector 69, Gurugram, Haryana 122101',
-        phone: '+91 9999999992'
+        phone: '+91 9999999992',
+        coordinates: { lat: 28.3982, lng: 77.0650 },
+        services: ['Dry Cleaning', 'Premium Care', 'Express Service', 'Alterations'],
+        rating: 4.3
       }
     };
 
@@ -1011,6 +1019,13 @@ router.post("/orders/assign-vendor", verifyAdminAccess, async (req, res) => {
     if (!selectedVendor) {
       return res.status(400).json({ message: 'Invalid vendor selection' });
     }
+
+    // Merge vendor data with distance/time information from frontend
+    const vendorWithDistanceData = {
+      ...selectedVendor,
+      distance: vendorData.distance || 0,
+      estimatedTime: vendorData.estimatedTime || 60
+    };
 
     // For development/mock mode, just return success
     if (!mongoose.Types.ObjectId.isValid(orderId)) {
