@@ -88,11 +88,11 @@ const addressSchema = new mongoose.Schema(
     },
     created_at: {
       type: Date,
-      default: Date.now,
+      default: () => new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"})),
     },
     updated_at: {
       type: Date,
-      default: Date.now,
+      default: () => new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"})),
     },
   },
   {
@@ -102,7 +102,7 @@ const addressSchema = new mongoose.Schema(
 
 // Update the updated_at field before saving
 addressSchema.pre("save", function (next) {
-  this.updated_at = new Date();
+  this.updated_at = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"}));
   next();
 });
 

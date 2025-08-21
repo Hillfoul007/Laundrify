@@ -3,7 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNotifications } from "@/contexts/NotificationContext";
+import { quickPickupService, type QuickPickupDetails } from "@/services/quickPickupService";
 
 import {
   createSuccessNotification,
@@ -64,12 +66,14 @@ interface EnhancedBookingHistoryProps {
 const EnhancedBookingHistory: React.FC<EnhancedBookingHistoryProps> =
   React.memo(({ currentUser, onBack, onLoginRequired }) => {
     const { addNotification } = useNotifications();
-    const [bookings, setBookings] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
-    const [editingBooking, setEditingBooking] = useState(null);
-    const [showEditModal, setShowEditModal] = useState(false);
-    const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const [bookings, setBookings] = useState([]);
+  const [quickPickups, setQuickPickups] = useState<QuickPickupDetails[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [editingBooking, setEditingBooking] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("regular");
 
     const [cancellingBooking, setCancellingBooking] = useState<string | null>(
       null,

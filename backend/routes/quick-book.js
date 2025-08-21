@@ -116,7 +116,7 @@ router.post("/", async (req, res) => {
         address,
         special_instructions: special_instructions || "",
         status: "pending",
-        created_at: new Date(),
+        created_at: new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"})),
       };
 
       console.log("📝 Step 6: Mock booking object created:", mockQuickBook._id);
