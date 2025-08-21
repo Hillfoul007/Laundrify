@@ -300,6 +300,67 @@ export class QuickPickupService {
   }
 
   /**
+   * Update delivery information by rider
+   */
+  async updateDeliveryInfo(
+    quickPickupId: string,
+    deliveryData: {
+      delivery_date?: string;
+      delivery_time?: string;
+      items_collected?: Array<{
+        name: string;
+        quantity: number;
+        price: number;
+        total: number;
+      }>;
+      actual_cost?: number;
+      rider_notes?: string;
+    }
+  ): Promise<QuickPickupResponse> {
+    try {
+      console.log("🚚 Updating delivery info for quick pickup:", { quickPickupId, deliveryData });
+
+      const response = await fetch(`${this.apiBaseUrl}/quick-pickup/${quickPickupId}/delivery`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("cleancare_auth_token")}`,
+        },
+        body: JSON.stringify(deliveryData),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log("✅ Delivery info updated successfully:", result);
+
+        // Update local storage if we have user ID
+        if (result.quickPickup) {
+          const transformedQuickPickup = this.transformBackendQuickPickup(result.quickPickup);
+          this.saveQuickPickupToLocalStorage(transformedQuickPickup);
+        }
+
+        return {
+          success: true,
+          quickPickup: result.quickPickup ? this.transformBackendQuickPickup(result.quickPickup) : undefined,
+        };
+      } else {
+        const errorResult = await response.json();
+        console.error("❌ Failed to update delivery info:", errorResult);
+        return {
+          success: false,
+          error: errorResult.error || "Failed to update delivery information",
+        };
+      }
+    } catch (error) {
+      console.error("❌ Error updating delivery info:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to update delivery information",
+      };
+    }
+  }
+
+  /**
    * Create a new quick pickup order
    */
   async createQuickPickup(quickPickupData: Partial<QuickPickupDetails>): Promise<QuickPickupResponse> {
