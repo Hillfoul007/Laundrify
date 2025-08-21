@@ -369,7 +369,7 @@ router.post('/verify-otp', async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    console.log(`��� Rider OTP login successful: ${rider.name}`);
+    console.log(`✅ Rider OTP login successful: ${rider.name}`);
     res.json({
       token,
       rider: {
@@ -1166,7 +1166,10 @@ router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
       order.item_prices = newItemPrices;
 
       // Update services array and service string to stay synchronized with item_prices
-      const updatedServices = items.map(item => item.name);
+      // Include quantities in service representation for better tracking
+      const updatedServices = items.map(item =>
+        item.quantity > 1 ? `${item.name} (x${item.quantity})` : item.name
+      );
       order.services = updatedServices;
       order.service = updatedServices.join(', ');
 
