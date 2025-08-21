@@ -31,6 +31,7 @@ import RiderLayout from '@/components/rider/RiderLayout';
 import CustomerVerificationService from '@/services/customerVerificationService';
 import globalVerificationManager from '@/utils/globalVerificationManager';
 import { getRiderApiUrl } from '@/lib/riderApi';
+import analyticsService from '@/services/analyticsService';
 
 export default function RiderOrders() {
   const { orderId } = useParams();
