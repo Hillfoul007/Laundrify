@@ -68,6 +68,12 @@ export default function RiderLogin() {
         url: testResponse.url,
         accessible: testResponse.ok
       });
+
+      if (testResponse.status === 404) {
+        console.log('🔍 Health endpoint not found - assuming development mode');
+        return false; // Backend not available in dev mode
+      }
+
       return testResponse.ok;
     } catch (error) {
       console.log('🔍 Backend Health Check Failed:', error);
