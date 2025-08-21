@@ -192,8 +192,9 @@ class RiderNotificationService {
         related_order: verificationData.orderId,
         priority: approved ? 'medium' : 'high',
         expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
-        delivery_channels: ['app', 'sms'],
+        sent_via: ['app', 'sms'],
         delivery_status: {
+          app: false,
           sms: false,
           push: false
         }
