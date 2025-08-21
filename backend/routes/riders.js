@@ -1096,7 +1096,7 @@ router.put('/orders/:orderId/update', verifyRiderToken, async (req, res) => {
       console.log(`🔍 Order not found in Bookings, checking QuickPickup...`);
       order = await QuickPickup.findOne({
         _id: orderId,
-        assignedRider: req.rider.riderId
+        rider_id: req.rider.riderId  // QuickPickup uses rider_id instead of assignedRider
       });
 
       if (order) {
