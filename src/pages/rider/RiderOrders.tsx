@@ -295,7 +295,7 @@ export default function RiderOrders() {
       }
 
       if (approved) {
-        toast.success('✅ Customer approved the changes! You can now save the order.', {
+        toast.success('�� Customer approved the changes! You can now save the order.', {
           duration: 5000,
           description: 'Click "Save Order" to complete the update'
         });
@@ -342,7 +342,7 @@ export default function RiderOrders() {
 
   const getMockOrderData = (id: string) => {
     // Simulate different order types based on ID
-    const isQuickPickupDemo = id.includes('quick') || id.includes('QP') || id === '68a1cb6dbea207fd0ace501b';
+    const isQuickPickupDemo = false; // Disabled: Quick pickups now loaded from quickPickupService
 
     console.log('📋 getMockOrderData called with ID:', id);
     console.log('��� isQuickPickupDemo:', isQuickPickupDemo);
