@@ -48,7 +48,7 @@ export class QuickPickupService {
   private apiBaseUrl: string;
 
   constructor() {
-    this.apiBaseUrl = config.API_BASE_URL;
+    this.apiBaseUrl = getApiUrl();
   }
 
   /**
