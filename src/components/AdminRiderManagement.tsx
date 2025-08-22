@@ -195,6 +195,14 @@ export default function AdminRiderManagement() {
   useEffect(() => {
     console.log('🚀 AdminRiderManagement component mounted, fetching data...');
 
+    // Test vendor service on mount
+    try {
+      const testVendors = vendorService.getActiveVendors();
+      console.log('🏪 Vendor service test - active vendors:', testVendors);
+    } catch (error) {
+      console.error('❌ Vendor service test failed:', error);
+    }
+
     // Directly try to fetch data - let individual functions handle connection issues
     fetchRiders();
     fetchOrders();
