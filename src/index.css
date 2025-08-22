@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import mobile styles */
+@import './styles/rider-mobile.css';
+
 @layer base {
   :root {
     --background: 0 0% 100%;

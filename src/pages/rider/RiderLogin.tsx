@@ -198,10 +198,10 @@ export default function RiderLogin() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 rider-mobile-layout">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="phone" className="flex items-center space-x-2">
+          <Label htmlFor="phone" className="flex items-center space-x-2 rider-label-mobile">
             <Phone className="h-4 w-4" />
             <span>Phone Number</span>
           </Label>
@@ -213,11 +213,12 @@ export default function RiderLogin() {
             value={credentials.phone}
             onChange={handleInputChange}
             required
+            className="rider-input-mobile"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="password" className="flex items-center space-x-2">
+          <Label htmlFor="password" className="flex items-center space-x-2 rider-label-mobile">
             <Lock className="h-4 w-4" />
             <span>Password</span>
           </Label>
@@ -229,40 +230,41 @@ export default function RiderLogin() {
             value={credentials.password}
             onChange={handleInputChange}
             required
+            className="rider-input-mobile"
           />
         </div>
 
-        <div className="bg-blue-50 p-3 rounded-lg">
-          <p className="text-blue-900 text-sm font-medium mb-2">🚀 Rider System</p>
-          <p className="text-blue-700 text-xs mb-2">
+        <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+          <p className="text-blue-900 text-sm font-medium mb-2 rider-text-body-mobile">🚀 Rider System</p>
+          <p className="text-blue-700 text-xs mb-2 rider-text-small-mobile">
             <strong>Environment:</strong> {window.location.hostname}
           </p>
-          <p className="text-blue-700 text-xs mb-2">
+          <p className="text-blue-700 text-xs mb-2 rider-text-small-mobile">
             <strong>API Endpoint:</strong> {getRiderApiUrl('/login')}
           </p>
-          <p className="text-blue-700 text-xs mb-2">
+          <p className="text-blue-700 text-xs mb-2 rider-text-small-mobile">
             <strong>Mode:</strong> {import.meta.env.MODE} | <strong>Dev:</strong> {import.meta.env.DEV ? 'Yes' : 'No'}
           </p>
 
           {getRiderApiUrl('/login').includes('backend-vaxf.onrender.com') ? (
             <div className="bg-green-50 p-2 rounded mt-2 border border-green-200">
-              <p className="text-green-800 text-xs font-medium">✅ Production Backend</p>
-              <p className="text-green-700 text-xs">
+              <p className="text-green-800 text-xs font-medium rider-text-small-mobile">✅ Production Backend</p>
+              <p className="text-green-700 text-xs rider-text-small-mobile">
                 Use your registered phone number and password to login.
               </p>
-              <p className="text-red-700 text-xs">
+              <p className="text-red-700 text-xs rider-text-small-mobile">
                 <strong>Note:</strong> Only approved riders can login. Check with admin if you can't access your account.
               </p>
             </div>
           ) : import.meta.env.DEV ? (
             <div className="bg-green-50 p-2 rounded mt-2 border border-green-200">
-              <p className="text-green-800 text-xs font-medium">✅ Development Mode</p>
-              <p className="text-green-700 text-xs">
+              <p className="text-green-800 text-xs font-medium rider-text-small-mobile">✅ Development Mode</p>
+              <p className="text-green-700 text-xs rider-text-small-mobile">
                 Full database functionality with registered rider accounts.
               </p>
             </div>
           ) : (
-            <p className="text-orange-700 text-xs">
+            <p className="text-orange-700 text-xs rider-text-small-mobile">
               ⚠️ Production mode. Use registered credentials.
             </p>
           )}
@@ -270,7 +272,7 @@ export default function RiderLogin() {
 
         <Button
           type="submit"
-          className="w-full"
+          className="rider-action-button-mobile rider-primary-action-mobile"
           disabled={isLoading}
         >
           {isLoading ? (
@@ -284,8 +286,8 @@ export default function RiderLogin() {
         </Button>
       </form>
       
-      <Alert>
-        <AlertDescription>
+      <Alert className="rider-alert-mobile rider-alert-info-mobile">
+        <AlertDescription className="rider-text-body-mobile">
           New to our platform? Register above to join our delivery team.
           Your account will be verified by our admin before you can start working.
         </AlertDescription>
