@@ -414,33 +414,6 @@ export default function RiderDashboard() {
           </Card>
         )}
 
-        {/* Error Status */}
-        {lastFetchError && isOnline && (
-          <Card className="rider-card-mobile rider-alert-mobile rider-alert-warning-mobile">
-            <CardContent className="pt-4">
-              <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-                <div className="flex items-start space-x-2 flex-1">
-                  <div className="w-3 h-3 bg-orange-500 rounded-full mt-1 flex-shrink-0"></div>
-                  <div className="min-w-0">
-                    <p className="text-orange-800 font-medium rider-text-body-mobile">Connection Issues</p>
-                    <p className="text-orange-600 text-sm rider-text-small-mobile break-words">{lastFetchError}</p>
-                  </div>
-                </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="rider-action-button-mobile rider-outline-action-mobile w-full sm:w-auto"
-                  onClick={() => {
-                    setLastFetchError(null);
-                    fetchAssignedOrders();
-                  }}
-                >
-                  Retry
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Notifications Card */}
         <RiderNotifications compact={true} />
