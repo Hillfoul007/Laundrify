@@ -115,7 +115,7 @@ export class QuickPickupService {
       const response = await fetch(endpoint, {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("cleancare_auth_token")}`,
+          Authorization: `Bearer ${localStorage.getItem("riderToken") || localStorage.getItem("cleancare_auth_token")}`,
         },
         signal: controller.signal,
       });
@@ -400,7 +400,7 @@ export class QuickPickupService {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("cleancare_auth_token")}`,
+            Authorization: `Bearer ${localStorage.getItem("riderToken") || localStorage.getItem("cleancare_auth_token")}`,
           },
           body: JSON.stringify({
             customer_id: userId,
