@@ -356,12 +356,27 @@ export default function AdminRiderManagement() {
                   hasLng: !!(order.coordinates?.lng),
                   address: order.address
                 });
-                return order.coordinates && order.coordinates.lat && order.coordinates.lng
-                  ? {
-                      lat: parseFloat(order.coordinates.lat),
-                      lng: parseFloat(order.coordinates.lng)
-                    }
-                  : null;
+
+                // First try to use provided coordinates
+                if (order.coordinates && order.coordinates.lat && order.coordinates.lng) {
+                  const coords = {
+                    lat: parseFloat(order.coordinates.lat),
+                    lng: parseFloat(order.coordinates.lng)
+                  };
+                  console.log(`✅ Using order coordinates:`, coords);
+                  return coords;
+                }
+
+                // Fallback: try to extract coordinates from address
+                if (order.address) {
+                  const fallbackCoords = extractCoordinatesFromAddress(order.address);
+                  console.log(`🗺️ Using address-based coordinates for order:`, fallbackCoords);
+                  return fallbackCoords;
+                }
+
+                // Last resort: default Gurugram coordinates
+                console.log(`⚠️ Using default coordinates for order`);
+                return { lat: 28.4595, lng: 77.0266 };
               })(),
               itemsCollected: order.itemsCollected || [],
               riderStatus: order.riderStatus || 'unassigned'
@@ -672,6 +687,58 @@ export default function AdminRiderManagement() {
     return d.toFixed(1);
   };
 
+  // Helper function to extract coordinates from address
+  const extractCoordinatesFromAddress = (address: string): { lat: number; lng: number } => {
+    if (!address || typeof address !== 'string') {
+      return { lat: 28.4595, lng: 77.0266 }; // Default Gurugram
+    }
+
+    const addressLower = address.toLowerCase();
+
+    // Common Gurugram coordinates
+    const sectorCoordinates: Record<string, { lat: number; lng: number }> = {
+      'sector 69': { lat: 28.3984, lng: 77.0648 },
+      'sector 70': { lat: 28.3920, lng: 77.0580 },
+      'sector 71': { lat: 28.3890, lng: 77.0520 },
+      'sector 14': { lat: 28.4595, lng: 77.0266 },
+      'sector 25': { lat: 28.4949, lng: 77.0828 },
+      'sector 54': { lat: 28.4211, lng: 77.0869 },
+      'sector 15': { lat: 28.4650, lng: 77.0300 },
+      'sector 44': { lat: 28.4400, lng: 77.0500 },
+      'sector 50': { lat: 28.4250, lng: 77.0600 },
+      'cyber city': { lat: 28.4949, lng: 77.0828 },
+      'mg road': { lat: 28.4595, lng: 77.0266 },
+      'golf course road': { lat: 28.4211, lng: 77.0869 },
+      'sohna road': { lat: 28.4089, lng: 77.0520 },
+      'dwarka expressway': { lat: 28.4089, lng: 76.9560 }
+    };
+
+    // Find matching area
+    for (const [area, coords] of Object.entries(sectorCoordinates)) {
+      if (addressLower.includes(area)) {
+        return coords;
+      }
+    }
+
+    // Try to extract sector number
+    const sectorMatch = addressLower.match(/sector[\s\-]*([0-9]+)/);
+    if (sectorMatch) {
+      const sectorNum = parseInt(sectorMatch[1]);
+      const baseLat = 28.4595;
+      const baseLng = 77.0266;
+      const latOffset = (sectorNum % 10) * 0.008;
+      const lngOffset = Math.floor(sectorNum / 10) * 0.008;
+
+      return {
+        lat: baseLat + latOffset,
+        lng: baseLng + lngOffset
+      };
+    }
+
+    // Default coordinates
+    return { lat: 28.4595, lng: 77.0266 };
+  };
+
   const getNearestRiders = (orderLocation: {lat: number, lng: number} | null) => {
     console.log('🗺️ Distance calculation debug:', {
       orderLocation,
@@ -679,28 +746,35 @@ export default function AdminRiderManagement() {
       activeRiders: activeRiders.map(r => ({ name: r.name, location: r.location }))
     });
 
+    // Ensure we always have order location
+    const effectiveOrderLocation = orderLocation || { lat: 28.4595, lng: 77.0266 };
+
     return activeRiders
       .map(rider => {
         let distance = 'Unknown';
 
-        if (orderLocation && rider.location) {
+        if (effectiveOrderLocation && rider.location) {
           try {
-            distance = calculateDistance(
-              orderLocation.lat,
-              orderLocation.lng,
+            const calculatedDistance = calculateDistance(
+              effectiveOrderLocation.lat,
+              effectiveOrderLocation.lng,
               rider.location.lat,
               rider.location.lng
             );
+            distance = calculatedDistance;
             console.log(`📍 Distance from ${rider.name} to order: ${distance} km`);
           } catch (error) {
             console.error('❌ Distance calculation error:', error);
             distance = 'Error';
           }
+        } else if (effectiveOrderLocation && !rider.location) {
+          console.log(`⚠️ Rider ${rider.name} has no location data`);
+          distance = 'No GPS';
         } else {
           console.log(`⚠️ Missing location data for ${rider.name}:`, {
-            hasOrderLocation: !!orderLocation,
+            hasOrderLocation: !!effectiveOrderLocation,
             hasRiderLocation: !!rider.location,
-            orderLocation,
+            orderLocation: effectiveOrderLocation,
             riderLocation: rider.location
           });
         }
@@ -711,9 +785,9 @@ export default function AdminRiderManagement() {
         };
       })
       .sort((a, b) => {
-        if (a.distance === 'Unknown') return 1;
-        if (b.distance === 'Unknown') return -1;
-        return parseFloat(a.distance) - parseFloat(b.distance);
+        if (typeof a.distance === 'string') return 1;
+        if (typeof b.distance === 'string') return -1;
+        return parseFloat(a.distance as string) - parseFloat(b.distance as string);
       });
   };
 
@@ -1099,11 +1173,9 @@ export default function AdminRiderManagement() {
                                             <div>
                                               <p className="font-medium">{rider.name}</p>
                                               <p className="text-sm text-gray-600">{rider.phone}</p>
-                                              {rider.distance && (
-                                                <p className="text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded mt-1">
-                                                  📍 {rider.distance} km away
-                                                </p>
-                                              )}
+                                              <p className="text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded mt-1">
+                                        📍 {typeof rider.distance === 'string' ? rider.distance : `${rider.distance} km`} away from pickup
+                                      </p>
                                             </div>
                                             <Badge variant="outline" className="bg-orange-50">
                                               Available
@@ -1152,8 +1224,8 @@ export default function AdminRiderManagement() {
                                                 </div>
                                                 <div className="flex items-center gap-2 flex-wrap">
                                                   <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">
-                                                    📍 {vendorService.formatDistance(vendor.distance)} from pickup
-                                                  </Badge>
+                                    📍 {vendor.distance > 0 ? vendorService.formatDistance(vendor.distance) : 'Calculating...'} from pickup
+                                  </Badge>
                                                   <Badge variant="outline" className="text-xs">
                                                     ⏱️ {vendorService.formatEstimatedTime(vendor.estimatedTime)}
                                                   </Badge>
