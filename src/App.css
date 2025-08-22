@@ -1,3 +1,6 @@
+/* Import mobile verification fixes */
+@import './styles/mobile-verification-fixes.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

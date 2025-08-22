@@ -235,12 +235,15 @@ try {
   console.error("❌ Failed to load Booking routes:", error.message);
 }
 
+// Temporarily disable location routes to debug path-to-regexp issue
+/*
 try {
   locationRoutes = require("./routes/location");
   console.log("✅ Location routes loaded");
 } catch (error) {
   console.error("❌ Failed to load Location routes:", error.message);
 }
+*/
 
 // Serve static frontend files in production
 if (productionConfig.isProduction()) {
@@ -248,6 +251,33 @@ if (productionConfig.isProduction()) {
   app.use(express.static(frontendPath));
   console.log("📁 Serving frontend static files from:", frontendPath);
 }
+
+// Main health check endpoint
+app.get('/api/health', (req, res) => {
+  console.log('🏥 Main health check endpoint hit');
+  res.json({
+    status: 'healthy',
+    service: 'laundrify-backend',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    version: '1.0.0',
+    database: {
+      connected: !!mongoose.connection.readyState,
+      state: mongoose.connection.readyState,
+      status: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+    },
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
+    routes: {
+      auth: '/api/auth',
+      bookings: '/api/bookings',
+      riders: '/api/riders',
+      admin: '/api/admin',
+      quickPickup: '/api/quick-pickup',
+      notifications: '/api/notifications'
+    }
+  });
+});
 
 // API Routes with error handling
 if (otpAuthRoutes) {
@@ -260,10 +290,12 @@ if (bookingRoutes) {
   console.log("🔗 Booking routes registered at /api/bookings");
 }
 
+/*
 if (locationRoutes) {
   app.use("/api/location", locationRoutes);
   console.log("🔗 Location routes registered at /api/location");
 }
+*/
 
 // WhatsApp Auth routes
 try {
@@ -317,6 +349,15 @@ try {
   console.error("❌ Failed to load Coupon routes:", error.message);
 }
 
+// Referral routes
+try {
+  const referralRoutes = require("./routes/referrals");
+  app.use("/api/referrals", referralRoutes);
+  console.log("🔗 Referral routes registered at /api/referrals");
+} catch (error) {
+  console.error("❌ Failed to load Referral routes:", error.message);
+}
+
 // Admin routes
 try {
   const adminRoutes = require("./routes/admin");
@@ -345,6 +386,26 @@ try {
 } catch (error) {
   console.error("❌ Failed to load Quick Book routes:", error.message);
   console.error("❌ Full quick book routes error:", error);
+}
+
+// Rider routes
+try {
+  const riderRoutes = require("./routes/riders");
+  app.use("/api/riders", riderRoutes);
+  console.log("🔗 Rider routes registered at /api/riders");
+} catch (error) {
+  console.error("❌ Failed to load Rider routes:", error.message);
+  console.error("❌ Full rider routes error:", error);
+}
+
+// Notification routes
+try {
+  const notificationRoutes = require("./routes/notifications");
+  app.use("/api/notifications", notificationRoutes);
+  console.log("🔗 Notification routes registered at /api/notifications");
+} catch (error) {
+  console.error("❌ Failed to load Notification routes:", error.message);
+  console.error("❌ Full notification routes error:", error);
 }
 
 // Google Sheets integration removed
@@ -424,6 +485,43 @@ app.get("/api/test", (req, res) => {
     utc_timestamp: new Date().toISOString(),
   });
 });
+
+// Serve static files for uploads
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+console.log("📁 Static files served from /uploads");
+
+// Serve frontend static files and handle React Router routes (only if dist exists)
+const frontendPath = path.join(__dirname, "../dist");
+const fs = require("fs");
+
+if (fs.existsSync(frontendPath)) {
+  app.use(express.static(frontendPath));
+  console.log("📁 Serving frontend static files from:", frontendPath);
+
+  // Catch-all handler: send back React's index.html file for non-API routes
+  app.get("*", (req, res) => {
+    // Don't handle API routes
+    if (req.path.startsWith("/api/")) {
+      return res.status(404).json({ error: "API endpoint not found" });
+    }
+
+    const indexPath = path.join(frontendPath, "index.html");
+    res.sendFile(indexPath, (err) => {
+      if (err) {
+        console.error("Error serving index.html:", err);
+        res.status(500).send("Error loading application");
+      }
+    });
+  });
+  console.log("��� SPA catch-all route configured for React Router");
+} else {
+  console.log("📁 Dist folder not found - running in development mode");
+
+  // In development, only handle API 404s
+  app.get("/api/*", (req, res) => {
+    res.status(404).json({ error: "API endpoint not found" });
+  });
+}
 
 // Global error handling middleware
 app.use((err, req, res, next) => {
@@ -508,24 +606,38 @@ if (productionConfig.isProduction()) {
     "🔗 Frontend routing configured - all non-API routes serve index.html",
   );
 } else {
-  // Handle 404 routes in development
-  app.use("*", (req, res) => {
-    res.status(404).json({
-      success: false,
-      message: `Route ${req.originalUrl} not found`,
-      availableRoutes: [
-        "/api/health",
-        "/api/test",
-        "/api/auth",
-        "/api/bookings",
-        "/api/addresses",
-        "/api/location",
-        "/api/whatsapp",
-        "/api/admin",
-        "/api/quick-book",
-      ],
-    });
+  // In development mode, provide helpful redirect for non-API routes
+  app.get("*", (req, res) => {
+    // Only show helpful message for non-API routes
+    if (!req.path.startsWith("/api/")) {
+      res.send(`
+        <html>
+          <head><title>Backend Server - Redirect Required</title></head>
+          <body style="font-family: Arial, sans-serif; padding: 40px; background: #f5f5f5;">
+            <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+              <h1 style="color: #C46DD8;">🔄 Redirect Required</h1>
+              <p>You're accessing the <strong>backend server</strong>, but you need the <strong>frontend</strong> for the Rider Portal.</p>
+
+              <h3>For the Rider System:</h3>
+              <ul>
+                <li><strong>Frontend URL:</strong> <a href="http://localhost:10000${req.path}">http://localhost:10000${req.path}</a></li>
+                <li><strong>Current URL:</strong> ${req.protocol}://${req.get('host')}${req.path} (Backend API server)</li>
+              </ul>
+
+              <div style="background: #e3f2fd; padding: 15px; border-radius: 4px; margin: 20px 0;">
+                <strong>💡 Solution:</strong> Access the rider portal at the frontend URL above.
+              </div>
+
+              <p><small>This is the backend API server. The React app (rider portal) runs on a separate frontend server.</small></p>
+            </div>
+          </body>
+        </html>
+      `);
+    } else {
+      res.status(404).json({ error: "API endpoint not found" });
+    }
   });
+  console.log("🔧 Development mode: Providing redirect help for frontend routes");
 }
 
 // Keep-alive mechanism for Render deployment
@@ -563,7 +675,7 @@ const server = app.listen(PORT, () => {
   if (productionConfig.isProduction()) {
     console.log(`🌐 Frontend and API available at: http://localhost:${PORT}`);
   } else {
-    console.log(`📱 API available at: http://localhost:${PORT}/api`);
+    console.log(`�� API available at: http://localhost:${PORT}/api`);
   }
   console.log(`��� Health check: http://localhost:${PORT}/api/health`);
   console.log(`🔒 Security: Helmet enabled`);

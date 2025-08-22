@@ -16,6 +16,8 @@ router.post("/", async (req, res) => {
       customer_phone,
       pickup_date,
       pickup_time,
+      delivery_date,
+      delivery_time,
       house_number,
       address,
       special_instructions,
@@ -33,17 +35,15 @@ router.post("/", async (req, res) => {
 
     console.log("✅ Step 3: Validation passed");
 
-    // Enhanced address validation for Quick Pickup
+    // Enhanced address validation for Quick Pickup - now serving all Gurugram/Gurgaon
     const addressLower = address.toLowerCase();
-    const validKeywords = ["tulip", "sector 69 gurugram", "sector 69 gurgaon"];
-    const hasValidKeyword = validKeywords.some(keyword => addressLower.includes(keyword));
-    const pincodeMatch = address.match(/\b122101\b/);
-    const hasValidPincode = !!pincodeMatch;
+    const validCities = ["gurgaon", "gurugram"];
+    const isValidLocation = validCities.some(city => addressLower.includes(city));
 
-    if (!hasValidKeyword && !hasValidPincode) {
+    if (!isValidLocation) {
       console.log("❌ Address validation failed: Service not available in this area");
       return res.status(400).json({
-        error: "Service not available in your area. We currently serve areas with 'tulip', 'sector 69 gurugram', or pincode 122101.",
+        error: "Service currently available only in Gurugram/Gurgaon area.",
       });
     }
 
@@ -84,6 +84,8 @@ router.post("/", async (req, res) => {
         customer_phone,
         pickup_date,
         pickup_time,
+        delivery_date: delivery_date || "",
+        delivery_time: delivery_time || "",
         house_number: house_number || "",
         address,
         special_instructions: special_instructions || "",
@@ -125,6 +127,8 @@ router.post("/", async (req, res) => {
         customer_phone,
         pickup_date,
         pickup_time,
+        delivery_date: delivery_date || "",
+        delivery_time: delivery_time || "",
         house_number: house_number || "",
         address,
         special_instructions: special_instructions || "",
@@ -236,6 +240,121 @@ router.get("/", async (req, res) => {
   }
 });
 
+// Test endpoint to check if quick pickup exists (no auth required)
+router.get("/test/:quickPickupId", async (req, res) => {
+  try {
+    const { quickPickupId } = req.params;
+
+    console.log(`📋 [TEST] Checking quick pickup by ID: ${quickPickupId}`);
+
+    // Validate quickPickupId
+    if (!mongoose.Types.ObjectId.isValid(quickPickupId)) {
+      return res.status(400).json({ error: "Invalid quick pickup ID" });
+    }
+
+    const quickPickup = await QuickPickup.findById(quickPickupId)
+      .populate("customer_id", "name full_name phone email");
+
+    if (!quickPickup) {
+      return res.status(404).json({
+        error: "Quick pickup not found",
+        searched_id: quickPickupId,
+        is_valid_id: mongoose.Types.ObjectId.isValid(quickPickupId)
+      });
+    }
+
+    console.log("✅ [TEST] Quick pickup found:", quickPickup._id);
+    res.json({
+      message: "Quick pickup found",
+      quickPickup,
+      test_mode: true
+    });
+  } catch (error) {
+    console.error("❌ [TEST] Error fetching quick pickup:", error);
+    res.status(500).json({ error: "Internal server error", details: error.message });
+  }
+});
+
+// Get single quick pickup by ID (for riders/admin)
+router.get("/:quickPickupId", async (req, res) => {
+  try {
+    const { quickPickupId } = req.params;
+
+    console.log(`📋 Fetching quick pickup by ID: ${quickPickupId}`);
+
+    // Validate quickPickupId
+    if (!mongoose.Types.ObjectId.isValid(quickPickupId)) {
+      return res.status(400).json({ error: "Invalid quick pickup ID" });
+    }
+
+    const quickPickup = await QuickPickup.findById(quickPickupId)
+      .populate("customer_id", "name full_name phone email")
+      .populate("rider_id", "name phone");
+
+    if (!quickPickup) {
+      return res.status(404).json({ error: "Quick pickup not found" });
+    }
+
+    console.log("✅ Quick pickup found:", quickPickup._id);
+    res.json({
+      message: "Quick pickup retrieved successfully",
+      quickPickup,
+    });
+  } catch (error) {
+    console.error("❌ Error fetching quick pickup:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Update delivery date/time by rider during pickup
+router.put("/:quickPickupId/delivery", async (req, res) => {
+  try {
+    const { quickPickupId } = req.params;
+    const { delivery_date, delivery_time, items_collected, actual_cost, rider_notes } = req.body;
+
+    console.log("📝 Rider updating delivery info for quick pickup:", { quickPickupId, delivery_date, delivery_time });
+
+    // Validate quickPickupId
+    if (!mongoose.Types.ObjectId.isValid(quickPickupId)) {
+      return res.status(400).json({ error: "Invalid quick pickup ID" });
+    }
+
+    // Prepare update data for rider
+    const updateData = {};
+    if (delivery_date) updateData.delivery_date = delivery_date;
+    if (delivery_time) updateData.delivery_time = delivery_time;
+    if (items_collected) updateData.items_collected = items_collected;
+    if (actual_cost !== undefined) updateData.actual_cost = actual_cost;
+    if (rider_notes) updateData.notes = rider_notes;
+
+    // Update status to picked_up if items were collected
+    if (items_collected && items_collected.length > 0) {
+      updateData.status = "picked_up";
+    }
+
+    const quickPickup = await QuickPickup.findByIdAndUpdate(
+      quickPickupId,
+      updateData,
+      { new: true, runValidators: true }
+    )
+      .populate("customer_id", "name full_name phone email")
+      .populate("rider_id", "name phone");
+
+    if (!quickPickup) {
+      return res.status(404).json({ error: "Quick pickup not found" });
+    }
+
+    console.log("✅ Quick pickup delivery info updated by rider:", quickPickup._id);
+    res.json({
+      message: "Delivery information updated successfully",
+      quickPickup,
+    });
+  } catch (error) {
+    console.error("❌ Error updating delivery info:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // Update quick pickup status (for riders/admin)
 router.put("/:quickPickupId", async (req, res) => {
   try {
@@ -277,7 +396,7 @@ router.put("/:quickPickupId", async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Error updating quick pickup:", error);
-    
+
     if (error.name === "ValidationError") {
       const validationErrors = Object.values(error.errors).map(err => err.message);
       return res.status(400).json({
