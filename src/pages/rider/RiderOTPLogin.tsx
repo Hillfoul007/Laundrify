@@ -305,38 +305,6 @@ export default function RiderOTPLogin({ onSwitchToRegister }: RiderOTPLoginProps
         </form>
       )}
 
-      <div className="bg-blue-50 p-3 rounded-lg">
-        <p className="text-blue-900 text-sm font-medium mb-2">🚀 Rider System</p>
-        <p className="text-blue-700 text-xs mb-2">
-          <strong>Secure OTP Login:</strong> No passwords needed
-        </p>
-        <p className="text-blue-700 text-xs mb-2">
-          <strong>Environment:</strong> {window.location.hostname}
-        </p>
-        
-        {getRiderApiUrl('/request-otp').includes('backend-vaxf.onrender.com') ? (
-          <div className="bg-green-50 p-2 rounded mt-2 border border-green-200">
-            <p className="text-green-800 text-xs font-medium">✅ Production Backend</p>
-            <p className="text-green-700 text-xs">
-              OTP will be sent to your registered phone number.
-            </p>
-            <p className="text-red-700 text-xs">
-              <strong>Note:</strong> Only approved riders can login.
-            </p>
-          </div>
-        ) : import.meta.env.DEV ? (
-          <div className="bg-green-50 p-2 rounded mt-2 border border-green-200">
-            <p className="text-green-800 text-xs font-medium">✅ Development Mode</p>
-            <p className="text-green-700 text-xs">
-              OTP will be logged in console for testing.
-            </p>
-          </div>
-        ) : (
-          <p className="text-orange-700 text-xs">
-            ⚠️ Production mode. Use registered phone number.
-          </p>
-        )}
-      </div>
       
       <Alert>
         <AlertDescription>
