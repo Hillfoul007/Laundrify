@@ -12,8 +12,18 @@ import {
   Activity,
   Bell,
   WifiOff,
-  Wifi
+  Wifi,
+  Menu,
+  X
 } from 'lucide-react';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
@@ -26,6 +36,7 @@ export default function RiderLayout({ children }: RiderLayoutProps) {
   const location = useLocation();
   const [rider, setRider] = React.useState<any>(null);
   const [unreadCount, setUnreadCount] = React.useState<number>(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const { isOnline } = useNetworkStatus();
 
   React.useEffect(() => {
@@ -139,8 +150,18 @@ export default function RiderLayout({ children }: RiderLayoutProps) {
 
   const handleLogout = () => {
     localStorage.removeItem('riderAuth');
+    localStorage.removeItem('riderToken');
     setRider(null);
+    setMobileMenuOpen(false);
     navigate('/rider/login');
+  };
+
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    setMobileMenuOpen(false);
+    if (path === '/rider/notifications') {
+      setUnreadCount(0);
+    }
   };
 
   const isActive = location.pathname;
@@ -148,28 +169,32 @@ export default function RiderLayout({ children }: RiderLayoutProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       {rider && (
-        <header className="bg-white shadow-sm border-b">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <div className="flex items-center space-x-4">
-                <Shield className="h-8 w-8 text-laundrify-purple" />
-                <h1 className="text-xl font-bold text-gray-900">Rider Portal</h1>
+        <header className="bg-white shadow-sm border-b sticky top-0 z-50">
+          <div className="px-3 sm:px-4 lg:px-8">
+            <div className="flex justify-between items-center h-14 sm:h-16">
+              {/* Left section */}
+              <div className="flex items-center space-x-2 sm:space-x-4">
+                <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-laundrify-purple" />
+                <h1 className="text-lg sm:text-xl font-bold text-gray-900">Rider Portal</h1>
               </div>
-              
-              <nav className="hidden md:flex space-x-4">
+
+              {/* Desktop Navigation - Hidden on mobile */}
+              <nav className="hidden lg:flex space-x-2">
                 <Button
                   variant={isActive === '/rider/dashboard' ? 'default' : 'ghost'}
-                  onClick={() => navigate('/rider/dashboard')}
-                  className="flex items-center space-x-2"
+                  onClick={() => handleNavigation('/rider/dashboard')}
+                  className="flex items-center space-x-2 text-sm"
+                  size="sm"
                 >
                   <Activity className="h-4 w-4" />
                   <span>Dashboard</span>
                 </Button>
-                
+
                 <Button
                   variant={isActive === '/rider/orders' ? 'default' : 'ghost'}
-                  onClick={() => navigate('/rider/orders')}
-                  className="flex items-center space-x-2"
+                  onClick={() => handleNavigation('/rider/orders')}
+                  className="flex items-center space-x-2 text-sm"
+                  size="sm"
                 >
                   <Package className="h-4 w-4" />
                   <span>Orders</span>
@@ -177,11 +202,9 @@ export default function RiderLayout({ children }: RiderLayoutProps) {
 
                 <Button
                   variant={isActive === '/rider/notifications' ? 'default' : 'ghost'}
-                  onClick={() => {
-                    navigate('/rider/notifications');
-                    setUnreadCount(0); // Reset count when navigating to notifications
-                  }}
-                  className="flex items-center space-x-2 relative"
+                  onClick={() => handleNavigation('/rider/notifications')}
+                  className="flex items-center space-x-2 relative text-sm"
+                  size="sm"
                 >
                   <Bell className="h-4 w-4" />
                   <span>Notifications</span>
@@ -194,49 +217,152 @@ export default function RiderLayout({ children }: RiderLayoutProps) {
 
                 <Button
                   variant={isActive === '/rider/profile' ? 'default' : 'ghost'}
-                  onClick={() => navigate('/rider/profile')}
-                  className="flex items-center space-x-2"
+                  onClick={() => handleNavigation('/rider/profile')}
+                  className="flex items-center space-x-2 text-sm"
+                  size="sm"
                 >
                   <User className="h-4 w-4" />
                   <span>Profile</span>
                 </Button>
               </nav>
 
-              <div className="flex items-center space-x-4">
-                {/* Network Status Indicator */}
-                <div className="flex items-center space-x-2">
+              {/* Right section */}
+              <div className="flex items-center space-x-2 sm:space-x-3">
+                {/* Network Status - Compact on mobile */}
+                <div className="hidden sm:flex items-center">
                   {isOnline ? (
-                    <Badge variant="outline" className="text-green-600 border-green-300 bg-green-50">
+                    <Badge variant="outline" className="text-green-600 border-green-300 bg-green-50 text-xs">
                       <Wifi className="h-3 w-3 mr-1" />
-                      Online
+                      <span className="hidden md:inline">Online</span>
                     </Badge>
                   ) : (
-                    <Badge variant="outline" className="text-red-600 border-red-300 bg-red-50">
+                    <Badge variant="outline" className="text-red-600 border-red-300 bg-red-50 text-xs">
                       <WifiOff className="h-3 w-3 mr-1" />
-                      Offline
+                      <span className="hidden md:inline">Offline</span>
                     </Badge>
                   )}
                 </div>
 
-                <div className="text-sm text-gray-600">
+                {/* Welcome text - Hidden on small mobile */}
+                <div className="hidden md:block text-sm text-gray-600 truncate max-w-32">
                   Welcome, {rider.name}
                 </div>
+
+                {/* Desktop Logout */}
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleLogout}
-                  className="flex items-center space-x-1"
+                  className="hidden lg:flex items-center space-x-1 text-sm"
                 >
                   <LogOut className="h-4 w-4" />
                   <span>Logout</span>
                 </Button>
+
+                {/* Mobile Menu Trigger */}
+                <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                  <SheetTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="lg:hidden p-2 h-8 w-8"
+                    >
+                      <Menu className="h-5 w-5" />
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="right" className="w-[280px] sm:w-[350px]">
+                    <SheetHeader className="text-left">
+                      <SheetTitle className="flex items-center space-x-2">
+                        <Shield className="h-6 w-6 text-laundrify-purple" />
+                        <span>Rider Menu</span>
+                      </SheetTitle>
+                      <SheetDescription>
+                        Welcome, {rider.name}
+                      </SheetDescription>
+                    </SheetHeader>
+
+                    <div className="mt-6 space-y-1">
+                      {/* Network Status in Mobile Menu */}
+                      <div className="p-3 rounded-lg border bg-gray-50 mb-4">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">Connection Status</span>
+                          {isOnline ? (
+                            <Badge variant="outline" className="text-green-600 border-green-300 bg-green-50">
+                              <Wifi className="h-3 w-3 mr-1" />
+                              Online
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-red-600 border-red-300 bg-red-50">
+                              <WifiOff className="h-3 w-3 mr-1" />
+                              Offline
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Navigation Links */}
+                      <Button
+                        variant={isActive === '/rider/dashboard' ? 'default' : 'ghost'}
+                        onClick={() => handleNavigation('/rider/dashboard')}
+                        className="w-full justify-start h-12 text-base"
+                      >
+                        <Activity className="h-5 w-5 mr-3" />
+                        Dashboard
+                      </Button>
+
+                      <Button
+                        variant={isActive === '/rider/orders' ? 'default' : 'ghost'}
+                        onClick={() => handleNavigation('/rider/orders')}
+                        className="w-full justify-start h-12 text-base"
+                      >
+                        <Package className="h-5 w-5 mr-3" />
+                        My Orders
+                      </Button>
+
+                      <Button
+                        variant={isActive === '/rider/notifications' ? 'default' : 'ghost'}
+                        onClick={() => handleNavigation('/rider/notifications')}
+                        className="w-full justify-start h-12 text-base relative"
+                      >
+                        <Bell className="h-5 w-5 mr-3" />
+                        Notifications
+                        {unreadCount > 0 && (
+                          <Badge variant="destructive" className="ml-auto text-xs px-2 py-0">
+                            {unreadCount > 9 ? '9+' : unreadCount}
+                          </Badge>
+                        )}
+                      </Button>
+
+                      <Button
+                        variant={isActive === '/rider/profile' ? 'default' : 'ghost'}
+                        onClick={() => handleNavigation('/rider/profile')}
+                        className="w-full justify-start h-12 text-base"
+                      >
+                        <User className="h-5 w-5 mr-3" />
+                        Profile
+                      </Button>
+
+                      {/* Logout in Mobile Menu */}
+                      <div className="pt-4 mt-4 border-t">
+                        <Button
+                          variant="outline"
+                          onClick={handleLogout}
+                          className="w-full justify-start h-12 text-base text-red-600 border-red-200 hover:bg-red-50"
+                        >
+                          <LogOut className="h-5 w-5 mr-3" />
+                          Logout
+                        </Button>
+                      </div>
+                    </div>
+                  </SheetContent>
+                </Sheet>
               </div>
             </div>
           </div>
         </header>
       )}
 
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <main className="mx-auto py-3 sm:py-6 px-3 sm:px-4 lg:px-8">
         <ErrorBoundary>
           {children || <Outlet />}
         </ErrorBoundary>
