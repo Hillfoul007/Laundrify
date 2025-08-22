@@ -167,15 +167,15 @@ export default function RiderLayout({ children }: RiderLayoutProps) {
   const isActive = location.pathname;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 rider-mobile-layout">
       {rider && (
-        <header className="bg-white shadow-sm border-b sticky top-0 z-50">
+        <header className="bg-white shadow-sm border-b sticky top-0 z-50 rider-header-mobile rider-safe-area-top">
           <div className="px-3 sm:px-4 lg:px-8">
             <div className="flex justify-between items-center h-14 sm:h-16">
               {/* Left section */}
               <div className="flex items-center space-x-2 sm:space-x-4">
-                <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-laundrify-purple" />
-                <h1 className="text-lg sm:text-xl font-bold text-gray-900">Rider Portal</h1>
+                <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-white lg:text-laundrify-purple" />
+                <h1 className="text-lg sm:text-xl font-bold text-white lg:text-gray-900 rider-heading-medium-mobile">Rider Portal</h1>
               </div>
 
               {/* Desktop Navigation - Hidden on mobile */}
@@ -228,18 +228,18 @@ export default function RiderLayout({ children }: RiderLayoutProps) {
 
               {/* Right section */}
               <div className="flex items-center space-x-2 sm:space-x-3">
-                {/* Network Status - Compact on mobile */}
-                <div className="hidden sm:flex items-center">
+                {/* Network Status - Always visible on mobile */}
+                <div className="flex items-center">
                   {isOnline ? (
-                    <Badge variant="outline" className="text-green-600 border-green-300 bg-green-50 text-xs">
-                      <Wifi className="h-3 w-3 mr-1" />
+                    <div className="rider-network-status-mobile rider-network-online-mobile hidden sm:flex">
+                      <Wifi className="h-3 w-3" />
                       <span className="hidden md:inline">Online</span>
-                    </Badge>
+                    </div>
                   ) : (
-                    <Badge variant="outline" className="text-red-600 border-red-300 bg-red-50 text-xs">
-                      <WifiOff className="h-3 w-3 mr-1" />
+                    <div className="rider-network-status-mobile rider-network-offline-mobile hidden sm:flex">
+                      <WifiOff className="h-3 w-3" />
                       <span className="hidden md:inline">Offline</span>
-                    </Badge>
+                    </div>
                   )}
                 </div>
 
@@ -265,7 +265,7 @@ export default function RiderLayout({ children }: RiderLayoutProps) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="lg:hidden p-2 h-8 w-8"
+                      className="lg:hidden rider-mobile-menu-trigger rider-touch-target"
                     >
                       <Menu className="h-5 w-5" />
                     </Button>
@@ -304,7 +304,7 @@ export default function RiderLayout({ children }: RiderLayoutProps) {
                       <Button
                         variant={isActive === '/rider/dashboard' ? 'default' : 'ghost'}
                         onClick={() => handleNavigation('/rider/dashboard')}
-                        className="w-full justify-start h-12 text-base"
+                        className="w-full justify-start h-12 text-base rider-touch-target"
                       >
                         <Activity className="h-5 w-5 mr-3" />
                         Dashboard
@@ -313,7 +313,7 @@ export default function RiderLayout({ children }: RiderLayoutProps) {
                       <Button
                         variant={isActive === '/rider/orders' ? 'default' : 'ghost'}
                         onClick={() => handleNavigation('/rider/orders')}
-                        className="w-full justify-start h-12 text-base"
+                        className="w-full justify-start h-12 text-base rider-touch-target"
                       >
                         <Package className="h-5 w-5 mr-3" />
                         My Orders
@@ -322,12 +322,12 @@ export default function RiderLayout({ children }: RiderLayoutProps) {
                       <Button
                         variant={isActive === '/rider/notifications' ? 'default' : 'ghost'}
                         onClick={() => handleNavigation('/rider/notifications')}
-                        className="w-full justify-start h-12 text-base relative"
+                        className="w-full justify-start h-12 text-base relative rider-touch-target"
                       >
                         <Bell className="h-5 w-5 mr-3" />
                         Notifications
                         {unreadCount > 0 && (
-                          <Badge variant="destructive" className="ml-auto text-xs px-2 py-0">
+                          <Badge variant="destructive" className="ml-auto text-xs px-2 py-0 rider-badge-mobile">
                             {unreadCount > 9 ? '9+' : unreadCount}
                           </Badge>
                         )}
@@ -336,7 +336,7 @@ export default function RiderLayout({ children }: RiderLayoutProps) {
                       <Button
                         variant={isActive === '/rider/profile' ? 'default' : 'ghost'}
                         onClick={() => handleNavigation('/rider/profile')}
-                        className="w-full justify-start h-12 text-base"
+                        className="w-full justify-start h-12 text-base rider-touch-target"
                       >
                         <User className="h-5 w-5 mr-3" />
                         Profile
@@ -347,7 +347,7 @@ export default function RiderLayout({ children }: RiderLayoutProps) {
                         <Button
                           variant="outline"
                           onClick={handleLogout}
-                          className="w-full justify-start h-12 text-base text-red-600 border-red-200 hover:bg-red-50"
+                          className="w-full justify-start h-12 text-base text-red-600 border-red-200 hover:bg-red-50 rider-touch-target"
                         >
                           <LogOut className="h-5 w-5 mr-3" />
                           Logout
@@ -362,7 +362,7 @@ export default function RiderLayout({ children }: RiderLayoutProps) {
         </header>
       )}
 
-      <main className="mx-auto py-3 sm:py-6 px-3 sm:px-4 lg:px-8">
+      <main className="mx-auto py-3 sm:py-6 px-3 sm:px-4 lg:px-8 rider-main-content rider-safe-area-bottom">
         <ErrorBoundary>
           {children || <Outlet />}
         </ErrorBoundary>
