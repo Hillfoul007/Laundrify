@@ -324,7 +324,7 @@ export class QuickPickupService {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("cleancare_auth_token")}`,
+          Authorization: `Bearer ${localStorage.getItem("riderToken") || localStorage.getItem("cleancare_auth_token")}`,
         },
         body: JSON.stringify(deliveryData),
       });
