@@ -1585,7 +1585,7 @@ export default function RiderOrders() {
                 <div className="flex justify-between items-center text-lg font-semibold">
                   <span>Total Amount:</span>
                   <div className="text-right">
-                    <span>��{totalAmount}</span>
+                    <span>₹{totalAmount}</span>
                     {isEditing && totalAmount !== originalTotal && (
                       <div className="text-sm font-normal">
                         <span className={`${totalAmount > originalTotal ? 'text-red-600' : 'text-green-600'}`}>
