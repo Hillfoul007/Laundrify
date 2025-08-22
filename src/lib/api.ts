@@ -1,7 +1,7 @@
 // API client for backend integration
-import { config } from "../config/env";
+import { getApiUrl } from "../config/env";
 
-const API_BASE_URL = config.apiBaseUrl;
+const API_BASE_URL = getApiUrl();
 
 interface ApiResponse<T> {
   data?: T;
