@@ -46,13 +46,13 @@ export default function RiderAuth() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-lg">
+    <div className="min-h-screen bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center p-4 rider-mobile-layout">
+      <Card className="w-full max-w-md shadow-lg rider-card-mobile">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-purple-600">
+          <CardTitle className="text-2xl font-bold text-purple-600 rider-heading-medium-mobile">
             Rider Portal
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="rider-text-body-mobile">
             Join our delivery team or login to your account
           </CardDescription>
         </CardHeader>
