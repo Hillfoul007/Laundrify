@@ -216,6 +216,15 @@ export default function AdminRiderManagement() {
     });
   }, [orders]);
 
+  // Debug vendor state changes
+  useEffect(() => {
+    console.log('🏪 Vendor state debug:', {
+      vendorCount: recommendedVendors.length,
+      vendors: recommendedVendors.map(v => ({ name: v.name, distance: v.distance })),
+      loadingVendors
+    });
+  }, [recommendedVendors, loadingVendors]);
+
   const fetchRiders = async () => {
     try {
       const response = await fetch(getAdminApiUrl('/riders'), {
