@@ -195,8 +195,8 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
 
       const google = await loader.load();
 
-      // Default to Sector 69, Gurugram (pincode 122101 area) for faster loading
-      const defaultCenter = { lat: 28.3960, lng: 77.0370 };
+      // Default to central Gurugram for faster loading
+      const defaultCenter = { lat: 28.4595, lng: 77.0266 };
 
       // Check if Map ID is configured for Advanced Markers
       const mapId = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID;
@@ -569,7 +569,7 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
           const currentCoords = await locationService.getCurrentPosition({
             enableHighAccuracy: true,
             timeout: attempts === 0 ? 8000 : 5000, // Faster timeouts for better UX
-            maximumAge: 30000, // Accept recent location for 122101 area
+            maximumAge: 30000, // Accept recent location for Gurugram area
           });
 
           console.log(
@@ -1128,12 +1128,12 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
             input: query,
             sessionToken: sessionToken,
             includedRegionCodes: ["in"],
-            // Bias results to Gurugram area (122101) for faster relevant results
+            // Bias results to Gurugram area for faster relevant results
             locationBias: {
-              center: { latitude: 28.3960, longitude: 77.0370 },
-              radiusMeters: 10000, // 10km radius around Sector 69
+              center: { latitude: 28.4595, longitude: 77.0266 },
+              radiusMeters: 25000, // 25km radius covering all Gurugram
             },
-            origin: { latitude: 28.3960, longitude: 77.0370 },
+            origin: { latitude: 28.4595, longitude: 77.0266 },
           };
 
           const response =
@@ -1358,7 +1358,7 @@ const ZomatoAddAddressPage: React.FC<ZomatoAddAddressPageProps> = ({
     setArea(area);
     setPincode(extractedPincode);
 
-    console.log("🔧 AFTER setState called");
+    console.log("���� AFTER setState called");
 
     // Force React re-render using functional updates - immediate
     setFlatNo(prev => {

@@ -130,8 +130,14 @@ class EnhancedApiClient {
     try {
       const result = await requestPromise;
       return result;
+    } catch (error) {
+      // Log the error for debugging
+      console.error(`🔥 Request failed for ${requestKey}:`, error);
+
+      // Re-throw the error so it's handled by the caller
+      throw error;
     } finally {
-      // Clean up from queue
+      // Always clean up from queue
       this.requestQueue.delete(requestKey);
     }
   }
@@ -154,20 +160,34 @@ class EnhancedApiClient {
 
         const response = await this.fetchWithTimeout(url, options);
 
+        // Clone the response to avoid "body stream already read" errors
+        const responseClone = response.clone();
+
         // Handle different response types
         const contentType = response.headers.get("content-type");
         let data: any;
 
-        if (contentType?.includes("application/json")) {
-          try {
+        try {
+          if (contentType?.includes("application/json")) {
             data = await response.json();
-          } catch (jsonError) {
-            console.warn("Failed to parse JSON response:", jsonError);
+          } else {
+            const text = await response.text();
+            data = text ? { message: text } : null;
+          }
+        } catch (bodyReadError) {
+          console.warn("Failed to read response body, trying clone:", bodyReadError);
+          try {
+            // Try to read from the cloned response
+            if (contentType?.includes("application/json")) {
+              data = await responseClone.json();
+            } else {
+              const text = await responseClone.text();
+              data = text ? { message: text } : null;
+            }
+          } catch (cloneError) {
+            console.warn("Failed to read response from clone:", cloneError);
             data = null;
           }
-        } else {
-          const text = await response.text();
-          data = text ? { message: text } : null;
         }
 
         if (!response.ok) {
@@ -196,9 +216,9 @@ class EnhancedApiClient {
           }
 
           if (response.status >= 500 && attempt < retries) {
-            console.warn(`Server error ${response.status}, retrying...`);
+            console.warn(`Server error ${response.status}, retrying in ${retryDelay * Math.pow(2, attempt)}ms...`);
             await this.sleep(retryDelay * Math.pow(2, attempt)); // Exponential backoff
-            continue;
+            continue; // This will make a completely new request
           }
 
           return {
@@ -217,6 +237,7 @@ class EnhancedApiClient {
 
         console.warn(`❌ API Request failed [Attempt ${attempt + 1}]:`, {
           error: lastError.message,
+          errorType: lastError.name,
           willRetry: attempt < retries,
         });
 
@@ -225,11 +246,26 @@ class EnhancedApiClient {
           lastError.message.includes("Failed to fetch") &&
           lastError.message.includes("CORS")
         ) {
+          console.warn("🚫 CORS error detected, not retrying");
           break; // Don't retry CORS errors
         }
 
+        // Don't retry on body stream errors
+        if (lastError.message.includes("body stream already read")) {
+          console.warn("🚫 Body stream error detected, not retrying");
+          break;
+        }
+
+        // Don't retry on timeout errors in some cases
+        if (lastError.message.includes("timeout") && attempt >= 1) {
+          console.warn("🚫 Multiple timeout errors, not retrying further");
+          break;
+        }
+
         if (attempt < retries) {
-          await this.sleep(retryDelay * Math.pow(2, attempt));
+          const delay = retryDelay * Math.pow(2, attempt);
+          console.log(`⏰ Waiting ${delay}ms before retry...`);
+          await this.sleep(delay);
         }
       }
     }
@@ -545,6 +581,131 @@ class EnhancedApiClient {
     );
   }
 
+  // Referral system endpoints
+  async generateReferralCode(userId: string): Promise<ApiResponse<{
+    referralCode: string;
+    message: string;
+  }>> {
+    return this.request("/referrals/generate", {
+      method: "POST",
+      body: { userId },
+    });
+  }
+
+  async validateReferralCode(referralCode: string, userId?: string): Promise<ApiResponse<{
+    success: boolean;
+    referral: {
+      code: string;
+      referrer_name: string;
+      discount_percentage: number;
+      max_discount: number;
+      expires_at: string;
+    };
+    message: string;
+  }>> {
+    return this.request("/referrals/validate", {
+      method: "POST",
+      body: { referralCode, userId },
+    });
+  }
+
+  async applyReferralCode(referralCode: string, userId: string): Promise<ApiResponse<{
+    success: boolean;
+    referral: {
+      id: string;
+      code: string;
+      discount_percentage: number;
+      max_discount: number;
+    };
+    message: string;
+  }>> {
+    return this.request("/referrals/apply", {
+      method: "POST",
+      body: { referralCode, userId },
+    });
+  }
+
+  async getUserReferralInfo(userId: string): Promise<ApiResponse<{
+    myReferralCode: string;
+    stats: {
+      asReferrer: {
+        totalReferrals: number;
+        completedReferrals: number;
+        pendingRewards: number;
+        totalRewardsEarned: number;
+      };
+      asReferee: {
+        hasUsedReferral: boolean;
+        referrerName?: string;
+        status?: string;
+      };
+    };
+    pendingRewards: Array<{
+      refereeId: string;
+      refereeName: string;
+      refereePhone: string;
+      completedAt: string;
+      discountApplied: number;
+    }>;
+  }>> {
+    return this.request(`/referrals/user/${encodeURIComponent(userId)}`);
+  }
+
+  async processReferralFirstOrder(
+    userId: string,
+    bookingId: string,
+    orderAmount: number,
+    discountApplied: number
+  ): Promise<ApiResponse<{
+    success: boolean;
+    hasReferral: boolean;
+    referral?: {
+      referrerId: string;
+      referrerName: string;
+      rewardCouponCode: string;
+      discountApplied: number;
+    };
+    message: string;
+  }>> {
+    return this.request("/referrals/complete-first-order", {
+      method: "POST",
+      body: { userId, bookingId, orderAmount, discountApplied },
+    });
+  }
+
+  // Admin referral endpoints
+  async getAdminReferrals(
+    page = 1,
+    limit = 20,
+    status?: string
+  ): Promise<ApiResponse<{
+    referrals: any[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      pages: number;
+    };
+  }>> {
+    const query = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+      ...(status && { status })
+    });
+
+    return this.adminRequest(`/referrals/admin/all?${query}`);
+  }
+
+  async getAdminReferralStats(): Promise<ApiResponse<{
+    totalReferrals: number;
+    pendingReferrals: number;
+    completedReferrals: number;
+    rewardedReferrals: number;
+    totalDiscountGiven: number;
+  }>> {
+    return this.adminRequest("/referrals/admin/stats");
+  }
+
 
 
   // Admin-specific methods
@@ -566,8 +727,29 @@ class EnhancedApiClient {
 
   // Clear all pending requests (useful for component unmount)
   clearPendingRequests(): void {
+    const pendingCount = this.requestQueue.size;
     this.requestQueue.clear();
-    console.log("🧹 Cleared all pending API requests");
+    console.log(`🧹 Cleared ${pendingCount} pending API requests`);
+  }
+
+  // Debug method to see current request queue
+  getRequestQueueStatus(): { size: number; keys: string[] } {
+    return {
+      size: this.requestQueue.size,
+      keys: Array.from(this.requestQueue.keys())
+    };
+  }
+
+  // Force clear a specific request from queue
+  clearRequest(endpoint: string, method: string = "GET"): void {
+    const keysToDelete = Array.from(this.requestQueue.keys()).filter(key =>
+      key.includes(endpoint) && key.startsWith(method)
+    );
+
+    keysToDelete.forEach(key => {
+      this.requestQueue.delete(key);
+      console.log(`🗑️ Cleared request: ${key}`);
+    });
   }
 
   // Get API connection status
@@ -585,17 +767,24 @@ class EnhancedApiClient {
 }
 
 // Create and export the enhanced API client instance
-// Force production backend for hosted environments
 const getCorrectApiUrl = () => {
   const hostname = window.location.hostname;
   const isLocalhost = hostname.includes("localhost") || hostname.includes("127.0.0.1");
+  const isDevelopment = import.meta.env.DEV;
+  const isRenderCom = hostname.includes("onrender.com");
 
-  if (isLocalhost) {
-    return "http://localhost:3001/api";
+  // In development mode with localhost, use relative paths for vite proxy
+  if (isDevelopment && isLocalhost) {
+    return "/api";
   }
 
-  // For all hosted environments, force backend URL
-  return "https://backend-vaxf.onrender.com/api";
+  // For any hosted environment (including render.com), use full backend URL
+  if (isRenderCom || !isLocalhost) {
+    return "https://backend-vaxf.onrender.com/api";
+  }
+
+  // Fallback for localhost
+  return "/api";
 };
 
 const CORRECT_API_URL = getCorrectApiUrl();

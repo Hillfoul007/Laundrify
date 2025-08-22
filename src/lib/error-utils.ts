@@ -9,6 +9,23 @@ export const getErrorMessage = (error: unknown): string => {
     return error.message;
   }
 
+  // Handle GeolocationPositionError specifically
+  if (error && typeof error === "object" && "code" in error) {
+    const geoError = error as GeolocationPositionError;
+    if (typeof geoError.code === "number") {
+      switch (geoError.code) {
+        case 1: // PERMISSION_DENIED
+          return "Please enable location access in your browser settings";
+        case 2: // POSITION_UNAVAILABLE
+          return "Your location could not be determined. Please try again.";
+        case 3: // TIMEOUT
+          return "Location request timed out. Please try again.";
+        default:
+          return "Unable to get your location. Please try again.";
+      }
+    }
+  }
+
   if (error && typeof error === "object") {
     // Handle Supabase error format
     if ("message" in error && typeof error.message === "string") {

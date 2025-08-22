@@ -193,84 +193,28 @@ export class LocationDetectionService {
   ): LocationAvailabilityResponse {
     const normalizedCity = city?.toLowerCase().trim();
 
-    // Define available locations with keywords (matching backend logic)
-    const availableLocations = [
-      {
-        city: "gurgaon",
-        area: "sector 69",
-        pincode: "122101",
-        keywords: ["tulip", "sector 69", "sector-69", "sector 69 gurugram", "sector 69 gurgaon"]
-      },
-      {
-        city: "gurugram",
-        area: "sector 69",
-        pincode: "122101",
-        keywords: ["tulip", "sector 69", "sector-69", "dlf", "sector 69 gurugram", "sector 69 gurgaon"]
-      }
-    ];
+    // Define available cities - extended to all Gurugram/Gurgaon
+    const availableCities = ["gurgaon", "gurugram"];
 
-    // Check pincode 122101 first - exact match
-    if (pincode && pincode.trim() === "122101") {
+    // Check if city matches Gurgaon or Gurugram
+    const isAvailableCity = availableCities.some((availableCity) => {
+      return normalizedCity?.includes(availableCity) ||
+             fullAddress?.toLowerCase().includes(availableCity);
+    });
+
+    if (isAvailableCity) {
       return {
         success: true,
         is_available: true,
-        message: "Service available for pincode 122101",
-      };
-    }
-
-    // Check keywords in full address before rejecting based on pincode
-    if (fullAddress) {
-      const addressLower = fullAddress.toLowerCase();
-
-      const matchByKeyword = availableLocations.find(location =>
-        location.keywords.some(keyword =>
-          addressLower.includes(keyword.toLowerCase())
-        )
-      );
-
-      if (matchByKeyword) {
-        return {
-          success: true,
-          is_available: true,
-          message: `Service available in your area (${matchByKeyword.area}, ${matchByKeyword.city})`,
-        };
-      }
-    }
-
-    // Check coordinates for Sector 69 if available (legacy support)
-    if (coordinates && this.isInSector69(coordinates.lat, coordinates.lng)) {
-      return {
-        success: true,
-        is_available: true,
-        message: "Service available in Sector 69, Gurugram (GPS verified)",
-      };
-    }
-
-    // Check by city name and area
-    const isAvailableByCity = availableLocations.some(
-      (location) =>
-        normalizedCity?.includes(location.city) &&
-        (normalizedCity?.includes("sector 69") ||
-          normalizedCity?.includes("sector-69")),
-    );
-
-    if (isAvailableByCity) {
-      return {
-        success: true,
-        is_available: true,
-        message: "Service available in your area",
+        message: "Service available in Gurugram/Gurgaon",
       };
     }
 
     // If no matches found
-    const availableAreas = availableLocations
-      .map(loc => `${loc.area}, ${loc.city} (${loc.pincode})`)
-      .join("; ");
-
     return {
       success: true,
       is_available: false,
-      message: `Service not available in your area. Currently serving: ${availableAreas}`,
+      message: "Service currently available only in Gurugram/Gurgaon area.",
     };
   }
 

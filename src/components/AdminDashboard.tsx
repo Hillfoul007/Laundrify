@@ -28,13 +28,14 @@ import { AdminAuth, ADMIN_CONFIG } from "@/config/adminConfig";
 import AdminBookingManagement from "./AdminBookingManagement";
 import AdminUserBooking from "./AdminUserBooking";
 import AdminServiceLocations from "./AdminServiceLocations";
+import AdminRiderManagement from "./AdminRiderManagement";
 import { apiClient } from "@/lib/apiClient";
 
 interface AdminDashboardProps {
   onLogout: () => void;
 }
 
-type TabValue = "overview" | "bookings" | "user-booking" | "locations" | "analytics";
+type TabValue = "overview" | "bookings" | "user-booking" | "locations" | "riders" | "analytics";
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const [activeTab, setActiveTab] = useState<TabValue>("overview");
@@ -66,23 +67,23 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
           loading: false,
         });
       } else {
-        // Fallback to sample data if API not available
+        // No fallback data - keep zeros if API returns no data
         setStats({
-          totalBookings: 247,
-          pendingBookings: 12,
-          activeUsers: 156,
-          totalRevenue: "₹45,680",
+          totalBookings: 0,
+          pendingBookings: 0,
+          activeUsers: 0,
+          totalRevenue: "₹0",
           loading: false,
         });
       }
     } catch (error) {
       console.error("Error fetching stats:", error);
-      // Use fallback data
+      // Keep loading state or show error - no fake data
       setStats({
-        totalBookings: 247,
-        pendingBookings: 12,
-        activeUsers: 156,
-        totalRevenue: "₹45,680",
+        totalBookings: 0,
+        pendingBookings: 0,
+        activeUsers: 0,
+        totalRevenue: "₹0",
         loading: false,
       });
     }
@@ -219,28 +220,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-sm">New booking #LAU-1247 received</span>
-              </div>
-              <span className="text-xs text-gray-500">2 min ago</span>
-            </div>
-            
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span className="text-sm">Booking #LAU-1246 completed</span>
-              </div>
-              <span className="text-xs text-gray-500">15 min ago</span>
-            </div>
-            
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                <span className="text-sm">User registered: John Doe</span>
-              </div>
-              <span className="text-xs text-gray-500">1 hour ago</span>
+            <div className="text-center py-8">
+              <p className="text-gray-500">Recent activity will appear here when data is available</p>
             </div>
           </div>
         </CardContent>
@@ -308,7 +289,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
       {/* Main Content */}
       <main className="p-6">
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabValue)}>
-          <TabsList className="grid w-full grid-cols-5 mb-6">
+          <TabsList className="grid w-full grid-cols-6 mb-6">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Overview
@@ -324,6 +305,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             <TabsTrigger value="locations" className="flex items-center gap-2">
               <MapPin className="h-4 w-4" />
               Locations
+            </TabsTrigger>
+            <TabsTrigger value="riders" className="flex items-center gap-2">
+              <Package className="h-4 w-4" />
+              Riders
             </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <Building className="h-4 w-4" />
@@ -345,6 +330,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
 
           <TabsContent value="locations">
             <AdminServiceLocations />
+          </TabsContent>
+
+          <TabsContent value="riders">
+            <AdminRiderManagement />
           </TabsContent>
 
           <TabsContent value="analytics">

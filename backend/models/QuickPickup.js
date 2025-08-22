@@ -25,6 +25,16 @@ const quickPickupSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    delivery_date: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    delivery_time: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     house_number: {
       type: String,
       trim: true,
@@ -53,6 +63,19 @@ const quickPickupSchema = new mongoose.Schema(
     rider_name: {
       type: String,
       default: "",
+    },
+    rider_phone: {
+      type: String,
+      default: "",
+    },
+    assigned_vendor: {
+      type: String,
+      default: null,
+    },
+    assigned_vendor_details: {
+      name: String,
+      address: String,
+      phone: String,
     },
     estimated_cost: {
       type: Number,
@@ -98,6 +121,14 @@ quickPickupSchema.index({ createdAt: -1 });
 // Virtual for formatted pickup datetime
 quickPickupSchema.virtual('pickup_datetime').get(function() {
   return `${this.pickup_date} ${this.pickup_time}`;
+});
+
+// Virtual for formatted delivery datetime
+quickPickupSchema.virtual('delivery_datetime').get(function() {
+  if (this.delivery_date && this.delivery_time) {
+    return `${this.delivery_date} ${this.delivery_time}`;
+  }
+  return null;
 });
 
 // Virtual to include virtual fields in JSON
