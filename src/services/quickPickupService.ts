@@ -3,7 +3,7 @@
  * Handles quick pickup orders separately from regular bookings
  */
 
-import { config } from "../config/env";
+import { getApiUrl } from "../config/env";
 import { getISTTimestamp } from "../utils/timeUtils";
 
 export interface QuickPickupDetails {
