@@ -285,12 +285,12 @@ export default function RiderRegistration({ onSwitchToLogin }: RiderRegistration
 
   if (step === 'success') {
     return (
-      <div className="text-center p-6">
+      <div className="text-center p-6 rider-mobile-layout">
         <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-        <h3 className="text-xl font-semibold text-green-700 mb-2">
+        <h3 className="text-xl font-semibold text-green-700 mb-2 rider-heading-small-mobile">
           Registration Submitted!
         </h3>
-        <p className="text-gray-600 mb-4">
+        <p className="text-gray-600 mb-4 rider-text-body-mobile">
           Thank you for registering. Our admin will verify your details and approve your account.
           You'll receive a notification once your account is approved.
         </p>
@@ -303,6 +303,7 @@ export default function RiderRegistration({ onSwitchToLogin }: RiderRegistration
             setSelfieImage(null);
           }}
           variant="outline"
+          className="rider-action-button-mobile rider-outline-action-mobile"
         >
           Register Another Rider
         </Button>
@@ -312,18 +313,18 @@ export default function RiderRegistration({ onSwitchToLogin }: RiderRegistration
 
   if (step === 'otp') {
     return (
-      <div className="space-y-6">
-        <Card>
+      <div className="space-y-6 rider-mobile-layout">
+        <Card className="rider-card-mobile">
           <CardHeader>
-            <CardTitle>Verify Phone Number</CardTitle>
-            <CardDescription>
+            <CardTitle className="rider-heading-small-mobile">Verify Phone Number</CardTitle>
+            <CardDescription className="rider-text-body-mobile">
               Enter the OTP sent to {formData.phone}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleOTPSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="otp" className="flex items-center space-x-2">
+                <Label htmlFor="otp" className="flex items-center space-x-2 rider-label-mobile">
                   <Lock className="h-4 w-4" />
                   <span>Enter OTP</span>
                 </Label>
@@ -336,19 +337,20 @@ export default function RiderRegistration({ onSwitchToLogin }: RiderRegistration
                   onChange={(e) => setOTP(e.target.value.replace(/\D/g, '').slice(0, 6))}
                   maxLength={6}
                   required
+                  className="rider-input-mobile"
                 />
               </div>
 
               <Button
                 type="submit"
-                className="w-full"
+                className="rider-action-button-mobile rider-primary-action-mobile"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
                   'Submitting Registration...'
                 ) : (
                   <>
-                    <CheckCircle className="h-4 w-4 mr-2" />
+                    <CheckCircle className="h-4 w-4" />
                     Complete Registration
                   </>
                 )}
@@ -389,11 +391,11 @@ export default function RiderRegistration({ onSwitchToLogin }: RiderRegistration
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 rider-mobile-layout">
       <form onSubmit={handleFormSubmit} className="space-y-4">
         {/* Basic Information */}
         <div className="space-y-2">
-          <Label htmlFor="name" className="flex items-center space-x-2">
+          <Label htmlFor="name" className="flex items-center space-x-2 rider-label-mobile">
             <User className="h-4 w-4" />
             <span>Full Name *</span>
           </Label>
@@ -405,11 +407,12 @@ export default function RiderRegistration({ onSwitchToLogin }: RiderRegistration
             value={formData.name}
             onChange={handleInputChange}
             required
+            className="rider-input-mobile"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="phone" className="flex items-center space-x-2">
+          <Label htmlFor="phone" className="flex items-center space-x-2 rider-label-mobile">
             <Phone className="h-4 w-4" />
             <span>Phone Number *</span>
           </Label>
@@ -421,11 +424,12 @@ export default function RiderRegistration({ onSwitchToLogin }: RiderRegistration
             value={formData.phone}
             onChange={handleInputChange}
             required
+            className="rider-input-mobile"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="aadharNumber" className="flex items-center space-x-2">
+          <Label htmlFor="aadharNumber" className="flex items-center space-x-2 rider-label-mobile">
             <FileText className="h-4 w-4" />
             <span>Aadhar Number *</span>
           </Label>
@@ -438,16 +442,17 @@ export default function RiderRegistration({ onSwitchToLogin }: RiderRegistration
             onChange={handleInputChange}
             maxLength={12}
             required
+            className="rider-input-mobile"
           />
         </div>
 
         {/* Aadhar Upload */}
         <div className="space-y-2">
-          <Label className="flex items-center space-x-2">
+          <Label className="flex items-center space-x-2 rider-label-mobile">
             <Upload className="h-4 w-4" />
             <span>Upload Aadhar Card *</span>
           </Label>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 rider-touch-target">
             <input
               type="file"
               accept="image/*"
@@ -455,17 +460,17 @@ export default function RiderRegistration({ onSwitchToLogin }: RiderRegistration
               className="hidden"
               id="aadhar-upload"
             />
-            <label htmlFor="aadhar-upload" className="cursor-pointer block text-center">
+            <label htmlFor="aadhar-upload" className="cursor-pointer block text-center rider-touch-target">
               {aadharImage ? (
                 <div className="text-green-600">
                   <CheckCircle className="h-8 w-8 mx-auto mb-2" />
-                  <p>{aadharImage.name}</p>
+                  <p className="rider-text-body-mobile">{aadharImage.name}</p>
                 </div>
               ) : (
                 <div className="text-gray-500">
                   <Upload className="h-8 w-8 mx-auto mb-2" />
-                  <p>Click to upload Aadhar card image</p>
-                  <p className="text-sm">Max size: 5MB</p>
+                  <p className="rider-text-body-mobile">Click to upload Aadhar card image</p>
+                  <p className="rider-text-small-mobile">Max size: 5MB</p>
                 </div>
               )}
             </label>
@@ -474,7 +479,7 @@ export default function RiderRegistration({ onSwitchToLogin }: RiderRegistration
 
         {/* Selfie Capture */}
         <div className="space-y-2">
-          <Label className="flex items-center space-x-2">
+          <Label className="flex items-center space-x-2 rider-label-mobile">
             <Camera className="h-4 w-4" />
             <span>Capture Live Selfie or Upload Photo *</span>
           </Label>
@@ -485,7 +490,7 @@ export default function RiderRegistration({ onSwitchToLogin }: RiderRegistration
                 type="button"
                 onClick={startCamera}
                 variant="outline"
-                className="w-full"
+                className="rider-action-button-mobile rider-outline-action-mobile"
               >
                 <Camera className="h-4 w-4 mr-2" />
                 Open Camera
@@ -493,7 +498,7 @@ export default function RiderRegistration({ onSwitchToLogin }: RiderRegistration
 
               <div className="text-center text-gray-500 text-sm">or</div>
 
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 rider-touch-target">
                 <input
                   type="file"
                   accept="image/*"
@@ -501,11 +506,11 @@ export default function RiderRegistration({ onSwitchToLogin }: RiderRegistration
                   className="hidden"
                   id="selfie-upload"
                 />
-                <label htmlFor="selfie-upload" className="cursor-pointer block text-center">
+                <label htmlFor="selfie-upload" className="cursor-pointer block text-center rider-touch-target">
                   <div className="text-gray-500">
                     <Upload className="h-8 w-8 mx-auto mb-2" />
-                    <p>Click to upload your photo</p>
-                    <p className="text-sm">Max size: 5MB</p>
+                    <p className="rider-text-body-mobile">Click to upload your photo</p>
+                    <p className="rider-text-small-mobile">Max size: 5MB</p>
                   </div>
                 </label>
               </div>
@@ -525,7 +530,7 @@ export default function RiderRegistration({ onSwitchToLogin }: RiderRegistration
                 <Button
                   type="button"
                   onClick={captureSelfie}
-                  className="flex-1"
+                  className="rider-action-button-mobile rider-primary-action-mobile flex-1"
                 >
                   Capture Selfie
                 </Button>
@@ -533,6 +538,7 @@ export default function RiderRegistration({ onSwitchToLogin }: RiderRegistration
                   type="button"
                   onClick={stopCamera}
                   variant="outline"
+                  className="rider-action-button-mobile rider-outline-action-mobile"
                 >
                   Cancel
                 </Button>
@@ -578,7 +584,7 @@ export default function RiderRegistration({ onSwitchToLogin }: RiderRegistration
 
         <Button
           type="submit"
-          className="w-full"
+          className="rider-action-button-mobile rider-primary-action-mobile"
           disabled={isSubmitting}
         >
           {isSubmitting ? 'Sending OTP...' : 'Send OTP & Continue'}
