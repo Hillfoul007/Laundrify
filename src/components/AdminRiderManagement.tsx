@@ -1136,35 +1136,48 @@ export default function AdminRiderManagement() {
                                       </div>
                                     ) : (
                                       <div className="border rounded-lg p-3 max-h-64 overflow-y-auto">
-                                        {recommendedVendors.map((vendor) => (
-                                          <div
-                                            key={vendor.id}
-                                            className={`p-4 border rounded mb-2 cursor-pointer transition-colors ${
-                                              selectedVendor === vendor.id ? 'border-green-500 bg-green-50' : 'hover:bg-gray-50'
-                                            }`}
-                                            onClick={() => setSelectedVendor(vendor.id)}
-                                          >
-                                            <div className="space-y-2">
-                                              <div className="font-medium text-gray-900">{vendor.name}</div>
-                                              <div className="text-sm text-gray-600 leading-relaxed">
-                                                {vendor.address}
-                                              </div>
-                                              <div className="flex items-center gap-2 flex-wrap">
-                                                <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">
-                                                  📍 {vendorService.formatDistance(vendor.distance)} from pickup
-                                                </Badge>
-                                                <Badge variant="outline" className="text-xs">
-                                                  ⏱️ {vendorService.formatEstimatedTime(vendor.estimatedTime)}
-                                                </Badge>
-                                                {vendor.rating && (
-                                                  <Badge variant="outline" className="text-xs">
-                                                    ⭐ {vendor.rating}
+                                        {recommendedVendors.length > 0 ? (
+                                          recommendedVendors.map((vendor) => (
+                                            <div
+                                              key={vendor.id}
+                                              className={`p-4 border rounded mb-2 cursor-pointer transition-colors ${
+                                                selectedVendor === vendor.id ? 'border-green-500 bg-green-50' : 'hover:bg-gray-50'
+                                              }`}
+                                              onClick={() => setSelectedVendor(vendor.id)}
+                                            >
+                                              <div className="space-y-2">
+                                                <div className="font-medium text-gray-900">{vendor.name}</div>
+                                                <div className="text-sm text-gray-600 leading-relaxed">
+                                                  {vendor.address}
+                                                </div>
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                  <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">
+                                                    📍 {vendorService.formatDistance(vendor.distance)} from pickup
                                                   </Badge>
-                                                )}
+                                                  <Badge variant="outline" className="text-xs">
+                                                    ⏱️ {vendorService.formatEstimatedTime(vendor.estimatedTime)}
+                                                  </Badge>
+                                                  {vendor.rating && (
+                                                    <Badge variant="outline" className="text-xs">
+                                                      ⭐ {vendor.rating}
+                                                    </Badge>
+                                                  )}
+                                                </div>
                                               </div>
                                             </div>
+                                          ))
+                                        ) : (
+                                          <div className="text-center py-8 text-gray-500">
+                                            <Store className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                                            <p className="font-medium">No vendors available</p>
+                                            <p className="text-sm">Vendor data failed to load</p>
+                                            <div className="mt-3 text-xs bg-yellow-50 p-3 rounded border">
+                                              <p><strong>Debug Info:</strong></p>
+                                              <p>Vendors array length: {recommendedVendors.length}</p>
+                                              <p>Loading state: {loadingVendors ? 'true' : 'false'}</p>
+                                            </div>
                                           </div>
-                                        ))}
+                                        )}
                                       </div>
                                     )}
                                   </div>
