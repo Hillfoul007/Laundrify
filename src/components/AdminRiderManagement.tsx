@@ -452,38 +452,48 @@ export default function AdminRiderManagement() {
   };
 
   const loadVendorRecommendations = async (order: any) => {
-    if (!order?.address) {
-      console.warn('No address found for order:', order);
-      setRecommendedVendors(vendorService.getActiveVendors().map(vendor => ({
-        ...vendor,
-        distance: 0,
-        estimatedTime: 60
-      })));
-      return;
-    }
-
+    console.log('🏪 Loading vendor recommendations for order:', order);
     setLoadingVendors(true);
+
     try {
-      const address = typeof order.address === 'string' ? order.address :
-        `${order.address?.flatNo || ''} ${order.address?.street || ''} ${order.address?.city || 'Gurugram'}`.trim();
-
-      console.log('🏪 Loading vendor recommendations for address:', address);
-
-      const vendors = await vendorService.getVendorRecommendations(
-        address,
-        order.services || []
-      );
-
-      console.log('✅ Loaded vendor recommendations:', vendors);
-      setRecommendedVendors(vendors);
-    } catch (error) {
-      console.error('Error loading vendor recommendations:', error);
-      // Fallback to default vendors
-      setRecommendedVendors(vendorService.getActiveVendors().map(vendor => ({
+      // Always start with default vendors to ensure something shows
+      const defaultVendors = vendorService.getActiveVendors().map(vendor => ({
         ...vendor,
         distance: 0,
         estimatedTime: 60
-      })));
+      }));
+
+      console.log('📋 Default vendors loaded:', defaultVendors);
+      setRecommendedVendors(defaultVendors);
+
+      // Try to get address and calculate distances
+      if (order?.address) {
+        const address = typeof order.address === 'string' ? order.address :
+          `${order.address?.flatNo || ''} ${order.address?.street || ''} ${order.address?.city || 'Gurugram'}`.trim();
+
+        console.log('🏪 Loading vendor recommendations for address:', address);
+
+        const vendors = await vendorService.getVendorRecommendations(
+          address,
+          order.services || []
+        );
+
+        console.log('✅ Loaded vendor recommendations with distances:', vendors);
+        if (vendors && vendors.length > 0) {
+          setRecommendedVendors(vendors);
+        }
+      } else {
+        console.warn('⚠️ No address found for order, using default vendors');
+      }
+    } catch (error) {
+      console.error('❌ Error loading vendor recommendations:', error);
+      // Ensure we always have vendors showing
+      const fallbackVendors = vendorService.getActiveVendors().map(vendor => ({
+        ...vendor,
+        distance: 0,
+        estimatedTime: 60
+      }));
+      setRecommendedVendors(fallbackVendors);
     } finally {
       setLoadingVendors(false);
     }
