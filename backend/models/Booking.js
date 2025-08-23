@@ -32,6 +32,49 @@ const bookingSchema = new mongoose.Schema(
       ref: "User",
       default: null,
     },
+    assignedRider: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Rider",
+      default: null,
+    },
+    assignedRiderPhone: {
+      type: String,
+      default: null,
+    },
+    assignedVendor: {
+      type: String,
+      default: null,
+    },
+    assignedVendorDetails: {
+      name: String,
+      address: String,
+      phone: String,
+    },
+    riderStatus: {
+      type: String,
+      enum: ["unassigned", "assigned", "accepted", "picked_up", "delivered", "completed"],
+      default: "unassigned",
+    },
+    assignedAt: {
+      type: Date,
+      default: null,
+    },
+    acceptedAt: {
+      type: Date,
+      default: null,
+    },
+    pickedUpAt: {
+      type: Date,
+      default: null,
+    },
+    deliveredAt: {
+      type: Date,
+      default: null,
+    },
+    completedAt: {
+      type: Date,
+      default: null,
+    },
     service: {
       type: String,
       required: [true, "Service is required"],
@@ -189,11 +232,11 @@ const bookingSchema = new mongoose.Schema(
     },
     created_at: {
       type: Date,
-      default: Date.now,
+      default: () => new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"})),
     },
     updated_at: {
       type: Date,
-      default: Date.now,
+      default: () => new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"})),
     },
   },
   {
@@ -273,7 +316,7 @@ bookingSchema.statics.generateCustomOrderId = async function () {
     sequence++;
     const fallbackSequenceStr = String(sequence).padStart(5, "0");
     const fallbackOrderId = `${letter}${yearMonth}${fallbackSequenceStr}`;
-    console.log("🔄 Fallback order ID:", fallbackOrderId);
+    console.log("�� Fallback order ID:", fallbackOrderId);
     return fallbackOrderId;
   }
 
@@ -283,7 +326,16 @@ bookingSchema.statics.generateCustomOrderId = async function () {
 // Calculate final amount and generate custom order ID before saving
 bookingSchema.pre("save", async function (next) {
   try {
-    this.updated_at = new Date();
+    // Get Indian Standard Time
+    const indianTime = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
+    const indianDate = new Date(indianTime);
+
+    this.updated_at = indianDate;
+
+    // Set created_at for new documents
+    if (this.isNew && !this.created_at) {
+      this.created_at = indianDate;
+    }
 
     // Generate custom order ID if it's a new document
     if (this.isNew && !this.custom_order_id) {
@@ -333,6 +385,26 @@ bookingSchema.pre("save", async function (next) {
     // Ensure final amount is not negative
     if (this.final_amount < 0) {
       this.final_amount = 0;
+    }
+
+    // Synchronize services and service fields with item_prices
+    if (this.item_prices && this.item_prices.length > 0) {
+      // Include quantities in service representation for better tracking
+      const serviceNamesWithQty = this.item_prices.map(item =>
+        item.quantity > 1 ? `${item.service_name} x${item.quantity}` : item.service_name
+      );
+
+      // Only update if they're different to avoid unnecessary changes
+      if (!this.services || this.services.join(',') !== serviceNamesWithQty.join(',')) {
+        this.services = serviceNamesWithQty;
+        console.log('🔄 Pre-save: Synchronized services array from item_prices with quantities');
+      }
+
+      const serviceString = serviceNamesWithQty.join(', ');
+      if (this.service !== serviceString) {
+        this.service = serviceString;
+        console.log('🔄 Pre-save: Synchronized service string from item_prices with quantities');
+      }
     }
 
     // Set completion timestamp if status is completed

@@ -1,5 +1,6 @@
 import { config } from "../config/env";
 import { getCurrentUser, getUserId, isUserAuthenticated } from "../utils/authUtils";
+import { getISTTimestamp, getISTUnixTimestamp } from "../utils/timeUtils";
 
 export interface AddressData {
   id?: string;
@@ -440,12 +441,12 @@ export class AddressService {
 
       // Add unique ID if not present
       if (!addressData.id && !addressData._id) {
-        addressData.id = `addr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        addressData.id = `addr_${getISTUnixTimestamp()}_${Math.random().toString(36).substr(2, 9)}`;
       }
 
       // Add timestamps
       if (!addressData.createdAt) {
-        addressData.createdAt = new Date().toISOString();
+        addressData.createdAt = getISTTimestamp();
       }
 
       // Update existing address or add new one

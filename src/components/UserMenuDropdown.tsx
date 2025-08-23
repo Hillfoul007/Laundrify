@@ -23,6 +23,7 @@ import {
 import ProfileSettingsModal from "./ProfileSettingsModal";
 import SavedAddressesModal from "./SavedAddressesModal";
 import PreferencesModal from "./PreferencesModal";
+import ReferralModal from "./ReferralModal";
 
 interface UserMenuDropdownProps {
   currentUser: any;
@@ -41,6 +42,7 @@ const UserMenuDropdown: React.FC<UserMenuDropdownProps> = ({
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showAddressesModal, setShowAddressesModal] = useState(false);
   const [showPreferencesModal, setShowPreferencesModal] = useState(false);
+  const [showReferralModal, setShowReferralModal] = useState(false);
   const [clickedItem, setClickedItem] = useState<string | null>(null);
 
   const getInitials = (name: string) => {
@@ -82,6 +84,7 @@ const UserMenuDropdown: React.FC<UserMenuDropdownProps> = ({
     // Close the dropdown with a delay to allow the dialog to open properly
     setTimeout(() => {
       setIsOpen(false);
+      setShowReferralModal(true);
       // Reset clicked state after dropdown closes
       setTimeout(() => setClickedItem(null), 300);
     }, 100);
@@ -243,33 +246,33 @@ const UserMenuDropdown: React.FC<UserMenuDropdownProps> = ({
             </DropdownMenuItem>
 
             <DropdownMenuItem
-              onClick={() =>
-                handleItemClick("share", () => {
-                  setIsOpen(false);
-                  handleWhatsAppShare();
-                })
-              }
-              className={`cursor-pointer rounded-xl p-3 hover:bg-emerald-50 hover:text-emerald-700 transition-all duration-200 group transform hover:scale-[1.02] ${
-                clickedItem === "share"
-                  ? "scale-110 bg-emerald-100 shadow-lg ring-2 ring-emerald-300 ring-opacity-50"
+              onClick={handleReferralClick}
+              className={`cursor-pointer rounded-xl p-3 hover:bg-yellow-50 hover:text-yellow-700 transition-all duration-200 group transform hover:scale-[1.02] ${
+                clickedItem === "referral"
+                  ? "scale-110 bg-yellow-100 shadow-lg ring-2 ring-yellow-300 ring-opacity-50"
                   : ""
               }`}
             >
               <div className="flex items-center w-full">
                 <div
-                  className={`w-8 h-8 bg-emerald-100 group-hover:bg-emerald-200 rounded-lg flex items-center justify-center mr-3 transition-all duration-200 ${
-                    clickedItem === "share"
-                      ? "animate-pulse bg-emerald-200 scale-110"
+                  className={`w-8 h-8 bg-yellow-100 group-hover:bg-yellow-200 rounded-lg flex items-center justify-center mr-3 transition-all duration-200 ${
+                    clickedItem === "referral"
+                      ? "animate-pulse bg-yellow-200 scale-110"
                       : ""
                   }`}
                 >
-                  <MessageCircle
-                    className={`h-4 w-4 text-emerald-600 transition-all duration-200 ${
-                      clickedItem === "share" ? "scale-125" : ""
+                  <Gift
+                    className={`h-4 w-4 text-yellow-600 transition-all duration-200 ${
+                      clickedItem === "referral" ? "scale-125" : ""
                     }`}
                   />
                 </div>
-                <span className="font-medium">Share with Friends</span>
+                <div className="flex items-center justify-between w-full">
+                  <span className="font-medium">Refer & Earn</span>
+                  <span className="text-xs bg-yellow-500 text-white px-2 py-1 rounded-full font-bold">
+                    50% OFF
+                  </span>
+                </div>
               </div>
             </DropdownMenuItem>
           </div>
@@ -299,6 +302,12 @@ const UserMenuDropdown: React.FC<UserMenuDropdownProps> = ({
       <PreferencesModal
         isOpen={showPreferencesModal}
         onClose={() => setShowPreferencesModal(false)}
+        currentUser={currentUser}
+      />
+
+      <ReferralModal
+        isOpen={showReferralModal}
+        onClose={() => setShowReferralModal(false)}
         currentUser={currentUser}
       />
     </>

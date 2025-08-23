@@ -5,10 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:backend": "cd backend && node server-laundry.js",
+    "dev:backend": "cd backend && node minimal-server.js",
+    "dev:standalone-backend": "node standalone-backend.cjs",
+    "dev:simple-backend": "node simple-backend.cjs",
+    "dev:both": "node run-both.cjs",
     "dev:full": "concurrently \"npm run dev\" \"npm run dev:backend\"",
-        "build": "NODE_OPTIONS=--max-old-space-size=384 vite build && NODE_OPTIONS=--max-old-space-size=384 node scripts/optimize-build.js",
-        "build:pwa": "NODE_OPTIONS=--max-old-space-size=384 node scripts/memory-optimized-build.cjs",
+    "build": "NODE_OPTIONS=--max-old-space-size=384 vite build && NODE_OPTIONS=--max-old-space-size=384 node scripts/optimize-build.js",
+    "build:pwa": "NODE_OPTIONS=--max-old-space-size=384 node scripts/memory-optimized-build.cjs",
     "build:minimal": "NODE_OPTIONS=--max-old-space-size=300 node scripts/minimal-build.cjs",
     "build:check": "NODE_OPTIONS=--max-old-space-size=384 tsc -b && NODE_OPTIONS=--max-old-space-size=384 vite build && NODE_OPTIONS=--max-old-space-size=384 node scripts/optimize-build.js",
     "build:analyze": "NODE_OPTIONS=--max-old-space-size=384 vite build --mode production && NODE_OPTIONS=--max-old-space-size=384 node scripts/bundle-analyzer.js",
@@ -20,10 +23,12 @@
     "start:frontend": "npx serve -s dist -p 8080",
     "deploy": "chmod +x deploy.sh && ./deploy.sh",
     "deploy:pwa": "npm run build:pwa && chmod +x deploy.sh && ./deploy.sh",
-            "render:build": "NODE_OPTIONS=--max-old-space-size=300 npm install && NODE_OPTIONS=--max-old-space-size=300 npm run build:minimal && cd backend && npm install --production && echo 'Build completed successfully'",
+    "render:build": "NODE_OPTIONS=--max-old-space-size=300 npm install && NODE_OPTIONS=--max-old-space-size=300 npm run build:minimal && cd backend && npm install --production && echo 'Build completed successfully'",
     "render:start": "NODE_ENV=production node backend/server-laundry.js",
     "install:all": "npm install && cd backend && npm install",
-    "build:production": "NODE_OPTIONS=--max-old-space-size=384 npm run install:all && NODE_OPTIONS=--max-old-space-size=384 npm run build:pwa"
+    "build:production": "NODE_OPTIONS=--max-old-space-size=384 npm run install:all && NODE_OPTIONS=--max-old-space-size=384 npm run build:pwa",
+    "deploy:fix": "node scripts/deploy-fix.js",
+    "postbuild": "node scripts/deploy-fix.js"
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.10",
