@@ -395,9 +395,16 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
     localStorage.setItem("laundry_cart", JSON.stringify(cart));
   }, [cart]);
 
-  // Check for pending customer verifications on app startup
+  // Check for pending customer verifications on app startup (optimized to prevent infinite refreshing)
   useEffect(() => {
-    if (currentUser) {
+    // Use a ref to track if we've already initialized to prevent multiple calls
+    const initKey = `verification_initialized_${currentUser?.phone || 'anonymous'}`;
+    const hasInitialized = sessionStorage.getItem(initKey);
+
+    if (currentUser && !hasInitialized) {
+      // Mark as initialized immediately to prevent re-runs
+      sessionStorage.setItem(initKey, 'true');
+
       // Clear any test/demo verifications first
       clearTestVerifications();
 
@@ -407,67 +414,32 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
       // Only check when user is authenticated
       checkOnStartup();
 
-      // Mobile-specific debug and verification check
+      // Mobile-specific debug and verification check (simplified to prevent excessive API calls)
       if (window.innerWidth < 768) {
         console.log('📱 Mobile device detected - running verification debug');
 
         // Initialize mobile fallback system
         initializeMobileVerificationFallback();
 
+        // Simplified verification check without creating test data
         setTimeout(() => {
           debugCustomerVerification();
           debugMobileVerificationBanner();
 
-          // Force check for pending verifications on mobile with extra debugging
+          // Only check for existing verifications
           setTimeout(async () => {
-            console.log('📱 Mobile: Force checking for pending verifications...');
+            console.log('📱 Mobile: Checking for existing pending verifications...');
             const hasPending = await checkPendingVerifications();
             if (hasPending) {
               console.log('📱 Mobile: Found pending verifications, showing popup...');
               showVerificationPopup();
-            } else {
-              console.log('📱 Mobile: No pending verifications found');
-
-              // Temporary: Create one test verification to check if banner works (development only)
-              if (process.env.NODE_ENV === 'development') {
-                console.log('📱 Mobile Debug: Creating ONE test verification to check banner...');
-                const testId = verificationService.addPendingVerification({
-                  orderId: `debug-mobile-${Date.now()}`,
-                  orderData: {
-                    bookingId: `DEBUG-${Math.random().toString(36).substr(2, 4).toUpperCase()}`,
-                    customerName: 'Debug Customer',
-                    customerPhone: currentUser.phone || '+91 9999999999',
-                    address: 'Debug Address',
-                    pickupTime: 'ASAP',
-                    riderName: 'Debug Rider',
-                    updatedAt: new Date().toISOString(),
-                    status: 'pending',
-                    originalItems: [{ id: '1', name: 'Test Item', price: 50, quantity: 1, total: 50, unit: 'PC' }],
-                    updatedItems: [{ id: '1', name: 'Test Item', price: 60, quantity: 1, total: 60, unit: 'PC' }],
-                    originalTotal: 50,
-                    updatedTotal: 60,
-                    priceChange: 10,
-                    riderNotes: 'Debug verification for mobile banner testing',
-                    isQuickPickup: false
-                  },
-                  type: 'price_change',
-                  priority: 'high',
-                  expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString() // 1 hour
-                });
-                console.log('📱 Created debug verification:', testId);
-
-                // Force refresh the pending count
-                setTimeout(async () => {
-                  await checkPendingVerifications();
-                  console.log('📱 After test creation - pendingCount should now be:', verificationService.getPendingVerifications().length);
-                }, 500);
-              }
             }
-          }, 1000);
-        }, 500);
+            // Removed test verification creation to prevent API spam
+          }, 2000); // Increased delay to prevent rush
+        }, 1000);
       }
     }
-  }, [currentUser, checkOnStartup, checkPendingVerifications, showVerificationPopup]);
+  }, [currentUser?.phone]); // Only depend on user phone to avoid excessive re-runs
 
   // Cleanup mobile verification fallback on unmount
   useEffect(() => {
