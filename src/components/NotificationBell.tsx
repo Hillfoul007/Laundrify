@@ -17,14 +17,31 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userId, className =
   useEffect(() => {
     if (userId) {
       fetchUnreadCount();
-      // Poll for new notifications every 30 seconds
-      const interval = setInterval(fetchUnreadCount, 30000);
+      // Poll for new notifications every 5 minutes (reduced from 30 seconds to prevent infinite refreshing)
+      // Also only poll when page is visible
+      const interval = setInterval(() => {
+        if (document.visibilityState === 'visible') {
+          fetchUnreadCount();
+        }
+      }, 300000); // 5 minutes
       return () => clearInterval(interval);
     }
   }, [userId]);
 
   const fetchUnreadCount = async () => {
     if (!userId || isLoading) return;
+
+    // Add rate limiting to prevent excessive API calls
+    const lastFetch = localStorage.getItem(`lastNotificationFetch_${userId}`);
+    const now = Date.now();
+    const twoMinutesAgo = now - 2 * 60 * 1000;
+
+    if (lastFetch && parseInt(lastFetch) > twoMinutesAgo) {
+      console.log('⏭️ Skipping notification count fetch - rate limited');
+      return;
+    }
+
+    localStorage.setItem(`lastNotificationFetch_${userId}`, now.toString());
 
     setIsLoading(true);
     try {
@@ -38,7 +55,8 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userId, className =
           'user-id': userId,
           'Content-Type': 'application/json',
         },
-        signal: controller.signal
+        signal: controller.signal,
+        cache: 'no-cache'
       });
 
       clearTimeout(timeoutId);
@@ -78,8 +96,10 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userId, className =
 
   const handleClose = () => {
     setIsOpen(false);
-    // Refresh count after closing notifications
+    // Refresh count after closing notifications (but respect rate limiting)
     setTimeout(() => {
+      // Clear rate limit for immediate refresh after user action
+      localStorage.removeItem(`lastNotificationFetch_${userId}`);
       fetchUnreadCount();
     }, 500);
   };
