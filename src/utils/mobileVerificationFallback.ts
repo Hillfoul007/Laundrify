@@ -19,10 +19,13 @@ export function initializeMobileVerificationFallback() {
   window.addEventListener('showVerificationPopup', handleShowVerificationPopup);
   window.addEventListener('newVerificationPending', handleNewVerificationPending);
 
-  // Check for pending verifications every 10 seconds
+  // Check for pending verifications every 2 minutes (reduced from 10 seconds to prevent infinite refreshing)
+  // Also only check when page is visible
   fallbackCheckInterval = setInterval(() => {
-    checkAndShowFallbackNotification();
-  }, 10000);
+    if (document.visibilityState === 'visible') {
+      checkAndShowFallbackNotification();
+    }
+  }, 120000); // 2 minutes
 
   // Also check immediately after a delay
   setTimeout(checkAndShowFallbackNotification, 3000);
