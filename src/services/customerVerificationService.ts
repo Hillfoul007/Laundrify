@@ -150,6 +150,16 @@ export class CustomerVerificationService {
    */
   private async fetchPendingVerificationsFromBackend(): Promise<void> {
     try {
+      // Check if we're in a rate-limited state to prevent excessive API calls
+      const lastFetch = localStorage.getItem('lastVerificationFetch');
+      const now = Date.now();
+      const twoMinutesAgo = now - 2 * 60 * 1000;
+
+      if (lastFetch && parseInt(lastFetch) > twoMinutesAgo) {
+        console.log('⏭️ Skipping verification fetch - rate limited (last fetch was less than 2 minutes ago)');
+        return;
+      }
+
       const authService = DVHostingSmsService.getInstance();
       const currentUser = authService.getCurrentUser();
 
@@ -157,6 +167,9 @@ export class CustomerVerificationService {
         console.log('ℹ️ No authenticated user, skipping backend verification fetch');
         return;
       }
+
+      // Update last fetch time before making request
+      localStorage.setItem('lastVerificationFetch', now.toString());
 
       const customerId = currentUser.phone.startsWith('user_')
         ? currentUser.phone
@@ -166,14 +179,16 @@ export class CustomerVerificationService {
 
       // Set a timeout for the fetch request
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
 
       const response = await fetch(`${this.apiBaseUrl}/admin/customer-verifications/${customerId}`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('cleancare_auth_token')}`,
         },
-        signal: controller.signal
+        signal: controller.signal,
+        // Add cache control to prevent aggressive caching/fetching
+        cache: 'no-cache'
       });
 
       clearTimeout(timeoutId);
