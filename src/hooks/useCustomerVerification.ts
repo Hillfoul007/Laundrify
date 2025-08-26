@@ -19,21 +19,37 @@ export const useCustomerVerification = () => {
 
   // Check for pending verifications
   const checkPendingVerifications = useCallback(async () => {
-    console.log('🔍 Checking for pending verifications...');
-    
-    // Refresh from backend first
-    await verificationService.refreshVerifications();
-    
-    const pending = verificationService.getNextPendingVerification();
-    updatePendingCount();
-    
-    if (pending) {
-      console.log('📋 Found pending verification:', pending.id);
-      setCurrentVerification(pending);
-      return true;
-    } else {
-      console.log('✅ No pending verifications found');
-      setCurrentVerification(null);
+    try {
+      console.log('🔍 Checking for pending verifications...');
+
+      // Only refresh from backend if we haven't checked recently (prevents infinite calls)
+      const lastCheck = localStorage.getItem('lastVerificationCheck');
+      const now = Date.now();
+      const fiveMinutesAgo = now - 5 * 60 * 1000;
+
+      if (!lastCheck || parseInt(lastCheck) < fiveMinutesAgo) {
+        await verificationService.refreshVerifications();
+        localStorage.setItem('lastVerificationCheck', now.toString());
+      } else {
+        console.log('⏭️ Skipping backend check - too recent');
+      }
+
+      const pending = verificationService.getNextPendingVerification();
+      updatePendingCount();
+
+      if (pending) {
+        console.log('📋 Found pending verification:', pending.id);
+        setCurrentVerification(pending);
+        return true;
+      } else {
+        console.log('✅ No pending verifications found');
+        setCurrentVerification(null);
+        return false;
+      }
+    } catch (error) {
+      console.error('❌ Error checking pending verifications:', error);
+      // Just update local count on error, don't fail completely
+      updatePendingCount();
       return false;
     }
   }, [updatePendingCount]);
@@ -132,13 +148,16 @@ export const useCustomerVerification = () => {
     };
   }, [isPopupOpen, showVerificationPopup, updatePendingCount]);
 
-  // Check for verifications periodically
+  // Check for verifications periodically (reduced frequency to prevent infinite refreshing)
   useEffect(() => {
     const interval = setInterval(() => {
       if (hasCheckedOnStartup) {
-        checkPendingVerifications();
+        // Only check if user is actually active on the page
+        if (document.visibilityState === 'visible') {
+          checkPendingVerifications();
+        }
       }
-    }, 30000); // Check every 30 seconds
+    }, 300000); // Check every 5 minutes instead of 30 seconds
 
     return () => clearInterval(interval);
   }, [hasCheckedOnStartup, checkPendingVerifications]);
