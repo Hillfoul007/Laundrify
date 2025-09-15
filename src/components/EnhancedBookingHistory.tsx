@@ -3,7 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNotifications } from "@/contexts/NotificationContext";
+import { quickPickupService, type QuickPickupDetails } from "@/services/quickPickupService";
 
 import {
   createSuccessNotification,
@@ -64,12 +66,14 @@ interface EnhancedBookingHistoryProps {
 const EnhancedBookingHistory: React.FC<EnhancedBookingHistoryProps> =
   React.memo(({ currentUser, onBack, onLoginRequired }) => {
     const { addNotification } = useNotifications();
-    const [bookings, setBookings] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
-    const [editingBooking, setEditingBooking] = useState(null);
-    const [showEditModal, setShowEditModal] = useState(false);
-    const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const [bookings, setBookings] = useState([]);
+  const [quickPickups, setQuickPickups] = useState<QuickPickupDetails[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [editingBooking, setEditingBooking] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("regular");
 
     const [cancellingBooking, setCancellingBooking] = useState<string | null>(
       null,
@@ -142,11 +146,52 @@ const EnhancedBookingHistory: React.FC<EnhancedBookingHistoryProps> =
                 updatedAt: booking.updated_at || booking.updatedAt,
               }),
             );
+
+            // Load real quick pickup orders
+            console.log("Loading quick pickup orders...");
+            let quickPickupOrders = [];
+            try {
+              const quickPickupResult = await quickPickupService.getCurrentUserQuickPickups();
+              if (quickPickupResult.success && quickPickupResult.quickPickups) {
+                quickPickupOrders = quickPickupResult.quickPickups.map((qp: any) => ({
+                  id: qp.id,
+                  custom_order_id: qp.custom_order_id || `QP${qp.id.slice(-6).toUpperCase()}`,
+                  order_id: qp.custom_order_id || `QP${qp.id.slice(-6).toUpperCase()}`,
+                  userId: qp.userId,
+                  services: qp.items_collected?.map((item: any) => `${item.name} x${item.quantity}`) || ["Quick Pickup - Items TBD"],
+                  totalAmount: qp.actual_cost || qp.estimated_cost || 0,
+                  item_prices: qp.items_collected || [],
+                  status: qp.status,
+                  pickupDate: qp.pickup_date,
+                  deliveryDate: qp.delivery_date || "TBD",
+                  pickupTime: qp.pickup_time,
+                  deliveryTime: qp.delivery_time || "TBD",
+                  address: qp.address,
+                  contactDetails: {
+                    phone: qp.customer_phone,
+                    name: qp.customer_name,
+                    instructions: qp.special_instructions || 'Quick pickup service',
+                  },
+                  paymentStatus: 'pending',
+                  createdAt: qp.createdAt,
+                  updatedAt: qp.updatedAt,
+                  isQuickPickup: true,
+                  quickPickupNote: '🚚 Quick pickup order'
+                }));
+                console.log("✅ Loaded real quick pickup orders:", quickPickupOrders.length);
+              }
+            } catch (error) {
+              console.warn("⚠️ Failed to load quick pickup orders:", error);
+            }
+
+            // Combine regular bookings with real quick pickup orders
+            const bookingsWithQuickPickup = [...quickPickupOrders, ...mongoBookings];
+
             console.log(
-              "✅ Loaded bookings from MongoDB (filtered):",
-              mongoBookings.length,
+              "✅ Loaded bookings from MongoDB (filtered + quick pickup demo):",
+              bookingsWithQuickPickup.length,
             );
-            setBookings(mongoBookings);
+            setBookings(bookingsWithQuickPickup);
             return;
           }
         }
@@ -161,11 +206,51 @@ const EnhancedBookingHistory: React.FC<EnhancedBookingHistoryProps> =
             response.bookings,
           );
 
+          // Load real quick pickup orders for fallback
+          console.log("Loading quick pickup orders for fallback...");
+          let quickPickupOrders = [];
+          try {
+            const quickPickupResult = await quickPickupService.getCurrentUserQuickPickups();
+            if (quickPickupResult.success && quickPickupResult.quickPickups) {
+              quickPickupOrders = quickPickupResult.quickPickups.map((qp: any) => ({
+                id: qp.id,
+                custom_order_id: qp.custom_order_id || `QP${qp.id.slice(-6).toUpperCase()}`,
+                order_id: qp.custom_order_id || `QP${qp.id.slice(-6).toUpperCase()}`,
+                userId: qp.userId,
+                services: qp.items_collected?.map((item: any) => `${item.name} x${item.quantity}`) || ["Quick Pickup - Items TBD"],
+                totalAmount: qp.actual_cost || qp.estimated_cost || 0,
+                item_prices: qp.items_collected || [],
+                status: qp.status,
+                pickupDate: qp.pickup_date,
+                deliveryDate: qp.delivery_date || "TBD",
+                pickupTime: qp.pickup_time,
+                deliveryTime: qp.delivery_time || "TBD",
+                address: qp.address,
+                contactDetails: {
+                  phone: qp.customer_phone,
+                  name: qp.customer_name,
+                  instructions: qp.special_instructions || 'Quick pickup service',
+                },
+                paymentStatus: 'pending',
+                createdAt: qp.createdAt,
+                updatedAt: qp.updatedAt,
+                isQuickPickup: true,
+                quickPickupNote: '🚚 Quick pickup order'
+              }));
+              console.log("✅ Loaded real quick pickup orders for fallback:", quickPickupOrders.length);
+            }
+          } catch (error) {
+            console.warn("⚠️ Failed to load quick pickup orders for fallback:", error);
+          }
+
+          // Combine regular bookings with real quick pickup orders
+          const bookingsWithQuickPickup = [...quickPickupOrders, ...productionBookings];
+
           console.log(
-            "✅ Bookings loaded from BookingService (filtered):",
-            productionBookings.length,
+            "✅ Bookings loaded from BookingService (filtered + real quick pickups):",
+            bookingsWithQuickPickup.length,
           );
-          setBookings(productionBookings);
+          setBookings(bookingsWithQuickPickup);
         } else {
           console.log("No bookings found or error:", response.error);
           setBookings([]);
@@ -708,6 +793,21 @@ const EnhancedBookingHistory: React.FC<EnhancedBookingHistoryProps> =
                               {booking.status || "pending"}
                             </Badge>
                           </div>
+
+                          {/* Quick Pickup Indicator */}
+                          {booking.isQuickPickup && (
+                            <div className="flex items-center gap-1 mt-1">
+                              <div className="bg-orange-100 text-orange-700 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                                <RefreshCw className="h-3 w-3" />
+                                <span>Quick Pickup</span>
+                              </div>
+                              {booking.quickPickupNote && (
+                                <div className="text-xs text-orange-600">
+                                  {booking.quickPickupNote}
+                                </div>
+                              )}
+                            </div>
+                          )}
 
                           {/* Quick Info Row */}
                           <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-gray-600">

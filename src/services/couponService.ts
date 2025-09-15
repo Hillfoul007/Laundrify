@@ -9,6 +9,7 @@ interface CouponData {
   excludeFirstOrder?: boolean;
   minimumAmount?: number;
   isActive: boolean;
+  isReferralReward?: boolean;
 }
 
 interface CouponUsage {
@@ -44,10 +45,10 @@ export class CouponService {
         isActive: true,
       },
       {
-        code: "NEW20",
-        discount: 20,
+        code: "NEW10",
+        discount: 10,
         maxDiscount: 200,
-        description: "20% off on all orders (up to ₹200)",
+        description: "10% off on all orders (up to ₹200)",
         type: "general",
         isActive: true,
       },
@@ -70,6 +71,11 @@ export class CouponService {
         isActive: true,
       },
     ];
+  }
+
+  // Check if a coupon is a referral reward coupon
+  isReferralRewardCoupon(couponCode: string): boolean {
+    return couponCode.toUpperCase().startsWith('REWARD');
   }
 
   // Check if user is a first-time user
@@ -162,6 +168,19 @@ export class CouponService {
     // For FIRST30, check if it's been used before
     if (coupon.code === "FIRST30" && this.hasCouponBeenUsed(coupon.code, userId)) {
       return { valid: false, error: "This coupon has already been used" };
+    }
+
+    // For referral reward coupons, always validate via API
+    if (this.isReferralRewardCoupon(couponCode)) {
+      // Referral reward coupons need backend validation
+      // Return tentative approval, actual validation happens in validateCouponAsync
+      return { valid: true, coupon: {
+        ...coupon,
+        code: couponCode.toUpperCase(),
+        type: "referral_reward",
+        isReferralReward: true,
+        description: "Referral reward coupon - validating..."
+      }};
     }
 
     return { valid: true, coupon };
