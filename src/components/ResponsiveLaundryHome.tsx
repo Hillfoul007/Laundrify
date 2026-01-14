@@ -21,6 +21,8 @@ import {
   Monitor,
   Bell,
   MessageCircle,
+  Gift,
+  AlertTriangle,
 } from "lucide-react";
 import {
   laundryServices,
@@ -44,12 +46,15 @@ import OptimizedImage from "./OptimizedImage";
 import DebugPanel from "./DebugPanel";
 import BookingDebugPanel from "./BookingDebugPanel";
 import ConnectionStatus from "./ConnectionStatus";
-import NotificationPanel from "./NotificationPanel";
 import VoiceSearch from "./VoiceSearch";
 import AdminServicesManager from "./AdminServicesManager";
 import LocationUnavailableModal from "./LocationUnavailableModal";
+import ReferralModal from "./ReferralModal";
+import NotificationBell from "./NotificationBell";
 import QuickPickupModal from "./QuickPickupModal";
+import CustomerVerificationPopup from "./CustomerVerificationPopup";
 import { DVHostingSmsService } from "@/services/dvhostingSmsService";
+import { useCustomerVerification } from "@/hooks/useCustomerVerification";
 import { LocationDetectionService } from "@/services/locationDetectionService";
 import { saveCartData, getCartData } from "@/utils/formPersistence";
 import "@/styles/mobile-sticky-search.css";
@@ -82,8 +87,21 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
   const [detectedLocationText, setDetectedLocationText] = useState("");
   const [showQuickPickupModal, setShowQuickPickupModal] = useState(false);
   const [showQuickPickupAfterLogin, setShowQuickPickupAfterLogin] = useState(false);
+  const [showReferralModal, setShowReferralModal] = useState(false);
   const dvhostingSmsService = DVHostingSmsService.getInstance();
   const locationDetectionService = LocationDetectionService.getInstance();
+
+  // Customer verification system
+  const {
+    isPopupOpen: isVerificationPopupOpen,
+    currentVerification,
+    pendingCount,
+    showVerificationPopup,
+    hideVerificationPopup,
+    checkOnStartup,
+    handleVerificationComplete,
+    createDemoVerification
+  } = useCustomerVerification();
 
   // Function to request location permission and check availability
   const requestLocationPermission = async () => {
@@ -360,6 +378,71 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
     localStorage.setItem("laundry_cart", JSON.stringify(cart));
   }, [cart]);
 
+  // Check for pending customer verifications on app startup
+  useEffect(() => {
+    if (currentUser) {
+      // Request notification permission
+      requestNotificationPermission();
+
+      // Only check when user is authenticated
+      checkOnStartup();
+    }
+  }, [currentUser, checkOnStartup]);
+
+  // Request notification permission for verification alerts
+  const requestNotificationPermission = async () => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      try {
+        const permission = await Notification.requestPermission();
+        console.log('🔔 Notification permission:', permission);
+        if (permission === 'granted') {
+          console.log('✅ Notifications enabled for order verifications');
+        }
+      } catch (error) {
+        console.warn('⚠️ Could not request notification permission:', error);
+      }
+    }
+  };
+
+  // Handle verification notification events
+  useEffect(() => {
+    const handleOpenVerificationPopup = (event: CustomEvent) => {
+      console.log('🔔 Opening verification popup from notification:', event.detail);
+      if (event.detail.verification) {
+        showVerificationPopup(event.detail.verification);
+      } else {
+        showVerificationPopup();
+      }
+    };
+
+    const handleInAppNotification = (event: CustomEvent) => {
+      console.log('🔔 Showing in-app notification:', event.detail);
+      const { title, message, action } = event.detail;
+
+      // Show a toast notification that's clickable
+      const toastId = toast(title, {
+        description: message,
+        duration: 10000, // 10 seconds
+        action: {
+          label: 'Review Changes',
+          onClick: () => {
+            if (action) action();
+            toast.dismiss(toastId);
+          }
+        }
+      });
+    };
+
+    // Add event listeners
+    window.addEventListener('openVerificationPopup', handleOpenVerificationPopup as EventListener);
+    window.addEventListener('showInAppNotification', handleInAppNotification as EventListener);
+
+    return () => {
+      window.removeEventListener('openVerificationPopup', handleOpenVerificationPopup as EventListener);
+      window.removeEventListener('showInAppNotification', handleInAppNotification as EventListener);
+    };
+  }, [showVerificationPopup]);
+
   const handleSearch = (query: string) => {
     setSearchQuery(query);
   };
@@ -615,16 +698,26 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
                     >
                       <Package className="h-5 w-5" />
                     </Button>
-                    <div className="text-white">
-                      <NotificationPanel />
-                    </div>
                   </>
                 )}
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Notification button removed as per user requirements */}
+              {currentUser && (
+                <div className="relative">
+                  <NotificationBell
+                    userId={currentUser._id || currentUser.phone}
+                    className="text-white hover:bg-white/20"
+                  />
+                  {/* Verification count badge */}
+                  {pendingCount > 0 && (
+                    <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold border-2 border-white z-10">
+                      V
+                    </div>
+                  )}
+                </div>
+              )}
 
               {currentUser ? (
                 <UserMenuDropdown
@@ -1139,7 +1232,19 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
                 </Button>
               )}
 
-              {currentUser && <NotificationPanel />}
+              {currentUser && (
+                <div className="relative">
+                  <NotificationBell
+                    userId={currentUser._id || currentUser.phone}
+                  />
+                  {/* Verification count badge */}
+                  {pendingCount > 0 && (
+                    <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold border-2 border-white z-10">
+                      V
+                    </div>
+                  )}
+                </div>
+              )}
 
               {currentUser ? (
                 <UserMenuDropdown
@@ -1433,8 +1538,26 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
           }}
         />
 
-        {/* WhatsApp Floating Action Button */}
-        <div className="fixed bottom-20 right-6 z-50">
+        {/* Floating Action Buttons */}
+        <div className="fixed bottom-20 right-6 z-50 flex flex-col gap-3">
+          {/* Referral Button - Only show if user is logged in */}
+          {currentUser && (
+            <Button
+              onClick={() => setShowReferralModal(true)}
+              className="bg-gradient-to-r from-laundrify-purple to-laundrify-pink hover:from-laundrify-purple/90 hover:to-laundrify-pink/90 text-white rounded-full w-14 h-14 p-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 relative overflow-hidden group"
+              title="Refer friends and earn rewards!"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-400 opacity-20 animate-pulse group-hover:opacity-30"></div>
+              <div className="relative flex flex-col items-center">
+                <Gift className="h-5 w-5" />
+                <span className="text-xs font-bold leading-none">50%</span>
+              </div>
+              {/* Sparkle animation */}
+              <div className="absolute top-1 right-1 w-2 h-2 bg-yellow-300 rounded-full opacity-80 animate-ping"></div>
+            </Button>
+          )}
+
+          {/* WhatsApp Button */}
           <Button
             onClick={() => {
               const phoneNumber = "917011585587"; // Replace with your WhatsApp business number
@@ -1447,6 +1570,79 @@ const ResponsiveLaundryHome: React.FC<ResponsiveLaundryHomeProps> = ({
             <MessageCircle className="h-5 w-5" />
           </Button>
         </div>
+
+        {/* Referral Modal */}
+        <ReferralModal
+          isOpen={showReferralModal}
+          onClose={() => setShowReferralModal(false)}
+          currentUser={currentUser}
+        />
+
+        {/* Customer Verification Popup */}
+        <CustomerVerificationPopup
+          isOpen={isVerificationPopupOpen}
+          onClose={hideVerificationPopup}
+          verification={currentVerification}
+          onVerificationComplete={handleVerificationComplete}
+        />
+
+        {/* Verification Alert Banner */}
+        {pendingCount > 0 && (
+          <div className="fixed top-16 left-4 right-4 z-50 sm:left-auto sm:right-4 sm:w-96">
+            <div className="bg-orange-500 text-white p-4 rounded-lg shadow-lg border border-orange-600">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <AlertTriangle className="h-5 w-5" />
+                  <div>
+                    <p className="font-semibold">Order Changes Need Approval</p>
+                    <p className="text-sm text-orange-100">
+                      {pendingCount} verification{pendingCount > 1 ? 's' : ''} pending
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={() => showVerificationPopup()}
+                  className="bg-white text-orange-600 hover:bg-orange-50"
+                >
+                  Review
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Demo Verification Buttons - Development Only */}
+        {import.meta.env.DEV && currentUser && (
+          <div className="fixed bottom-4 left-4 z-50 space-y-2">
+            <div>
+              <Button
+                onClick={createDemoVerification}
+                size="sm"
+                variant="outline"
+                className="bg-yellow-400 hover:bg-yellow-500 text-black border-yellow-600"
+              >
+                <Bell className="h-4 w-4 mr-2" />
+                Demo Verification
+                {pendingCount > 0 && (
+                  <Badge className="ml-2 bg-red-500 text-white text-xs">
+                    {pendingCount}
+                  </Badge>
+                )}
+              </Button>
+            </div>
+            <div>
+              <Button
+                onClick={() => window.open('/verification-popup-demo', '_blank')}
+                size="sm"
+                variant="outline"
+                className="bg-blue-400 hover:bg-blue-500 text-white border-blue-600"
+              >
+                🎭 Full Demo Page
+              </Button>
+            </div>
+          </div>
+        )}
     </div>
       </div>
   );

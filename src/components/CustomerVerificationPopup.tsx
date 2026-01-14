@@ -1,0 +1,426 @@
+import React, { useState, useEffect } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  Package,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  User,
+  Clock,
+  Minus,
+  Plus,
+  ArrowRight,
+  Phone,
+  MapPin,
+  Bell,
+  X
+} from 'lucide-react';
+import { toast } from 'sonner';
+import CustomerVerificationService, { PendingVerification } from '@/services/customerVerificationService';
+import { getCategoryDisplay } from '@/data/laundryServices';
+
+interface CustomerVerificationPopupProps {
+  isOpen: boolean;
+  onClose: () => void;
+  verification?: PendingVerification | null;
+  onVerificationComplete?: (approved: boolean, verificationId: string) => void;
+}
+
+export default function CustomerVerificationPopup({
+  isOpen,
+  onClose,
+  verification,
+  onVerificationComplete
+}: CustomerVerificationPopupProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentVerification, setCurrentVerification] = useState<PendingVerification | null>(verification || null);
+  const verificationService = CustomerVerificationService.getInstance();
+
+  useEffect(() => {
+    if (isOpen && !verification) {
+      // Get the next pending verification
+      const next = verificationService.getNextPendingVerification();
+      setCurrentVerification(next);
+    } else {
+      setCurrentVerification(verification || null);
+    }
+  }, [isOpen, verification]);
+
+  const handleVerification = async (approved: boolean) => {
+    if (!currentVerification) return;
+
+    setIsSubmitting(true);
+    try {
+      const result = await verificationService.processVerification(
+        currentVerification.id,
+        approved
+      );
+
+      if (result.success) {
+        toast.success(result.message);
+        onVerificationComplete?.(approved, currentVerification.id);
+        
+        // Check if there are more verifications to show
+        const nextVerification = verificationService.getNextPendingVerification();
+        if (nextVerification && nextVerification.id !== currentVerification.id) {
+          setCurrentVerification(nextVerification);
+        } else {
+          onClose();
+        }
+      } else {
+        toast.error(result.message || 'Failed to process verification');
+      }
+    } catch (error) {
+      console.error('Verification error:', error);
+      toast.error('Failed to process verification. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSkip = () => {
+    // Move to next verification or close
+    const allVerifications = verificationService.getPendingVerifications();
+    const currentIndex = allVerifications.findIndex(v => v.id === currentVerification?.id);
+    
+    if (currentIndex >= 0 && currentIndex < allVerifications.length - 1) {
+      setCurrentVerification(allVerifications[currentIndex + 1]);
+    } else {
+      onClose();
+    }
+  };
+
+  const getItemChanges = (orderData: any) => {
+    const changes = [];
+    const originalMap = new Map(orderData.originalItems.map((item: any) => [item.name, item]));
+    const updatedMap = new Map(orderData.updatedItems.map((item: any) => [item.name, item]));
+
+    // Check for added items
+    for (const [name, item] of updatedMap) {
+      if (!originalMap.has(name)) {
+        changes.push({ type: 'added', item, original: null });
+      }
+    }
+
+    // Check for removed items
+    for (const [name, item] of originalMap) {
+      if (!updatedMap.has(name)) {
+        changes.push({ type: 'removed', item: null, original: item });
+      }
+    }
+
+    // Check for modified items
+    for (const [name, item] of updatedMap) {
+      if (originalMap.has(name)) {
+        const original = originalMap.get(name);
+        if (original.quantity !== item.quantity) {
+          changes.push({ type: 'modified', item, original });
+        }
+      }
+    }
+
+    return changes;
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'text-red-600 bg-red-50 border-red-200';
+      case 'medium': return 'text-orange-600 bg-orange-50 border-orange-200';
+      case 'low': return 'text-blue-600 bg-blue-50 border-blue-200';
+      default: return 'text-gray-600 bg-gray-50 border-gray-200';
+    }
+  };
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'price_change': return <ArrowRight className="h-4 w-4" />;
+      case 'items_change': return <Package className="h-4 w-4" />;
+      case 'quick_pickup_created': return <Clock className="h-4 w-4" />;
+      default: return <AlertTriangle className="h-4 w-4" />;
+    }
+  };
+
+  const getTypeDescription = (type: string) => {
+    switch (type) {
+      case 'price_change': return 'Price has been updated';
+      case 'items_change': return 'Items have been modified';
+      case 'quick_pickup_created': return 'New quick pickup order created';
+      default: return 'Order requires verification';
+    }
+  };
+
+  if (!currentVerification) {
+    return null;
+  }
+
+  const { orderData } = currentVerification;
+  const itemChanges = getItemChanges(orderData);
+  const pendingCount = verificationService.getPendingVerifications().length;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <AlertTriangle className="h-5 w-5 text-orange-600" />
+              <DialogTitle>Customer Verification</DialogTitle>
+            </div>
+            <div className="flex items-center space-x-2">
+              {pendingCount > 1 && (
+                <Badge variant="outline" className="text-xs">
+                  {pendingCount} pending
+                </Badge>
+              )}
+              <Badge className={getPriorityColor(currentVerification.priority)}>
+                {currentVerification.priority.toUpperCase()}
+              </Badge>
+            </div>
+          </div>
+          <DialogDescription>
+            Customer has been notified of the changes and needs to verify them before you can save the order.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-6">
+          {/* Verification Type Alert */}
+          <Alert className={getPriorityColor(currentVerification.priority)}>
+            {getTypeIcon(currentVerification.type)}
+            <AlertDescription>
+              <strong>{getTypeDescription(currentVerification.type)}</strong>
+              {currentVerification.type === 'quick_pickup_created' && 
+                ' - The customer needs to approve this new order.'
+              }
+            </AlertDescription>
+          </Alert>
+
+          {/* Order Information */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
+            <div>
+              <p className="text-sm text-gray-600">Order ID</p>
+              <p className="font-medium">{orderData.bookingId}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Customer</p>
+              <p className="font-medium">{orderData.customerName}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Rider</p>
+              <p className="font-medium">{orderData.riderName}</p>
+            </div>
+          </div>
+
+          {/* Demo Simulation Section */}
+          <div className="border-2 border-dashed border-blue-300 bg-blue-50 p-4 rounded-lg">
+            <h3 className="font-semibold text-blue-800 mb-2 flex items-center">
+              <Package className="h-4 w-4 mr-2" />
+              Demo: Simulate Customer Response
+            </h3>
+            <p className="text-sm text-blue-700 mb-3">
+              This simulates what the customer sees on their mobile app. In a real scenario, 
+              the customer would receive a notification and respond from their device.
+            </p>
+            
+            <div className="flex space-x-2">
+              <Button
+                size="sm"
+                onClick={() => handleVerification(true)}
+                disabled={isSubmitting}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                <CheckCircle className="h-3 w-3 mr-1" />
+                Approve Changes
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => handleVerification(false)}
+                disabled={isSubmitting}
+              >
+                <XCircle className="h-3 w-3 mr-1" />
+                Reject Changes
+              </Button>
+            </div>
+          </div>
+
+          {/* Customer Details */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-gray-600">Phone</p>
+              <div className="flex items-center space-x-1">
+                <Phone className="h-3 w-3 text-gray-400" />
+                <p className="font-medium">{orderData.customerPhone}</p>
+              </div>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Pickup Time</p>
+              <div className="flex items-center space-x-1">
+                <Clock className="h-3 w-3 text-gray-400" />
+                <p className="font-medium">{orderData.pickupTime}</p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-600">Pickup Address</p>
+            <div className="flex items-start space-x-1">
+              <MapPin className="h-3 w-3 text-gray-400 mt-1" />
+              <p className="font-medium">{orderData.address}</p>
+            </div>
+          </div>
+
+          {/* Rider Notes */}
+          {orderData.riderNotes && (
+            <Alert>
+              <User className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Rider's Note:</strong> {orderData.riderNotes}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Updated Items List */}
+          <div>
+            <h3 className="font-semibold mb-3">Updated Service List</h3>
+            <div className="space-y-3">
+              {orderData.updatedItems.map((item: any, index: number) => (
+                <div key={index} className="flex justify-between items-center p-3 border rounded-lg bg-gray-50">
+                  <div className="flex-1">
+                    <h4 className="font-medium">{item.name}</h4>
+                    {item.description && (
+                      <p className="text-sm text-gray-600">{item.description}</p>
+                    )}
+                    {item.category && (
+                      <Badge variant="outline" className="text-xs mt-1">
+                        {getCategoryDisplay(item.category)}
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="text-right">
+                    <p className="font-medium">
+                      {item.quantity} {item.unit || 'PC'} × ₹{item.price}
+                    </p>
+                    <p className="text-sm font-semibold text-green-600">
+                      ₹{item.total || (item.quantity * item.price)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Changes Summary */}
+          {itemChanges.length > 0 && (
+            <div>
+              <h3 className="font-semibold mb-3">Changes Made</h3>
+              <div className="space-y-3">
+                {itemChanges.map((change, index) => (
+                  <div key={index} className={`p-3 rounded-lg border ${
+                    change.type === 'added' ? 'bg-green-50 border-green-200' :
+                    change.type === 'removed' ? 'bg-red-50 border-red-200' :
+                    'bg-blue-50 border-blue-200'
+                  }`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        {change.type === 'added' && <Plus className="h-4 w-4 text-green-600" />}
+                        {change.type === 'removed' && <Minus className="h-4 w-4 text-red-600" />}
+                        {change.type === 'modified' && <ArrowRight className="h-4 w-4 text-blue-600" />}
+                        <span className="font-medium">
+                          {change.type === 'added' && 'Added: '}
+                          {change.type === 'removed' && 'Removed: '}
+                          {change.type === 'modified' && 'Modified: '}
+                          {change.item?.name || change.original?.name}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        {change.type === 'added' && (
+                          <span className="text-green-700 font-medium">
+                            +₹{change.item.quantity * change.item.price}
+                          </span>
+                        )}
+                        {change.type === 'removed' && (
+                          <span className="text-red-700 font-medium">
+                            -₹{change.original.quantity * change.original.price}
+                          </span>
+                        )}
+                        {change.type === 'modified' && (
+                          <span className="text-blue-700">
+                            {change.original.quantity} → {change.item.quantity}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Price Comparison */}
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <h3 className="font-semibold mb-3">Price Summary</h3>
+            <div className="space-y-2">
+              {!orderData.isQuickPickup && (
+                <div className="flex justify-between">
+                  <span>Original Total:</span>
+                  <span>₹{orderData.originalTotal}</span>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <span>Updated Total:</span>
+                <span>₹{orderData.updatedTotal}</span>
+              </div>
+              {!orderData.isQuickPickup && orderData.priceChange !== 0 && (
+                <div className={`flex justify-between font-semibold text-lg border-t pt-2 ${
+                  orderData.priceChange > 0 ? 'text-red-600' : 
+                  orderData.priceChange < 0 ? 'text-green-600' : 'text-gray-900'
+                }`}>
+                  <span>Price Change:</span>
+                  <span>
+                    {orderData.priceChange > 0 ? '+' : ''}₹{orderData.priceChange}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex justify-between items-center pt-4 border-t">
+            <div className="text-sm text-gray-600">
+              {pendingCount > 1 && `${pendingCount - 1} more verification(s) pending`}
+            </div>
+            
+            <div className="flex space-x-3">
+              {pendingCount > 1 && (
+                <Button
+                  variant="outline"
+                  onClick={handleSkip}
+                  disabled={isSubmitting}
+                >
+                  Skip for Now
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                onClick={onClose}
+                disabled={isSubmitting}
+              >
+                <X className="h-4 w-4 mr-1" />
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
